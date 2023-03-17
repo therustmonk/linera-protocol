@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["NotifierServiceClient","A service run by the Proxy which listens for incoming connections from workers and then notifies clients."]]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["NotifierServiceServer","A service run by the Proxy which listens for incoming connections from workers and then notifies clients."]],"trait":[["NotifierService","Generated trait containing gRPC methods that should be implemented for use with NotifierServiceServer."]]};

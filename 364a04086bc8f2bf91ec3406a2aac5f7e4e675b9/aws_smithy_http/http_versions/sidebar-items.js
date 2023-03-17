@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"static":[["DEFAULT_HTTP_VERSION_LIST","The default list of desired HTTP protocol versions to use when making requests"]],"type":[["HttpVersionList","A list of supported or desired HttpVersions. Typically use when requesting an HTTP Client from a client cache."]]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Adapter","Adapter from a `hyper::Client` to a connector usable by a Smithy `Client`."],["Builder","Builder for `hyper_ext::Adapter`"]]};

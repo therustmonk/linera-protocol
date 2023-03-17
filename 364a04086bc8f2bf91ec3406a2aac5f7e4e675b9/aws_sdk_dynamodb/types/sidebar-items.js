@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["SdkError","Failed SDK Result"]],"struct":[["Blob","Binary Blob Type"],["DateTime","DateTime in time."]]};

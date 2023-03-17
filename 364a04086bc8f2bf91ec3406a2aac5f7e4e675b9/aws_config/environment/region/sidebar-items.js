@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["EnvironmentVariableRegionProvider","Load a region from environment variables"]]};

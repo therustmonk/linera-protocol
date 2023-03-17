@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["AssumeRoleProvider","Credentials provider that uses credentials provided by another provider to assume a role through the AWS Security Token Service (STS)."],["AssumeRoleProviderBuilder","A builder for [`AssumeRoleProvider`]."]]};

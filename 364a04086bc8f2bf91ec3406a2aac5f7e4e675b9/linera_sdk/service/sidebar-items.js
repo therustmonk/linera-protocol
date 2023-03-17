@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["PollQuery",""]],"mod":[["exported_futures","Types for the exported futures for the service endpoints."],["system_api",""]],"struct":[["CryptoHash",""],["QueryContext",""]],"trait":[["QueryApplication",""],["Service",""]],"type":[["ChainId",""]]};

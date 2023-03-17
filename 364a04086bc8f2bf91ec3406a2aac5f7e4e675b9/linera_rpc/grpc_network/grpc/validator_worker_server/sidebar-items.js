@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["ValidatorWorkerServer","Interface provided by each physical shard (aka “worker”) of a validator or a local node."]],"trait":[["ValidatorWorker","Generated trait containing gRPC methods that should be implemented for use with ValidatorWorkerServer."]]};

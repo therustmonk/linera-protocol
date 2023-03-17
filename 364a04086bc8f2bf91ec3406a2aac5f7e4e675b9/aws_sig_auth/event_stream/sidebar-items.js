@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["SigV4Signer","Event Stream SigV4 signing implementation."]]};

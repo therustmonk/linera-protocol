@@ -1,0 +1,162 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/aws-smithy-client-0.44.0/src/http_connector.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>http_connector.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../aws_smithy_client/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+</pre><pre class="rust"><code><span class="comment">/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+</span><span class="doccomment">//! Default connectors based on what TLS features are active. Also contains HTTP-related abstractions
+//! that enable passing HTTP connectors around.
+
+</span><span class="kw">use </span><span class="kw">crate</span>::erase::DynConnector;
+<span class="kw">use </span>aws_smithy_async::rt::sleep::AsyncSleep;
+<span class="kw">use </span>aws_smithy_types::timeout;
+<span class="kw">use </span>std::{fmt::Debug, sync::Arc};
+
+<span class="doccomment">/// Type alias for a Connector factory function.
+</span><span class="kw">pub type </span>MakeConnectorFn =
+    <span class="kw">dyn </span>Fn(<span class="kw-2">&amp;</span>HttpSettings, <span class="prelude-ty">Option</span>&lt;Arc&lt;<span class="kw">dyn </span>AsyncSleep&gt;&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;DynConnector&gt; + Send + Sync;
+
+<span class="doccomment">/// Enum for describing the two &quot;kinds&quot; of HTTP Connectors in smithy-rs.
+</span><span class="attribute">#[derive(Clone)]
+</span><span class="kw">pub enum </span>HttpConnector {
+    <span class="doccomment">/// A `DynConnector` to be used for all requests.
+    </span>Prebuilt(<span class="prelude-ty">Option</span>&lt;DynConnector&gt;),
+    <span class="doccomment">/// A factory function that will be used to create new `DynConnector`s whenever one is needed.
+    </span>ConnectorFn(Arc&lt;MakeConnectorFn&gt;),
+}
+
+<span class="kw">impl </span>Debug <span class="kw">for </span>HttpConnector {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Prebuilt(<span class="prelude-val">Some</span>(connector)) =&gt; {
+                <span class="macro">write!</span>(f, <span class="string">&quot;Prebuilt({:?})&quot;</span>, connector)
+            }
+            <span class="self">Self</span>::Prebuilt(<span class="prelude-val">None</span>) =&gt; {
+                <span class="macro">write!</span>(f, <span class="string">&quot;Prebuilt(None)&quot;</span>)
+            }
+            <span class="self">Self</span>::ConnectorFn(<span class="kw">_</span>) =&gt; {
+                <span class="macro">write!</span>(f, <span class="string">&quot;ConnectorFn(&lt;function pointer&gt;)&quot;</span>)
+            }
+        }
+    }
+}
+
+<span class="kw">impl </span>HttpConnector {
+    <span class="doccomment">/// If `HttpConnector` is `Prebuilt`, return a clone of that connector.
+    /// If `HttpConnector` is `ConnectorFn`, generate a new connector from settings and return it.
+    </span><span class="kw">pub fn </span>connector(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        settings: <span class="kw-2">&amp;</span>HttpSettings,
+        sleep: <span class="prelude-ty">Option</span>&lt;Arc&lt;<span class="kw">dyn </span>AsyncSleep&gt;&gt;,
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;DynConnector&gt; {
+        <span class="kw">match </span><span class="self">self </span>{
+            HttpConnector::Prebuilt(conn) =&gt; conn.clone(),
+            HttpConnector::ConnectorFn(func) =&gt; func(settings, sleep),
+        }
+    }
+}
+
+<span class="doccomment">/// HttpSettings for HTTP Connectors
+</span><span class="attribute">#[non_exhaustive]
+#[derive(Default, Debug)]
+</span><span class="kw">pub struct </span>HttpSettings {
+    <span class="doccomment">/// Timeout configuration used when making HTTP connections
+    </span><span class="kw">pub </span>http_timeout_config: timeout::Http,
+    <span class="doccomment">/// Timeout configuration used when creating TCP connections
+    </span><span class="kw">pub </span>tcp_timeout_config: timeout::Tcp,
+}
+
+<span class="kw">impl </span>HttpSettings {
+    <span class="doccomment">/// Set the HTTP timeouts to be used when making HTTP connections
+    </span><span class="kw">pub fn </span>with_http_timeout_config(<span class="kw-2">mut </span><span class="self">self</span>, http_timeout_config: timeout::Http) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.http_timeout_config = http_timeout_config;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Set the TCP timeouts to be used when creating TCP connections
+    </span><span class="kw">pub fn </span>with_tcp_timeout_config(<span class="kw-2">mut </span><span class="self">self</span>, tcp_timeout_config: timeout::Tcp) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.tcp_timeout_config = tcp_timeout_config;
+        <span class="self">self
+    </span>}
+}
+</code></pre></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="aws_smithy_client" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

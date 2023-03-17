@@ -1,0 +1,4 @@
+(function() {var implementors = {
+"linera_sdk":[["impl <a class=\"trait\" href=\"linera_views/common/trait.KeyValueStoreClient.html\" title=\"trait linera_views::common::KeyValueStoreClient\">KeyValueStoreClient</a> for <a class=\"struct\" href=\"linera_sdk/contract/system_api/struct.WasmClient.html\" title=\"struct linera_sdk::contract::system_api::WasmClient\">WasmClient</a>"],["impl <a class=\"trait\" href=\"linera_views/common/trait.KeyValueStoreClient.html\" title=\"trait linera_views::common::KeyValueStoreClient\">KeyValueStoreClient</a> for <a class=\"struct\" href=\"linera_sdk/service/system_api/struct.ReadableWasmClient.html\" title=\"struct linera_sdk::service::system_api::ReadableWasmClient\">ReadableWasmClient</a>"]],
+"linera_views":[]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

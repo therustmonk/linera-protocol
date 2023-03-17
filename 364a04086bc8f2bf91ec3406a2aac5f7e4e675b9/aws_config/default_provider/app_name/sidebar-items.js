@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["default_provider","Default App Name Provider chain"]],"struct":[["Builder","Default provider builder for [`AppName`]"]]};

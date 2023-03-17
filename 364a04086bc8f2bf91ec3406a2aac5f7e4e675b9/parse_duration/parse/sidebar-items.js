@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["Error","An enumeration of the possible errors while parsing."]],"fn":[["parse","Parse a string into a duration object."]]};

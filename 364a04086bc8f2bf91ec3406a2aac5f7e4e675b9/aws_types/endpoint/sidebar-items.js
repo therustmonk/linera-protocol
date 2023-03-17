@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":[["credential_scope","Types associated with [`CredentialScope`]."]],"struct":[["AwsEndpoint","Endpoint to connect to an AWS Service"],["CredentialScope","The scope for AWS credentials."]],"trait":[["ResolveAwsEndpoint","Resolve the AWS Endpoint for a given region"]],"type":[["BoxError","A boxed error."]]};

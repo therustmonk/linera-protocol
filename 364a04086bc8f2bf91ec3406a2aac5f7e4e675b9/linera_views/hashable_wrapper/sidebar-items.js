@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["WrappedHashableContainerView","A hash for ContainerView and storing of the hash for memoization purposes"]]};

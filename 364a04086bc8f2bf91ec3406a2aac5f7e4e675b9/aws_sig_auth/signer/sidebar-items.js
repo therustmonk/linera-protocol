@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["HttpSignatureType",""],["SignableBody","A signable HTTP request body"],["SigningAlgorithm",""],["SigningRequirements",""]],"struct":[["OperationSigningConfig","Signing Configuration for an Operation"],["RequestConfig","Signing Configuration for an individual Request"],["SigV4Signer",""],["SigningOptions",""]],"type":[["SigningError",""]]};

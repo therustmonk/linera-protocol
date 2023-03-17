@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["Error",""]],"struct":[["ElWriter",""],["ScopeWriter","Wrap the construction of a tag pair `<a></a>`"],["XmlWriter","XmlWriter Abstraction"]]};

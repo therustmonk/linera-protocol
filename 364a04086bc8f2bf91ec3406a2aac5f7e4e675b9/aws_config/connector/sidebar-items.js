@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["default_connector","Given `HttpSettings` and an `AsyncSleep`, create a `DynConnector` from defaults depending on what cargo features are activated."]]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["SigningStageError",""]],"struct":[["SigV4SigningStage","Middleware stage to sign requests with SigV4"],["Signature","Container for the request signature for use in the property bag."]]};

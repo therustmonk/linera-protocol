@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["default_provider","Default [`timeout::Config`] Provider chain"]],"struct":[["Builder","Builder for `timeout::Config` that checks the environment variables and AWS profile files for configuration"]]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["calculate_signature","Calculates a Sigv4 signature"],["generate_signing_key","Generates a signing key for Sigv4"]]};

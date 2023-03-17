@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":[["client","Raw IMDSv2 Client"],["credentials","IMDSv2 Credentials Provider"],["region","IMDS Region Provider"]],"struct":[["Client","IMDSv2 Client"]]};

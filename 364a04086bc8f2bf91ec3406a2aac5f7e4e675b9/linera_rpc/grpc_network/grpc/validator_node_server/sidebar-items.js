@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["ValidatorNodeServer","How to communicate with a validator or a local node."]],"trait":[["ValidatorNode","Generated trait containing gRPC methods that should be implemented for use with ValidatorNodeServer."]]};

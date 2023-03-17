@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["ChainError",""],["ChainManager","How to produce new blocks."],["ChainManagerInfo","Chain manager information that is included in `ChainInfo` sent to clients."],["ChainManagerOutcome","The result of verifying a (valid) query."]],"mod":[["data_types",""]],"struct":[["ChainStateView","A view accessing the state of a chain."]]};

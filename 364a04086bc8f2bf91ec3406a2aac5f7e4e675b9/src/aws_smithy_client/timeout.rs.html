@@ -1,0 +1,560 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/aws-smithy-client-0.44.0/src/timeout.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>timeout.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../aws_smithy_client/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+</pre><pre class="rust"><code><span class="comment">/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+</span><span class="doccomment">//! Timeout Configuration
+//!
+//! While timeout configuration is unstable, this module is in aws-smithy-client.
+//!
+//! As timeout and HTTP configuration stabilizes, this will move to aws-types and become a part of
+//! HttpSettings.
+</span><span class="kw">use </span>std::future::Future;
+<span class="kw">use </span>std::pin::Pin;
+<span class="kw">use </span>std::sync::Arc;
+<span class="kw">use </span>std::task::{Context, Poll};
+<span class="kw">use </span>std::time::Duration;
+
+<span class="kw">use </span><span class="kw">crate</span>::SdkError;
+<span class="kw">use </span>aws_smithy_async::future::timeout::Timeout;
+<span class="kw">use </span>aws_smithy_async::rt::sleep::{AsyncSleep, Sleep};
+<span class="kw">use </span>aws_smithy_http::operation::Operation;
+<span class="kw">use </span>pin_project_lite::pin_project;
+<span class="kw">use </span>tower::Layer;
+
+<span class="attribute">#[derive(Debug)]
+</span><span class="kw">struct </span>RequestTimeoutError {
+    kind: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str,
+    duration: Duration,
+}
+
+<span class="kw">impl </span>RequestTimeoutError {
+    <span class="kw">pub fn </span>new_boxed(kind: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, duration: Duration) -&gt; Box&lt;<span class="self">Self</span>&gt; {
+        Box::new(<span class="self">Self </span>{ kind, duration })
+    }
+}
+
+<span class="kw">impl </span>std::fmt::Display <span class="kw">for </span>RequestTimeoutError {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="macro">write!</span>(
+            f,
+            <span class="string">&quot;{} timeout occurred after {:?}&quot;</span>,
+            <span class="self">self</span>.kind, <span class="self">self</span>.duration
+        )
+    }
+}
+
+<span class="kw">impl </span>std::error::Error <span class="kw">for </span>RequestTimeoutError {}
+
+<span class="attribute">#[derive(Clone, Debug)]
+</span><span class="doccomment">/// A struct containing everything needed to create a new [`TimeoutService`]
+</span><span class="kw">pub struct </span>TimeoutServiceParams {
+    <span class="doccomment">/// The duration of timeouts created from these params
+    </span>duration: Duration,
+    <span class="doccomment">/// The kind of timeouts created from these params
+    </span>kind: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str,
+    <span class="doccomment">/// The AsyncSleep impl that will be used to create time-limited futures
+    </span>async_sleep: Arc&lt;<span class="kw">dyn </span>AsyncSleep&gt;,
+}
+
+<span class="attribute">#[derive(Clone, Debug, Default)]
+</span><span class="doccomment">/// A struct of structs containing everything needed to create new [`TimeoutService`]s
+</span><span class="kw">pub struct </span>ClientTimeoutParams {
+    <span class="doccomment">/// Params used to create a new API call [`TimeoutService`]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) api_call: <span class="prelude-ty">Option</span>&lt;TimeoutServiceParams&gt;,
+    <span class="doccomment">/// Params used to create a new API call attempt [`TimeoutService`]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) api_call_attempt: <span class="prelude-ty">Option</span>&lt;TimeoutServiceParams&gt;,
+}
+
+<span class="doccomment">/// Convert a [`timeout::Api`](aws_smithy_types::timeout::Api) into an [`ClientTimeoutParams`] in order to create
+/// the set of [`TimeoutService`]s needed by a [`crate::Client`]
+</span><span class="kw">pub fn </span>generate_timeout_service_params_from_timeout_config(
+    api_timeout_config: <span class="kw-2">&amp;</span>aws_smithy_types::timeout::Api,
+    async_sleep: <span class="prelude-ty">Option</span>&lt;Arc&lt;<span class="kw">dyn </span>AsyncSleep&gt;&gt;,
+) -&gt; ClientTimeoutParams {
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(async_sleep) = async_sleep {
+        ClientTimeoutParams {
+            api_call: api_timeout_config
+                .call_timeout()
+                .map(|duration| TimeoutServiceParams {
+                    duration,
+                    kind: <span class="string">&quot;API call (all attempts including retries)&quot;</span>,
+                    async_sleep: async_sleep.clone(),
+                })
+                .into(),
+            api_call_attempt: api_timeout_config
+                .call_attempt_timeout()
+                .map(|duration| TimeoutServiceParams {
+                    duration,
+                    kind: <span class="string">&quot;API call (single attempt)&quot;</span>,
+                    async_sleep: async_sleep.clone(),
+                })
+                .into(),
+        }
+    } <span class="kw">else </span>{
+        Default::default()
+    }
+}
+
+<span class="doccomment">/// A service that wraps another service, adding the ability to set a timeout for requests
+/// handled by the inner service.
+</span><span class="attribute">#[derive(Clone, Debug)]
+</span><span class="kw">pub struct </span>TimeoutService&lt;S&gt; {
+    inner: S,
+    params: <span class="prelude-ty">Option</span>&lt;TimeoutServiceParams&gt;,
+}
+
+<span class="kw">impl</span>&lt;S&gt; TimeoutService&lt;S&gt; {
+    <span class="doccomment">/// Create a new `TimeoutService` that will timeout after the duration specified in `params` elapses
+    </span><span class="kw">pub fn </span>new(inner: S, params: <span class="prelude-ty">Option</span>&lt;TimeoutServiceParams&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ inner, params }
+    }
+
+    <span class="doccomment">/// Create a new `TimeoutService` that will never timeout
+    </span><span class="kw">pub fn </span>no_timeout(inner: S) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            inner,
+            params: <span class="prelude-val">None</span>,
+        }
+    }
+}
+
+<span class="doccomment">/// A layer that wraps services in a timeout service
+</span><span class="attribute">#[non_exhaustive]
+#[derive(Debug)]
+</span><span class="kw">pub struct </span>TimeoutLayer(<span class="prelude-ty">Option</span>&lt;TimeoutServiceParams&gt;);
+
+<span class="kw">impl </span>TimeoutLayer {
+    <span class="doccomment">/// Create a new `TimeoutLayer`
+    </span><span class="kw">pub fn </span>new(params: <span class="prelude-ty">Option</span>&lt;TimeoutServiceParams&gt;) -&gt; <span class="self">Self </span>{
+        TimeoutLayer(params)
+    }
+}
+
+<span class="kw">impl</span>&lt;S&gt; Layer&lt;S&gt; <span class="kw">for </span>TimeoutLayer {
+    <span class="kw">type </span>Service = TimeoutService&lt;S&gt;;
+
+    <span class="kw">fn </span>layer(<span class="kw-2">&amp;</span><span class="self">self</span>, inner: S) -&gt; <span class="self">Self</span>::Service {
+        TimeoutService {
+            inner,
+            params: <span class="self">self</span>.<span class="number">0</span>.clone(),
+        }
+    }
+}
+
+<span class="macro">pin_project! </span>{
+    <span class="attribute">#[non_exhaustive]
+    #[must_use = <span class="string">&quot;futures do nothing unless you `.await` or poll them&quot;</span>]
+    </span><span class="comment">// This allow is needed because otherwise Clippy will get mad we didn&#39;t document the
+    // generated TimeoutServiceFutureProj
+    </span><span class="attribute">#[allow(missing_docs)]
+    #[project = TimeoutServiceFutureProj]
+    </span><span class="doccomment">/// A future generated by a [`TimeoutService`] that may or may not have a timeout depending on
+    /// whether or not one was set. Because `TimeoutService` can be used at multiple levels of the
+    /// service stack, a `kind` can be set so that when a timeout occurs, you can know which kind of
+    /// timeout it was.
+    </span><span class="kw">pub enum </span>TimeoutServiceFuture&lt;F&gt; {
+        <span class="doccomment">/// A wrapper around an inner future that will output an [`SdkError`] if it runs longer than
+        /// the given duration
+        </span>Timeout {
+            <span class="attribute">#[pin]
+            </span>future: Timeout&lt;F, Sleep&gt;,
+            kind: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str,
+            duration: Duration,
+        },
+        <span class="doccomment">/// A thin wrapper around an inner future that will never time out
+        </span>NoTimeout {
+            <span class="attribute">#[pin]
+            </span>future: F
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;F&gt; TimeoutServiceFuture&lt;F&gt; {
+    <span class="doccomment">/// Given a `future`, an implementor of `AsyncSleep`, a `kind` for this timeout, and a `duration`,
+    /// wrap the `future` inside a [`Timeout`] future and create a new [`TimeoutServiceFuture`] that
+    /// will output an [`SdkError`] if `future` doesn&#39;t complete before `duration` has elapsed.
+    </span><span class="kw">pub fn </span>new(future: F, params: <span class="kw-2">&amp;</span>TimeoutServiceParams) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::Timeout {
+            future: Timeout::new(future, params.async_sleep.sleep(params.duration)),
+            kind: params.kind,
+            duration: params.duration,
+        }
+    }
+
+    <span class="doccomment">/// Create a [`TimeoutServiceFuture`] that will never time out.
+    </span><span class="kw">pub fn </span>no_timeout(future: F) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::NoTimeout { future }
+    }
+}
+
+<span class="kw">impl</span>&lt;InnerFuture, T, E&gt; Future <span class="kw">for </span>TimeoutServiceFuture&lt;InnerFuture&gt;
+<span class="kw">where
+    </span>InnerFuture: Future&lt;Output = <span class="prelude-ty">Result</span>&lt;T, SdkError&lt;E&gt;&gt;&gt;,
+{
+    <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;T, SdkError&lt;E&gt;&gt;;
+
+    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+        <span class="kw">let </span>(future, kind, duration) = <span class="kw">match </span><span class="self">self</span>.project() {
+            TimeoutServiceFutureProj::NoTimeout { future } =&gt; <span class="kw">return </span>future.poll(cx),
+            TimeoutServiceFutureProj::Timeout {
+                future,
+                kind,
+                duration,
+            } =&gt; (future, kind, duration),
+        };
+        <span class="kw">match </span>future.poll(cx) {
+            Poll::Ready(<span class="prelude-val">Ok</span>(response)) =&gt; Poll::Ready(response),
+            Poll::Ready(<span class="prelude-val">Err</span>(_timeout)) =&gt; Poll::Ready(<span class="prelude-val">Err</span>(SdkError::TimeoutError(
+                RequestTimeoutError::new_boxed(kind, <span class="kw-2">*</span>duration),
+            ))),
+            Poll::Pending =&gt; Poll::Pending,
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;H, R, InnerService, E&gt; tower::Service&lt;Operation&lt;H, R&gt;&gt; <span class="kw">for </span>TimeoutService&lt;InnerService&gt;
+<span class="kw">where
+    </span>InnerService: tower::Service&lt;Operation&lt;H, R&gt;, Error = SdkError&lt;E&gt;&gt;,
+{
+    <span class="kw">type </span>Response = InnerService::Response;
+    <span class="kw">type </span>Error = aws_smithy_http::result::SdkError&lt;E&gt;;
+    <span class="kw">type </span>Future = TimeoutServiceFuture&lt;InnerService::Future&gt;;
+
+    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
+        <span class="self">self</span>.inner.poll_ready(cx)
+    }
+
+    <span class="kw">fn </span>call(<span class="kw-2">&amp;mut </span><span class="self">self</span>, req: Operation&lt;H, R&gt;) -&gt; <span class="self">Self</span>::Future {
+        <span class="kw">let </span>future = <span class="self">self</span>.inner.call(req);
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(params) = <span class="kw-2">&amp;</span><span class="self">self</span>.params {
+            <span class="self">Self</span>::Future::new(future, params)
+        } <span class="kw">else </span>{
+            <span class="self">Self</span>::Future::no_timeout(future)
+        }
+    }
+}
+
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>test {
+    <span class="kw">use </span>std::sync::Arc;
+    <span class="kw">use </span>std::time::Duration;
+
+    <span class="kw">use </span><span class="kw">crate</span>::never::NeverService;
+    <span class="kw">use </span><span class="kw">crate</span>::timeout::generate_timeout_service_params_from_timeout_config;
+    <span class="kw">use crate</span>::{SdkError, TimeoutLayer};
+
+    <span class="kw">use </span>aws_smithy_async::assert_elapsed;
+    <span class="kw">use </span>aws_smithy_async::rt::sleep::{AsyncSleep, TokioSleep};
+    <span class="kw">use </span>aws_smithy_http::body::SdkBody;
+    <span class="kw">use </span>aws_smithy_http::operation::{Operation, Request};
+    <span class="kw">use </span>aws_smithy_types::tristate::TriState;
+
+    <span class="kw">use </span>tower::{Service, ServiceBuilder, ServiceExt};
+
+    <span class="attribute">#[tokio::test]
+    </span><span class="kw">async fn </span>test_timeout_service_ends_request_that_never_completes() {
+        <span class="kw">let </span>req = Request::new(http::Request::new(SdkBody::empty()));
+        <span class="kw">let </span>op = Operation::new(req, ());
+        <span class="kw">let </span>never_service: NeverService&lt;<span class="kw">_</span>, (), <span class="kw">_</span>&gt; = NeverService::new();
+        <span class="kw">let </span>timeout_config = aws_smithy_types::timeout::Api::new()
+            .with_call_timeout(TriState::Set(Duration::from_secs_f32(<span class="number">0.25</span>)));
+        <span class="kw">let </span>sleep_impl: <span class="prelude-ty">Option</span>&lt;Arc&lt;<span class="kw">dyn </span>AsyncSleep&gt;&gt; = <span class="prelude-val">Some</span>(Arc::new(TokioSleep::new()));
+        <span class="kw">let </span>timeout_service_params =
+            generate_timeout_service_params_from_timeout_config(<span class="kw-2">&amp;</span>timeout_config, sleep_impl);
+        <span class="kw">let </span><span class="kw-2">mut </span>svc = ServiceBuilder::new()
+            .layer(TimeoutLayer::new(timeout_service_params.api_call))
+            .service(never_service);
+
+        <span class="kw">let </span>now = tokio::time::Instant::now();
+        tokio::time::pause();
+
+        <span class="kw">let </span>err: SdkError&lt;Box&lt;<span class="kw">dyn </span>std::error::Error + <span class="lifetime">&#39;static</span>&gt;&gt; =
+            svc.ready().<span class="kw">await</span>.unwrap().call(op).<span class="kw">await</span>.unwrap_err();
+
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, err), <span class="string">&quot;TimeoutError(RequestTimeoutError { kind: \&quot;API call (all attempts including retries)\&quot;, duration: 250ms })&quot;</span>);
+        <span class="macro">assert_elapsed!</span>(now, Duration::from_secs_f32(<span class="number">0.25</span>));
+    }
+}
+</code></pre></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="aws_smithy_client" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

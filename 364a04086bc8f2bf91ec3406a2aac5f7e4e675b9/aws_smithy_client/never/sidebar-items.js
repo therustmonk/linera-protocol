@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["NeverReplies","A service that will connect but never send any data"],["NeverService","A service that will never return whatever it is you want"]],"type":[["NeverConnected","A service where the underlying TCP connection never connects."],["NeverConnector","A Connector that can be use with `Client` that never returns a response."]]};

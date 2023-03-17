@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["CommitteeConfig","The (public) configuration for all validators."],["GenesisConfig",""],["UserChain",""],["ValidatorConfig","The public configuration of a validator."],["ValidatorServerConfig","The private configuration of a validator service."],["WalletState",""]],"trait":[["Export",""],["Import",""]]};

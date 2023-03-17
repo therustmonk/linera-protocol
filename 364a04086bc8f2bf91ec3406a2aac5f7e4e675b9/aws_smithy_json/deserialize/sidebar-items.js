@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["ErrorReason",""],["EscapeError",""]],"fn":[["json_token_iter","JSON token parser as a Rust iterator"]],"mod":[["token",""]],"struct":[["Error",""],["JsonTokenIterator","An iterator over a `&[u8]` that yields `Result<Token, Error>` with [Token] being JSON tokens. Construct with [json_token_iter]."]]};

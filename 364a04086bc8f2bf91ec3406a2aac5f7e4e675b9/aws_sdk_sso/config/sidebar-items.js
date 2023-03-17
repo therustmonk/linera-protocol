@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Builder","Builder for creating a `Config`."],["Config","Service config."]]};

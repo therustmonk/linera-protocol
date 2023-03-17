@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Builder","Builder for AWS Shared Configuration"],["SdkConfig","AWS Shared Configuration"]]};

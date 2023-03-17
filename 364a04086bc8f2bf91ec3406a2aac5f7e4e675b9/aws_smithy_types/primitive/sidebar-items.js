@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Encoder","Primitive Type Encoder"],["PrimitiveParseError","An error during primitive parsing"]],"trait":[["Parse","Sealed trait for custom parsing of primitive types"]]};

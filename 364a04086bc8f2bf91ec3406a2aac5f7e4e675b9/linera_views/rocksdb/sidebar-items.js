@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["RocksdbContextError","The error type for [`RocksdbContext`]"]],"type":[["DB","The RocksDb client in use."],["RocksdbClient","A shared DB client for RocksDB."],["RocksdbContext","An implementation of [`crate::common::Context`] based on Rocksdb"]]};

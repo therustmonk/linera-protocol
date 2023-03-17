@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["RegisterView","A view that supports modifying a single value of type `T`."]]};

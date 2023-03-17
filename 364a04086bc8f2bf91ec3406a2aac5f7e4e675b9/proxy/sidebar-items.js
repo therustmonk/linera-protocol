@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["Proxy","A Linera Proxy, either gRPC or over ‘Simple Transport’, meaning TCP or UDP. The proxy can be configured to have a gRPC ingress and egress, or a combination of TCP / UDP ingress and egress."]],"fn":[["main",""]],"struct":[["ProxyOptions","Options for running the proxy."],["SimpleProxy",""]]};

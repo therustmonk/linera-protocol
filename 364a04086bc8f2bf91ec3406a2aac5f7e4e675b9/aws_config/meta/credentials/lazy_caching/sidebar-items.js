@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Builder","Builder for constructing a [`LazyCachingCredentialsProvider`]."],["LazyCachingCredentialsProvider","`LazyCachingCredentialsProvider` implements [`ProvideCredentials`] by caching credentials that it loads by calling a user-provided [`ProvideCredentials`] implementation."]]};

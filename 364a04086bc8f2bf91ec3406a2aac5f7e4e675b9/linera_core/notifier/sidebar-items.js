@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Notifier","The `Notifier` holds references to clients waiting to receive notifications from the validator. Clients will be evicted if their connections are terminated."]]};

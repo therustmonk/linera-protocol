@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["OnlyReady","Zero sized type for using NowOrLater when no future variant exists."]],"struct":[["NowOrLater","Future with an explicit `Now` variant"]],"type":[["BoxFuture","Boxed future type alias"]]};

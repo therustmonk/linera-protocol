@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["QueryApplication","Future implementation exported from the guest to allow the host to call [`Service::query_application`]."]],"trait":[["ServiceStateStorage","The storage APIs used by a service."]]};

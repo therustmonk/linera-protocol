@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Builder","Builder for [`ImdsCredentialsProvider`]"],["ImdsCredentialsProvider","IMDSv2 Credentials Provider"]]};

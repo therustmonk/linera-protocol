@@ -1,0 +1,50 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Define a GraphQL oneof input object"><meta name="keywords" content="rust, rustlang, rust-lang, OneofObject"><title>OneofObject in async_graphql - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../normalize.css"><link rel="stylesheet" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../ayu.css" disabled><link rel="stylesheet" href="../dark.css" disabled><link rel="stylesheet" href="../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../storage.js"></script><script defer src="sidebar-items.js"></script><script defer src="../main.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"></head><body class="rustdoc derive"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../async_graphql/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div></a><h2></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../async_graphql/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div></a><div class="sidebar-elems"><h2><a href="index.html">In async_graphql</a></h2></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1 class="fqn">Derive Macro <a href="index.html">async_graphql</a>::<wbr><a class="derive" href="#">OneofObject</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../src/async_graphql_derive/lib.rs.html#222">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><div class="item-decl"><pre class="rust derive"><code>#[derive(OneofObject)]
+{
+    // Attributes available to this derive:
+    #[graphql]
+}
+</code></pre></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Define a GraphQL oneof input object</p>
+<h2 id="macro-attributes"><a href="#macro-attributes">Macro attributes</a></h2><div><table><thead><tr><th>Attribute</th><th>description</th><th>Type</th><th>Optional</th></tr></thead><tbody>
+<tr><td>name</td><td>Oneof input object name</td><td>string</td><td>Y</td></tr>
+<tr><td>name_type</td><td>If <code>true</code>, the object name will be specified from <a href="https://docs.rs/async-graphql/latest/async_graphql/trait.TypeName.html"><code>async_graphql::TypeName</code></a> trait</td><td>bool</td><td>Y</td></tr>
+<tr><td>rename_fields</td><td>Rename all the fields according to the given case convention. The possible values are “lowercase”, “UPPERCASE”, “PascalCase”, “camelCase”, “snake_case”, “SCREAMING_SNAKE_CASE”.</td><td>string</td><td>Y</td></tr>
+<tr><td>visible</td><td>If <code>false</code>, it will not be displayed in introspection. <em><a href="https://async-graphql.github.io/async-graphql/en/visibility.html">See also the Book</a>.</em></td><td>bool</td><td>Y</td></tr>
+<tr><td>visible</td><td>Call the specified function. If the return value is <code>false</code>, it will not be displayed in introspection.</td><td>string</td><td>Y</td></tr>
+<tr><td>concretes</td><td>Specify how the concrete type of the generic SimpleObject should be implemented.</td><td>ConcreteType</td><td>Y</td></tr>
+</tbody></table>
+</div><h2 id="field-attributes"><a href="#field-attributes">Field attributes</a></h2><div><table><thead><tr><th>Attribute</th><th>description</th><th>Type</th><th>Optional</th></tr></thead><tbody>
+<tr><td>name</td><td>Field name</td><td>string</td><td>Y</td></tr>
+<tr><td>validator</td><td>Input value validator <em><a href="https://async-graphql.github.io/async-graphql/en/input_value_validators.html">See also the Book</a></em></td><td>object</td><td>Y</td></tr>
+<tr><td>visible</td><td>If <code>false</code>, it will not be displayed in introspection. <em><a href="https://async-graphql.github.io/async-graphql/en/visibility.html">See also the Book</a>.</em></td><td>bool</td><td>Y</td></tr>
+<tr><td>visible</td><td>Call the specified function. If the return value is <code>false</code>, it will not be displayed in introspection.</td><td>string</td><td>Y</td></tr>
+<tr><td>secret</td><td>Mark this field as a secret, it will not output the actual value in the log.</td><td>bool</td><td>Y</td></tr>
+</tbody></table>
+</div><h2 id="examples"><a href="#examples">Examples</a></h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>async_graphql::<span class="kw-2">*</span>;
+
+<span class="attribute">#[derive(OneofObject)]
+</span><span class="kw">enum </span>MyInputObject {
+    A(i32),
+    B(String),
+}
+
+<span class="kw">struct </span>Query;
+
+<span class="attribute">#[Object]
+</span><span class="kw">impl </span>Query {
+    <span class="kw">async fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>, input: MyInputObject) -&gt; String {
+        <span class="kw">match </span>input {
+            MyInputObject::A(value) =&gt; <span class="macro">format!</span>(<span class="string">&quot;a:{}&quot;</span>, value),
+            MyInputObject::B(value) =&gt; <span class="macro">format!</span>(<span class="string">&quot;b:{}&quot;</span>, value),
+        }
+    }
+}
+
+<span class="kw">let </span>schema = Schema::new(Query, EmptyMutation, EmptySubscription);
+<span class="kw">let </span>res = schema.execute(<span class="string">r#&quot;
+{
+    value1: value(input:{a:100})
+    value2: value(input:{b:&quot;abc&quot;})
+}&quot;#</span>).<span class="kw">await</span>.into_result().unwrap().data;
+<span class="macro">assert_eq!</span>(res, <span class="macro">value!</span>({ <span class="string">&quot;value1&quot;</span>: <span class="string">&quot;a:100&quot;</span>, <span class="string">&quot;value2&quot;</span>: <span class="string">&quot;b:abc&quot; </span>}));</code></pre></div>
+</div></details></section></div></main><div id="rustdoc-vars" data-root-path="../" data-current-crate="async_graphql" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

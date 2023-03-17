@@ -1,0 +1,1634 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/async-graphql-derive-5.0.5/src/object.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>object.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../async_graphql_derive/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
+<span id="617">617</span>
+<span id="618">618</span>
+<span id="619">619</span>
+<span id="620">620</span>
+<span id="621">621</span>
+<span id="622">622</span>
+<span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
+<span id="695">695</span>
+<span id="696">696</span>
+<span id="697">697</span>
+<span id="698">698</span>
+<span id="699">699</span>
+<span id="700">700</span>
+<span id="701">701</span>
+<span id="702">702</span>
+<span id="703">703</span>
+<span id="704">704</span>
+<span id="705">705</span>
+<span id="706">706</span>
+<span id="707">707</span>
+<span id="708">708</span>
+<span id="709">709</span>
+<span id="710">710</span>
+<span id="711">711</span>
+<span id="712">712</span>
+<span id="713">713</span>
+<span id="714">714</span>
+<span id="715">715</span>
+<span id="716">716</span>
+<span id="717">717</span>
+<span id="718">718</span>
+<span id="719">719</span>
+<span id="720">720</span>
+<span id="721">721</span>
+<span id="722">722</span>
+<span id="723">723</span>
+<span id="724">724</span>
+<span id="725">725</span>
+<span id="726">726</span>
+<span id="727">727</span>
+<span id="728">728</span>
+<span id="729">729</span>
+<span id="730">730</span>
+<span id="731">731</span>
+<span id="732">732</span>
+<span id="733">733</span>
+<span id="734">734</span>
+<span id="735">735</span>
+<span id="736">736</span>
+<span id="737">737</span>
+<span id="738">738</span>
+<span id="739">739</span>
+<span id="740">740</span>
+<span id="741">741</span>
+<span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
+<span id="745">745</span>
+<span id="746">746</span>
+<span id="747">747</span>
+<span id="748">748</span>
+<span id="749">749</span>
+<span id="750">750</span>
+<span id="751">751</span>
+<span id="752">752</span>
+<span id="753">753</span>
+<span id="754">754</span>
+<span id="755">755</span>
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
+<span id="776">776</span>
+<span id="777">777</span>
+<span id="778">778</span>
+<span id="779">779</span>
+<span id="780">780</span>
+<span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
+<span id="786">786</span>
+<span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
+<span id="792">792</span>
+<span id="793">793</span>
+<span id="794">794</span>
+<span id="795">795</span>
+<span id="796">796</span>
+<span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
+<span id="800">800</span>
+<span id="801">801</span>
+<span id="802">802</span>
+<span id="803">803</span>
+<span id="804">804</span>
+<span id="805">805</span>
+<span id="806">806</span>
+<span id="807">807</span>
+<span id="808">808</span>
+<span id="809">809</span>
+<span id="810">810</span>
+<span id="811">811</span>
+<span id="812">812</span>
+<span id="813">813</span>
+<span id="814">814</span>
+<span id="815">815</span>
+<span id="816">816</span>
+</pre><pre class="rust"><code><span class="kw">use </span>std::{iter::FromIterator, str::FromStr};
+
+<span class="kw">use </span>proc_macro::TokenStream;
+<span class="kw">use </span>proc_macro2::Ident;
+<span class="kw">use </span>quote::quote;
+<span class="kw">use </span>syn::{
+    ext::IdentExt, punctuated::Punctuated, Block, Error, FnArg, ImplItem, ItemImpl, Pat,
+    ReturnType, Token, Type, TypeReference,
+};
+
+<span class="kw">use crate</span>::{
+    args::{<span class="self">self</span>, ComplexityType, RenameRuleExt, RenameTarget},
+    output_type::OutputType,
+    utils::{
+        extract_input_args, gen_deprecation, generate_default, generate_guards, get_cfg_attrs,
+        get_crate_name, get_rustdoc, get_type_path_and_name, parse_complexity_expr,
+        parse_graphql_attrs, remove_graphql_attrs, visible_fn, GeneratorResult,
+    },
+};
+
+<span class="kw">pub fn </span>generate(
+    object_args: <span class="kw-2">&amp;</span>args::Object,
+    item_impl: <span class="kw-2">&amp;mut </span>ItemImpl,
+) -&gt; GeneratorResult&lt;TokenStream&gt; {
+    <span class="kw">let </span>crate_name = get_crate_name(object_args.internal);
+    <span class="kw">let </span>(self_ty, self_name) = get_type_path_and_name(item_impl.self_ty.as_ref())<span class="question-mark">?</span>;
+    <span class="kw">let </span>(impl_generics, <span class="kw">_</span>, where_clause) = item_impl.generics.split_for_impl();
+    <span class="kw">let </span>extends = object_args.extends;
+    <span class="kw">let </span>shareable = object_args.shareable;
+    <span class="kw">let </span>inaccessible = object_args.inaccessible;
+    <span class="kw">let </span>tags = object_args
+        .tags
+        .iter()
+        .map(|tag| <span class="macro">quote!</span>(::std::string::ToString::to_string(#tag)))
+        .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+    <span class="kw">let </span>gql_typename = <span class="kw">if </span>!object_args.name_type {
+        object_args
+            .name
+            .as_ref()
+            .map(|name| <span class="macro">quote!</span>(::std::borrow::Cow::Borrowed(#name)))
+            .unwrap_or_else(|| {
+                <span class="kw">let </span>name = RenameTarget::Type.rename(self_name.clone());
+                <span class="macro">quote!</span>(::std::borrow::Cow::Borrowed(#name))
+            })
+    } <span class="kw">else </span>{
+        <span class="macro">quote!</span>(&lt;<span class="self">Self </span><span class="kw">as </span>#crate_name::TypeName&gt;::type_name())
+    };
+
+    <span class="kw">let </span>desc = <span class="kw">if </span>object_args.use_type_description {
+        <span class="macro">quote! </span>{ ::std::option::Option::Some(::std::string::ToString::to_string(&lt;<span class="self">Self </span><span class="kw">as </span>#crate_name::Description&gt;::description())) }
+    } <span class="kw">else </span>{
+        get_rustdoc(<span class="kw-2">&amp;</span>item_impl.attrs)<span class="question-mark">?
+            </span>.map(|s| <span class="macro">quote!</span>(::std::option::Option::Some(::std::string::ToString::to_string(#s))))
+            .unwrap_or_else(|| <span class="macro">quote!</span>(::std::option::Option::None))
+    };
+
+    <span class="kw">let </span><span class="kw-2">mut </span>resolvers = Vec::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>schema_fields = Vec::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>find_entities = Vec::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>add_keys = Vec::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>create_entity_types = Vec::new();
+
+    <span class="comment">// Computation of the derivated fields
+    </span><span class="kw">let </span><span class="kw-2">mut </span>derived_impls = <span class="macro">vec!</span>[];
+    <span class="kw">for </span>item <span class="kw">in </span><span class="kw-2">&amp;mut </span>item_impl.items {
+        <span class="kw">if let </span>ImplItem::Method(method) = item {
+            <span class="kw">let </span>method_args: args::ObjectField =
+                parse_graphql_attrs(<span class="kw-2">&amp;</span>method.attrs)<span class="question-mark">?</span>.unwrap_or_default();
+
+            <span class="kw">for </span>derived <span class="kw">in </span>method_args.derived {
+                <span class="kw">if </span>derived.name.is_some() &amp;&amp; derived.into.is_some() {
+                    <span class="kw">let </span>base_function_name = <span class="kw-2">&amp;</span>method.sig.ident;
+                    <span class="kw">let </span>name = derived.name.unwrap();
+                    <span class="kw">let </span>with = derived.with;
+                    <span class="kw">let </span>into = Type::Verbatim(
+                        proc_macro2::TokenStream::from_str(<span class="kw-2">&amp;</span>derived.into.unwrap()).unwrap(),
+                    );
+
+                    <span class="kw">let </span><span class="kw-2">mut </span>new_impl = method.clone();
+                    new_impl.sig.ident = name;
+                    new_impl.sig.output =
+                        syn::parse2::&lt;ReturnType&gt;(<span class="macro">quote! </span>{ -&gt; #crate_name::Result&lt;#into&gt; })
+                            .expect(<span class="string">&quot;invalid result type&quot;</span>);
+
+                    <span class="kw">let </span>should_create_context = new_impl
+                        .sig
+                        .inputs
+                        .iter()
+                        .nth(<span class="number">1</span>)
+                        .map(|x| {
+                            <span class="kw">if let </span>FnArg::Typed(pat) = x {
+                                <span class="kw">if let </span>Type::Reference(TypeReference { elem, .. }) = <span class="kw-2">&amp;*</span>pat.ty {
+                                    <span class="kw">if let </span>Type::Path(path) = elem.as_ref() {
+                                        <span class="kw">return </span>path.path.segments.last().unwrap().ident
+                                            != <span class="string">&quot;Context&quot;</span>;
+                                    }
+                                }
+                            };
+                            <span class="bool-val">true
+                        </span>})
+                        .unwrap_or(<span class="bool-val">true</span>);
+
+                    <span class="kw">if </span>should_create_context {
+                        <span class="kw">let </span>arg_ctx = syn::parse2::&lt;FnArg&gt;(<span class="macro">quote! </span>{ ctx: <span class="kw-2">&amp;</span>Context&lt;<span class="lifetime">&#39;_</span>&gt; })
+                            .expect(<span class="string">&quot;invalid arg type&quot;</span>);
+                        new_impl.sig.inputs.insert(<span class="number">1</span>, arg_ctx);
+                    }
+
+                    <span class="kw">let </span>other_atts: Punctuated&lt;Ident, <span class="macro">Token!</span>[,]&gt; = Punctuated::from_iter(
+                        new_impl
+                            .sig
+                            .inputs
+                            .iter()
+                            .filter_map(|x| <span class="kw">match </span>x {
+                                FnArg::Typed(pat) =&gt; <span class="kw">match </span><span class="kw-2">&amp;*</span>pat.pat {
+                                    Pat::Ident(ident) =&gt; <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(ident.ident.clone())),
+                                    <span class="kw">_ </span>=&gt; <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(Error::new_spanned(
+                                        pat,
+                                        <span class="string">&quot;Must be a simple argument&quot;</span>,
+                                    ))),
+                                },
+                                FnArg::Receiver(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
+                            })
+                            .collect::&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;Ident&gt;, Error&gt;&gt;()<span class="question-mark">?
+                            </span>.into_iter(),
+                    );
+
+                    <span class="kw">let </span>new_block = <span class="kw">match </span>with {
+                        <span class="prelude-val">Some</span>(with) =&gt; <span class="macro">quote!</span>({
+                            ::std::result::Result::Ok(#with(#self_ty::#base_function_name(<span class="kw-2">&amp;</span><span class="self">self</span>, #other_atts).<span class="kw">await</span><span class="question-mark">?</span>))
+                        }),
+                        <span class="prelude-val">None </span>=&gt; <span class="macro">quote!</span>({
+                            {
+                                ::std::result::Result::Ok(#self_ty::#base_function_name(<span class="kw-2">&amp;</span><span class="self">self</span>, #other_atts).<span class="kw">await</span><span class="question-mark">?</span>.into())
+                            }
+                        }),
+                    };
+
+                    new_impl.block = syn::parse2::&lt;Block&gt;(new_block).expect(<span class="string">&quot;invalid block&quot;</span>);
+
+                    derived_impls.push(ImplItem::Method(new_impl));
+                }
+            }
+        }
+    }
+    item_impl.items.append(<span class="kw-2">&amp;mut </span>derived_impls);
+
+    <span class="kw">for </span>item <span class="kw">in </span><span class="kw-2">&amp;mut </span>item_impl.items {
+        <span class="kw">if let </span>ImplItem::Method(method) = item {
+            <span class="kw">let </span>method_args: args::ObjectField =
+                parse_graphql_attrs(<span class="kw-2">&amp;</span>method.attrs)<span class="question-mark">?</span>.unwrap_or_default();
+
+            <span class="kw">if </span>method_args.entity {
+                <span class="kw">let </span>cfg_attrs = get_cfg_attrs(<span class="kw-2">&amp;</span>method.attrs);
+
+                <span class="kw">if </span>method.sig.asyncness.is_none() {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new_spanned(<span class="kw-2">&amp;</span>method, <span class="string">&quot;Must be asynchronous&quot;</span>).into());
+                }
+
+                <span class="kw">let </span>args = extract_input_args::&lt;args::Argument&gt;(<span class="kw-2">&amp;</span>crate_name, method)<span class="question-mark">?</span>;
+
+                <span class="kw">let </span>ty = <span class="kw">match </span><span class="kw-2">&amp;</span>method.sig.output {
+                    ReturnType::Type(<span class="kw">_</span>, ty) =&gt; OutputType::parse(ty)<span class="question-mark">?</span>,
+                    ReturnType::Default =&gt; {
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new_spanned(
+                            <span class="kw-2">&amp;</span>method.sig.output,
+                            <span class="string">&quot;Resolver must have a return type&quot;</span>,
+                        )
+                        .into())
+                    }
+                };
+
+                <span class="kw">let </span>entity_type = ty.value_type();
+                <span class="kw">let </span><span class="kw-2">mut </span>key_pat = Vec::new();
+                <span class="kw">let </span><span class="kw-2">mut </span>key_getter = Vec::new();
+                <span class="kw">let </span><span class="kw-2">mut </span>use_keys = Vec::new();
+                <span class="kw">let </span><span class="kw-2">mut </span>get_federation_key = Vec::new();
+                <span class="kw">let </span><span class="kw-2">mut </span>requires_getter = Vec::new();
+                <span class="kw">let </span>all_key = args.iter().all(|(<span class="kw">_</span>, <span class="kw">_</span>, arg)| !arg.key);
+
+                <span class="kw">if </span>args.is_empty() {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new_spanned(
+                        method,
+                        <span class="string">&quot;Entity need to have at least one key.&quot;</span>,
+                    )
+                    .into());
+                }
+
+                <span class="kw">for </span>(ident, ty, args::Argument { name, key, .. }) <span class="kw">in </span><span class="kw-2">&amp;</span>args {
+                    <span class="kw">let </span>is_key = all_key || <span class="kw-2">*</span>key;
+                    <span class="kw">let </span>name = name.clone().unwrap_or_else(|| {
+                        object_args
+                            .rename_args
+                            .rename(ident.ident.unraw().to_string(), RenameTarget::Argument)
+                    });
+
+                    <span class="kw">if </span>is_key {
+                        get_federation_key.push(<span class="macro">quote! </span>{
+                            <span class="kw">if let </span><span class="prelude-val">Some</span>(fields) = &lt;#ty <span class="kw">as </span>#crate_name::InputType&gt;::federation_fields() {
+                                key_str.push(<span class="macro">format!</span>(<span class="string">&quot;{} {}&quot;</span>, #name, fields));
+                            } <span class="kw">else </span>{
+                                key_str.push(#name.to_string());
+                            }
+                        });
+
+                        key_pat.push(<span class="macro">quote! </span>{
+                            ::std::option::Option::Some(#ident)
+                        });
+                        key_getter.push(<span class="macro">quote! </span>{
+                            params.get(#name).and_then(|value| {
+                                <span class="kw">let </span>value: ::std::option::Option&lt;#ty&gt; = #crate_name::InputType::parse(::std::option::Option::Some(::std::clone::Clone::clone(<span class="kw-2">&amp;</span>value))).ok();
+                                value
+                            })
+                        });
+                    } <span class="kw">else </span>{
+                        <span class="comment">// requires
+                        </span>requires_getter.push(<span class="macro">quote! </span>{
+                            <span class="kw">let </span>#ident: #ty = #crate_name::InputType::parse(params.get(#name).cloned()).
+                                map_err(|err| err.into_server_error(ctx.item.pos))<span class="question-mark">?</span>;
+                        });
+                    }
+                    use_keys.push(ident);
+                }
+
+                add_keys.push(<span class="macro">quote! </span>{
+                    {
+                        <span class="kw">let </span><span class="kw-2">mut </span>key_str = Vec::new();
+                        #(#get_federation_key)*
+                        registry.add_keys(<span class="kw-2">&amp;</span>&lt;#entity_type <span class="kw">as </span>#crate_name::OutputType&gt;::type_name(), <span class="kw-2">&amp;</span>key_str.join(<span class="string">&quot; &quot;</span>));
+                    }
+                });
+                create_entity_types.push(
+                    <span class="macro">quote! </span>{ &lt;#entity_type <span class="kw">as </span>#crate_name::OutputType&gt;::create_type_info(registry); },
+                );
+
+                <span class="kw">let </span>field_ident = <span class="kw-2">&amp;</span>method.sig.ident;
+                <span class="kw">if let </span>OutputType::Value(inner_ty) = <span class="kw-2">&amp;</span>ty {
+                    <span class="kw">let </span>block = <span class="kw-2">&amp;</span>method.block;
+                    <span class="kw">let </span>new_block = <span class="macro">quote!</span>({
+                        {
+                            <span class="kw">let </span>value:#inner_ty = <span class="kw">async move </span>#block.<span class="kw">await</span>;
+                            ::std::result::Result::Ok(value)
+                        }
+                    });
+                    method.block = syn::parse2::&lt;Block&gt;(new_block).expect(<span class="string">&quot;invalid block&quot;</span>);
+                    method.sig.output =
+                        syn::parse2::&lt;ReturnType&gt;(<span class="macro">quote! </span>{ -&gt; #crate_name::Result&lt;#inner_ty&gt; })
+                            .expect(<span class="string">&quot;invalid result type&quot;</span>);
+                }
+                <span class="kw">let </span>do_find = <span class="macro">quote! </span>{
+                    <span class="self">self</span>.#field_ident(ctx, #(#use_keys),<span class="kw-2">*</span>)
+                        .<span class="kw">await</span>.map_err(|err| ::std::convert::Into::&lt;#crate_name::Error&gt;::into(err)
+                        .into_server_error(ctx.item.pos))
+                };
+
+                find_entities.push((
+                    args.len(),
+                    <span class="macro">quote! </span>{
+                        #(#cfg_attrs)*
+                        <span class="kw">if </span>typename == <span class="kw-2">&amp;</span>&lt;#entity_type <span class="kw">as </span>#crate_name::OutputType&gt;::type_name() {
+                            <span class="kw">if let </span>(#(#key_pat),<span class="kw-2">*</span>) = (#(#key_getter),<span class="kw-2">*</span>) {
+                                <span class="kw">let </span>f = <span class="kw">async move </span>{
+                                    #(#requires_getter)*
+                                    #do_find
+                                };
+                                <span class="kw">let </span>obj = f.<span class="kw">await</span>.map_err(|err| ctx.set_error_path(err))<span class="question-mark">?</span>;
+                                <span class="kw">let </span>ctx_obj = ctx.with_selection_set(<span class="kw-2">&amp;</span>ctx.item.node.selection_set);
+                                <span class="kw">return </span>#crate_name::OutputType::resolve(<span class="kw-2">&amp;</span>obj, <span class="kw-2">&amp;</span>ctx_obj, ctx.item).<span class="kw">await</span>.map(::std::option::Option::Some);
+                            }
+                        }
+                    },
+                ));
+            } <span class="kw">else if </span>!method_args.skip {
+                <span class="kw">if </span>method.sig.asyncness.is_none() {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new_spanned(<span class="kw-2">&amp;</span>method, <span class="string">&quot;Must be asynchronous&quot;</span>).into());
+                }
+                <span class="kw">let </span>cfg_attrs = get_cfg_attrs(<span class="kw-2">&amp;</span>method.attrs);
+
+                <span class="kw">if </span>method_args.flatten {
+                    <span class="comment">// Only used to inject the context placeholder if required.
+                    </span>extract_input_args::&lt;args::Argument&gt;(<span class="kw-2">&amp;</span>crate_name, method)<span class="question-mark">?</span>;
+
+                    <span class="kw">let </span>ty = <span class="kw">match </span><span class="kw-2">&amp;</span>method.sig.output {
+                        ReturnType::Type(<span class="kw">_</span>, ty) =&gt; OutputType::parse(ty)<span class="question-mark">?</span>,
+                        ReturnType::Default =&gt; {
+                            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new_spanned(
+                                <span class="kw-2">&amp;</span>method.sig.output,
+                                <span class="string">&quot;Flatten resolver must have a return type&quot;</span>,
+                            )
+                            .into())
+                        }
+                    };
+                    <span class="kw">let </span>ty = ty.value_type();
+                    <span class="kw">let </span>ident = <span class="kw-2">&amp;</span>method.sig.ident;
+
+                    schema_fields.push(<span class="macro">quote! </span>{
+                        &lt;#ty&gt;::create_type_info(registry);
+                        <span class="kw">if let </span>#crate_name::registry::MetaType::Object { fields: obj_fields, .. } =
+                            registry.create_fake_output_type::&lt;#ty&gt;() {
+                            fields.extend(obj_fields);
+                        }
+                    });
+
+                    resolvers.push(<span class="macro">quote! </span>{
+                        #(#cfg_attrs)*
+                        <span class="kw">if let </span>::std::option::Option::Some(value) = #crate_name::ContainerType::resolve_field(<span class="kw-2">&amp;</span><span class="self">self</span>.#ident(ctx).<span class="kw">await</span>, ctx).<span class="kw">await</span><span class="question-mark">? </span>{
+                            <span class="kw">return </span>::std::result::Result::Ok(std::option::Option::Some(value));
+                        }
+                    });
+
+                    remove_graphql_attrs(<span class="kw-2">&amp;mut </span>method.attrs);
+                    <span class="kw">continue</span>;
+                }
+
+                <span class="kw">let </span>field_name = method_args.name.clone().unwrap_or_else(|| {
+                    object_args
+                        .rename_fields
+                        .rename(method.sig.ident.unraw().to_string(), RenameTarget::Field)
+                });
+                <span class="kw">let </span>field_desc = get_rustdoc(<span class="kw-2">&amp;</span>method.attrs)<span class="question-mark">?
+                    </span>.map(|s| <span class="macro">quote! </span>{ ::std::option::Option::Some(::std::string::ToString::to_string(#s)) })
+                    .unwrap_or_else(|| <span class="macro">quote! </span>{::std::option::Option::None});
+                <span class="kw">let </span>field_deprecation = gen_deprecation(<span class="kw-2">&amp;</span>method_args.deprecation, <span class="kw-2">&amp;</span>crate_name);
+                <span class="kw">let </span>external = method_args.external;
+                <span class="kw">let </span>shareable = method_args.shareable;
+                <span class="kw">let </span>inaccessible = method_args.inaccessible;
+                <span class="kw">let </span>tags = method_args
+                    .tags
+                    .iter()
+                    .map(|tag| <span class="macro">quote!</span>(::std::string::ToString::to_string(#tag)))
+                    .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+                <span class="kw">let </span>override_from = <span class="kw">match </span><span class="kw-2">&amp;</span>method_args.override_from {
+                    <span class="prelude-val">Some</span>(from) =&gt; {
+                        <span class="macro">quote! </span>{ ::std::option::Option::Some(::std::string::ToString::to_string(#from)) }
+                    }
+                    <span class="prelude-val">None </span>=&gt; <span class="macro">quote! </span>{ ::std::option::Option::None },
+                };
+                <span class="kw">let </span>requires = <span class="kw">match </span><span class="kw-2">&amp;</span>method_args.requires {
+                    <span class="prelude-val">Some</span>(requires) =&gt; {
+                        <span class="macro">quote! </span>{ ::std::option::Option::Some(::std::string::ToString::to_string(#requires)) }
+                    }
+                    <span class="prelude-val">None </span>=&gt; <span class="macro">quote! </span>{ ::std::option::Option::None },
+                };
+                <span class="kw">let </span>provides = <span class="kw">match </span><span class="kw-2">&amp;</span>method_args.provides {
+                    <span class="prelude-val">Some</span>(provides) =&gt; {
+                        <span class="macro">quote! </span>{ ::std::option::Option::Some(::std::string::ToString::to_string(#provides)) }
+                    }
+                    <span class="prelude-val">None </span>=&gt; <span class="macro">quote! </span>{ ::std::option::Option::None },
+                };
+                <span class="kw">let </span>cache_control = {
+                    <span class="kw">let </span>public = method_args.cache_control.is_public();
+                    <span class="kw">let </span>max_age = <span class="kw">if </span>method_args.cache_control.no_cache {
+                        -<span class="number">1
+                    </span>} <span class="kw">else </span>{
+                        method_args.cache_control.max_age <span class="kw">as </span>i32
+                    };
+                    <span class="macro">quote! </span>{
+                        #crate_name::CacheControl {
+                            public: #public,
+                            max_age: #max_age,
+                        }
+                    }
+                };
+
+                <span class="kw">let </span>args = extract_input_args::&lt;args::Argument&gt;(<span class="kw-2">&amp;</span>crate_name, method)<span class="question-mark">?</span>;
+                <span class="kw">let </span><span class="kw-2">mut </span>schema_args = Vec::new();
+                <span class="kw">let </span><span class="kw-2">mut </span>use_params = Vec::new();
+                <span class="kw">let </span><span class="kw-2">mut </span>get_params = Vec::new();
+
+                <span class="kw">for </span>(
+                    ident,
+                    ty,
+                    args::Argument {
+                        name,
+                        desc,
+                        default,
+                        default_with,
+                        process_with,
+                        validator,
+                        visible,
+                        secret,
+                        inaccessible,
+                        tags,
+                        ..
+                    },
+                ) <span class="kw">in </span><span class="kw-2">&amp;</span>args
+                {
+                    <span class="kw">let </span>name = name.clone().unwrap_or_else(|| {
+                        object_args
+                            .rename_args
+                            .rename(ident.ident.unraw().to_string(), RenameTarget::Argument)
+                    });
+                    <span class="kw">let </span>desc = desc
+                        .as_ref()
+                        .map(|s| <span class="macro">quote! </span>{::std::option::Option::Some(::std::string::ToString::to_string(#s))})
+                        .unwrap_or_else(|| <span class="macro">quote! </span>{::std::option::Option::None});
+                    <span class="kw">let </span>default = generate_default(default, default_with)<span class="question-mark">?</span>;
+                    <span class="kw">let </span>schema_default = default
+                        .as_ref()
+                        .map(|value| {
+                            <span class="macro">quote! </span>{
+                                ::std::option::Option::Some(::std::string::ToString::to_string(
+                                    <span class="kw-2">&amp;</span>&lt;#ty <span class="kw">as </span>#crate_name::InputType&gt;::to_value(<span class="kw-2">&amp;</span>#value)
+                                ))
+                            }
+                        })
+                        .unwrap_or_else(|| <span class="macro">quote! </span>{::std::option::Option::None});
+
+                    <span class="kw">let </span>visible = visible_fn(visible);
+                    <span class="kw">let </span>tags = tags
+                        .iter()
+                        .map(|tag| <span class="macro">quote!</span>(::std::string::ToString::to_string(#tag)))
+                        .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+
+                    schema_args.push(<span class="macro">quote! </span>{
+                            args.insert(::std::borrow::ToOwned::to_owned(#name), #crate_name::registry::MetaInputValue {
+                                name: ::std::string::ToString::to_string(#name),
+                                description: #desc,
+                                ty: &lt;#ty <span class="kw">as </span>#crate_name::InputType&gt;::create_type_info(registry),
+                                default_value: #schema_default,
+                                visible: #visible,
+                                inaccessible: #inaccessible,
+                                tags: <span class="macro">::std::vec!</span>[ #(#tags),* ],
+                                is_secret: #secret,
+                            });
+                        });
+
+                    <span class="kw">let </span>param_ident = <span class="kw-2">&amp;</span>ident.ident;
+                    use_params.push(<span class="macro">quote! </span>{ #param_ident });
+
+                    <span class="kw">let </span>default = <span class="kw">match </span>default {
+                        <span class="prelude-val">Some</span>(default) =&gt; {
+                            <span class="macro">quote! </span>{ ::std::option::Option::Some(|| -&gt; #ty { #default }) }
+                        }
+                        <span class="prelude-val">None </span>=&gt; <span class="macro">quote! </span>{ ::std::option::Option::None },
+                    };
+
+                    <span class="kw">let </span>process_with = <span class="kw">match </span>process_with.as_ref() {
+                        <span class="prelude-val">Some</span>(fn_path) =&gt; {
+                            <span class="kw">let </span>fn_path: syn::ExprPath = syn::parse_str(fn_path)<span class="question-mark">?</span>;
+                            <span class="macro">quote! </span>{
+                                #fn_path(<span class="kw-2">&amp;mut </span>#param_ident);
+                            }
+                        }
+                        <span class="prelude-val">None </span>=&gt; Default::default(),
+                    };
+
+                    <span class="kw">let </span>validators = validator.clone().unwrap_or_default().create_validators(
+                        <span class="kw-2">&amp;</span>crate_name,
+                        <span class="macro">quote!</span>(<span class="kw-2">&amp;</span>#ident),
+                        <span class="prelude-val">Some</span>(<span class="macro">quote!</span>(.map_err(|err| err.into_server_error(__pos)))),
+                    )<span class="question-mark">?</span>;
+
+                    <span class="kw">let </span><span class="kw-2">mut </span>non_mut_ident = ident.clone();
+                    non_mut_ident.mutability = <span class="prelude-val">None</span>;
+                    get_params.push(<span class="macro">quote! </span>{
+                        <span class="attribute">#[allow(non_snake_case, unused_variables, unused_mut)]
+                        </span><span class="kw">let </span>(__pos, <span class="kw-2">mut </span>#non_mut_ident) = ctx.param_value::&lt;#ty&gt;(#name, #default)<span class="question-mark">?</span>;
+                        #process_with
+                        #validators
+                        <span class="attribute">#[allow(non_snake_case, unused_variables)]
+                        </span><span class="kw">let </span>#ident = #non_mut_ident;
+                    });
+                }
+
+                <span class="kw">let </span>ty = <span class="kw">match </span><span class="kw-2">&amp;</span>method.sig.output {
+                    ReturnType::Type(<span class="kw">_</span>, ty) =&gt; OutputType::parse(ty)<span class="question-mark">?</span>,
+                    ReturnType::Default =&gt; {
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new_spanned(
+                            <span class="kw-2">&amp;</span>method.sig.output,
+                            <span class="string">&quot;Resolver must have a return type&quot;</span>,
+                        )
+                        .into())
+                    }
+                };
+                <span class="kw">let </span>schema_ty = ty.value_type();
+                <span class="kw">let </span>visible = visible_fn(<span class="kw-2">&amp;</span>method_args.visible);
+
+                <span class="kw">let </span>complexity = <span class="kw">if let </span><span class="prelude-val">Some</span>(complexity) = <span class="kw-2">&amp;</span>method_args.complexity {
+                    <span class="kw">match </span>complexity {
+                        ComplexityType::Const(n) =&gt; {
+                            <span class="macro">quote! </span>{ ::std::option::Option::Some(#crate_name::registry::ComplexityType::Const(#n)) }
+                        }
+                        ComplexityType::Fn(s) =&gt; {
+                            <span class="kw">let </span>(variables, expr) = parse_complexity_expr(s)<span class="question-mark">?</span>;
+                            <span class="kw">let </span><span class="kw-2">mut </span>parse_args = Vec::new();
+                            <span class="kw">for </span>variable <span class="kw">in </span>variables {
+                                <span class="kw">if let </span><span class="prelude-val">Some</span>((
+                                    ident,
+                                    ty,
+                                    args::Argument {
+                                        name,
+                                        default,
+                                        default_with,
+                                        ..
+                                    },
+                                )) = args
+                                    .iter()
+                                    .find(|(pat_ident, <span class="kw">_</span>, <span class="kw">_</span>)| pat_ident.ident == variable)
+                                {
+                                    <span class="kw">let </span>default = <span class="kw">match </span>generate_default(default, default_with)<span class="question-mark">? </span>{
+                                        <span class="prelude-val">Some</span>(default) =&gt; {
+                                            <span class="macro">quote! </span>{ ::std::option::Option::Some(|| -&gt; #ty { #default }) }
+                                        }
+                                        <span class="prelude-val">None </span>=&gt; <span class="macro">quote! </span>{ ::std::option::Option::None },
+                                    };
+                                    <span class="kw">let </span>name = name.clone().unwrap_or_else(|| {
+                                        object_args.rename_args.rename(
+                                            ident.ident.unraw().to_string(),
+                                            RenameTarget::Argument,
+                                        )
+                                    });
+                                    parse_args.push(<span class="macro">quote! </span>{
+                                        <span class="kw">let </span>#ident: #ty = __ctx.param_value(__variables_definition, __field, #name, #default)<span class="question-mark">?</span>;
+                                    });
+                                }
+                            }
+                            <span class="macro">quote! </span>{
+                                <span class="prelude-val">Some</span>(#crate_name::registry::ComplexityType::Fn(|__ctx, __variables_definition, __field, child_complexity| {
+                                    #(#parse_args)*
+                                    <span class="prelude-val">Ok</span>(#expr)
+                                }))
+                            }
+                        }
+                    }
+                } <span class="kw">else </span>{
+                    <span class="macro">quote! </span>{ ::std::option::Option::None }
+                };
+
+                schema_fields.push(<span class="macro">quote! </span>{
+                    #(#cfg_attrs)*
+                    fields.insert(::std::borrow::ToOwned::to_owned(#field_name), #crate_name::registry::MetaField {
+                        name: ::std::borrow::ToOwned::to_owned(#field_name),
+                        description: #field_desc,
+                        args: {
+                            <span class="kw">let </span><span class="kw-2">mut </span>args = #crate_name::indexmap::IndexMap::new();
+                            #(#schema_args)*
+                            args
+                        },
+                        ty: &lt;#schema_ty <span class="kw">as </span>#crate_name::OutputType&gt;::create_type_info(registry),
+                        deprecation: #field_deprecation,
+                        cache_control: #cache_control,
+                        external: #external,
+                        provides: #provides,
+                        requires: #requires,
+                        shareable: #shareable,
+                        inaccessible: #inaccessible,
+                        tags: <span class="macro">::std::vec!</span>[ #(#tags),* ],
+                        override_from: #override_from,
+                        visible: #visible,
+                        compute_complexity: #complexity,
+                    });
+                });
+
+                <span class="kw">let </span>field_ident = <span class="kw-2">&amp;</span>method.sig.ident;
+                <span class="kw">if let </span>OutputType::Value(inner_ty) = <span class="kw-2">&amp;</span>ty {
+                    <span class="kw">let </span>block = <span class="kw-2">&amp;</span>method.block;
+                    <span class="kw">let </span>new_block = <span class="macro">quote!</span>({
+                        {
+                            ::std::result::Result::Ok(<span class="kw">async move </span>{
+                                <span class="kw">let </span>value:#inner_ty = #block;
+                                value
+                            }.<span class="kw">await</span>)
+                        }
+                    });
+                    method.block = syn::parse2::&lt;Block&gt;(new_block).expect(<span class="string">&quot;invalid block&quot;</span>);
+                    method.sig.output =
+                        syn::parse2::&lt;ReturnType&gt;(<span class="macro">quote! </span>{ -&gt; #crate_name::Result&lt;#inner_ty&gt; })
+                            .expect(<span class="string">&quot;invalid result type&quot;</span>);
+                }
+
+                <span class="kw">let </span>resolve_obj = <span class="macro">quote! </span>{
+                    {
+                        <span class="kw">let </span>res = <span class="self">self</span>.#field_ident(ctx, #(#use_params),<span class="kw-2">*</span>).<span class="kw">await</span>;
+                        res.map_err(|err| ::std::convert::Into::&lt;#crate_name::Error&gt;::into(err).into_server_error(ctx.item.pos))
+                    }
+                };
+
+                <span class="kw">let </span>guard_map_err = <span class="macro">quote! </span>{
+                    .map_err(|err| err.into_server_error(ctx.item.pos))
+                };
+                <span class="kw">let </span>guard = <span class="kw">match </span>method_args.guard.as_ref().or(object_args.guard.as_ref()) {
+                    <span class="prelude-val">Some</span>(code) =&gt; <span class="prelude-val">Some</span>(generate_guards(<span class="kw-2">&amp;</span>crate_name, code, guard_map_err)<span class="question-mark">?</span>),
+                    <span class="prelude-val">None </span>=&gt; <span class="prelude-val">None</span>,
+                };
+
+                resolvers.push(<span class="macro">quote! </span>{
+                    #(#cfg_attrs)*
+                    <span class="kw">if </span>ctx.item.node.name.node == #field_name {
+                        <span class="kw">let </span>f = <span class="kw">async move </span>{
+                            #(#get_params)*
+                            #guard
+                            #resolve_obj
+                        };
+                        <span class="kw">let </span>obj = f.<span class="kw">await</span>.map_err(|err| ctx.set_error_path(err))<span class="question-mark">?</span>;
+                        <span class="kw">let </span>ctx_obj = ctx.with_selection_set(<span class="kw-2">&amp;</span>ctx.item.node.selection_set);
+                        <span class="kw">return </span>#crate_name::OutputType::resolve(<span class="kw-2">&amp;</span>obj, <span class="kw-2">&amp;</span>ctx_obj, ctx.item).<span class="kw">await</span>.map(::std::option::Option::Some);
+                    }
+                });
+            }
+
+            remove_graphql_attrs(<span class="kw-2">&amp;mut </span>method.attrs);
+        }
+    }
+
+    <span class="kw">let </span>cache_control = {
+        <span class="kw">let </span>public = object_args.cache_control.is_public();
+        <span class="kw">let </span>max_age = <span class="kw">if </span>object_args.cache_control.no_cache {
+            -<span class="number">1
+        </span>} <span class="kw">else </span>{
+            object_args.cache_control.max_age <span class="kw">as </span>i32
+        };
+        <span class="macro">quote! </span>{
+            #crate_name::CacheControl {
+                public: #public,
+                max_age: #max_age,
+            }
+        }
+    };
+
+    find_entities.sort_by(|(a, <span class="kw">_</span>), (b, <span class="kw">_</span>)| b.cmp(a));
+    <span class="kw">let </span>find_entities_iter = find_entities.iter().map(|(<span class="kw">_</span>, code)| code);
+
+    <span class="kw">if </span>resolvers.is_empty() &amp;&amp; create_entity_types.is_empty() {
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new_spanned(
+            self_ty,
+            <span class="string">&quot;A GraphQL Object type must define one or more fields.&quot;</span>,
+        )
+        .into());
+    }
+
+    <span class="kw">let </span>visible = visible_fn(<span class="kw-2">&amp;</span>object_args.visible);
+    <span class="kw">let </span>resolve_container = <span class="kw">if </span>object_args.serial {
+        <span class="macro">quote! </span>{ #crate_name::resolver_utils::resolve_container_serial(ctx, <span class="self">self</span>).<span class="kw">await </span>}
+    } <span class="kw">else </span>{
+        <span class="macro">quote! </span>{ #crate_name::resolver_utils::resolve_container(ctx, <span class="self">self</span>).<span class="kw">await </span>}
+    };
+
+    <span class="kw">let </span>expanded = <span class="kw">if </span>object_args.concretes.is_empty() {
+        <span class="macro">quote! </span>{
+            #item_impl
+
+            <span class="attribute">#[allow(clippy::all, clippy::pedantic, clippy::suspicious_else_formatting)]
+            #[allow(unused_braces, unused_variables, unused_parens, unused_mut)]
+            #[#crate_name::async_trait::async_trait]
+            </span><span class="kw">impl </span>#impl_generics #crate_name::resolver_utils::ContainerType <span class="kw">for </span>#self_ty #where_clause {
+                <span class="kw">async fn </span>resolve_field(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;</span>#crate_name::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; #crate_name::ServerResult&lt;::std::option::Option&lt;#crate_name::Value&gt;&gt; {
+                    #(#resolvers)*
+                    ::std::result::Result::Ok(::std::option::Option::None)
+                }
+
+                <span class="kw">async fn </span>find_entity(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;</span>#crate_name::Context&lt;<span class="lifetime">&#39;_</span>&gt;, params: <span class="kw-2">&amp;</span>#crate_name::Value) -&gt; #crate_name::ServerResult&lt;::std::option::Option&lt;#crate_name::Value&gt;&gt; {
+                    <span class="kw">let </span>params = <span class="kw">match </span>params {
+                        #crate_name::Value::Object(params) =&gt; params,
+                        <span class="kw">_ </span>=&gt; <span class="kw">return </span>::std::result::Result::Ok(::std::option::Option::None),
+                    };
+                    <span class="kw">let </span>typename = <span class="kw">if let </span>::std::option::Option::Some(#crate_name::Value::String(typename)) = params.get(<span class="string">&quot;__typename&quot;</span>) {
+                        typename
+                    } <span class="kw">else </span>{
+                        <span class="kw">return </span>::std::result::Result::Err(
+                            #crate_name::ServerError::new(<span class="string">r#&quot;&quot;__typename&quot; must be an existing string.&quot;#</span>, ::std::option::Option::Some(ctx.item.pos))
+                        );
+                    };
+                    #(#find_entities_iter)*
+                    ::std::result::Result::Ok(::std::option::Option::None)
+                }
+            }
+
+            <span class="attribute">#[allow(clippy::all, clippy::pedantic)]
+            #[#crate_name::async_trait::async_trait]
+            </span><span class="kw">impl </span>#impl_generics #crate_name::OutputType <span class="kw">for </span>#self_ty #where_clause {
+                <span class="kw">fn </span>type_name() -&gt; ::std::borrow::Cow&lt;<span class="lifetime">&#39;static</span>, ::std::primitive::str&gt; {
+                    #gql_typename
+                }
+
+                <span class="kw">fn </span>create_type_info(registry: <span class="kw-2">&amp;mut </span>#crate_name::registry::Registry) -&gt; ::std::string::String {
+                    <span class="kw">let </span>ty = registry.create_output_type::&lt;<span class="self">Self</span>, <span class="kw">_</span>&gt;(#crate_name::registry::MetaTypeId::Object, |registry| #crate_name::registry::MetaType::Object {
+                        name: ::std::borrow::Cow::into_owned(#gql_typename),
+                        description: #desc,
+                        fields: {
+                            <span class="kw">let </span><span class="kw-2">mut </span>fields = #crate_name::indexmap::IndexMap::new();
+                            #(#schema_fields)*
+                            fields
+                        },
+                        cache_control: #cache_control,
+                        extends: #extends,
+                        shareable: #shareable,
+                        inaccessible: #inaccessible,
+                        tags: <span class="macro">::std::vec!</span>[ #(#tags),* ],
+                        keys: ::std::option::Option::None,
+                        visible: #visible,
+                        is_subscription: <span class="bool-val">false</span>,
+                        rust_typename: ::std::option::Option::Some(::std::any::type_name::&lt;<span class="self">Self</span>&gt;()),
+                    });
+                    #(#create_entity_types)*
+                    #(#add_keys)*
+                    ty
+                }
+
+                <span class="kw">async fn </span>resolve(
+                    <span class="kw-2">&amp;</span><span class="self">self</span>,
+                    ctx: <span class="kw-2">&amp;</span>#crate_name::ContextSelectionSet&lt;<span class="lifetime">&#39;_</span>&gt;,
+                    _field: <span class="kw-2">&amp;</span>#crate_name::Positioned&lt;#crate_name::parser::types::Field&gt;
+                ) -&gt; #crate_name::ServerResult&lt;#crate_name::Value&gt; {
+                    #resolve_container
+                }
+            }
+
+            <span class="kw">impl </span>#impl_generics #crate_name::ObjectType <span class="kw">for </span>#self_ty #where_clause {}
+        }
+    } <span class="kw">else </span>{
+        <span class="kw">let </span><span class="kw-2">mut </span>codes = Vec::new();
+
+        codes.push(<span class="macro">quote! </span>{
+            #item_impl
+
+            <span class="kw">impl </span>#impl_generics #self_ty #where_clause {
+                <span class="kw">fn </span>__internal_create_type_info(registry: <span class="kw-2">&amp;mut </span>#crate_name::registry::Registry, name: <span class="kw-2">&amp;</span>str) -&gt; ::std::string::String  <span class="kw">where </span><span class="self">Self</span>: #crate_name::OutputType {
+                    <span class="kw">let </span>ty = registry.create_output_type::&lt;<span class="self">Self</span>, <span class="kw">_</span>&gt;(#crate_name::registry::MetaTypeId::Object, |registry| #crate_name::registry::MetaType::Object {
+                        name: ::std::borrow::ToOwned::to_owned(name),
+                        description: #desc,
+                        fields: {
+                            <span class="kw">let </span><span class="kw-2">mut </span>fields = #crate_name::indexmap::IndexMap::new();
+                            #(#schema_fields)*
+                            fields
+                        },
+                        cache_control: #cache_control,
+                        extends: #extends,
+                        shareable: #shareable,
+                        inaccessible: #inaccessible,
+                        tags: <span class="macro">::std::vec!</span>[ #(#tags),* ],
+                        keys: ::std::option::Option::None,
+                        visible: #visible,
+                        is_subscription: <span class="bool-val">false</span>,
+                        rust_typename: ::std::option::Option::Some(::std::any::type_name::&lt;<span class="self">Self</span>&gt;()),
+                    });
+                    #(#create_entity_types)*
+                    #(#add_keys)*
+                    ty
+                }
+
+                <span class="kw">async fn </span>__internal_resolve_field(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;</span>#crate_name::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; #crate_name::ServerResult&lt;::std::option::Option&lt;#crate_name::Value&gt;&gt; <span class="kw">where </span><span class="self">Self</span>: #crate_name::ContainerType {
+                    #(#resolvers)*
+                    ::std::result::Result::Ok(::std::option::Option::None)
+                }
+
+                <span class="kw">async fn </span>__internal_find_entity(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;</span>#crate_name::Context&lt;<span class="lifetime">&#39;_</span>&gt;, params: <span class="kw-2">&amp;</span>#crate_name::Value) -&gt; #crate_name::ServerResult&lt;::std::option::Option&lt;#crate_name::Value&gt;&gt; {
+                    <span class="kw">let </span>params = <span class="kw">match </span>params {
+                        #crate_name::Value::Object(params) =&gt; params,
+                        <span class="kw">_ </span>=&gt; <span class="kw">return </span>::std::result::Result::Ok(::std::option::Option::None),
+                    };
+                    <span class="kw">let </span>typename = <span class="kw">if let </span>::std::option::Option::Some(#crate_name::Value::String(typename)) = params.get(<span class="string">&quot;__typename&quot;</span>) {
+                        typename
+                    } <span class="kw">else </span>{
+                        <span class="kw">return </span>::std::result::Result::Err(
+                            #crate_name::ServerError::new(<span class="string">r#&quot;&quot;__typename&quot; must be an existing string.&quot;#</span>, ::std::option::Option::Some(ctx.item.pos))
+                        );
+                    };
+                    #(#find_entities_iter)*
+                    ::std::result::Result::Ok(::std::option::Option::None)
+                }
+            }
+        });
+
+        <span class="kw">for </span>concrete <span class="kw">in </span><span class="kw-2">&amp;</span>object_args.concretes {
+            <span class="kw">let </span>gql_typename = <span class="kw-2">&amp;</span>concrete.name;
+            <span class="kw">let </span>params = <span class="kw-2">&amp;</span>concrete.params.<span class="number">0</span>;
+            <span class="kw">let </span>ty = {
+                <span class="kw">let </span>s = <span class="macro">quote!</span>(#self_ty).to_string();
+                <span class="kw">match </span>s.rfind(<span class="string">&#39;&lt;&#39;</span>) {
+                    <span class="prelude-val">Some</span>(pos) =&gt; syn::parse_str(<span class="kw-2">&amp;</span>s[..pos]).unwrap(),
+                    <span class="prelude-val">None </span>=&gt; self_ty.clone(),
+                }
+            };
+            <span class="kw">let </span>concrete_type = <span class="macro">quote! </span>{ #ty&lt;#(#params),<span class="kw-2">*</span>&gt; };
+
+            codes.push(<span class="macro">quote! </span>{
+                <span class="attribute">#[#crate_name::async_trait::async_trait]
+                </span><span class="kw">impl </span>#crate_name::resolver_utils::ContainerType <span class="kw">for </span>#concrete_type {
+                    <span class="kw">async fn </span>resolve_field(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;</span>#crate_name::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; #crate_name::ServerResult&lt;::std::option::Option&lt;#crate_name::Value&gt;&gt; {
+                        <span class="self">self</span>.__internal_resolve_field(ctx).<span class="kw">await
+                    </span>}
+
+                    <span class="kw">async fn </span>find_entity(<span class="kw-2">&amp;</span><span class="self">self</span>, ctx: <span class="kw-2">&amp;</span>#crate_name::Context&lt;<span class="lifetime">&#39;_</span>&gt;, params: <span class="kw-2">&amp;</span>#crate_name::Value) -&gt; #crate_name::ServerResult&lt;::std::option::Option&lt;#crate_name::Value&gt;&gt; {
+                        <span class="self">self</span>.__internal_find_entity(ctx, params).<span class="kw">await
+                    </span>}
+                }
+
+                <span class="attribute">#[#crate_name::async_trait::async_trait]
+                </span><span class="kw">impl </span>#crate_name::OutputType <span class="kw">for </span>#concrete_type {
+                    <span class="kw">fn </span>type_name() -&gt; ::std::borrow::Cow&lt;<span class="lifetime">&#39;static</span>, ::std::primitive::str&gt; {
+                        ::std::borrow::Cow::Borrowed(#gql_typename)
+                    }
+
+                    <span class="kw">fn </span>create_type_info(registry: <span class="kw-2">&amp;mut </span>#crate_name::registry::Registry) -&gt; ::std::string::String {
+                        <span class="self">Self</span>::__internal_create_type_info(registry, #gql_typename)
+                    }
+
+                    <span class="kw">async fn </span>resolve(
+                        <span class="kw-2">&amp;</span><span class="self">self</span>,
+                        ctx: <span class="kw-2">&amp;</span>#crate_name::ContextSelectionSet&lt;<span class="lifetime">&#39;_</span>&gt;,
+                        _field: <span class="kw-2">&amp;</span>#crate_name::Positioned&lt;#crate_name::parser::types::Field&gt;
+                    ) -&gt; #crate_name::ServerResult&lt;#crate_name::Value&gt; {
+                        #resolve_container
+                    }
+                }
+
+                <span class="kw">impl </span>#crate_name::ObjectType <span class="kw">for </span>#concrete_type {}
+            });
+        }
+
+        <span class="macro">quote!</span>(#(#codes)<span class="kw-2">*</span>)
+    };
+
+    <span class="prelude-val">Ok</span>(expanded.into())
+}
+</code></pre></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="async_graphql_derive" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

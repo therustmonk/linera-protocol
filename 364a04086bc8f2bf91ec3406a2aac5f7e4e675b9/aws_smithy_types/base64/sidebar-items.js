@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["DecodeError","Failure to decode a base64 value."]],"fn":[["decode","Decode `input` from base64 using the standard base64 alphabet"],["encode","Encode `input` into base64 using the standard base64 alphabet"]]};

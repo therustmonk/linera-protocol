@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["channel","Create a new rendezvous channel"]],"struct":[["Receiver","Receiver half of the rendezvous channel"],["Sender","Sender-half of a channel"]]};

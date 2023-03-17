@@ -1,0 +1,2238 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/regalloc2-0.3.2/src/ion/moves.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>moves.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../regalloc2/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
+<span id="617">617</span>
+<span id="618">618</span>
+<span id="619">619</span>
+<span id="620">620</span>
+<span id="621">621</span>
+<span id="622">622</span>
+<span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
+<span id="695">695</span>
+<span id="696">696</span>
+<span id="697">697</span>
+<span id="698">698</span>
+<span id="699">699</span>
+<span id="700">700</span>
+<span id="701">701</span>
+<span id="702">702</span>
+<span id="703">703</span>
+<span id="704">704</span>
+<span id="705">705</span>
+<span id="706">706</span>
+<span id="707">707</span>
+<span id="708">708</span>
+<span id="709">709</span>
+<span id="710">710</span>
+<span id="711">711</span>
+<span id="712">712</span>
+<span id="713">713</span>
+<span id="714">714</span>
+<span id="715">715</span>
+<span id="716">716</span>
+<span id="717">717</span>
+<span id="718">718</span>
+<span id="719">719</span>
+<span id="720">720</span>
+<span id="721">721</span>
+<span id="722">722</span>
+<span id="723">723</span>
+<span id="724">724</span>
+<span id="725">725</span>
+<span id="726">726</span>
+<span id="727">727</span>
+<span id="728">728</span>
+<span id="729">729</span>
+<span id="730">730</span>
+<span id="731">731</span>
+<span id="732">732</span>
+<span id="733">733</span>
+<span id="734">734</span>
+<span id="735">735</span>
+<span id="736">736</span>
+<span id="737">737</span>
+<span id="738">738</span>
+<span id="739">739</span>
+<span id="740">740</span>
+<span id="741">741</span>
+<span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
+<span id="745">745</span>
+<span id="746">746</span>
+<span id="747">747</span>
+<span id="748">748</span>
+<span id="749">749</span>
+<span id="750">750</span>
+<span id="751">751</span>
+<span id="752">752</span>
+<span id="753">753</span>
+<span id="754">754</span>
+<span id="755">755</span>
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
+<span id="776">776</span>
+<span id="777">777</span>
+<span id="778">778</span>
+<span id="779">779</span>
+<span id="780">780</span>
+<span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
+<span id="786">786</span>
+<span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
+<span id="792">792</span>
+<span id="793">793</span>
+<span id="794">794</span>
+<span id="795">795</span>
+<span id="796">796</span>
+<span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
+<span id="800">800</span>
+<span id="801">801</span>
+<span id="802">802</span>
+<span id="803">803</span>
+<span id="804">804</span>
+<span id="805">805</span>
+<span id="806">806</span>
+<span id="807">807</span>
+<span id="808">808</span>
+<span id="809">809</span>
+<span id="810">810</span>
+<span id="811">811</span>
+<span id="812">812</span>
+<span id="813">813</span>
+<span id="814">814</span>
+<span id="815">815</span>
+<span id="816">816</span>
+<span id="817">817</span>
+<span id="818">818</span>
+<span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
+<span id="831">831</span>
+<span id="832">832</span>
+<span id="833">833</span>
+<span id="834">834</span>
+<span id="835">835</span>
+<span id="836">836</span>
+<span id="837">837</span>
+<span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
+<span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
+<span id="867">867</span>
+<span id="868">868</span>
+<span id="869">869</span>
+<span id="870">870</span>
+<span id="871">871</span>
+<span id="872">872</span>
+<span id="873">873</span>
+<span id="874">874</span>
+<span id="875">875</span>
+<span id="876">876</span>
+<span id="877">877</span>
+<span id="878">878</span>
+<span id="879">879</span>
+<span id="880">880</span>
+<span id="881">881</span>
+<span id="882">882</span>
+<span id="883">883</span>
+<span id="884">884</span>
+<span id="885">885</span>
+<span id="886">886</span>
+<span id="887">887</span>
+<span id="888">888</span>
+<span id="889">889</span>
+<span id="890">890</span>
+<span id="891">891</span>
+<span id="892">892</span>
+<span id="893">893</span>
+<span id="894">894</span>
+<span id="895">895</span>
+<span id="896">896</span>
+<span id="897">897</span>
+<span id="898">898</span>
+<span id="899">899</span>
+<span id="900">900</span>
+<span id="901">901</span>
+<span id="902">902</span>
+<span id="903">903</span>
+<span id="904">904</span>
+<span id="905">905</span>
+<span id="906">906</span>
+<span id="907">907</span>
+<span id="908">908</span>
+<span id="909">909</span>
+<span id="910">910</span>
+<span id="911">911</span>
+<span id="912">912</span>
+<span id="913">913</span>
+<span id="914">914</span>
+<span id="915">915</span>
+<span id="916">916</span>
+<span id="917">917</span>
+<span id="918">918</span>
+<span id="919">919</span>
+<span id="920">920</span>
+<span id="921">921</span>
+<span id="922">922</span>
+<span id="923">923</span>
+<span id="924">924</span>
+<span id="925">925</span>
+<span id="926">926</span>
+<span id="927">927</span>
+<span id="928">928</span>
+<span id="929">929</span>
+<span id="930">930</span>
+<span id="931">931</span>
+<span id="932">932</span>
+<span id="933">933</span>
+<span id="934">934</span>
+<span id="935">935</span>
+<span id="936">936</span>
+<span id="937">937</span>
+<span id="938">938</span>
+<span id="939">939</span>
+<span id="940">940</span>
+<span id="941">941</span>
+<span id="942">942</span>
+<span id="943">943</span>
+<span id="944">944</span>
+<span id="945">945</span>
+<span id="946">946</span>
+<span id="947">947</span>
+<span id="948">948</span>
+<span id="949">949</span>
+<span id="950">950</span>
+<span id="951">951</span>
+<span id="952">952</span>
+<span id="953">953</span>
+<span id="954">954</span>
+<span id="955">955</span>
+<span id="956">956</span>
+<span id="957">957</span>
+<span id="958">958</span>
+<span id="959">959</span>
+<span id="960">960</span>
+<span id="961">961</span>
+<span id="962">962</span>
+<span id="963">963</span>
+<span id="964">964</span>
+<span id="965">965</span>
+<span id="966">966</span>
+<span id="967">967</span>
+<span id="968">968</span>
+<span id="969">969</span>
+<span id="970">970</span>
+<span id="971">971</span>
+<span id="972">972</span>
+<span id="973">973</span>
+<span id="974">974</span>
+<span id="975">975</span>
+<span id="976">976</span>
+<span id="977">977</span>
+<span id="978">978</span>
+<span id="979">979</span>
+<span id="980">980</span>
+<span id="981">981</span>
+<span id="982">982</span>
+<span id="983">983</span>
+<span id="984">984</span>
+<span id="985">985</span>
+<span id="986">986</span>
+<span id="987">987</span>
+<span id="988">988</span>
+<span id="989">989</span>
+<span id="990">990</span>
+<span id="991">991</span>
+<span id="992">992</span>
+<span id="993">993</span>
+<span id="994">994</span>
+<span id="995">995</span>
+<span id="996">996</span>
+<span id="997">997</span>
+<span id="998">998</span>
+<span id="999">999</span>
+<span id="1000">1000</span>
+<span id="1001">1001</span>
+<span id="1002">1002</span>
+<span id="1003">1003</span>
+<span id="1004">1004</span>
+<span id="1005">1005</span>
+<span id="1006">1006</span>
+<span id="1007">1007</span>
+<span id="1008">1008</span>
+<span id="1009">1009</span>
+<span id="1010">1010</span>
+<span id="1011">1011</span>
+<span id="1012">1012</span>
+<span id="1013">1013</span>
+<span id="1014">1014</span>
+<span id="1015">1015</span>
+<span id="1016">1016</span>
+<span id="1017">1017</span>
+<span id="1018">1018</span>
+<span id="1019">1019</span>
+<span id="1020">1020</span>
+<span id="1021">1021</span>
+<span id="1022">1022</span>
+<span id="1023">1023</span>
+<span id="1024">1024</span>
+<span id="1025">1025</span>
+<span id="1026">1026</span>
+<span id="1027">1027</span>
+<span id="1028">1028</span>
+<span id="1029">1029</span>
+<span id="1030">1030</span>
+<span id="1031">1031</span>
+<span id="1032">1032</span>
+<span id="1033">1033</span>
+<span id="1034">1034</span>
+<span id="1035">1035</span>
+<span id="1036">1036</span>
+<span id="1037">1037</span>
+<span id="1038">1038</span>
+<span id="1039">1039</span>
+<span id="1040">1040</span>
+<span id="1041">1041</span>
+<span id="1042">1042</span>
+<span id="1043">1043</span>
+<span id="1044">1044</span>
+<span id="1045">1045</span>
+<span id="1046">1046</span>
+<span id="1047">1047</span>
+<span id="1048">1048</span>
+<span id="1049">1049</span>
+<span id="1050">1050</span>
+<span id="1051">1051</span>
+<span id="1052">1052</span>
+<span id="1053">1053</span>
+<span id="1054">1054</span>
+<span id="1055">1055</span>
+<span id="1056">1056</span>
+<span id="1057">1057</span>
+<span id="1058">1058</span>
+<span id="1059">1059</span>
+<span id="1060">1060</span>
+<span id="1061">1061</span>
+<span id="1062">1062</span>
+<span id="1063">1063</span>
+<span id="1064">1064</span>
+<span id="1065">1065</span>
+<span id="1066">1066</span>
+<span id="1067">1067</span>
+<span id="1068">1068</span>
+<span id="1069">1069</span>
+<span id="1070">1070</span>
+<span id="1071">1071</span>
+<span id="1072">1072</span>
+<span id="1073">1073</span>
+<span id="1074">1074</span>
+<span id="1075">1075</span>
+<span id="1076">1076</span>
+<span id="1077">1077</span>
+<span id="1078">1078</span>
+<span id="1079">1079</span>
+<span id="1080">1080</span>
+<span id="1081">1081</span>
+<span id="1082">1082</span>
+<span id="1083">1083</span>
+<span id="1084">1084</span>
+<span id="1085">1085</span>
+<span id="1086">1086</span>
+<span id="1087">1087</span>
+<span id="1088">1088</span>
+<span id="1089">1089</span>
+<span id="1090">1090</span>
+<span id="1091">1091</span>
+<span id="1092">1092</span>
+<span id="1093">1093</span>
+<span id="1094">1094</span>
+<span id="1095">1095</span>
+<span id="1096">1096</span>
+<span id="1097">1097</span>
+<span id="1098">1098</span>
+<span id="1099">1099</span>
+<span id="1100">1100</span>
+<span id="1101">1101</span>
+<span id="1102">1102</span>
+<span id="1103">1103</span>
+<span id="1104">1104</span>
+<span id="1105">1105</span>
+<span id="1106">1106</span>
+<span id="1107">1107</span>
+<span id="1108">1108</span>
+<span id="1109">1109</span>
+<span id="1110">1110</span>
+<span id="1111">1111</span>
+<span id="1112">1112</span>
+<span id="1113">1113</span>
+<span id="1114">1114</span>
+<span id="1115">1115</span>
+<span id="1116">1116</span>
+<span id="1117">1117</span>
+<span id="1118">1118</span>
+</pre><pre class="rust"><code><span class="comment">/*
+ * This file was initially derived from the files
+ * `js/src/jit/BacktrackingAllocator.h` and
+ * `js/src/jit/BacktrackingAllocator.cpp` in Mozilla Firefox, and was
+ * originally licensed under the Mozilla Public License 2.0. We
+ * subsequently relicensed it to Apache-2.0 WITH LLVM-exception (see
+ * https://github.com/bytecodealliance/regalloc2/issues/7).
+ *
+ * Since the initial port, the design has been substantially evolved
+ * and optimized.
+ */
+
+</span><span class="doccomment">//! Move resolution.
+
+</span><span class="kw">use super</span>::{
+    Env, InsertMovePrio, InsertedMove, LiveRangeFlag, LiveRangeIndex, RedundantMoveEliminator,
+    VRegIndex, SLOT_NONE,
+};
+<span class="kw">use </span><span class="kw">crate</span>::ion::data_structures::{
+    BlockparamIn, BlockparamOut, CodeRange, FixedRegFixupLevel, LiveRangeKey, PosWithPrio,
+};
+<span class="kw">use </span><span class="kw">crate</span>::ion::reg_traversal::RegTraversalIter;
+<span class="kw">use </span><span class="kw">crate</span>::moves::{MoveAndScratchResolver, ParallelMoves};
+<span class="kw">use crate</span>::{
+    Allocation, Block, Edit, Function, Inst, InstPosition, OperandConstraint, OperandKind,
+    OperandPos, PReg, ProgPoint, RegClass, SpillSlot, VReg,
+};
+<span class="kw">use </span>fxhash::FxHashMap;
+<span class="kw">use </span>smallvec::{smallvec, SmallVec};
+<span class="kw">use </span>std::fmt::Debug;
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, F: Function&gt; Env&lt;<span class="lifetime">&#39;a</span>, F&gt; {
+    <span class="kw">pub fn </span>is_start_of_block(<span class="kw-2">&amp;</span><span class="self">self</span>, pos: ProgPoint) -&gt; bool {
+        <span class="kw">let </span>block = <span class="self">self</span>.cfginfo.insn_block[pos.inst().index()];
+        pos == <span class="self">self</span>.cfginfo.block_entry[block.index()]
+    }
+    <span class="kw">pub fn </span>is_end_of_block(<span class="kw-2">&amp;</span><span class="self">self</span>, pos: ProgPoint) -&gt; bool {
+        <span class="kw">let </span>block = <span class="self">self</span>.cfginfo.insn_block[pos.inst().index()];
+        pos == <span class="self">self</span>.cfginfo.block_exit[block.index()]
+    }
+
+    <span class="kw">fn </span>allocation_is_stack(<span class="kw-2">&amp;</span><span class="self">self</span>, alloc: Allocation) -&gt; bool {
+        <span class="kw">if </span>alloc.is_stack() {
+            <span class="bool-val">true
+        </span>} <span class="kw">else if let </span><span class="prelude-val">Some</span>(preg) = alloc.as_reg() {
+            <span class="self">self</span>.pregs[preg.index()].is_stack
+        } <span class="kw">else </span>{
+            <span class="bool-val">false
+        </span>}
+    }
+
+    <span class="kw">pub fn </span>insert_move(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        pos: ProgPoint,
+        prio: InsertMovePrio,
+        from_alloc: Allocation,
+        to_alloc: Allocation,
+        to_vreg: <span class="prelude-ty">Option</span>&lt;VReg&gt;,
+    ) {
+        <span class="macro">trace!</span>(
+            <span class="string">&quot;insert_move: pos {:?} prio {:?} from_alloc {:?} to_alloc {:?}&quot;</span>,
+            pos,
+            prio,
+            from_alloc,
+            to_alloc
+        );
+        <span class="kw">match </span>(from_alloc.as_reg(), to_alloc.as_reg()) {
+            (<span class="prelude-val">Some</span>(from), <span class="prelude-val">Some</span>(to)) =&gt; {
+                <span class="macro">debug_assert_eq!</span>(from.class(), to.class());
+            }
+            <span class="kw">_ </span>=&gt; {}
+        }
+        <span class="self">self</span>.inserted_moves.push(InsertedMove {
+            pos_prio: PosWithPrio {
+                pos,
+                prio: prio <span class="kw">as </span>u32,
+            },
+            from_alloc,
+            to_alloc,
+            to_vreg,
+        });
+    }
+
+    <span class="kw">pub fn </span>get_alloc(<span class="kw-2">&amp;</span><span class="self">self</span>, inst: Inst, slot: usize) -&gt; Allocation {
+        <span class="kw">let </span>inst_allocs = <span class="kw-2">&amp;</span><span class="self">self</span>.allocs[<span class="self">self</span>.inst_alloc_offsets[inst.index()] <span class="kw">as </span>usize..];
+        inst_allocs[slot]
+    }
+
+    <span class="kw">pub fn </span>set_alloc(<span class="kw-2">&amp;mut </span><span class="self">self</span>, inst: Inst, slot: usize, alloc: Allocation) {
+        <span class="kw">let </span>inst_allocs = <span class="kw-2">&amp;mut </span><span class="self">self</span>.allocs[<span class="self">self</span>.inst_alloc_offsets[inst.index()] <span class="kw">as </span>usize..];
+        inst_allocs[slot] = alloc;
+    }
+
+    <span class="kw">pub fn </span>get_alloc_for_range(<span class="kw-2">&amp;</span><span class="self">self</span>, range: LiveRangeIndex) -&gt; Allocation {
+        <span class="macro">trace!</span>(<span class="string">&quot;get_alloc_for_range: {:?}&quot;</span>, range);
+        <span class="kw">let </span>bundle = <span class="self">self</span>.ranges[range.index()].bundle;
+        <span class="macro">trace!</span>(<span class="string">&quot; -&gt; bundle: {:?}&quot;</span>, bundle);
+        <span class="kw">let </span>bundledata = <span class="kw-2">&amp;</span><span class="self">self</span>.bundles[bundle.index()];
+        <span class="macro">trace!</span>(<span class="string">&quot; -&gt; allocation {:?}&quot;</span>, bundledata.allocation);
+        <span class="kw">if </span>bundledata.allocation != Allocation::none() {
+            bundledata.allocation
+        } <span class="kw">else </span>{
+            <span class="macro">trace!</span>(<span class="string">&quot; -&gt; spillset {:?}&quot;</span>, bundledata.spillset);
+            <span class="macro">trace!</span>(
+                <span class="string">&quot; -&gt; spill slot {:?}&quot;</span>,
+                <span class="self">self</span>.spillsets[bundledata.spillset.index()].slot
+            );
+            <span class="self">self</span>.spillslots[<span class="self">self</span>.spillsets[bundledata.spillset.index()].slot.index()].alloc
+        }
+    }
+
+    <span class="kw">pub fn </span>apply_allocations_and_insert_moves(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="macro">trace!</span>(<span class="string">&quot;apply_allocations_and_insert_moves&quot;</span>);
+        <span class="macro">trace!</span>(<span class="string">&quot;blockparam_ins: {:?}&quot;</span>, <span class="self">self</span>.blockparam_ins);
+        <span class="macro">trace!</span>(<span class="string">&quot;blockparam_outs: {:?}&quot;</span>, <span class="self">self</span>.blockparam_outs);
+
+        <span class="comment">// Now that all splits are done, we can pay the cost once to
+        // sort VReg range lists and update with the final ranges.
+        </span><span class="kw">for </span>vreg <span class="kw">in </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.vregs {
+            <span class="kw">for </span>entry <span class="kw">in </span><span class="kw-2">&amp;mut </span>vreg.ranges {
+                entry.range = <span class="self">self</span>.ranges[entry.index.index()].range;
+            }
+            vreg.ranges.sort_unstable_by_key(|entry| entry.range.from);
+        }
+
+        <span class="doccomment">/// We create &quot;half-moves&quot; in order to allow a single-scan
+        /// strategy with a subsequent sort. Basically, the key idea
+        /// is that as our single scan through a range for a vreg hits
+        /// upon the source or destination of an edge-move, we emit a
+        /// &quot;half-move&quot;. These half-moves are carefully keyed in a
+        /// particular sort order (the field order below is
+        /// significant!) so that all half-moves on a given (from, to)
+        /// block-edge appear contiguously, and then all moves from a
+        /// given vreg appear contiguously. Within a given from-vreg,
+        /// pick the first `Source` (there should only be one, but
+        /// imprecision in liveranges due to loop handling sometimes
+        /// means that a blockparam-out is also recognized as a normal-out),
+        /// and then for each `Dest`, copy the source-alloc to that
+        /// dest-alloc.
+        </span><span class="attribute">#[derive(Clone, Debug, PartialEq, Eq)]
+        </span><span class="kw">struct </span>HalfMove {
+            key: u64,
+            alloc: Allocation,
+        }
+        <span class="attribute">#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+        #[repr(u8)]
+        </span><span class="kw">enum </span>HalfMoveKind {
+            Source = <span class="number">0</span>,
+            Dest = <span class="number">1</span>,
+        }
+        <span class="kw">fn </span>half_move_key(
+            from_block: Block,
+            to_block: Block,
+            to_vreg: VRegIndex,
+            kind: HalfMoveKind,
+        ) -&gt; u64 {
+            <span class="macro">debug_assert!</span>(from_block.index() &lt; <span class="number">1 </span>&lt;&lt; <span class="number">21</span>);
+            <span class="macro">debug_assert!</span>(to_block.index() &lt; <span class="number">1 </span>&lt;&lt; <span class="number">21</span>);
+            <span class="macro">debug_assert!</span>(to_vreg.index() &lt; <span class="number">1 </span>&lt;&lt; <span class="number">21</span>);
+            ((from_block.index() <span class="kw">as </span>u64) &lt;&lt; <span class="number">43</span>)
+                | ((to_block.index() <span class="kw">as </span>u64) &lt;&lt; <span class="number">22</span>)
+                | ((to_vreg.index() <span class="kw">as </span>u64) &lt;&lt; <span class="number">1</span>)
+                | (kind <span class="kw">as </span>u8 <span class="kw">as </span>u64)
+        }
+        <span class="kw">impl </span>HalfMove {
+            <span class="kw">fn </span>from_block(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Block {
+                Block::new(((<span class="self">self</span>.key &gt;&gt; <span class="number">43</span>) &amp; ((<span class="number">1 </span>&lt;&lt; <span class="number">21</span>) - <span class="number">1</span>)) <span class="kw">as </span>usize)
+            }
+            <span class="kw">fn </span>to_block(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Block {
+                Block::new(((<span class="self">self</span>.key &gt;&gt; <span class="number">22</span>) &amp; ((<span class="number">1 </span>&lt;&lt; <span class="number">21</span>) - <span class="number">1</span>)) <span class="kw">as </span>usize)
+            }
+            <span class="kw">fn </span>to_vreg(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; VRegIndex {
+                VRegIndex::new(((<span class="self">self</span>.key &gt;&gt; <span class="number">1</span>) &amp; ((<span class="number">1 </span>&lt;&lt; <span class="number">21</span>) - <span class="number">1</span>)) <span class="kw">as </span>usize)
+            }
+            <span class="kw">fn </span>kind(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; HalfMoveKind {
+                <span class="kw">if </span><span class="self">self</span>.key &amp; <span class="number">1 </span>== <span class="number">1 </span>{
+                    HalfMoveKind::Dest
+                } <span class="kw">else </span>{
+                    HalfMoveKind::Source
+                }
+            }
+        }
+
+        <span class="kw">let </span>debug_labels = <span class="self">self</span>.func.debug_value_labels();
+
+        <span class="kw">let </span><span class="kw-2">mut </span>half_moves: Vec&lt;HalfMove&gt; = Vec::with_capacity(<span class="number">6 </span>* <span class="self">self</span>.func.num_insts());
+        <span class="kw">let </span><span class="kw-2">mut </span>reuse_input_insts = Vec::with_capacity(<span class="self">self</span>.func.num_insts() / <span class="number">2</span>);
+
+        <span class="kw">let </span><span class="kw-2">mut </span>blockparam_in_idx = <span class="number">0</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>blockparam_out_idx = <span class="number">0</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>prog_move_src_idx = <span class="number">0</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>prog_move_dst_idx = <span class="number">0</span>;
+        <span class="kw">for </span>vreg <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.vregs.len() {
+            <span class="kw">let </span>vreg = VRegIndex::new(vreg);
+            <span class="kw">if </span>!<span class="self">self</span>.is_vreg_used(vreg) {
+                <span class="kw">continue</span>;
+            }
+
+            <span class="kw">let </span>pinned_alloc = <span class="self">self</span>.func.is_pinned_vreg(<span class="self">self</span>.vreg(vreg));
+
+            <span class="comment">// For each range in each vreg, insert moves or
+            // half-moves.  We also scan over `blockparam_ins` and
+            // `blockparam_outs`, which are sorted by (block, vreg),
+            // and over program-move srcs/dsts to fill in allocations.
+            </span><span class="kw">let </span><span class="kw-2">mut </span>prev = LiveRangeIndex::invalid();
+            <span class="kw">for </span>range_idx <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.vregs[vreg.index()].ranges.len() {
+                <span class="kw">let </span>entry = <span class="self">self</span>.vregs[vreg.index()].ranges[range_idx];
+                <span class="kw">let </span>alloc = pinned_alloc
+                    .map(|preg| Allocation::reg(preg))
+                    .unwrap_or_else(|| <span class="self">self</span>.get_alloc_for_range(entry.index));
+                <span class="kw">let </span>range = entry.range;
+                <span class="macro">trace!</span>(
+                    <span class="string">&quot;apply_allocations: vreg {:?} LR {:?} with range {:?} has alloc {:?} (pinned {:?})&quot;</span>,
+                    vreg,
+                    entry.index,
+                    range,
+                    alloc,
+                    pinned_alloc,
+                );
+                <span class="macro">debug_assert!</span>(alloc != Allocation::none());
+
+                <span class="kw">if </span><span class="self">self</span>.annotations_enabled {
+                    <span class="self">self</span>.annotate(
+                        range.from,
+                        <span class="macro">format!</span>(
+                            <span class="string">&quot; &lt;&lt;&lt; start v{} in {} (range{}) (bundle{})&quot;</span>,
+                            vreg.index(),
+                            alloc,
+                            entry.index.index(),
+                            <span class="self">self</span>.ranges[entry.index.index()].bundle.raw_u32(),
+                        ),
+                    );
+                    <span class="self">self</span>.annotate(
+                        range.to,
+                        <span class="macro">format!</span>(
+                            <span class="string">&quot;     end   v{} in {} (range{}) (bundle{}) &gt;&gt;&gt;&quot;</span>,
+                            vreg.index(),
+                            alloc,
+                            entry.index.index(),
+                            <span class="self">self</span>.ranges[entry.index.index()].bundle.raw_u32(),
+                        ),
+                    );
+                }
+
+                <span class="comment">// Does this range follow immediately after a prior
+                // range in the same block? If so, insert a move (if
+                // the allocs differ). We do this directly rather than
+                // with half-moves because we eagerly know both sides
+                // already (and also, half-moves are specific to
+                // inter-block transfers).
+                //
+                // Note that we do *not* do this if there is also a
+                // def as the first use in the new range: it&#39;s
+                // possible that an old liverange covers the Before
+                // pos of an inst, a new liverange covers the After
+                // pos, and the def also happens at After. In this
+                // case we don&#39;t want to an insert a move after the
+                // instruction copying the old liverange.
+                //
+                // Note also that we assert that the new range has to
+                // start at the Before-point of an instruction; we
+                // can&#39;t insert a move that logically happens just
+                // before After (i.e. in the middle of a single
+                // instruction).
+                //
+                // Also note that this case is not applicable to
+                // pinned vregs (because they are always in one PReg).
+                </span><span class="kw">if </span>pinned_alloc.is_none() &amp;&amp; prev.is_valid() {
+                    <span class="kw">let </span>prev_alloc = <span class="self">self</span>.get_alloc_for_range(prev);
+                    <span class="kw">let </span>prev_range = <span class="self">self</span>.ranges[prev.index()].range;
+                    <span class="kw">let </span>first_is_def =
+                        <span class="self">self</span>.ranges[entry.index.index()].has_flag(LiveRangeFlag::StartsAtDef);
+                    <span class="macro">debug_assert!</span>(prev_alloc != Allocation::none());
+
+                    <span class="kw">if </span>prev_range.to == range.from
+                        &amp;&amp; !<span class="self">self</span>.is_start_of_block(range.from)
+                        &amp;&amp; !first_is_def
+                    {
+                        <span class="macro">trace!</span>(
+                            <span class="string">&quot;prev LR {} abuts LR {} in same block; moving {} -&gt; {} for v{}&quot;</span>,
+                            prev.index(),
+                            entry.index.index(),
+                            prev_alloc,
+                            alloc,
+                            vreg.index()
+                        );
+                        <span class="macro">debug_assert_eq!</span>(range.from.pos(), InstPosition::Before);
+                        <span class="self">self</span>.insert_move(
+                            range.from,
+                            InsertMovePrio::Regular,
+                            prev_alloc,
+                            alloc,
+                            <span class="prelude-val">Some</span>(<span class="self">self</span>.vreg(vreg)),
+                        );
+                    }
+                }
+
+                <span class="comment">// The block-to-block edge-move logic is not
+                // applicable to pinned vregs, which are always in one
+                // PReg (so never need moves within their own vreg
+                // ranges).
+                </span><span class="kw">if </span>pinned_alloc.is_none() {
+                    <span class="comment">// Scan over blocks whose ends are covered by this
+                    // range. For each, for each successor that is not
+                    // already in this range (hence guaranteed to have the
+                    // same allocation) and if the vreg is live, add a
+                    // Source half-move.
+                    </span><span class="kw">let </span><span class="kw-2">mut </span>block = <span class="self">self</span>.cfginfo.insn_block[range.from.inst().index()];
+                    <span class="kw">while </span>block.is_valid() &amp;&amp; block.index() &lt; <span class="self">self</span>.func.num_blocks() {
+                        <span class="kw">if </span>range.to &lt; <span class="self">self</span>.cfginfo.block_exit[block.index()].next() {
+                            <span class="kw">break</span>;
+                        }
+                        <span class="macro">trace!</span>(<span class="string">&quot;examining block with end in range: block{}&quot;</span>, block.index());
+                        <span class="kw">for </span><span class="kw-2">&amp;</span>succ <span class="kw">in </span><span class="self">self</span>.func.block_succs(block) {
+                            <span class="macro">trace!</span>(
+                                <span class="string">&quot; -&gt; has succ block {} with entry {:?}&quot;</span>,
+                                succ.index(),
+                                <span class="self">self</span>.cfginfo.block_entry[succ.index()]
+                            );
+                            <span class="kw">if </span>range.contains_point(<span class="self">self</span>.cfginfo.block_entry[succ.index()]) {
+                                <span class="kw">continue</span>;
+                            }
+                            <span class="macro">trace!</span>(<span class="string">&quot; -&gt; out of this range, requires half-move if live&quot;</span>);
+                            <span class="kw">if </span><span class="self">self</span>.is_live_in(succ, vreg) {
+                                <span class="macro">trace!</span>(<span class="string">&quot;  -&gt; live at input to succ, adding halfmove&quot;</span>);
+                                half_moves.push(HalfMove {
+                                    key: half_move_key(block, succ, vreg, HalfMoveKind::Source),
+                                    alloc,
+                                });
+                            }
+                        }
+
+                        <span class="comment">// Scan forward in `blockparam_outs`, adding all
+                        // half-moves for outgoing values to blockparams
+                        // in succs.
+                        </span><span class="macro">trace!</span>(
+                            <span class="string">&quot;scanning blockparam_outs for v{} block{}: blockparam_out_idx = {}&quot;</span>,
+                            vreg.index(),
+                            block.index(),
+                            blockparam_out_idx,
+                        );
+                        <span class="kw">while </span>blockparam_out_idx &lt; <span class="self">self</span>.blockparam_outs.len() {
+                            <span class="kw">let </span>BlockparamOut {
+                                from_vreg,
+                                from_block,
+                                to_block,
+                                to_vreg,
+                            } = <span class="self">self</span>.blockparam_outs[blockparam_out_idx];
+                            <span class="kw">if </span>(from_vreg, from_block) &gt; (vreg, block) {
+                                <span class="kw">break</span>;
+                            }
+                            <span class="kw">if </span>(from_vreg, from_block) == (vreg, block) {
+                                <span class="macro">trace!</span>(
+                                    <span class="string">&quot; -&gt; found: from v{} block{} to v{} block{}&quot;</span>,
+                                    from_vreg.index(),
+                                    from_block.index(),
+                                    to_vreg.index(),
+                                    to_vreg.index()
+                                );
+                                half_moves.push(HalfMove {
+                                    key: half_move_key(
+                                        from_block,
+                                        to_block,
+                                        to_vreg,
+                                        HalfMoveKind::Source,
+                                    ),
+                                    alloc,
+                                });
+
+                                <span class="kw">if </span><span class="self">self</span>.annotations_enabled {
+                                    <span class="self">self</span>.annotate(
+                                        <span class="self">self</span>.cfginfo.block_exit[block.index()],
+                                        <span class="macro">format!</span>(
+                                            <span class="string">&quot;blockparam-out: block{} to block{}: v{} to v{} in {}&quot;</span>,
+                                            from_block.index(),
+                                            to_block.index(),
+                                            from_vreg.index(),
+                                            to_vreg.index(),
+                                            alloc
+                                        ),
+                                    );
+                                }
+                            }
+
+                            blockparam_out_idx += <span class="number">1</span>;
+                        }
+
+                        block = block.next();
+                    }
+
+                    <span class="comment">// Scan over blocks whose beginnings are covered by
+                    // this range and for which the vreg is live at the
+                    // start of the block. For each, for each predecessor,
+                    // add a Dest half-move.
+                    </span><span class="kw">let </span><span class="kw-2">mut </span>block = <span class="self">self</span>.cfginfo.insn_block[range.from.inst().index()];
+                    <span class="kw">if </span><span class="self">self</span>.cfginfo.block_entry[block.index()] &lt; range.from {
+                        block = block.next();
+                    }
+                    <span class="kw">while </span>block.is_valid() &amp;&amp; block.index() &lt; <span class="self">self</span>.func.num_blocks() {
+                        <span class="kw">if </span><span class="self">self</span>.cfginfo.block_entry[block.index()] &gt;= range.to {
+                            <span class="kw">break</span>;
+                        }
+
+                        <span class="comment">// Add half-moves for blockparam inputs.
+                        </span><span class="macro">trace!</span>(
+                            <span class="string">&quot;scanning blockparam_ins at vreg {} block {}: blockparam_in_idx = {}&quot;</span>,
+                            vreg.index(),
+                            block.index(),
+                            blockparam_in_idx
+                        );
+                        <span class="kw">while </span>blockparam_in_idx &lt; <span class="self">self</span>.blockparam_ins.len() {
+                            <span class="kw">let </span>BlockparamIn {
+                                from_block,
+                                to_block,
+                                to_vreg,
+                            } = <span class="self">self</span>.blockparam_ins[blockparam_in_idx];
+                            <span class="kw">if </span>(to_vreg, to_block) &gt; (vreg, block) {
+                                <span class="kw">break</span>;
+                            }
+                            <span class="kw">if </span>(to_vreg, to_block) == (vreg, block) {
+                                half_moves.push(HalfMove {
+                                    key: half_move_key(
+                                        from_block,
+                                        to_block,
+                                        to_vreg,
+                                        HalfMoveKind::Dest,
+                                    ),
+                                    alloc,
+                                });
+                                <span class="macro">trace!</span>(
+                                    <span class="string">&quot;match: blockparam_in: v{} in block{} from block{} into {}&quot;</span>,
+                                    to_vreg.index(),
+                                    to_block.index(),
+                                    from_block.index(),
+                                    alloc,
+                                );
+                                <span class="attribute">#[cfg(debug_assertions)]
+                                </span><span class="kw">if </span><span class="self">self</span>.annotations_enabled {
+                                    <span class="self">self</span>.annotate(
+                                        <span class="self">self</span>.cfginfo.block_entry[block.index()],
+                                        <span class="macro">format!</span>(
+                                            <span class="string">&quot;blockparam-in: block{} to block{}:into v{} in {}&quot;</span>,
+                                            from_block.index(),
+                                            to_block.index(),
+                                            to_vreg.index(),
+                                            alloc
+                                        ),
+                                    );
+                                }
+                            }
+                            blockparam_in_idx += <span class="number">1</span>;
+                        }
+
+                        <span class="kw">if </span>!<span class="self">self</span>.is_live_in(block, vreg) {
+                            block = block.next();
+                            <span class="kw">continue</span>;
+                        }
+
+                        <span class="macro">trace!</span>(
+                            <span class="string">&quot;scanning preds at vreg {} block {} for ends outside the range&quot;</span>,
+                            vreg.index(),
+                            block.index()
+                        );
+
+                        <span class="comment">// Now find any preds whose ends are not in the
+                        // same range, and insert appropriate moves.
+                        </span><span class="kw">for </span><span class="kw-2">&amp;</span>pred <span class="kw">in </span><span class="self">self</span>.func.block_preds(block) {
+                            <span class="macro">trace!</span>(
+                                <span class="string">&quot;pred block {} has exit {:?}&quot;</span>,
+                                pred.index(),
+                                <span class="self">self</span>.cfginfo.block_exit[pred.index()]
+                            );
+                            <span class="kw">if </span>range.contains_point(<span class="self">self</span>.cfginfo.block_exit[pred.index()]) {
+                                <span class="kw">continue</span>;
+                            }
+                            <span class="macro">trace!</span>(<span class="string">&quot; -&gt; requires half-move&quot;</span>);
+                            half_moves.push(HalfMove {
+                                key: half_move_key(pred, block, vreg, HalfMoveKind::Dest),
+                                alloc,
+                            });
+                        }
+
+                        block = block.next();
+                    }
+                }
+
+                <span class="comment">// Scan over def/uses and apply allocations.
+                </span><span class="kw">for </span>use_idx <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.ranges[entry.index.index()].uses.len() {
+                    <span class="kw">let </span>usedata = <span class="self">self</span>.ranges[entry.index.index()].uses[use_idx];
+                    <span class="macro">trace!</span>(<span class="string">&quot;applying to use: {:?}&quot;</span>, usedata);
+                    <span class="macro">debug_assert!</span>(range.contains_point(usedata.pos));
+                    <span class="kw">let </span>inst = usedata.pos.inst();
+                    <span class="kw">let </span>slot = usedata.slot;
+                    <span class="kw">let </span>operand = usedata.operand;
+                    <span class="comment">// Safepoints add virtual uses with no slots;
+                    // avoid these.
+                    </span><span class="kw">if </span>slot != SLOT_NONE {
+                        <span class="self">self</span>.set_alloc(inst, slot <span class="kw">as </span>usize, alloc);
+                    }
+                    <span class="kw">if let </span>OperandConstraint::Reuse(<span class="kw">_</span>) = operand.constraint() {
+                        reuse_input_insts.push(inst);
+                    }
+                }
+
+                <span class="comment">// Scan debug-labels on this vreg that overlap with
+                // this range, producing a debug-info output record
+                // giving the allocation location for each label.
+                </span><span class="kw">if </span>!debug_labels.is_empty() {
+                    <span class="comment">// Do a binary search to find the start of any
+                    // labels for this vreg. Recall that we require
+                    // debug-label requests to be sorted by vreg as a
+                    // precondition (which we verified above).
+                    </span><span class="kw">let </span>start = debug_labels
+                        .binary_search_by(|<span class="kw-2">&amp;</span>(label_vreg, _label_from, _label_to, _label)| {
+                            <span class="comment">// Search for the point just before the first
+                            // tuple that could be for `vreg` overlapping
+                            // with `range`. Never return
+                            // `Ordering::Equal`; `binary_search_by` in
+                            // this case returns the index of the first
+                            // entry that is greater as an `Err`.
+                            </span><span class="kw">if </span>label_vreg.vreg() &lt; vreg.index() {
+                                std::cmp::Ordering::Less
+                            } <span class="kw">else </span>{
+                                std::cmp::Ordering::Greater
+                            }
+                        })
+                        .unwrap_err();
+
+                    <span class="kw">for </span><span class="kw-2">&amp;</span>(label_vreg, label_from, label_to, label) <span class="kw">in </span><span class="kw-2">&amp;</span>debug_labels[start..] {
+                        <span class="kw">let </span>label_from = ProgPoint::before(label_from);
+                        <span class="kw">let </span>label_to = ProgPoint::before(label_to);
+                        <span class="kw">let </span>label_range = CodeRange {
+                            from: label_from,
+                            to: label_to,
+                        };
+                        <span class="kw">if </span>label_vreg.vreg() != vreg.index() {
+                            <span class="kw">break</span>;
+                        }
+                        <span class="kw">if </span>!range.overlaps(<span class="kw-2">&amp;</span>label_range) {
+                            <span class="kw">continue</span>;
+                        }
+
+                        <span class="kw">let </span>from = std::cmp::max(label_from, range.from);
+                        <span class="kw">let </span>to = std::cmp::min(label_to, range.to);
+
+                        <span class="self">self</span>.debug_locations.push((label, from, to, alloc));
+                    }
+                }
+
+                <span class="comment">// Scan over program move srcs/dsts to fill in allocations.
+
+                // Move srcs happen at `After` of a given
+                // inst. Compute [from, to) semi-inclusive range of
+                // inst indices for which we should fill in the source
+                // with this LR&#39;s allocation.
+                //
+                // range from inst-Before or inst-After covers cur
+                // inst&#39;s After; so includes move srcs from inst.
+                </span><span class="kw">let </span>move_src_start = (vreg, range.from.inst());
+                <span class="comment">// range to (exclusive) inst-Before or inst-After
+                // covers only prev inst&#39;s After; so includes move
+                // srcs to (exclusive) inst.
+                </span><span class="kw">let </span>move_src_end = (vreg, range.to.inst());
+                <span class="macro">trace!</span>(
+                    <span class="string">&quot;vreg {:?} range {:?}: looking for program-move sources from {:?} to {:?}&quot;</span>,
+                    vreg,
+                    range,
+                    move_src_start,
+                    move_src_end
+                );
+                <span class="kw">while </span>prog_move_src_idx &lt; <span class="self">self</span>.prog_move_srcs.len()
+                    &amp;&amp; <span class="self">self</span>.prog_move_srcs[prog_move_src_idx].<span class="number">0 </span>&lt; move_src_start
+                {
+                    <span class="macro">trace!</span>(<span class="string">&quot; -&gt; skipping idx {}&quot;</span>, prog_move_src_idx);
+                    prog_move_src_idx += <span class="number">1</span>;
+                }
+                <span class="kw">while </span>prog_move_src_idx &lt; <span class="self">self</span>.prog_move_srcs.len()
+                    &amp;&amp; <span class="self">self</span>.prog_move_srcs[prog_move_src_idx].<span class="number">0 </span>&lt; move_src_end
+                {
+                    <span class="macro">trace!</span>(
+                        <span class="string">&quot; -&gt; setting idx {} ({:?}) to alloc {:?}&quot;</span>,
+                        prog_move_src_idx,
+                        <span class="self">self</span>.prog_move_srcs[prog_move_src_idx].<span class="number">0</span>,
+                        alloc
+                    );
+                    <span class="self">self</span>.prog_move_srcs[prog_move_src_idx].<span class="number">1 </span>= alloc;
+                    prog_move_src_idx += <span class="number">1</span>;
+                }
+
+                <span class="comment">// move dsts happen at Before point.
+                //
+                // Range from inst-Before includes cur inst, while inst-After includes only next inst.
+                </span><span class="kw">let </span>move_dst_start = <span class="kw">if </span>range.from.pos() == InstPosition::Before {
+                    (vreg, range.from.inst())
+                } <span class="kw">else </span>{
+                    (vreg, range.from.inst().next())
+                };
+                <span class="comment">// Range to (exclusive) inst-Before includes prev
+                // inst, so to (exclusive) cur inst; range to
+                // (exclusive) inst-After includes cur inst, so to
+                // (exclusive) next inst.
+                </span><span class="kw">let </span>move_dst_end = <span class="kw">if </span>range.to.pos() == InstPosition::Before {
+                    (vreg, range.to.inst())
+                } <span class="kw">else </span>{
+                    (vreg, range.to.inst().next())
+                };
+                <span class="macro">trace!</span>(
+                    <span class="string">&quot;vreg {:?} range {:?}: looking for program-move dests from {:?} to {:?}&quot;</span>,
+                    vreg,
+                    range,
+                    move_dst_start,
+                    move_dst_end
+                );
+                <span class="kw">while </span>prog_move_dst_idx &lt; <span class="self">self</span>.prog_move_dsts.len()
+                    &amp;&amp; <span class="self">self</span>.prog_move_dsts[prog_move_dst_idx].<span class="number">0 </span>&lt; move_dst_start
+                {
+                    <span class="macro">trace!</span>(<span class="string">&quot; -&gt; skipping idx {}&quot;</span>, prog_move_dst_idx);
+                    prog_move_dst_idx += <span class="number">1</span>;
+                }
+                <span class="kw">while </span>prog_move_dst_idx &lt; <span class="self">self</span>.prog_move_dsts.len()
+                    &amp;&amp; <span class="self">self</span>.prog_move_dsts[prog_move_dst_idx].<span class="number">0 </span>&lt; move_dst_end
+                {
+                    <span class="macro">trace!</span>(
+                        <span class="string">&quot; -&gt; setting idx {} ({:?}) to alloc {:?}&quot;</span>,
+                        prog_move_dst_idx,
+                        <span class="self">self</span>.prog_move_dsts[prog_move_dst_idx].<span class="number">0</span>,
+                        alloc
+                    );
+                    <span class="self">self</span>.prog_move_dsts[prog_move_dst_idx].<span class="number">1 </span>= alloc;
+                    prog_move_dst_idx += <span class="number">1</span>;
+                }
+
+                prev = entry.index;
+            }
+        }
+
+        <span class="comment">// Sort the half-moves list. For each (from, to,
+        // from-vreg) tuple, find the from-alloc and all the
+        // to-allocs, and insert moves on the block edge.
+        </span>half_moves.sort_unstable_by_key(|h| h.key);
+        <span class="macro">trace!</span>(<span class="string">&quot;halfmoves: {:?}&quot;</span>, half_moves);
+        <span class="self">self</span>.stats.halfmoves_count = half_moves.len();
+
+        <span class="kw">let </span><span class="kw-2">mut </span>i = <span class="number">0</span>;
+        <span class="kw">while </span>i &lt; half_moves.len() {
+            <span class="comment">// Find a Source.
+            </span><span class="kw">while </span>i &lt; half_moves.len() &amp;&amp; half_moves[i].kind() != HalfMoveKind::Source {
+                i += <span class="number">1</span>;
+            }
+            <span class="kw">if </span>i &gt;= half_moves.len() {
+                <span class="kw">break</span>;
+            }
+            <span class="kw">let </span>src = <span class="kw-2">&amp;</span>half_moves[i];
+            i += <span class="number">1</span>;
+
+            <span class="comment">// Find all Dests.
+            </span><span class="kw">let </span>dest_key = src.key | <span class="number">1</span>;
+            <span class="kw">let </span>first_dest = i;
+            <span class="kw">while </span>i &lt; half_moves.len() &amp;&amp; half_moves[i].key == dest_key {
+                i += <span class="number">1</span>;
+            }
+            <span class="kw">let </span>last_dest = i;
+
+            <span class="macro">trace!</span>(
+                <span class="string">&quot;halfmove match: src {:?} dests {:?}&quot;</span>,
+                src,
+                <span class="kw-2">&amp;</span>half_moves[first_dest..last_dest]
+            );
+
+            <span class="comment">// Determine the ProgPoint where moves on this (from, to)
+            // edge should go:
+            // - If there is more than one in-edge to `to`, then
+            //   `from` must have only one out-edge; moves go at tail of
+            //   `from` just before last Branch/Ret.
+            // - Otherwise, there must be at most one in-edge to `to`,
+            //   and moves go at start of `to`.
+            </span><span class="kw">let </span>from_last_insn = <span class="self">self</span>.func.block_insns(src.from_block()).last();
+            <span class="kw">let </span>to_first_insn = <span class="self">self</span>.func.block_insns(src.to_block()).first();
+            <span class="kw">let </span>from_is_ret = <span class="self">self</span>.func.is_ret(from_last_insn);
+            <span class="kw">let </span>to_is_entry = <span class="self">self</span>.func.entry_block() == src.to_block();
+            <span class="kw">let </span>from_outs =
+                <span class="self">self</span>.func.block_succs(src.from_block()).len() + <span class="kw">if </span>from_is_ret { <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>};
+            <span class="kw">let </span>to_ins =
+                <span class="self">self</span>.func.block_preds(src.to_block()).len() + <span class="kw">if </span>to_is_entry { <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>};
+
+            <span class="kw">let </span>(insertion_point, prio) = <span class="kw">if </span>to_ins &gt; <span class="number">1 </span>&amp;&amp; from_outs &lt;= <span class="number">1 </span>{
+                (
+                    <span class="comment">// N.B.: though semantically the edge moves happen
+                    // after the branch, we must insert them before
+                    // the branch because otherwise, of course, they
+                    // would never execute. This is correct even in
+                    // the presence of branches that read register
+                    // inputs (e.g. conditional branches on some RISCs
+                    // that branch on reg zero/not-zero, or any
+                    // indirect branch), but for a very subtle reason:
+                    // all cases of such branches will (or should)
+                    // have multiple successors, and thus due to
+                    // critical-edge splitting, their successors will
+                    // have only the single predecessor, and we prefer
+                    // to insert at the head of the successor in that
+                    // case (rather than here). We make this a
+                    // requirement, in fact: the user of this library
+                    // shall not read registers in a branch
+                    // instruction of there is only one successor per
+                    // the given CFG information.
+                    </span>ProgPoint::before(from_last_insn),
+                    InsertMovePrio::OutEdgeMoves,
+                )
+            } <span class="kw">else if </span>to_ins &lt;= <span class="number">1 </span>{
+                (
+                    ProgPoint::before(to_first_insn),
+                    InsertMovePrio::InEdgeMoves,
+                )
+            } <span class="kw">else </span>{
+                <span class="macro">panic!</span>(
+                    <span class="string">&quot;Critical edge: can&#39;t insert moves between blocks {:?} and {:?}&quot;</span>,
+                    src.from_block(),
+                    src.to_block()
+                );
+            };
+
+            <span class="kw">let </span><span class="kw-2">mut </span>last = <span class="prelude-val">None</span>;
+            <span class="kw">for </span>dest <span class="kw">in </span>first_dest..last_dest {
+                <span class="kw">let </span>dest = <span class="kw-2">&amp;</span>half_moves[dest];
+                <span class="kw">if </span>last == <span class="prelude-val">Some</span>(dest.alloc) {
+                    <span class="kw">continue</span>;
+                }
+                <span class="self">self</span>.insert_move(
+                    insertion_point,
+                    prio,
+                    src.alloc,
+                    dest.alloc,
+                    <span class="prelude-val">Some</span>(<span class="self">self</span>.vreg(dest.to_vreg())),
+                );
+                last = <span class="prelude-val">Some</span>(dest.alloc);
+            }
+        }
+
+        <span class="comment">// Handle multi-fixed-reg constraints by copying.
+        </span><span class="kw">for </span>fixup <span class="kw">in </span>std::mem::replace(<span class="kw-2">&amp;mut </span><span class="self">self</span>.multi_fixed_reg_fixups, <span class="macro">vec!</span>[]) {
+            <span class="kw">let </span>from_alloc = <span class="self">self</span>.get_alloc(fixup.pos.inst(), fixup.from_slot <span class="kw">as </span>usize);
+            <span class="kw">let </span>to_alloc = Allocation::reg(PReg::from_index(fixup.to_preg.index()));
+            <span class="macro">trace!</span>(
+                <span class="string">&quot;multi-fixed-move constraint at {:?} from {} to {} for v{}&quot;</span>,
+                fixup.pos,
+                from_alloc,
+                to_alloc,
+                fixup.vreg.index(),
+            );
+            <span class="kw">let </span>prio = <span class="kw">match </span>fixup.level {
+                FixedRegFixupLevel::Initial =&gt; InsertMovePrio::MultiFixedRegInitial,
+                FixedRegFixupLevel::Secondary =&gt; InsertMovePrio::MultiFixedRegSecondary,
+            };
+            <span class="self">self</span>.insert_move(
+                fixup.pos,
+                prio,
+                from_alloc,
+                to_alloc,
+                <span class="prelude-val">Some</span>(<span class="self">self</span>.vreg(fixup.vreg)),
+            );
+            <span class="self">self</span>.set_alloc(
+                fixup.pos.inst(),
+                fixup.to_slot <span class="kw">as </span>usize,
+                Allocation::reg(PReg::from_index(fixup.to_preg.index())),
+            );
+        }
+
+        <span class="comment">// Handle outputs that reuse inputs: copy beforehand, then set
+        // input&#39;s alloc to output&#39;s.
+        //
+        // Note that the output&#39;s allocation may not *actually* be
+        // valid until InstPosition::After, but the reused input may
+        // occur at InstPosition::Before. This may appear incorrect,
+        // but we make it work by ensuring that all *other* inputs are
+        // extended to InstPosition::After so that the def will not
+        // interfere. (The liveness computation code does this -- we
+        // do not require the user to do so.)
+        //
+        // One might ask: why not insist that input-reusing defs occur
+        // at InstPosition::Before? this would be correct, but would
+        // mean that the reused input and the reusing output
+        // interfere, *guaranteeing* that every such case would
+        // require a move. This is really bad on ISAs (like x86) where
+        // reused inputs are ubiquitous.
+        //
+        // Another approach might be to put the def at Before, and
+        // trim the reused input&#39;s liverange back to the previous
+        // instruction&#39;s After. This is kind of OK until (i) a block
+        // boundary occurs between the prior inst and this one, or
+        // (ii) any moves/spills/reloads occur between the two
+        // instructions. We really do need the input to be live at
+        // this inst&#39;s Before.
+        //
+        // In principle what we really need is a &quot;BeforeBefore&quot;
+        // program point, but we don&#39;t want to introduce that
+        // everywhere and pay the cost of twice as many ProgPoints
+        // throughout the allocator.
+        //
+        // Or we could introduce a separate move instruction -- this
+        // is the approach that regalloc.rs takes with &quot;mod&quot; operands
+        // -- but that is also costly.
+        //
+        // So we take this approach (invented by IonMonkey -- somewhat
+        // hard to discern, though see [0] for a comment that makes
+        // this slightly less unclear) to avoid interference between
+        // the actual reused input and reusing output, ensure
+        // interference (hence no incorrectness) between other inputs
+        // and the reusing output, and not require a separate explicit
+        // move instruction.
+        //
+        // [0] https://searchfox.org/mozilla-central/rev/3a798ef9252896fb389679f06dd3203169565af0/js/src/jit/shared/Lowering-shared-inl.h#108-110
+        </span><span class="kw">for </span>inst <span class="kw">in </span>reuse_input_insts {
+            <span class="kw">let </span><span class="kw-2">mut </span>input_reused: SmallVec&lt;[usize; <span class="number">4</span>]&gt; = <span class="macro">smallvec!</span>[];
+            <span class="kw">for </span>output_idx <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.func.inst_operands(inst).len() {
+                <span class="kw">let </span>operand = <span class="self">self</span>.func.inst_operands(inst)[output_idx];
+                <span class="kw">if let </span>OperandConstraint::Reuse(input_idx) = operand.constraint() {
+                    <span class="macro">debug_assert!</span>(!input_reused.contains(<span class="kw-2">&amp;</span>input_idx));
+                    <span class="macro">debug_assert_eq!</span>(operand.pos(), OperandPos::Late);
+                    input_reused.push(input_idx);
+                    <span class="kw">let </span>input_alloc = <span class="self">self</span>.get_alloc(inst, input_idx);
+                    <span class="kw">let </span>output_alloc = <span class="self">self</span>.get_alloc(inst, output_idx);
+                    <span class="macro">trace!</span>(
+                        <span class="string">&quot;reuse-input inst {:?}: output {} has alloc {:?}, input {} has alloc {:?}&quot;</span>,
+                        inst,
+                        output_idx,
+                        output_alloc,
+                        input_idx,
+                        input_alloc
+                    );
+                    <span class="kw">if </span>input_alloc != output_alloc {
+                        <span class="attribute">#[cfg(debug_assertions)]
+                        </span><span class="kw">if </span><span class="self">self</span>.annotations_enabled {
+                            <span class="self">self</span>.annotate(
+                                ProgPoint::before(inst),
+                                <span class="macro">format!</span>(<span class="string">&quot; reuse-input-copy: {} -&gt; {}&quot;</span>, input_alloc, output_alloc),
+                            );
+                        }
+                        <span class="kw">let </span>input_operand = <span class="self">self</span>.func.inst_operands(inst)[input_idx];
+                        <span class="self">self</span>.insert_move(
+                            ProgPoint::before(inst),
+                            InsertMovePrio::ReusedInput,
+                            input_alloc,
+                            output_alloc,
+                            <span class="prelude-val">Some</span>(input_operand.vreg()),
+                        );
+                        <span class="self">self</span>.set_alloc(inst, input_idx, output_alloc);
+                    }
+                }
+            }
+        }
+
+        <span class="comment">// Sort the prog-moves lists and insert moves to reify the
+        // input program&#39;s move operations.
+        </span><span class="self">self</span>.prog_move_srcs
+            .sort_unstable_by_key(|((<span class="kw">_</span>, inst), <span class="kw">_</span>)| <span class="kw-2">*</span>inst);
+        <span class="self">self</span>.prog_move_dsts
+            .sort_unstable_by_key(|((<span class="kw">_</span>, inst), <span class="kw">_</span>)| inst.prev());
+        <span class="kw">let </span>prog_move_srcs = std::mem::replace(<span class="kw-2">&amp;mut </span><span class="self">self</span>.prog_move_srcs, <span class="macro">vec!</span>[]);
+        <span class="kw">let </span>prog_move_dsts = std::mem::replace(<span class="kw-2">&amp;mut </span><span class="self">self</span>.prog_move_dsts, <span class="macro">vec!</span>[]);
+        <span class="macro">debug_assert_eq!</span>(prog_move_srcs.len(), prog_move_dsts.len());
+        <span class="kw">for </span>(<span class="kw-2">&amp;</span>((<span class="kw">_</span>, from_inst), from_alloc), <span class="kw-2">&amp;</span>((to_vreg, to_inst), to_alloc)) <span class="kw">in
+            </span>prog_move_srcs.iter().zip(prog_move_dsts.iter())
+        {
+            <span class="macro">trace!</span>(
+                <span class="string">&quot;program move at inst {:?}: alloc {:?} -&gt; {:?} (v{})&quot;</span>,
+                from_inst,
+                from_alloc,
+                to_alloc,
+                to_vreg.index(),
+            );
+            <span class="macro">debug_assert!</span>(from_alloc.is_some());
+            <span class="macro">debug_assert!</span>(to_alloc.is_some());
+            <span class="macro">debug_assert_eq!</span>(from_inst, to_inst.prev());
+            <span class="comment">// N.B.: these moves happen with the *same* priority as
+            // LR-to-LR moves, because they work just like them: they
+            // connect a use at one progpoint (move-After) with a def
+            // at an adjacent progpoint (move+1-Before), so they must
+            // happen in parallel with all other LR-to-LR moves.
+            </span><span class="self">self</span>.insert_move(
+                ProgPoint::before(to_inst),
+                InsertMovePrio::Regular,
+                from_alloc,
+                to_alloc,
+                <span class="prelude-val">Some</span>(<span class="self">self</span>.vreg(to_vreg)),
+            );
+        }
+
+        <span class="comment">// Sort the debug-locations vector; we provide this
+        // invariant to the client.
+        </span><span class="self">self</span>.debug_locations.sort_unstable();
+    }
+
+    <span class="kw">pub fn </span>resolve_inserted_moves(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="comment">// For each program point, gather all moves together. Then
+        // resolve (see cases below).
+        </span><span class="kw">let </span><span class="kw-2">mut </span>i = <span class="number">0</span>;
+        <span class="self">self</span>.inserted_moves
+            .sort_unstable_by_key(|m| m.pos_prio.key());
+
+        <span class="comment">// Redundant-move elimination state tracker.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>redundant_moves = RedundantMoveEliminator::default();
+
+        <span class="kw">fn </span>redundant_move_process_side_effects&lt;<span class="lifetime">&#39;a</span>, F: Function&gt;(
+            this: <span class="kw-2">&amp;</span>Env&lt;<span class="lifetime">&#39;a</span>, F&gt;,
+            redundant_moves: <span class="kw-2">&amp;mut </span>RedundantMoveEliminator,
+            from: ProgPoint,
+            to: ProgPoint,
+        ) {
+            <span class="comment">// If any safepoints in range, clear and return.
+            // Also, if we cross a block boundary, clear and return.
+            </span><span class="kw">if </span>this.cfginfo.insn_block[from.inst().index()]
+                != this.cfginfo.insn_block[to.inst().index()]
+            {
+                redundant_moves.clear();
+                <span class="kw">return</span>;
+            }
+            <span class="kw">for </span>inst <span class="kw">in </span>from.inst().index()..=to.inst().index() {
+                <span class="kw">if </span>this.func.requires_refs_on_stack(Inst::new(inst)) {
+                    redundant_moves.clear();
+                    <span class="kw">return</span>;
+                }
+            }
+
+            <span class="kw">let </span>start_inst = <span class="kw">if </span>from.pos() == InstPosition::Before {
+                from.inst()
+            } <span class="kw">else </span>{
+                from.inst().next()
+            };
+            <span class="kw">let </span>end_inst = <span class="kw">if </span>to.pos() == InstPosition::Before {
+                to.inst()
+            } <span class="kw">else </span>{
+                to.inst().next()
+            };
+            <span class="kw">for </span>inst <span class="kw">in </span>start_inst.index()..end_inst.index() {
+                <span class="kw">let </span>inst = Inst::new(inst);
+                <span class="kw">for </span>(i, op) <span class="kw">in </span>this.func.inst_operands(inst).iter().enumerate() {
+                    <span class="kw">match </span>op.kind() {
+                        OperandKind::Def | OperandKind::Mod =&gt; {
+                            <span class="kw">let </span>alloc = this.get_alloc(inst, i);
+                            redundant_moves.clear_alloc(alloc);
+                        }
+                        <span class="kw">_ </span>=&gt; {}
+                    }
+                }
+                <span class="kw">for </span>reg <span class="kw">in </span>this.func.inst_clobbers(inst) {
+                    redundant_moves.clear_alloc(Allocation::reg(reg));
+                }
+            }
+        }
+
+        <span class="kw">let </span><span class="kw-2">mut </span>last_pos = ProgPoint::before(Inst::new(<span class="number">0</span>));
+
+        <span class="kw">while </span>i &lt; <span class="self">self</span>.inserted_moves.len() {
+            <span class="kw">let </span>start = i;
+            <span class="kw">let </span>pos_prio = <span class="self">self</span>.inserted_moves[i].pos_prio;
+            <span class="kw">while </span>i &lt; <span class="self">self</span>.inserted_moves.len() &amp;&amp; <span class="self">self</span>.inserted_moves[i].pos_prio == pos_prio {
+                i += <span class="number">1</span>;
+            }
+            <span class="kw">let </span>moves = <span class="kw-2">&amp;</span><span class="self">self</span>.inserted_moves[start..i];
+
+            redundant_move_process_side_effects(<span class="self">self</span>, <span class="kw-2">&amp;mut </span>redundant_moves, last_pos, pos_prio.pos);
+            last_pos = pos_prio.pos;
+
+            <span class="comment">// Gather all the moves with Int class and Float class
+            // separately. These cannot interact, so it is safe to
+            // have two separate ParallelMove instances. They need to
+            // be separate because moves between the two classes are
+            // impossible. (We could enhance ParallelMoves to
+            // understand register classes, but this seems simpler.)
+            </span><span class="kw">let </span><span class="kw-2">mut </span>int_moves: SmallVec&lt;[InsertedMove; <span class="number">8</span>]&gt; = <span class="macro">smallvec!</span>[];
+            <span class="kw">let </span><span class="kw-2">mut </span>float_moves: SmallVec&lt;[InsertedMove; <span class="number">8</span>]&gt; = <span class="macro">smallvec!</span>[];
+
+            <span class="kw">for </span>m <span class="kw">in </span>moves {
+                <span class="kw">if </span>m.from_alloc.is_reg() &amp;&amp; m.to_alloc.is_reg() {
+                    <span class="macro">debug_assert_eq!</span>(m.from_alloc.class(), m.to_alloc.class());
+                }
+                <span class="kw">if </span>m.from_alloc == m.to_alloc {
+                    <span class="kw">continue</span>;
+                }
+                <span class="kw">match </span>m.from_alloc.class() {
+                    RegClass::Int =&gt; {
+                        int_moves.push(m.clone());
+                    }
+                    RegClass::Float =&gt; {
+                        float_moves.push(m.clone());
+                    }
+                }
+            }
+
+            <span class="kw">for </span><span class="kw-2">&amp;</span>(regclass, moves) <span class="kw">in
+                </span><span class="kw-2">&amp;</span>[(RegClass::Int, <span class="kw-2">&amp;</span>int_moves), (RegClass::Float, <span class="kw-2">&amp;</span>float_moves)]
+            {
+                <span class="comment">// All moves in `moves` semantically happen in
+                // parallel. Let&#39;s resolve these to a sequence of moves
+                // that can be done one at a time.
+                </span><span class="kw">let </span><span class="kw-2">mut </span>parallel_moves = ParallelMoves::new();
+                <span class="macro">trace!</span>(
+                    <span class="string">&quot;parallel moves at pos {:?} prio {:?}&quot;</span>,
+                    pos_prio.pos,
+                    pos_prio.prio
+                );
+                <span class="kw">for </span>m <span class="kw">in </span>moves {
+                    <span class="kw">if </span>(m.from_alloc != m.to_alloc) || m.to_vreg.is_some() {
+                        <span class="macro">trace!</span>(<span class="string">&quot; {} -&gt; {}&quot;</span>, m.from_alloc, m.to_alloc,);
+                        parallel_moves.add(m.from_alloc, m.to_alloc, m.to_vreg);
+                    }
+                }
+
+                <span class="kw">let </span>resolved = parallel_moves.resolve();
+                <span class="kw">let </span><span class="kw-2">mut </span>scratch_iter = RegTraversalIter::new(
+                    <span class="self">self</span>.env,
+                    regclass,
+                    PReg::invalid(),
+                    PReg::invalid(),
+                    <span class="number">0</span>,
+                    <span class="prelude-val">None</span>,
+                );
+                <span class="kw">let </span>key = LiveRangeKey::from_range(<span class="kw-2">&amp;</span>CodeRange {
+                    from: pos_prio.pos,
+                    to: pos_prio.pos.next(),
+                });
+                <span class="kw">let </span>get_reg = || {
+                    <span class="kw">while let </span><span class="prelude-val">Some</span>(preg) = scratch_iter.next() {
+                        <span class="kw">if </span>!<span class="self">self</span>.pregs[preg.index()]
+                            .allocations
+                            .btree
+                            .contains_key(<span class="kw-2">&amp;</span>key)
+                        {
+                            <span class="kw">let </span>alloc = Allocation::reg(preg);
+                            <span class="kw">if </span>moves
+                                .iter()
+                                .any(|m| m.from_alloc == alloc || m.to_alloc == alloc)
+                            {
+                                <span class="comment">// Skip pregs used by moves in this
+                                // parallel move set, even if not
+                                // marked used at progpoint: edge move
+                                // liveranges meet but don&#39;t overlap
+                                // so otherwise we may incorrectly
+                                // overwrite a source reg.
+                                </span><span class="kw">continue</span>;
+                            }
+                            <span class="kw">return </span><span class="prelude-val">Some</span>(alloc);
+                        }
+                    }
+                    <span class="prelude-val">None
+                </span>};
+                <span class="kw">let </span><span class="kw-2">mut </span>stackslot_idx = <span class="number">0</span>;
+                <span class="kw">let </span>get_stackslot = || {
+                    <span class="kw">let </span>idx = stackslot_idx;
+                    stackslot_idx += <span class="number">1</span>;
+                    <span class="comment">// We can&#39;t borrow `self` as mutable, so we create
+                    // these placeholders then allocate the actual
+                    // slots if needed with `self.allocate_spillslot`
+                    // below.
+                    </span>Allocation::stack(SpillSlot::new(SpillSlot::MAX - idx, regclass))
+                };
+                <span class="kw">let </span>preferred_victim = <span class="self">self</span>.preferred_victim_by_class[regclass <span class="kw">as </span>usize];
+
+                <span class="kw">let </span>scratch_resolver =
+                    MoveAndScratchResolver::new(get_reg, get_stackslot, preferred_victim);
+
+                <span class="kw">let </span>resolved = scratch_resolver.compute(resolved);
+
+                <span class="kw">let </span><span class="kw-2">mut </span>rewrites = FxHashMap::default();
+                <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..stackslot_idx {
+                    <span class="kw">if </span>i &gt;= <span class="self">self</span>.extra_spillslots_by_class[regclass <span class="kw">as </span>usize].len() {
+                        <span class="kw">let </span>slot = <span class="self">self</span>.allocate_spillslot(regclass);
+                        <span class="self">self</span>.extra_spillslots_by_class[regclass <span class="kw">as </span>usize].push(slot);
+                    }
+                    rewrites.insert(
+                        Allocation::stack(SpillSlot::new(SpillSlot::MAX - i, regclass)),
+                        <span class="self">self</span>.extra_spillslots_by_class[regclass <span class="kw">as </span>usize][i],
+                    );
+                }
+
+                <span class="kw">for </span>(src, dst, to_vreg) <span class="kw">in </span>resolved {
+                    <span class="kw">let </span>src = rewrites.get(<span class="kw-2">&amp;</span>src).cloned().unwrap_or(src);
+                    <span class="kw">let </span>dst = rewrites.get(<span class="kw-2">&amp;</span>dst).cloned().unwrap_or(dst);
+                    <span class="macro">trace!</span>(<span class="string">&quot;  resolved: {} -&gt; {} ({:?})&quot;</span>, src, dst, to_vreg);
+                    <span class="kw">let </span>action = redundant_moves.process_move(src, dst, to_vreg);
+                    <span class="kw">if </span>!action.elide {
+                        <span class="self">self</span>.add_move_edit(pos_prio, src, dst);
+                    } <span class="kw">else </span>{
+                        <span class="macro">trace!</span>(<span class="string">&quot;    -&gt; redundant move elided&quot;</span>);
+                    }
+                }
+            }
+        }
+
+        <span class="comment">// Ensure edits are in sorted ProgPoint order. N.B.: this must
+        // be a stable sort! We have to keep the order produced by the
+        // parallel-move resolver for all moves within a single sort
+        // key.
+        </span><span class="self">self</span>.edits.sort_by_key(|<span class="kw-2">&amp;</span>(pos_prio, <span class="kw">_</span>)| pos_prio.key());
+        <span class="self">self</span>.stats.edits_count = <span class="self">self</span>.edits.len();
+
+        <span class="comment">// Add debug annotations.
+        </span><span class="kw">if </span><span class="self">self</span>.annotations_enabled {
+            <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.edits.len() {
+                <span class="kw">let </span><span class="kw-2">&amp;</span>(pos_prio, <span class="kw-2">ref </span>edit) = <span class="kw-2">&amp;</span><span class="self">self</span>.edits[i];
+                <span class="kw">match </span>edit {
+                    <span class="kw-2">&amp;</span>Edit::Move { from, to } =&gt; {
+                        <span class="self">self</span>.annotate(pos_prio.pos, <span class="macro">format!</span>(<span class="string">&quot;move {} -&gt; {}&quot;</span>, from, to));
+                    }
+                }
+            }
+        }
+    }
+
+    <span class="kw">pub fn </span>add_move_edit(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos_prio: PosWithPrio, from: Allocation, to: Allocation) {
+        <span class="kw">if </span>from != to {
+            <span class="kw">if </span>from.is_reg() &amp;&amp; to.is_reg() {
+                <span class="macro">debug_assert_eq!</span>(from.as_reg().unwrap().class(), to.as_reg().unwrap().class());
+            }
+            <span class="self">self</span>.edits.push((pos_prio, Edit::Move { from, to }));
+        }
+    }
+}
+</code></pre></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="regalloc2" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

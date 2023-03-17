@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["EnvironmentVariableAppNameProvider","Load an app name from the `AWS_SDK_UA_APP_ID` environment variable."]]};

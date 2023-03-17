@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":[["BUILD_METADATA","Constant build metadata for this crate."]],"enum":[["OsFamily","Operating system family that the SDK can be compiled for"]],"struct":[["BuildMetadata","Metadata about the environment the SDK was compiled for."]]};

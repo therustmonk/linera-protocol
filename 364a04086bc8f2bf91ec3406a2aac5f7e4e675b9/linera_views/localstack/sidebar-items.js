@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":[["LOCALSTACK_ENDPOINT","Name of the environment variable with the address to a LocalStack instance."]],"enum":[["EndpointError","Failure to get the LocalStack endpoint."]],"fn":[["get_endpoint","Get the [`Endpoint`] to connect to a LocalStack instance."]]};

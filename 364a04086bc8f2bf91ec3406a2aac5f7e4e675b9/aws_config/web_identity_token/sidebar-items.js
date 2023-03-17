@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Builder","Builder for `WebIdentityTokenCredentialsProvider`"],["StaticConfiguration","Statically configured WebIdentityToken configuration"],["WebIdentityTokenCredentialsProvider","Credential provider to load credentials from Web Identity  Tokens"]]};

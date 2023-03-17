@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["CrossChainRequest","An internal message between chains within a validator."]],"struct":[["BlockHeightRange","A range of block heights as used in ChainInfoQuery."],["ChainInfo",""],["ChainInfoQuery","Message to obtain information on a chain."],["ChainInfoResponse","The response to an `ChainInfoQuery`"]]};

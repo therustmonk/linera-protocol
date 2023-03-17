@@ -1,0 +1,123 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="This crate provides a function `parse` for parsing strings into durations. The parser is based on the standard set by systemd.time, but extends it significantly. For example, negative numbers, decimals and exponents are allowed."><meta name="keywords" content="rust, rustlang, rust-lang, parse_duration"><title>parse_duration - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../normalize.css"><link rel="stylesheet" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../ayu.css" disabled><link rel="stylesheet" href="../dark.css" disabled><link rel="stylesheet" href="../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../storage.js"></script><script defer src="../crates.js"></script><script defer src="../main.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../parse_duration/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div></a><h2></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../parse_duration/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div></a><h2 class="location"><a href="#">Crate parse_duration</a></h2><div class="sidebar-elems"><ul class="block"><li class="version">Version 2.1.1</li><li><a id="all-types" href="all.html">All Items</a></li></ul><section><ul class="block"><li><a href="#reexports">Re-exports</a></li><li><a href="#modules">Modules</a></li></ul></section></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1 class="fqn">Crate <a class="mod" href="#">parse_duration</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../src/parse_duration/lib.rs.html#23-185">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>This crate provides a function <a href="fn.parse.html"><code>parse</code></a> for parsing strings into durations.
+The parser is based on the standard set by
+<a href="https://www.freedesktop.org/software/systemd/man/systemd.time.html#Parsing%20Time%20Spans">systemd.time</a>,
+but extends it significantly.
+For example, negative numbers, decimals and exponents are allowed.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>parse_duration::parse;
+<span class="kw">use </span>std::time::Duration;
+
+<span class="comment">// One hour less than a day
+</span><span class="macro">assert_eq!</span>(parse(<span class="string">&quot;1 day -1 hour&quot;</span>), <span class="prelude-val">Ok</span>(Duration::new(<span class="number">82_800</span>, <span class="number">0</span>)));
+<span class="comment">// Using exponents
+</span><span class="macro">assert_eq!</span>(parse(<span class="string">&quot;1.26e-1 days&quot;</span>), <span class="prelude-val">Ok</span>(Duration::new(<span class="number">10_886</span>, <span class="number">400_000_000</span>)));
+<span class="comment">// Extra things will be ignored
+</span><span class="macro">assert_eq!</span>(
+    parse(<span class="string">&quot;Duration: 1 hour, 15 minutes and 29 seconds&quot;</span>),
+    <span class="prelude-val">Ok</span>(Duration::new(<span class="number">4529</span>, <span class="number">0</span>))
+);</code></pre></div>
+<h2 id="syntax"><a href="#syntax">Syntax</a></h2>
+<p>Generally, the accepted syntax is a sequence of <code>[value]</code> <code>[unit]</code> pairs, such as
+<code>&quot;15 days 20 seconds 100 milliseconds&quot;</code>.
+Spaces are not needed as in <code>&quot;15days20seconds100milliseconds&quot;</code>.
+Order doesn’t matter at all.</p>
+<p>Characters other than alphanumeric (actually all word characters as defined by the regex crate)
+are ignored,
+other than the fact that they act as a word boundary.
+So <code>&quot;.:++++]][][[][15[]][seconds][]:}}}}&quot;</code> is the same as <code>&quot;15 seconds&quot;</code>.</p>
+<p>Any words with no corresponding value are ignored.
+So in <code>&quot;14 days seconds&quot;</code>, <code>&quot;seconds&quot;</code> would be ignored.</p>
+<p>Any value without a unit will produce an error, unless <em>only</em> that unit is passed
+(besides non-word characters).
+In that case, the value is interpreted as seconds.
+For example, <code>&quot;.:++++]][][[][15[]][][]:}}}}&quot;</code> would be interpreted as 15 seconds.</p>
+<p>If the same unit is specified more than once, the sum of the values is used.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>parse_duration::parse;
+<span class="kw">use </span>std::time::Duration;
+
+<span class="macro">assert_eq!</span>(
+    parse(<span class="string">&quot;15 days 20 seconds 100 milliseconds&quot;</span>),
+    <span class="prelude-val">Ok</span>(Duration::new(<span class="number">1_296_020</span>, <span class="number">100_000_000</span>))
+);
+<span class="macro">assert_eq!</span>(
+    parse(<span class="string">&quot;15days20seconds100milliseconds&quot;</span>),
+    <span class="prelude-val">Ok</span>(Duration::new(<span class="number">1_296_020</span>, <span class="number">100_000_000</span>))
+);
+
+<span class="macro">assert_eq!</span>(parse(<span class="string">&quot;.:++++]][][[][15[]][seconds][]:}}}}&quot;</span>), <span class="prelude-val">Ok</span>(Duration::new(<span class="number">15</span>, <span class="number">0</span>)));
+
+<span class="macro">assert_eq!</span>(parse(<span class="string">&quot;14 days seconds&quot;</span>), <span class="prelude-val">Ok</span>(Duration::new(<span class="number">1_209_600</span>, <span class="number">0</span>)));
+
+<span class="macro">assert_eq!</span>(parse(<span class="string">&quot;.:++++]][][[][15[]][][]:}}}}&quot;</span>), <span class="prelude-val">Ok</span>(Duration::new(<span class="number">15</span>, <span class="number">0</span>)));
+
+<span class="macro">assert_eq!</span>(parse(<span class="string">&quot;10 seconds 20 seconds&quot;</span>), <span class="prelude-val">Ok</span>(Duration::new(<span class="number">30</span>, <span class="number">0</span>)));</code></pre></div>
+<h2 id="units"><a href="#units">Units</a></h2>
+<p>The following units are accepted:</p>
+<ul>
+<li>nanoseconds</li>
+<li>microseconds</li>
+<li>milliseconds</li>
+<li>seconds</li>
+<li>minutes</li>
+<li>hours</li>
+<li>days</li>
+<li>weeks</li>
+<li>months</li>
+<li>years</li>
+</ul>
+<p>Years are defined using the average over 400 years in the Gregorian calendar.
+As such, a year is equivalent to 365.2425 days. A month is defined as one twelfth of a year.</p>
+<p>Abbreviations for each of these units are accepted.
+The general rule is that any initial segment of the full name is accepted as long as it’s not
+ambiguous.
+Additionally, the parser is generally case-insensitive.
+The exception to both these rules is that <code>&quot;m&quot;</code> (or <code>&quot;mi&quot;</code> or <code>&quot;min&quot;</code>…)
+is accepted for minutes
+and <code>&quot;M&quot;</code> (or <code>&quot;Mo&quot;</code> or <code>&quot;Mon&quot;</code>…) is accepted for months.
+Initial segments for other abbreviations
+(<code>&quot;nsecs&quot;</code>, <code>&quot;usecs&quot;</code>, <code>&quot;μsecs&quot;</code>, <code>&quot;msecs&quot;</code>, <code>&quot;secs&quot;</code>, <code>&quot;mins&quot;</code>, <code>&quot;hrs&quot;</code>, <code>&quot;wks&quot;</code>, <code>&quot;yrs&quot;</code>)
+are also accepted.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>parse_duration::parse;
+<span class="kw">use </span>std::time::Duration;
+
+<span class="comment">// Full names may be used
+</span><span class="macro">assert_eq!</span>(parse(<span class="string">&quot;10 days 1 nanoseconds 15 years&quot;</span>), <span class="prelude-val">Ok</span>(Duration::new(<span class="number">474_218_280</span>, <span class="number">1</span>)));
+<span class="comment">// or very short names
+</span><span class="macro">assert_eq!</span>(parse(<span class="string">&quot;10d1n15y&quot;</span>), <span class="prelude-val">Ok</span>(Duration::new(<span class="number">474_218_280</span>, <span class="number">1</span>)));</code></pre></div>
+<h2 id="values"><a href="#values">Values</a></h2>
+<p>The values may be an integer, a decimal, or a mantissa with an exponent.
+They may be as large as desired as long as the final duration is less than
+2<sup>64</sup> seconds.</p>
+<p>Negatives are allowed, but the negative sign must be directly adjacent to the value:
+<code>&quot;-15 seconds&quot;</code>, not <code>&quot;- 15 seconds&quot;</code>.
+When using negative values, the sum must end up non-negative, since <code>Duration</code>s are positive
+durations.</p>
+<p>Decimals are accurate up to nanosecond precision.
+They will be rounded down to the nearest nanosecond if necessary.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>parse_duration::parse;
+<span class="kw">use </span>std::time::Duration;
+
+<span class="macro">assert_eq!</span>(parse(<span class="string">&quot;1 day -1 hour&quot;</span>), <span class="prelude-val">Ok</span>(Duration::new(<span class="number">82_800</span>, <span class="number">0</span>)));
+
+<span class="macro">assert_eq!</span>(parse(<span class="string">&quot;1.84467e19 seconds&quot;</span>), <span class="prelude-val">Ok</span>(Duration::new(<span class="number">18_446_700_000_000_000_000</span>, <span class="number">0</span>)));
+<span class="macro">assert_eq!</span>(
+    parse(<span class="string">&quot;1.84467e28 nanoseconds&quot;</span>),
+    <span class="prelude-val">Ok</span>(Duration::new(<span class="number">18_446_700_000_000_000_000</span>, <span class="number">0</span>))
+);</code></pre></div>
+<h2 id="errors"><a href="#errors">Errors</a></h2>
+<p>The error <code>enum</code> has different variants for particular sorts of errors.
+See <a href="parse/enum.Error.html">the documentation for the error <code>enum</code></a> for more information.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>parse_duration::parse;
+
+<span class="kw">let </span>input = <span class="string">&quot;1e100 seconds&quot;</span>;
+
+<span class="kw">if let </span><span class="prelude-val">Err</span>(parse::Error::OutOfBounds(<span class="kw">_</span>)) = parse(input) {
+    <span class="macro">println!</span>(<span class="string">&quot;The input was too big&quot;</span>);
+} <span class="kw">else </span>{
+    <span class="macro">panic!</span>(<span class="string">&quot;The input wasn&#39;t too big&quot;</span>);
+}</code></pre></div>
+</div></details><h2 id="reexports" class="small-section-header"><a href="#reexports">Re-exports</a></h2><div class="item-table"><div class="item-row"><div class="item-left import-item" id="reexport.parse"><code>pub use parse::<a class="fn" href="parse/fn.parse.html" title="fn parse_duration::parse::parse">parse</a>;</code></div></div></div><h2 id="modules" class="small-section-header"><a href="#modules">Modules</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="parse/index.html" title="parse_duration::parse mod">parse</a></div><div class="item-right docblock-short">This module contains the parse function and the error <code>enum</code>.</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../" data-current-crate="parse_duration" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

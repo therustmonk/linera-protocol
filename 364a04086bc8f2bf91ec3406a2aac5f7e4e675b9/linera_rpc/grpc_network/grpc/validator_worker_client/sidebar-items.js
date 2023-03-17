@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["ValidatorWorkerClient","Interface provided by each physical shard (aka “worker”) of a validator or a local node."]]};

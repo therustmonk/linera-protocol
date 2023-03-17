@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["GrpcNodeProvider",""],["NodeProvider","A general node provider which delegates node provision to the underlying node provider according to the `ValidatorPublicNetworkConfig`."],["SimpleNodeProvider","A client without an address - serves as a client factory."]]};
