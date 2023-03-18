@@ -814,6 +814,34 @@
 <span id="814">814</span>
 <span id="815">815</span>
 <span id="816">816</span>
+<span id="817">817</span>
+<span id="818">818</span>
+<span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
+<span id="831">831</span>
+<span id="832">832</span>
+<span id="833">833</span>
+<span id="834">834</span>
+<span id="835">835</span>
+<span id="836">836</span>
+<span id="837">837</span>
+<span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
 </pre><pre class="rust"><code><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>util;
 
 <span class="kw">extern crate </span>proc_macro;
@@ -846,7 +874,7 @@
     }
 }
 
-<span class="kw">fn </span>generate_view_code(input: ItemStruct) -&gt; TokenStream2 {
+<span class="kw">fn </span>generate_view_code(input: ItemStruct, root: bool) -&gt; TokenStream2 {
     <span class="kw">let </span>struct_name = input.ident;
     <span class="kw">let </span>generics = input.generics;
     <span class="kw">let </span>template_vect = get_seq_parameter(generics.clone());
@@ -877,6 +905,18 @@
     }
     <span class="kw">let </span>first_name = names.get(<span class="number">0</span>).expect(<span class="string">&quot;list of names should be non-empty&quot;</span>);
 
+    <span class="kw">let </span>increment_counter = <span class="kw">if </span>root {
+        <span class="macro">quote! </span>{
+            linera_views::increment_counter(
+                linera_views::LOAD_VIEW_COUNTER,
+                <span class="macro">stringify!</span>(#struct_name),
+                <span class="kw-2">&amp;</span>context.base_key(),
+            );
+        }
+    } <span class="kw">else </span>{
+        <span class="macro">quote! </span>{}
+    };
+
     <span class="macro">quote! </span>{
         <span class="attribute">#[async_trait::async_trait]
         </span><span class="kw">impl </span>#generics linera_views::views::View&lt;#first_generic&gt; <span class="kw">for </span>#struct_name #generics
@@ -889,6 +929,7 @@
             }
 
             <span class="kw">async fn </span>load(context: #first_generic) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, linera_views::views::ViewError&gt; {
+                #increment_counter
                 #(#loades)*
                 <span class="prelude-val">Ok</span>(<span class="self">Self </span>{#(#names),<span class="kw-2">*</span>})
             }
@@ -937,6 +978,11 @@
             linera_views::views::ViewError: From&lt;#first_generic::Error&gt;,
         {
             <span class="kw">async fn </span>save(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), linera_views::views::ViewError&gt; {
+                linera_views::increment_counter(
+                    linera_views::SAVE_VIEW_COUNTER,
+                    <span class="macro">stringify!</span>(#struct_name),
+                    <span class="kw-2">&amp;</span><span class="self">self</span>.context().base_key(),
+                );
                 <span class="kw">use </span>linera_views::batch::Batch;
                 <span class="kw">let </span><span class="kw-2">mut </span>batch = Batch::new();
                 #(#flushes)*
@@ -1270,13 +1316,13 @@
 <span class="attribute">#[proc_macro_derive(View)]
 </span><span class="kw">pub fn </span>derive_view(input: TokenStream) -&gt; TokenStream {
     <span class="kw">let </span>input = <span class="macro">parse_macro_input!</span>(input <span class="kw">as </span>ItemStruct);
-    generate_view_code(input).into()
+    generate_view_code(input, <span class="bool-val">false</span>).into()
 }
 
 <span class="attribute">#[proc_macro_derive(HashableView)]
 </span><span class="kw">pub fn </span>derive_hash_view(input: TokenStream) -&gt; TokenStream {
     <span class="kw">let </span>input = <span class="macro">parse_macro_input!</span>(input <span class="kw">as </span>ItemStruct);
-    <span class="kw">let </span><span class="kw-2">mut </span>stream = generate_view_code(input.clone());
+    <span class="kw">let </span><span class="kw-2">mut </span>stream = generate_view_code(input.clone(), <span class="bool-val">false</span>);
     stream.extend(generate_hash_view_code(input));
     stream.into()
 }
@@ -1284,7 +1330,7 @@
 <span class="attribute">#[proc_macro_derive(RootView)]
 </span><span class="kw">pub fn </span>derive_root_view(input: TokenStream) -&gt; TokenStream {
     <span class="kw">let </span>input = <span class="macro">parse_macro_input!</span>(input <span class="kw">as </span>ItemStruct);
-    <span class="kw">let </span><span class="kw-2">mut </span>stream = generate_view_code(input.clone());
+    <span class="kw">let </span><span class="kw-2">mut </span>stream = generate_view_code(input.clone(), <span class="bool-val">true</span>);
     stream.extend(generate_save_delete_view_code(input));
     stream.into()
 }
@@ -1293,7 +1339,7 @@
 #[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">pub fn </span>derive_crypto_hash_view(input: TokenStream) -&gt; TokenStream {
     <span class="kw">let </span>input = <span class="macro">parse_macro_input!</span>(input <span class="kw">as </span>ItemStruct);
-    <span class="kw">let </span><span class="kw-2">mut </span>stream = generate_view_code(input.clone());
+    <span class="kw">let </span><span class="kw-2">mut </span>stream = generate_view_code(input.clone(), <span class="bool-val">false</span>);
     stream.extend(generate_hash_view_code(input.clone()));
     stream.extend(generate_crypto_hash_code(input));
     stream.into()
@@ -1303,7 +1349,7 @@
 #[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">pub fn </span>derive_crypto_hash_root_view(input: TokenStream) -&gt; TokenStream {
     <span class="kw">let </span>input = <span class="macro">parse_macro_input!</span>(input <span class="kw">as </span>ItemStruct);
-    <span class="kw">let </span><span class="kw-2">mut </span>stream = generate_view_code(input.clone());
+    <span class="kw">let </span><span class="kw-2">mut </span>stream = generate_view_code(input.clone(), <span class="bool-val">true</span>);
     stream.extend(generate_save_delete_view_code(input.clone()));
     stream.extend(generate_hash_view_code(input.clone()));
     stream.extend(generate_crypto_hash_code(input));
@@ -1315,7 +1361,7 @@
 #[cfg(test)]
 </span><span class="kw">pub fn </span>derive_hashable_root_view(input: TokenStream) -&gt; TokenStream {
     <span class="kw">let </span>input = <span class="macro">parse_macro_input!</span>(input <span class="kw">as </span>ItemStruct);
-    <span class="kw">let </span><span class="kw-2">mut </span>stream = generate_view_code(input.clone());
+    <span class="kw">let </span><span class="kw-2">mut </span>stream = generate_view_code(input.clone(), <span class="bool-val">true</span>);
     stream.extend(generate_save_delete_view_code(input.clone()));
     stream.extend(generate_hash_view_code(input));
     stream.into()
@@ -1353,7 +1399,7 @@
                 collection: CollectionView&lt;C, usize, RegisterView&lt;C, usize&gt;&gt;,
             }
         );
-        <span class="kw">let </span>output = generate_view_code(input);
+        <span class="kw">let </span>output = generate_view_code(input, <span class="bool-val">true</span>);
 
         <span class="kw">let </span>expected = <span class="macro">quote!</span>(
             <span class="attribute">#[async_trait::async_trait]
@@ -1366,6 +1412,11 @@
                     <span class="self">self</span>.register.context()
                 }
                 <span class="kw">async fn </span>load(context: C) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, linera_views::views::ViewError&gt; {
+                    linera_views::increment_counter(
+                        linera_views::LOAD_VIEW_COUNTER,
+                        <span class="macro">stringify!</span>(TestView),
+                        <span class="kw-2">&amp;</span>context.base_key(),
+                    );
                     <span class="kw">let </span>index = <span class="number">0</span>;
                     <span class="kw">let </span>base_key = context.derive_key(<span class="kw-2">&amp;</span>index)<span class="question-mark">?</span>;
                     <span class="kw">let </span>register =
@@ -1473,6 +1524,11 @@
                 linera_views::views::ViewError: From&lt;C::Error&gt;,
             {
                 <span class="kw">async fn </span>save(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), linera_views::views::ViewError&gt; {
+                    linera_views::increment_counter(
+                        linera_views::SAVE_VIEW_COUNTER,
+                        <span class="macro">stringify!</span>(TestView),
+                        <span class="kw-2">&amp;</span><span class="self">self</span>.context().base_key(),
+                    );
                     <span class="kw">use </span>linera_views::batch::Batch;
                     <span class="kw">let </span><span class="kw-2">mut </span>batch = Batch::new();
                     <span class="self">self</span>.register.flush(<span class="kw-2">&amp;mut </span>batch)<span class="question-mark">?</span>;

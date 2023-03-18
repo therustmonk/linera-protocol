@@ -124,10 +124,33 @@
 <span id="124">124</span>
 <span id="125">125</span>
 <span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="kw">use crate</span>::{chain_guards::ChainGuards, ChainRuntimeContext, ChainStateView, Store};
+</span><span class="kw">use crate</span>::{
+    chain_guards::ChainGuards, ChainRuntimeContext, ChainStateView, Store,
+    READ_CERTIFICATE_COUNTER, READ_VALUE_COUNTER, WRITE_CERTIFICATE_COUNTER, WRITE_VALUE_COUNTER,
+};
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>dashmap::DashMap;
 <span class="kw">use </span>linera_base::{crypto::CryptoHash, data_types::ChainId};
@@ -139,6 +162,7 @@
     rocksdb::{RocksdbClient, RocksdbContext, RocksdbContextError, DB},
     views::{View, ViewError},
 };
+<span class="kw">use </span>metrics::increment_counter;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>std::{path::PathBuf, sync::Arc};
 
@@ -206,11 +230,18 @@
     <span class="kw">async fn </span>read_value(<span class="kw-2">&amp;</span><span class="self">self</span>, hash: CryptoHash) -&gt; <span class="prelude-ty">Result</span>&lt;HashedValue, ViewError&gt; {
         <span class="kw">let </span>value_key = bcs::to_bytes(<span class="kw-2">&amp;</span>BaseKey::Value(hash))<span class="question-mark">?</span>;
         <span class="kw">let </span>maybe_value: <span class="prelude-ty">Option</span>&lt;Value&gt; = <span class="self">self</span>.<span class="number">0</span>.db.read_key(<span class="kw-2">&amp;</span>value_key).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>id = <span class="kw">match </span><span class="kw-2">&amp;</span>maybe_value {
+            <span class="prelude-val">Some</span>(value) =&gt; value.block.chain_id.to_string(),
+            <span class="prelude-val">None </span>=&gt; <span class="string">&quot;not found&quot;</span>.to_string(),
+        };
+        <span class="macro">increment_counter!</span>(READ_VALUE_COUNTER, <span class="kw-2">&amp;</span>[(<span class="string">&quot;chain_id&quot;</span>, id)]);
         <span class="kw">let </span>value = maybe_value.ok_or_else(|| ViewError::not_found(<span class="string">&quot;value for hash&quot;</span>, hash))<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(value.with_hash_unchecked(hash))
     }
 
     <span class="kw">async fn </span>write_value(<span class="kw-2">&amp;</span><span class="self">self</span>, value: HashedValue) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; {
+        <span class="kw">let </span>id = value.block().chain_id.to_string();
+        <span class="macro">increment_counter!</span>(WRITE_VALUE_COUNTER, <span class="kw-2">&amp;</span>[(<span class="string">&quot;chain_id&quot;</span>, id)]);
         <span class="kw">let </span>value_key = bcs::to_bytes(<span class="kw-2">&amp;</span>BaseKey::Value(value.hash()))<span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>batch = Batch::new();
         batch.put_key_value(value_key.to_vec(), <span class="kw-2">&amp;</span>value)<span class="question-mark">?</span>;
@@ -222,9 +253,16 @@
         <span class="kw">let </span>cert_key = bcs::to_bytes(<span class="kw-2">&amp;</span>BaseKey::Certificate(hash))<span class="question-mark">?</span>;
         <span class="kw">let </span>value_key = bcs::to_bytes(<span class="kw-2">&amp;</span>BaseKey::Value(hash))<span class="question-mark">?</span>;
         <span class="kw">let </span>(cert_result, value_result) = <span class="macro">tokio::join!</span>(
-            <span class="self">self</span>.<span class="number">0</span>.db.read_key(<span class="kw-2">&amp;</span>cert_key),
-            <span class="self">self</span>.<span class="number">0</span>.db.read_key(<span class="kw-2">&amp;</span>value_key)
+            <span class="self">self</span>.<span class="number">0</span>.db.read_key::&lt;LiteCertificate&gt;(<span class="kw-2">&amp;</span>cert_key),
+            <span class="self">self</span>.<span class="number">0</span>.db.read_key::&lt;Value&gt;(<span class="kw-2">&amp;</span>value_key)
         );
+        <span class="kw">if let </span><span class="prelude-val">Ok</span>(maybe_value) = <span class="kw-2">&amp;</span>value_result {
+            <span class="kw">let </span>id = <span class="kw">match </span>maybe_value {
+                <span class="prelude-val">Some</span>(value) =&gt; value.block.chain_id.to_string(),
+                <span class="prelude-val">None </span>=&gt; <span class="string">&quot;not found&quot;</span>.to_string(),
+            };
+            <span class="macro">increment_counter!</span>(READ_CERTIFICATE_COUNTER, <span class="kw-2">&amp;</span>[(<span class="string">&quot;chain_id&quot;</span>, id)]);
+        };
         <span class="kw">let </span>value: Value =
             value_result<span class="question-mark">?</span>.ok_or_else(|| ViewError::not_found(<span class="string">&quot;value for hash&quot;</span>, hash))<span class="question-mark">?</span>;
         <span class="kw">let </span>cert: LiteCertificate =
@@ -235,6 +273,8 @@
     }
 
     <span class="kw">async fn </span>write_certificate(<span class="kw-2">&amp;</span><span class="self">self</span>, certificate: Certificate) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; {
+        <span class="kw">let </span>id = certificate.value.block().chain_id.to_string();
+        <span class="macro">increment_counter!</span>(WRITE_CERTIFICATE_COUNTER, <span class="kw-2">&amp;</span>[(<span class="string">&quot;chain_id&quot;</span>, id)]);
         <span class="kw">let </span>hash = certificate.value.hash();
         <span class="kw">let </span>cert_key = bcs::to_bytes(<span class="kw-2">&amp;</span>BaseKey::Certificate(hash))<span class="question-mark">?</span>;
         <span class="kw">let </span>value_key = bcs::to_bytes(<span class="kw-2">&amp;</span>BaseKey::Value(hash))<span class="question-mark">?</span>;

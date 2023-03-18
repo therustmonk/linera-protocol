@@ -1305,6 +1305,15 @@
 <span id="1305">1305</span>
 <span id="1306">1306</span>
 <span id="1307">1307</span>
+<span id="1308">1308</span>
+<span id="1309">1309</span>
+<span id="1310">1310</span>
+<span id="1311">1311</span>
+<span id="1312">1312</span>
+<span id="1313">1313</span>
+<span id="1314">1314</span>
+<span id="1315">1315</span>
+<span id="1316">1316</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1347,6 +1356,10 @@
     time::Duration,
 };
 <span class="kw">use </span>tracing::info;
+
+<span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+#[path = <span class="string">&quot;unit_tests/client_test_utils.rs&quot;</span>]
+</span><span class="kw">pub mod </span>client_test_utils;
 
 <span class="attribute">#[cfg(test)]
 #[path = <span class="string">&quot;unit_tests/client_tests.rs&quot;</span>]
@@ -1601,6 +1614,11 @@
             </span>.epoch
             .ok_or(NodeError::InactiveLocalChain(<span class="self">self</span>.chain_id))<span class="question-mark">?</span>)
     }
+
+    <span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+    </span><span class="kw">pub async fn </span>get_identity(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Owner, anyhow::Error&gt; {
+        <span class="self">self</span>.identity().<span class="kw">await
+    </span>}
 
     <span class="doccomment">/// Obtain the identity of the current owner of the chain. HACK: In the case of a
     /// multi-owner chain, we pick one identity for which we know the private key.

@@ -1359,7 +1359,7 @@
     ViewError: From&lt;Client::ContextError&gt;,
 {
     <span class="comment">// NOTE: This only works for non-sharded workers!
-    </span><span class="attribute">#[cfg(test)]
+    </span><span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>fully_handle_certificate(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         certificate: Certificate,

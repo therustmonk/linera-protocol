@@ -446,6 +446,39 @@
 <span id="446">446</span>
 <span id="447">447</span>
 <span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -474,6 +507,7 @@
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;
 <span class="kw">use </span>std::{
+    net::SocketAddr,
     path::{Path, PathBuf},
     str::FromStr,
 };
@@ -664,6 +698,12 @@
     <span class="doccomment">/// The port of the proxy on the internal network.
     </span>internal_port: u16,
 
+    <span class="doccomment">/// The host on which metrics are served.
+    </span>metrics_host: String,
+
+    <span class="doccomment">/// The port on which metrics are served.
+    </span>metrics_port: <span class="prelude-ty">Option</span>&lt;u16&gt;,
+
     <span class="doccomment">/// The network protocol for the frontend.
     </span>external_protocol: NetworkProtocol,
 
@@ -677,11 +717,13 @@
 <span class="kw">impl </span>FromStr <span class="kw">for </span>ValidatorOptions {
     <span class="kw">type </span><span class="prelude-val">Err </span>= anyhow::Error;
 
-    <span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
+    <span class="comment">// TODO(#543): Use a config file instead of this string.
+    </span><span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
         <span class="kw">let </span>parts: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = s.split(<span class="string">&#39;:&#39;</span>).collect();
         <span class="macro">ensure!</span>(
-            parts.len() &gt;= <span class="number">7 </span>&amp;&amp; parts.len() % <span class="number">2 </span>== <span class="number">1</span>,
-            <span class="string">&quot;Expecting format `file.json:(udp|tcp):host:port:(udp|tcp):internal_host:internal_port:host1:port1:...:hostN:portN`&quot;
+            parts.len() &gt;= <span class="number">9 </span>&amp;&amp; parts.len() % <span class="number">2 </span>== <span class="number">1</span>,
+            <span class="string">&quot;Expecting format `file.json:(udp|tcp):host:port:(udp|tcp):internal_host:\
+            internal_port:metrics_host:metrics_port:host1:port1:...:hostN:portN`&quot;
         </span>);
 
         <span class="kw">let </span>server_config_path = Path::new(parts[<span class="number">0</span>]).to_path_buf();
@@ -691,8 +733,14 @@
         <span class="kw">let </span>internal_protocol = parts[<span class="number">4</span>].parse().map_err(|s| <span class="macro">anyhow!</span>(<span class="string">&quot;{}&quot;</span>, s))<span class="question-mark">?</span>;
         <span class="kw">let </span>internal_host = parts[<span class="number">5</span>].to_owned();
         <span class="kw">let </span>internal_port = parts[<span class="number">6</span>].parse()<span class="question-mark">?</span>;
+        <span class="kw">let </span>metrics_host = parts[<span class="number">7</span>].to_owned();
+        <span class="kw">let </span>metrics_port = <span class="kw">if </span>parts[<span class="number">8</span>].is_empty() {
+            <span class="prelude-val">None
+        </span>} <span class="kw">else </span>{
+            <span class="prelude-val">Some</span>(parts[<span class="number">8</span>].parse()<span class="question-mark">?</span>)
+        };
 
-        <span class="kw">let </span>shards = parts[<span class="number">7</span>..]
+        <span class="kw">let </span>shards = parts[<span class="number">9</span>..]
             .chunks_exact(<span class="number">2</span>)
             .map(|shard_address| {
                 <span class="kw">let </span>host = shard_address[<span class="number">0</span>].to_owned();
@@ -711,6 +759,8 @@
             internal_host,
             internal_port,
             shards,
+            metrics_host,
+            metrics_port,
         })
     }
 }
@@ -726,6 +776,8 @@
         shards: options.shards,
         host: options.internal_host,
         port: options.internal_port,
+        metrics_host: options.metrics_host,
+        metrics_port: options.metrics_port,
     };
     <span class="kw">let </span>key = KeyPair::generate();
     <span class="kw">let </span>name = ValidatorName(key.public());
@@ -817,6 +869,18 @@
                 .expect(<span class="string">&quot;Fail to read initial chain config&quot;</span>);
             <span class="kw">let </span>server_config = ValidatorServerConfig::read(<span class="kw-2">&amp;</span>server_config_path)
                 .expect(<span class="string">&quot;Fail to read server config&quot;</span>);
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(port) = server_config.internal_network.metrics_port {
+                <span class="kw">let </span>host = <span class="kw-2">&amp;</span>server_config.internal_network.metrics_host;
+                <span class="kw">let </span>address: SocketAddr = <span class="macro">format!</span>(<span class="string">&quot;{}:{}&quot;</span>, host, port)
+                    .parse()
+                    .expect(<span class="string">&quot;Invalid metrics address&quot;</span>);
+                <span class="kw">if let </span><span class="prelude-val">Err</span>(error) = metrics_exporter_tcp::TcpBuilder::new()
+                    .listen_address(address)
+                    .install()
+                {
+                    <span class="macro">tracing::warn!</span>(<span class="question-mark">?</span>error, %address, <span class="string">&quot;Could not install TCP metrics exporter.&quot;</span>);
+                }
+            }
             <span class="kw">let </span>job = ServerContext {
                 server_config,
                 cross_chain_config,
@@ -867,7 +931,7 @@
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>test_validator_options() {
         <span class="kw">let </span>options = ValidatorOptions::from_str(
-            <span class="string">&quot;server.json:tcp:host:9000:udp:internal_host:10000:host1:9001:host2:9002&quot;</span>,
+            <span class="string">&quot;server.json:tcp:host:9000:udp:internal_host:10000:metrics_host:5000:host1:9001:host2:9002&quot;</span>,
         )
         .unwrap();
         <span class="macro">assert_eq!</span>(
@@ -890,6 +954,8 @@
                         port: <span class="number">9002</span>,
                     },
                 ],
+                metrics_host: <span class="string">&quot;metrics_host&quot;</span>.into(),
+                metrics_port: <span class="prelude-val">Some</span>(<span class="number">5000</span>),
             }
         );
     }

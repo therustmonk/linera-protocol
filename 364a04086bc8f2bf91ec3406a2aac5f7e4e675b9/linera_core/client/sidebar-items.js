@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["ChainClient","Client to operate a chain by interacting with validators and the given local storage implementation."]],"trait":[["ValidatorNodeProvider","Turn an address into a validator node (local node or client to a remote node)."]]};
+window.SIDEBAR_ITEMS = {"mod":[["client_test_utils",""]],"struct":[["ChainClient","Client to operate a chain by interacting with validators and the given local storage implementation."]],"trait":[["ValidatorNodeProvider","Turn an address into a validator node (local node or client to a remote node)."]]};
