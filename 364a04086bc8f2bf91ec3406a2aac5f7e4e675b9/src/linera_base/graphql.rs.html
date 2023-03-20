@@ -38,9 +38,10 @@
 <span id="38">38</span>
 <span id="39">39</span>
 <span id="40">40</span>
+<span id="41">41</span>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     committee::{Committee, ValidatorState},
-    crypto::{CryptoHash, Signature},
+    crypto::{CryptoHash, PublicKey, Signature},
     data_types::{BlockHeight, ChainDescription, ChainId, Epoch, Owner, Timestamp, ValidatorName},
 };
 <span class="kw">use </span>async_graphql::{scalar, Object};
@@ -52,6 +53,7 @@
 <span class="macro">scalar!</span>(CryptoHash);
 <span class="macro">scalar!</span>(Epoch);
 <span class="macro">scalar!</span>(Owner);
+<span class="macro">scalar!</span>(PublicKey);
 <span class="macro">scalar!</span>(Signature);
 <span class="macro">scalar!</span>(Timestamp);
 <span class="macro">scalar!</span>(ValidatorName);

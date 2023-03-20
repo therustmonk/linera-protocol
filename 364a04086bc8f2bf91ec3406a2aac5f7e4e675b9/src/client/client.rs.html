@@ -1033,9 +1033,9 @@
 <span class="kw">use </span>futures::StreamExt;
 <span class="kw">use </span>linera_base::{
     committee::ValidatorState,
-    crypto::KeyPair,
+    crypto::{KeyPair, PublicKey},
     data_types::{
-        BlockHeight, ChainDescription, ChainId, Epoch, Owner, RoundNumber, Timestamp, ValidatorName,
+        BlockHeight, ChainDescription, ChainId, Epoch, RoundNumber, Timestamp, ValidatorName,
     },
 };
 <span class="kw">use </span>linera_chain::data_types::{
@@ -1474,8 +1474,8 @@
         </span>sender: ChainId,
 
         <span class="doccomment">/// Public key of the new owner (otherwise create a key pair and remember it)
-        </span><span class="attribute">#[structopt(long = <span class="string">&quot;to-owner&quot;</span>)]
-        </span>owner: <span class="prelude-ty">Option</span>&lt;Owner&gt;,
+        </span><span class="attribute">#[structopt(long = <span class="string">&quot;to-public-key&quot;</span>)]
+        </span>public_key: <span class="prelude-ty">Option</span>&lt;PublicKey&gt;,
     },
 
     <span class="doccomment">/// Close (i.e. deactivate) an existing chain. (Consider `spend_and_transfer`
@@ -1516,7 +1516,7 @@
         </span><span class="attribute">#[structopt(long = <span class="string">&quot;name&quot;</span>)]
         </span>name: ValidatorName,
 
-        <span class="doccomment">/// Address
+        <span class="doccomment">/// Network address
         </span><span class="attribute">#[structopt(long = <span class="string">&quot;address&quot;</span>)]
         </span>network_address: String,
 
@@ -1640,18 +1640,18 @@
                 context.save_chains();
             }
 
-            OpenChain { sender, owner } =&gt; {
+            OpenChain { sender, public_key } =&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, sender);
-                <span class="kw">let </span>(new_owner, key_pair) = <span class="kw">match </span>owner {
+                <span class="kw">let </span>(new_public_key, key_pair) = <span class="kw">match </span>public_key {
                     <span class="prelude-val">Some</span>(key) =&gt; (key, <span class="prelude-val">None</span>),
                     <span class="prelude-val">None </span>=&gt; {
                         <span class="kw">let </span>key_pair = KeyPair::generate();
-                        (Owner(key_pair.public()), <span class="prelude-val">Some</span>(key_pair))
+                        (key_pair.public(), <span class="prelude-val">Some</span>(key_pair))
                     }
                 };
                 <span class="macro">info!</span>(<span class="string">&quot;Starting operation to open a new chain&quot;</span>);
                 <span class="kw">let </span>time_start = Instant::now();
-                <span class="kw">let </span>(id, certificate) = chain_client.open_chain(new_owner).<span class="kw">await</span>.unwrap();
+                <span class="kw">let </span>(id, certificate) = chain_client.open_chain(new_public_key).<span class="kw">await</span>.unwrap();
                 <span class="kw">let </span>time_total = time_start.elapsed().as_micros();
                 <span class="macro">info!</span>(<span class="string">&quot;Operation confirmed after {} us&quot;</span>, time_total);
                 <span class="macro">info!</span>(<span class="string">&quot;{:?}&quot;</span>, certificate);
@@ -2023,7 +2023,7 @@
                 <span class="comment">// Public &quot;genesis&quot; state.
                 </span>genesis_config.chains.push((
                     description,
-                    Owner(chain.key_pair.as_ref().unwrap().public()),
+                    chain.key_pair.as_ref().unwrap().public(),
                     initial_funding,
                     timestamp,
                 ));

@@ -1054,7 +1054,7 @@
         <span class="kw">let </span>signature = Signature::new(<span class="kw-2">&amp;</span>content, secret);
         <span class="self">Self </span>{
             content,
-            owner: Owner(secret.public()),
+            owner: secret.public().into(),
             signature,
             blobs,
         }

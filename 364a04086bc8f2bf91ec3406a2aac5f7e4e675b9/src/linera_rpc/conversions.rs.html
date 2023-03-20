@@ -1781,7 +1781,7 @@
 <span class="kw">impl </span>From&lt;Owner&gt; <span class="kw">for </span>grpc::Owner {
     <span class="kw">fn </span>from(owner: Owner) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            inner: <span class="prelude-val">Some</span>(owner.<span class="number">0</span>.into()),
+            bytes: owner.<span class="number">0</span>.as_bytes().to_vec(),
         }
     }
 }
@@ -1790,7 +1790,7 @@
     <span class="kw">type </span>Error = ProtoConversionError;
 
     <span class="kw">fn </span>try_from(owner: grpc::Owner) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span>(<span class="macro">try_proto_convert!</span>(owner.inner)))
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span>(CryptoHash::try_from(owner.bytes.as_slice())<span class="question-mark">?</span>))
     }
 }
 

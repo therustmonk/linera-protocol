@@ -1084,6 +1084,7 @@
 <span id="1084">1084</span>
 <span id="1085">1085</span>
 <span id="1086">1086</span>
+<span id="1087">1087</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1838,11 +1839,12 @@
             WorkerError::InvalidEpoch { chain_id, epoch }
         );
         <span class="comment">// Check the authentication of the block.
-        </span><span class="macro">ensure!</span>(
-            chain.manager.get().has_owner(owner),
-            WorkerError::InvalidOwner
-        );
-        signature.check(<span class="kw-2">&amp;</span>proposal.content, owner.<span class="number">0</span>)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>public_key = chain
+            .manager
+            .get()
+            .verify_owner(owner)
+            .ok_or(WorkerError::InvalidOwner)<span class="question-mark">?</span>;
+        signature.check(<span class="kw-2">&amp;</span>proposal.content, public_key)<span class="question-mark">?</span>;
         <span class="comment">// Check the authentication of the operations in the block.
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(signer) = block.authenticated_signer {
             <span class="macro">ensure!</span>(signer == <span class="kw-2">*</span>owner, WorkerError::InvalidSigner(signer));

@@ -421,6 +421,15 @@
 <span id="421">421</span>
 <span id="422">422</span>
 <span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -432,7 +441,7 @@
     ChainError,
 };
 <span class="kw">use </span>linera_base::{
-    crypto::{CryptoHash, KeyPair},
+    crypto::{CryptoHash, KeyPair, PublicKey},
     data_types::{BlockHeight, Owner, RoundNumber},
     ensure,
 };
@@ -457,6 +466,8 @@
 </span><span class="kw">pub struct </span>SingleOwnerManager {
     <span class="doccomment">/// The owner of the chain.
     </span><span class="kw">pub </span>owner: Owner,
+    <span class="doccomment">/// The corresponding public key.
+    </span><span class="kw">pub </span>public_key: PublicKey,
     <span class="doccomment">/// Latest proposal that we have voted on last (both to validate and confirm it).
     </span><span class="kw">pub </span>pending: <span class="prelude-ty">Option</span>&lt;Vote&gt;,
 }
@@ -465,8 +476,7 @@
 </span><span class="attribute">#[derive(Clone, Debug, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>MultiOwnerManager {
     <span class="doccomment">/// The co-owners of the chain.
-    /// Using a map instead a hashset because Serde treats HashSet&#39;s as vectors.
-    </span><span class="kw">pub </span>owners: HashMap&lt;Owner, ()&gt;,
+    </span><span class="kw">pub </span>owners: HashMap&lt;Owner, PublicKey&gt;,
     <span class="doccomment">/// Latest authenticated block that we have received.
     </span><span class="kw">pub </span>proposed: <span class="prelude-ty">Option</span>&lt;BlockProposal&gt;,
     <span class="doccomment">/// Latest validated proposal that we have seen (and voted to confirm).
@@ -489,8 +499,9 @@
 }
 
 <span class="kw">impl </span>SingleOwnerManager {
-    <span class="kw">pub fn </span>new(owner: Owner) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(owner: Owner, public_key: PublicKey) -&gt; <span class="self">Self </span>{
         SingleOwnerManager {
+            public_key,
             owner,
             pending: <span class="prelude-val">None</span>,
         }
@@ -498,7 +509,7 @@
 }
 
 <span class="kw">impl </span>MultiOwnerManager {
-    <span class="kw">pub fn </span>new(owners: HashMap&lt;Owner, ()&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(owners: HashMap&lt;Owner, PublicKey&gt;) -&gt; <span class="self">Self </span>{
         MultiOwnerManager {
             owners,
             proposed: <span class="prelude-val">None</span>,
@@ -531,8 +542,9 @@
             ChainOwnership::None =&gt; {
                 <span class="kw-2">*</span><span class="self">self </span>= ChainManager::None;
             }
-            ChainOwnership::Single { owner } =&gt; {
-                <span class="kw-2">*</span><span class="self">self </span>= ChainManager::Single(Box::new(SingleOwnerManager::new(<span class="kw-2">*</span>owner)));
+            ChainOwnership::Single { owner, public_key } =&gt; {
+                <span class="kw-2">*</span><span class="self">self </span>=
+                    ChainManager::Single(Box::new(SingleOwnerManager::new(<span class="kw-2">*</span>owner, <span class="kw-2">*</span>public_key)));
             }
             ChainOwnership::Multi { owners } =&gt; {
                 <span class="kw-2">*</span><span class="self">self </span>= ChainManager::Multi(Box::new(MultiOwnerManager::new(owners.clone())));
@@ -544,11 +556,17 @@
         !<span class="macro">matches!</span>(<span class="self">self</span>, ChainManager::None)
     }
 
-    <span class="kw">pub fn </span>has_owner(<span class="kw-2">&amp;</span><span class="self">self</span>, owner: <span class="kw-2">&amp;</span>Owner) -&gt; bool {
+    <span class="kw">pub fn </span>verify_owner(<span class="kw-2">&amp;</span><span class="self">self</span>, owner: <span class="kw-2">&amp;</span>Owner) -&gt; <span class="prelude-ty">Option</span>&lt;PublicKey&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            ChainManager::Single(manager) =&gt; manager.owner == <span class="kw-2">*</span>owner,
-            ChainManager::Multi(manager) =&gt; manager.owners.contains_key(owner),
-            ChainManager::None =&gt; <span class="bool-val">false</span>,
+            ChainManager::Single(manager) =&gt; {
+                <span class="kw">if </span>manager.owner == <span class="kw-2">*</span>owner {
+                    <span class="prelude-val">Some</span>(manager.public_key)
+                } <span class="kw">else </span>{
+                    <span class="prelude-val">None
+                </span>}
+            }
+            ChainManager::Multi(manager) =&gt; manager.owners.get(owner).copied(),
+            ChainManager::None =&gt; <span class="prelude-val">None</span>,
         }
     }
 
@@ -767,7 +785,7 @@
 </span><span class="kw">pub struct </span>MultiOwnerManagerInfo {
     <span class="doccomment">/// The co-owners of the chain.
     /// Using a map instead a hashset because Serde treats HashSet&#39;s as vectors.
-    </span><span class="kw">pub </span>owners: HashMap&lt;Owner, ()&gt;,
+    </span><span class="kw">pub </span>owners: HashMap&lt;Owner, PublicKey&gt;,
     <span class="doccomment">/// Latest authenticated block that we have received, if requested.
     </span><span class="kw">pub </span>requested_proposed: <span class="prelude-ty">Option</span>&lt;BlockProposal&gt;,
     <span class="doccomment">/// Latest validated proposal that we have seen (and voted to confirm), if requested.

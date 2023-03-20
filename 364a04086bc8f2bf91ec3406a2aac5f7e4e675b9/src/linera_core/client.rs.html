@@ -1332,7 +1332,7 @@
 };
 <span class="kw">use </span>linera_base::{
     committee::{Committee, ValidatorState},
-    crypto::{CryptoHash, KeyPair},
+    crypto::{CryptoHash, KeyPair, PublicKey},
     data_types::{
         BlockHeight, ChainId, EffectId, Epoch, Owner, RoundNumber, Timestamp, ValidatorName,
     },
@@ -1429,7 +1429,7 @@
     ) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>known_key_pairs = known_key_pairs
             .into_iter()
-            .map(|kp| (Owner(kp.public()), kp))
+            .map(|kp| (Owner::from(kp.public()), kp))
             .collect();
         <span class="kw">let </span>state = WorkerState::new(<span class="macro">format!</span>(<span class="string">&quot;Client node {:?}&quot;</span>, chain_id), <span class="prelude-val">None</span>, storage_client)
             .with_allow_inactive_chains(<span class="bool-val">true</span>)
@@ -1615,14 +1615,9 @@
             .ok_or(NodeError::InactiveLocalChain(<span class="self">self</span>.chain_id))<span class="question-mark">?</span>)
     }
 
-    <span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
-    </span><span class="kw">pub async fn </span>get_identity(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Owner, anyhow::Error&gt; {
-        <span class="self">self</span>.identity().<span class="kw">await
-    </span>}
-
     <span class="doccomment">/// Obtain the identity of the current owner of the chain. HACK: In the case of a
     /// multi-owner chain, we pick one identity for which we know the private key.
-    </span><span class="kw">async fn </span>identity(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Owner, anyhow::Error&gt; {
+    </span><span class="kw">pub async fn </span>identity(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Owner, anyhow::Error&gt; {
         <span class="kw">match </span><span class="self">self</span>.chain_info().<span class="kw">await</span><span class="question-mark">?</span>.manager {
             ChainManagerInfo::Single(m) =&gt; {
                 <span class="kw">if </span>!<span class="self">self</span>.known_key_pairs.contains_key(<span class="kw-2">&amp;</span>m.owner) {
@@ -1635,7 +1630,7 @@
             }
             ChainManagerInfo::Multi(m) =&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>identities = Vec::new();
-                <span class="kw">for </span>(owner, ()) <span class="kw">in </span><span class="kw-2">&amp;</span>m.owners {
+                <span class="kw">for </span>owner <span class="kw">in </span>m.owners.keys() {
                     <span class="kw">if </span><span class="self">self</span>.known_key_pairs.contains_key(owner) {
                         identities.push(<span class="kw-2">*</span>owner);
                     }
@@ -1665,6 +1660,11 @@
             </span>.known_key_pairs
             .get(<span class="kw-2">&amp;</span>id)
             .expect(<span class="string">&quot;key should be known at this point&quot;</span>))
+    }
+
+    <span class="doccomment">/// Obtain the public key associated to the current identity.
+    </span><span class="kw">pub async fn </span>public_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PublicKey&gt; {
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.key_pair().<span class="kw">await</span><span class="question-mark">?</span>.public())
     }
 
     <span class="kw">async fn </span>make_validator_nodes(
@@ -2357,31 +2357,31 @@
 
     <span class="doccomment">/// Rotate the key of the chain.
     </span><span class="kw">pub async fn </span>rotate_key_pair(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key_pair: KeyPair) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
-        <span class="kw">let </span>new_owner = Owner(key_pair.public());
-        <span class="self">self</span>.known_key_pairs.insert(new_owner, key_pair);
-        <span class="self">self</span>.transfer_ownership(new_owner).<span class="kw">await
+        <span class="kw">let </span>new_public_key = key_pair.public();
+        <span class="self">self</span>.known_key_pairs.insert(new_public_key.into(), key_pair);
+        <span class="self">self</span>.transfer_ownership(new_public_key).<span class="kw">await
     </span>}
 
     <span class="doccomment">/// Transfer ownership of the chain.
-    </span><span class="kw">pub async fn </span>transfer_ownership(<span class="kw-2">&amp;mut </span><span class="self">self</span>, new_owner: Owner) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    </span><span class="kw">pub async fn </span>transfer_ownership(<span class="kw-2">&amp;mut </span><span class="self">self</span>, new_public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="self">self</span>.execute_operation(
             ApplicationId::System,
-            Operation::System(SystemOperation::ChangeOwner { new_owner }),
+            Operation::System(SystemOperation::ChangeOwner { new_public_key }),
         )
         .<span class="kw">await
     </span>}
 
     <span class="doccomment">/// Add another owner to the chain.
-    </span><span class="kw">pub async fn </span>share_ownership(<span class="kw-2">&amp;mut </span><span class="self">self</span>, new_owner: Owner) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    </span><span class="kw">pub async fn </span>share_ownership(<span class="kw-2">&amp;mut </span><span class="self">self</span>, new_public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>owner = <span class="self">self</span>.identity().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>public_key = <span class="self">self</span>.public_key().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.execute_block(
             messages,
             <span class="macro">vec!</span>[(
                 ApplicationId::System,
                 Operation::System(SystemOperation::ChangeMultipleOwners {
-                    new_owners: <span class="macro">vec!</span>[owner, new_owner],
+                    new_public_keys: <span class="macro">vec!</span>[public_key, new_public_key],
                 }),
             )],
         )
@@ -2389,7 +2389,7 @@
     </span>}
 
     <span class="doccomment">/// Open a new chain with a derived UID.
-    </span><span class="kw">pub async fn </span>open_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>, owner: Owner) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainId, Certificate)&gt; {
+    </span><span class="kw">pub async fn </span>open_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>, public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainId, Certificate)&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>id = ChainId::child(EffectId {
             chain_id: <span class="self">self</span>.chain_id,
@@ -2406,7 +2406,7 @@
                     ApplicationId::System,
                     Operation::System(SystemOperation::OpenChain {
                         id,
-                        owner,
+                        public_key,
                         committees,
                         admin_id: <span class="self">self</span>.admin_id,
                         epoch,

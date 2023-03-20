@@ -255,6 +255,9 @@
 <span id="255">255</span>
 <span id="256">256</span>
 <span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -276,6 +279,7 @@
     <span class="kw">fn </span>from(host: OperationContext) -&gt; <span class="self">Self </span>{
         contract::OperationContext {
             chain_id: host.chain_id.into(),
+            authenticated_signer: host.authenticated_signer.map(|owner| owner.<span class="number">0</span>.into()),
             height: host.height.<span class="number">0</span>,
             index: host
                 .index
@@ -289,6 +293,7 @@
     <span class="kw">fn </span>from(host: EffectContext) -&gt; <span class="self">Self </span>{
         contract::EffectContext {
             chain_id: host.chain_id.into(),
+            authenticated_signer: host.authenticated_signer.map(|owner| owner.<span class="number">0</span>.into()),
             height: host.height.<span class="number">0</span>,
             effect_id: host.effect_id.into(),
         }
@@ -338,6 +343,7 @@
     <span class="kw">fn </span>from(host: CalleeContext) -&gt; <span class="self">Self </span>{
         contract::CalleeContext {
             chain_id: host.chain_id.into(),
+            authenticated_signer: host.authenticated_signer.map(|owner| owner.<span class="number">0</span>.into()),
             authenticated_caller_id: host
                 .authenticated_caller_id
                 .map(contract::ApplicationId::from),

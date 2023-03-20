@@ -227,8 +227,8 @@
 
 </span><span class="kw">use </span>linera_base::{
     committee::{Committee, ValidatorState},
-    crypto::{CryptoHash, KeyPair},
-    data_types::{BlockHeight, ChainDescription, ChainId, Owner, Timestamp, ValidatorName},
+    crypto::{CryptoHash, KeyPair, PublicKey},
+    data_types::{BlockHeight, ChainDescription, ChainId, Timestamp, ValidatorName},
 };
 <span class="kw">use </span>linera_core::client::{ChainClient, ValidatorNodeProvider};
 <span class="kw">use </span>linera_execution::system::Balance;
@@ -409,7 +409,7 @@
 </span><span class="kw">pub struct </span>GenesisConfig {
     <span class="kw">pub </span>committee: CommitteeConfig,
     <span class="kw">pub </span>admin_id: ChainId,
-    <span class="kw">pub </span>chains: Vec&lt;(ChainDescription, Owner, Balance, Timestamp)&gt;,
+    <span class="kw">pub </span>chains: Vec&lt;(ChainDescription, PublicKey, Balance, Timestamp)&gt;,
 }
 
 <span class="kw">impl </span>Import <span class="kw">for </span>GenesisConfig {}
@@ -429,13 +429,13 @@
         </span>S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
         ViewError: From&lt;S::ContextError&gt;,
     {
-        <span class="kw">for </span>(description, owner, balance, timestamp) <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.chains {
+        <span class="kw">for </span>(description, public_key, balance, timestamp) <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.chains {
             store
                 .create_chain(
                     <span class="self">self</span>.committee.clone().into_committee(),
                     <span class="self">self</span>.admin_id,
                     <span class="kw-2">*</span>description,
-                    <span class="kw-2">*</span>owner,
+                    <span class="kw-2">*</span>public_key,
                     <span class="kw-2">*</span>balance,
                     <span class="kw-2">*</span>timestamp,
                 )

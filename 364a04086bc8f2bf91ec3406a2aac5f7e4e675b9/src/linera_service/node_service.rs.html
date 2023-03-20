@@ -536,6 +536,10 @@
 <span id="536">536</span>
 <span id="537">537</span>
 <span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
 </pre><pre class="rust"><code><span class="kw">use </span>async_graphql::{
     futures_util::Stream,
     http::GraphiQLSource,
@@ -554,6 +558,7 @@
 <span class="kw">use </span>futures::lock::Mutex;
 <span class="kw">use </span>linera_base::{
     committee::Committee,
+    crypto::PublicKey,
     data_types::{ChainId, Epoch, Owner},
 };
 <span class="kw">use </span>linera_chain::{data_types::Certificate, ChainStateView};
@@ -716,14 +721,14 @@
     </span><span class="kw">async fn </span>open_chain(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         id: ChainId,
-        owner: Owner,
+        public_key: PublicKey,
         admin_id: ChainId,
         epoch: Epoch,
         committees: BTreeMap&lt;Epoch, Committee&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, Error&gt; {
         <span class="kw">let </span>operation = SystemOperation::OpenChain {
             id,
-            owner,
+            public_key,
             admin_id,
             epoch,
             committees,
@@ -738,14 +743,17 @@
     </span>}
 
     <span class="doccomment">/// Changes the authentication key of the chain.
-    </span><span class="kw">async fn </span>change_owner(<span class="kw-2">&amp;</span><span class="self">self</span>, new_owner: Owner) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, Error&gt; {
-        <span class="kw">let </span>operation = SystemOperation::ChangeOwner { new_owner };
+    </span><span class="kw">async fn </span>change_owner(<span class="kw-2">&amp;</span><span class="self">self</span>, new_public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, Error&gt; {
+        <span class="kw">let </span>operation = SystemOperation::ChangeOwner { new_public_key };
         <span class="self">self</span>.execute_system_operation(operation).<span class="kw">await
     </span>}
 
     <span class="doccomment">/// Changes the authentication key of the chain.
-    </span><span class="kw">async fn </span>change_multiple_owners(<span class="kw-2">&amp;</span><span class="self">self</span>, new_owners: Vec&lt;Owner&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, Error&gt; {
-        <span class="kw">let </span>operation = SystemOperation::ChangeMultipleOwners { new_owners };
+    </span><span class="kw">async fn </span>change_multiple_owners(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        new_public_keys: Vec&lt;PublicKey&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, Error&gt; {
+        <span class="kw">let </span>operation = SystemOperation::ChangeMultipleOwners { new_public_keys };
         <span class="self">self</span>.execute_system_operation(operation).<span class="kw">await
     </span>}
 

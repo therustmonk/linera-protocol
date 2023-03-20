@@ -195,8 +195,8 @@
 
 </span><span class="kw">use </span><span class="kw">super</span>::writable_system <span class="kw">as </span>system;
 <span class="kw">use crate</span>::{
-    ApplicationCallResult, ApplicationId, ChannelName, CryptoHash, Destination, EffectId,
-    ExecutionResult, Session, SessionCallResult, SessionId,
+    base::{ApplicationId, ChannelName, CryptoHash, Destination, EffectId, SessionId},
+    ApplicationCallResult, ExecutionResult, Session, SessionCallResult,
 };
 <span class="kw">use </span>std::task::Poll;
 

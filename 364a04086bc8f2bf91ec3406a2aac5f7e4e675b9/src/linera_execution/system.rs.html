@@ -1069,7 +1069,7 @@
 <span class="kw">use </span>custom_debug_derive::Debug;
 <span class="kw">use </span>linera_base::{
     committee::Committee,
-    crypto::CryptoHash,
+    crypto::{CryptoHash, PublicKey},
     data_types::{ArithmeticError, ChainDescription, ChainId, EffectId, Epoch, Owner, Timestamp},
     ensure, hex_debug,
 };
@@ -1162,7 +1162,7 @@
     /// This will automatically subscribe to the future committees created by `admin_id`.
     </span>OpenChain {
         id: ChainId,
-        owner: Owner,
+        public_key: PublicKey,
         admin_id: ChainId,
         epoch: Epoch,
         committees: BTreeMap&lt;Epoch, Committee&gt;,
@@ -1170,9 +1170,9 @@
     <span class="doccomment">/// Closes the chain.
     </span>CloseChain,
     <span class="doccomment">/// Changes the authentication key of the chain.
-    </span>ChangeOwner { new_owner: Owner },
+    </span>ChangeOwner { new_public_key: PublicKey },
     <span class="doccomment">/// Changes the authentication key of the chain.
-    </span>ChangeMultipleOwners { new_owners: Vec&lt;Owner&gt; },
+    </span>ChangeMultipleOwners { new_public_keys: Vec&lt;PublicKey&gt; },
     <span class="doccomment">/// (admin chain only) Registers a new committee. This will notify the subscribers of
     /// the admin chain so that they can migrate to the new epoch (by accepting the
     /// notification as an &quot;incoming message&quot; in a next block).
@@ -1230,7 +1230,7 @@
     <span class="doccomment">/// Creates (or activate) a new chain by installing the given authentication key.
     </span>OpenChain {
         id: ChainId,
-        owner: Owner,
+        public_key: PublicKey,
         admin_id: ChainId,
         epoch: Epoch,
         committees: BTreeMap&lt;Epoch, Committee&gt;,
@@ -1505,7 +1505,7 @@
         <span class="kw">match </span>operation {
             OpenChain {
                 id,
-                owner,
+                public_key,
                 committees,
                 admin_id,
                 epoch,
@@ -1535,7 +1535,7 @@
                     <span class="bool-val">false</span>,
                     SystemEffect::OpenChain {
                         id: <span class="kw-2">*</span>id,
-                        owner: <span class="kw-2">*</span>owner,
+                        public_key: <span class="kw-2">*</span>public_key,
                         committees: committees.clone(),
                         admin_id: <span class="kw-2">*</span>admin_id,
                         epoch: <span class="kw-2">*</span>epoch,
@@ -1555,12 +1555,12 @@
                 );
                 result.effects.extend([e1, e2]);
             }
-            ChangeOwner { new_owner } =&gt; {
-                <span class="self">self</span>.ownership.set(ChainOwnership::single(<span class="kw-2">*</span>new_owner));
+            ChangeOwner { new_public_key } =&gt; {
+                <span class="self">self</span>.ownership.set(ChainOwnership::single(<span class="kw-2">*</span>new_public_key));
             }
-            ChangeMultipleOwners { new_owners } =&gt; {
+            ChangeMultipleOwners { new_public_keys } =&gt; {
                 <span class="self">self</span>.ownership
-                    .set(ChainOwnership::multiple(new_owners.clone()));
+                    .set(ChainOwnership::multiple(new_public_keys.iter().cloned()));
             }
             CloseChain =&gt; {
                 <span class="self">self</span>.ownership.set(ChainOwnership::default());
@@ -1919,7 +1919,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         effect_id: EffectId,
         chain_id: ChainId,
-        owner: Owner,
+        public_key: PublicKey,
         epoch: Epoch,
         committees: BTreeMap&lt;Epoch, Committee&gt;,
         admin_id: ChainId,
@@ -1941,7 +1941,7 @@
                 name: SystemChannel::Admin.name(),
             })
             .expect(<span class="string">&quot;serialization failed&quot;</span>);
-        <span class="self">self</span>.ownership.set(ChainOwnership::single(owner));
+        <span class="self">self</span>.ownership.set(ChainOwnership::single(public_key));
         <span class="self">self</span>.timestamp.set(timestamp);
     }
 

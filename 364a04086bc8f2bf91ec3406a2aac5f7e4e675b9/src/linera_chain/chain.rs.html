@@ -898,7 +898,7 @@
         <span class="kw">match </span><span class="kw-2">&amp;</span>effect {
             Effect::System(SystemEffect::OpenChain {
                 id,
-                owner,
+                public_key,
                 epoch,
                 committees,
                 admin_id,
@@ -907,7 +907,7 @@
                 </span><span class="self">self</span>.execution_state.system.open_chain(
                     effect_id,
                     <span class="kw-2">*</span>id,
-                    <span class="kw-2">*</span>owner,
+                    <span class="kw-2">*</span>public_key,
                     <span class="kw-2">*</span>epoch,
                     committees.clone(),
                     <span class="kw-2">*</span>admin_id,

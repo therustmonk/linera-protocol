@@ -342,29 +342,6 @@
 <span id="342">342</span>
 <span id="343">343</span>
 <span id="344">344</span>
-<span id="345">345</span>
-<span id="346">346</span>
-<span id="347">347</span>
-<span id="348">348</span>
-<span id="349">349</span>
-<span id="350">350</span>
-<span id="351">351</span>
-<span id="352">352</span>
-<span id="353">353</span>
-<span id="354">354</span>
-<span id="355">355</span>
-<span id="356">356</span>
-<span id="357">357</span>
-<span id="358">358</span>
-<span id="359">359</span>
-<span id="360">360</span>
-<span id="361">361</span>
-<span id="362">362</span>
-<span id="363">363</span>
-<span id="364">364</span>
-<span id="365">365</span>
-<span id="366">366</span>
-<span id="367">367</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -450,9 +427,10 @@
 </span><span class="attribute">#[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Debug, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>ValidatorName(<span class="kw">pub </span>PublicKey);
 
-<span class="doccomment">/// The owner of a chain.
+<span class="doccomment">/// The owner of a chain. This is currently the hash of the owner&#39;s public key used to
+/// verify signatures.
 </span><span class="attribute">#[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Debug, Serialize, Deserialize)]
-</span><span class="kw">pub struct </span>Owner(<span class="kw">pub </span>PublicKey);
+</span><span class="kw">pub struct </span>Owner(<span class="kw">pub </span>CryptoHash);
 
 <span class="doccomment">/// A number identifying the configuration of the chain (aka the committee).
 </span><span class="attribute">#[derive(
@@ -485,10 +463,10 @@
 <span class="attribute">#[derive(Debug, Error)]
 </span><span class="doccomment">/// An error type for arithmetic errors.
 </span><span class="kw">pub enum </span>ArithmeticError {
-    <span class="attribute">#[error(<span class="string">&quot;Sequence number overflow&quot;</span>)]
-    </span>SequenceOverflow,
-    <span class="attribute">#[error(<span class="string">&quot;Sequence number underflow&quot;</span>)]
-    </span>SequenceUnderflow,
+    <span class="attribute">#[error(<span class="string">&quot;Number overflow&quot;</span>)]
+    </span>Overflow,
+    <span class="attribute">#[error(<span class="string">&quot;Number underflow&quot;</span>)]
+    </span>Underflow,
 }
 
 <span class="kw">impl </span>std::fmt::Display <span class="kw">for </span>BlockHeight {
@@ -539,37 +517,25 @@
 
     <span class="attribute">#[inline]
     </span><span class="kw">pub fn </span>try_add_one(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;BlockHeight, ArithmeticError&gt; {
-        <span class="kw">let </span>val = <span class="self">self
-            </span>.<span class="number">0
-            </span>.checked_add(<span class="number">1</span>)
-            .ok_or(ArithmeticError::SequenceOverflow)<span class="question-mark">?</span>;
+        <span class="kw">let </span>val = <span class="self">self</span>.<span class="number">0</span>.checked_add(<span class="number">1</span>).ok_or(ArithmeticError::Overflow)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self</span>(val))
     }
 
     <span class="attribute">#[inline]
     </span><span class="kw">pub fn </span>try_sub_one(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;BlockHeight, ArithmeticError&gt; {
-        <span class="kw">let </span>val = <span class="self">self
-            </span>.<span class="number">0
-            </span>.checked_sub(<span class="number">1</span>)
-            .ok_or(ArithmeticError::SequenceUnderflow)<span class="question-mark">?</span>;
+        <span class="kw">let </span>val = <span class="self">self</span>.<span class="number">0</span>.checked_sub(<span class="number">1</span>).ok_or(ArithmeticError::Underflow)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self</span>(val))
     }
 
     <span class="attribute">#[inline]
     </span><span class="kw">pub fn </span>try_add_assign_one(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArithmeticError&gt; {
-        <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self
-            </span>.<span class="number">0
-            </span>.checked_add(<span class="number">1</span>)
-            .ok_or(ArithmeticError::SequenceOverflow)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self</span>.<span class="number">0</span>.checked_add(<span class="number">1</span>).ok_or(ArithmeticError::Overflow)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="attribute">#[inline]
     </span><span class="kw">pub fn </span>try_sub_assign_one(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArithmeticError&gt; {
-        <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self
-            </span>.<span class="number">0
-            </span>.checked_sub(<span class="number">1</span>)
-            .ok_or(ArithmeticError::SequenceUnderflow)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self</span>.<span class="number">0</span>.checked_sub(<span class="number">1</span>).ok_or(ArithmeticError::Underflow)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 }
@@ -582,37 +548,25 @@
 
     <span class="attribute">#[inline]
     </span><span class="kw">pub fn </span>try_add_one(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;RoundNumber, ArithmeticError&gt; {
-        <span class="kw">let </span>val = <span class="self">self
-            </span>.<span class="number">0
-            </span>.checked_add(<span class="number">1</span>)
-            .ok_or(ArithmeticError::SequenceOverflow)<span class="question-mark">?</span>;
+        <span class="kw">let </span>val = <span class="self">self</span>.<span class="number">0</span>.checked_add(<span class="number">1</span>).ok_or(ArithmeticError::Overflow)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self</span>(val))
     }
 
     <span class="attribute">#[inline]
     </span><span class="kw">pub fn </span>try_sub_one(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;RoundNumber, ArithmeticError&gt; {
-        <span class="kw">let </span>val = <span class="self">self
-            </span>.<span class="number">0
-            </span>.checked_sub(<span class="number">1</span>)
-            .ok_or(ArithmeticError::SequenceUnderflow)<span class="question-mark">?</span>;
+        <span class="kw">let </span>val = <span class="self">self</span>.<span class="number">0</span>.checked_sub(<span class="number">1</span>).ok_or(ArithmeticError::Underflow)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self</span>(val))
     }
 
     <span class="attribute">#[inline]
     </span><span class="kw">pub fn </span>try_add_assign_one(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArithmeticError&gt; {
-        <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self
-            </span>.<span class="number">0
-            </span>.checked_add(<span class="number">1</span>)
-            .ok_or(ArithmeticError::SequenceOverflow)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self</span>.<span class="number">0</span>.checked_add(<span class="number">1</span>).ok_or(ArithmeticError::Overflow)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="attribute">#[inline]
     </span><span class="kw">pub fn </span>try_sub_assign_one(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArithmeticError&gt; {
-        <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self
-            </span>.<span class="number">0
-            </span>.checked_sub(<span class="number">1</span>)
-            .ok_or(ArithmeticError::SequenceUnderflow)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self</span>.<span class="number">0</span>.checked_sub(<span class="number">1</span>).ok_or(ArithmeticError::Underflow)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 }
@@ -620,19 +574,13 @@
 <span class="kw">impl </span>Epoch {
     <span class="attribute">#[inline]
     </span><span class="kw">pub fn </span>try_add_one(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArithmeticError&gt; {
-        <span class="kw">let </span>val = <span class="self">self
-            </span>.<span class="number">0
-            </span>.checked_add(<span class="number">1</span>)
-            .ok_or(ArithmeticError::SequenceOverflow)<span class="question-mark">?</span>;
+        <span class="kw">let </span>val = <span class="self">self</span>.<span class="number">0</span>.checked_add(<span class="number">1</span>).ok_or(ArithmeticError::Overflow)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self</span>(val))
     }
 
     <span class="attribute">#[inline]
     </span><span class="kw">pub fn </span>try_add_assign_one(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArithmeticError&gt; {
-        <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self
-            </span>.<span class="number">0
-            </span>.checked_add(<span class="number">1</span>)
-            .ok_or(ArithmeticError::SequenceOverflow)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self</span>.<span class="number">0</span>.checked_add(<span class="number">1</span>).ok_or(ArithmeticError::Overflow)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 }
@@ -669,7 +617,13 @@
 
 <span class="kw">impl </span>From&lt;PublicKey&gt; <span class="kw">for </span>Owner {
     <span class="kw">fn </span>from(value: PublicKey) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>(value)
+        <span class="self">Self</span>(CryptoHash::new(<span class="kw-2">&amp;</span>value))
+    }
+}
+
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>PublicKey&gt; <span class="kw">for </span>Owner {
+    <span class="kw">fn </span>from(value: <span class="kw-2">&amp;</span>PublicKey) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(CryptoHash::new(value))
     }
 }
 
@@ -677,7 +631,7 @@
     <span class="kw">type </span><span class="prelude-val">Err </span>= CryptoError;
 
     <span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
-        <span class="prelude-val">Ok</span>(Owner(PublicKey::from_str(s)<span class="question-mark">?</span>))
+        <span class="prelude-val">Ok</span>(Owner(CryptoHash::from_str(s)<span class="question-mark">?</span>))
     }
 }
 

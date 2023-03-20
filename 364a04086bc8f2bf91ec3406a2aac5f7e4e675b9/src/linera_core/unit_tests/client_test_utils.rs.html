@@ -540,6 +540,7 @@
 <span id="540">540</span>
 <span id="541">541</span>
 <span id="542">542</span>
+<span id="543">543</span>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     client::{ChainClient, ValidatorNodeProvider},
     data_types::<span class="kw-2">*</span>,
@@ -666,7 +667,7 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="prelude-ty">Result</span>&lt;ChainInfoResponse, NodeError&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>validator = <span class="self">self</span>.<span class="number">0</span>.lock().<span class="kw">await</span>;
         <span class="kw">let </span>result = <span class="kw">if </span>validator.is_faulty {
-            <span class="prelude-val">Err</span>(ArithmeticError::SequenceOverflow.into())
+            <span class="prelude-val">Err</span>(ArithmeticError::Overflow.into())
         } <span class="kw">else </span>{
             validator.state.handle_block_proposal(proposal).<span class="kw">await
         </span>};
@@ -773,15 +774,15 @@
 
 <span class="kw">struct </span>GenesisAccount {
     description: ChainDescription,
-    owner: Owner,
+    public_key: PublicKey,
     balance: Balance,
 }
 
 <span class="kw">impl </span>GenesisStoreBuilder {
-    <span class="kw">fn </span>add(<span class="kw-2">&amp;mut </span><span class="self">self</span>, description: ChainDescription, owner: Owner, balance: Balance) {
+    <span class="kw">fn </span>add(<span class="kw-2">&amp;mut </span><span class="self">self</span>, description: ChainDescription, public_key: PublicKey, balance: Balance) {
         <span class="self">self</span>.accounts.push(GenesisAccount {
             description,
-            owner,
+            public_key,
             balance,
         })
     }
@@ -797,7 +798,7 @@
                     initial_committee.clone(),
                     admin_id,
                     account.description,
-                    account.owner,
+                    account.public_key,
                     account.balance,
                     Timestamp::from(<span class="number">0</span>),
                 )
@@ -867,9 +868,10 @@
         balance: Balance,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ChainClient&lt;NodeProvider&lt;B::Store&gt;, B::Store&gt;, anyhow::Error&gt; {
         <span class="kw">let </span>key_pair = KeyPair::generate();
-        <span class="kw">let </span>owner = Owner(key_pair.public());
+        <span class="kw">let </span>public_key = key_pair.public();
         <span class="comment">// Remember what&#39;s in the genesis store for future clients to join.
-        </span><span class="self">self</span>.genesis_store_builder.add(description, owner, balance);
+        </span><span class="self">self</span>.genesis_store_builder
+            .add(description, public_key, balance);
         <span class="kw">for </span>(name, store) <span class="kw">in </span><span class="self">self</span>.validator_stores.iter_mut() {
             <span class="kw">if </span><span class="self">self</span>.faulty_validators.contains(name) {
                 store
@@ -877,7 +879,7 @@
                         <span class="self">self</span>.initial_committee.clone(),
                         <span class="self">self</span>.admin_id,
                         description,
-                        owner,
+                        public_key,
                         Balance::from(<span class="number">0</span>),
                         Timestamp::from(<span class="number">0</span>),
                     )
@@ -889,7 +891,7 @@
                         <span class="self">self</span>.initial_committee.clone(),
                         <span class="self">self</span>.admin_id,
                         description,
-                        owner,
+                        public_key,
                         balance,
                         Timestamp::from(<span class="number">0</span>),
                     )
@@ -903,7 +905,7 @@
                     <span class="self">self</span>.initial_committee.clone(),
                     <span class="self">self</span>.admin_id,
                     description,
-                    owner,
+                    public_key,
                     balance,
                     Timestamp::from(<span class="number">0</span>),
                 )

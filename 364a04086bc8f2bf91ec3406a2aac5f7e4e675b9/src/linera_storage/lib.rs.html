@@ -239,6 +239,8 @@
 <span id="239">239</span>
 <span id="240">240</span>
 <span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -258,8 +260,8 @@
 <span class="kw">use </span>futures::future;
 <span class="kw">use </span>linera_base::{
     committee::Committee,
-    crypto::CryptoHash,
-    data_types::{ChainDescription, ChainId, Epoch, Owner, Timestamp},
+    crypto::{CryptoHash, PublicKey},
+    data_types::{ChainDescription, ChainId, Epoch, Timestamp},
 };
 <span class="kw">use </span>linera_chain::{
     data_types::{Certificate, HashedValue},
@@ -359,7 +361,7 @@
         committee: Committee,
         admin_id: ChainId,
         description: ChainDescription,
-        owner: Owner,
+        public_key: PublicKey,
         balance: Balance,
         timestamp: Timestamp,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt;
@@ -378,7 +380,9 @@
             .committees
             .get_mut()
             .insert(Epoch::from(<span class="number">0</span>), committee);
-        system_state.ownership.set(ChainOwnership::single(owner));
+        system_state
+            .ownership
+            .set(ChainOwnership::single(public_key));
         system_state.balance.set(balance);
         system_state.timestamp.set(timestamp);
         <span class="kw">let </span>state_hash = chain.execution_state.crypto_hash().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -386,7 +390,7 @@
         chain
             .manager
             .get_mut()
-            .reset(<span class="kw-2">&amp;</span>ChainOwnership::single(owner));
+            .reset(<span class="kw-2">&amp;</span>ChainOwnership::single(public_key));
         chain.save().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }

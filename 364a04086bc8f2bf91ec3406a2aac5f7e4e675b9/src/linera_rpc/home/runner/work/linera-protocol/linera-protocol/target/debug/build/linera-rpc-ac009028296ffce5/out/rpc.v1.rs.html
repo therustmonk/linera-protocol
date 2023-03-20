@@ -1866,8 +1866,8 @@
 }
 <span class="attribute">#[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>Owner {
-    <span class="attribute">#[prost(message, optional, tag = <span class="string">&quot;1&quot;</span>)]
-    </span><span class="kw">pub </span>inner: ::core::option::Option&lt;PublicKey&gt;,
+    <span class="attribute">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;1&quot;</span>)]
+    </span><span class="kw">pub </span>bytes: ::prost::alloc::vec::Vec&lt;u8&gt;,
 }
 <span class="attribute">#[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>Signature {
