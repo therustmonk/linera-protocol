@@ -540,6 +540,9 @@
 <span id="540">540</span>
 <span id="541">541</span>
 <span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
 </pre><pre class="rust"><code><span class="kw">use </span>async_graphql::{
     futures_util::Stream,
     http::GraphiQLSource,
@@ -576,6 +579,7 @@
 <span class="kw">use </span>serde_json::Value;
 <span class="kw">use </span>std::{collections::BTreeMap, net::SocketAddr, num::NonZeroU16, sync::Arc};
 <span class="kw">use </span>thiserror::Error <span class="kw">as </span>ThisError;
+<span class="kw">use </span>tower_http::cors::CorsLayer;
 <span class="kw">use </span>tracing::{error, info};
 
 <span class="doccomment">/// Our root GraphQL query type.
@@ -1069,7 +1073,9 @@
             .route(<span class="string">&quot;/applications/:id&quot;</span>, applications_handler)
             .route_service(<span class="string">&quot;/ws&quot;</span>, GraphQLSubscription::new(schema.clone()))
             .layer(Extension(client))
-            .layer(Extension(<span class="self">self</span>.port));
+            .layer(Extension(<span class="self">self</span>.port))
+            <span class="comment">// TODO(#551): Provide application authentication.
+            </span>.layer(CorsLayer::permissive());
 
         <span class="kw">let </span>port = <span class="self">self</span>.port.get();
 
