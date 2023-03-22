@@ -93,6 +93,9 @@
 <span id="93">93</span>
 <span id="94">94</span>
 <span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -108,8 +111,11 @@
 <span class="doccomment">/// The definitions used for the memory/rocksdb/dynamo_db
 </span><span class="kw">pub mod </span>common;
 
-<span class="doccomment">/// The main definitions.
+<span class="doccomment">/// The main definitions
 </span><span class="kw">pub mod </span>views;
+
+<span class="doccomment">/// The lru caching
+</span><span class="kw">pub mod </span>lru_caching;
 
 <span class="doccomment">/// The register_view
 </span><span class="kw">pub mod </span>register_view;

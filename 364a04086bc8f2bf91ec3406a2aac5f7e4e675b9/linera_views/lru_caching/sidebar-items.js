@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["LruCachingKeyValueClient","We take a client, a maximum size and build a LRU based system."]],"type":[["LruCachingMemoryContext","A context that stores all values in memory."]]};

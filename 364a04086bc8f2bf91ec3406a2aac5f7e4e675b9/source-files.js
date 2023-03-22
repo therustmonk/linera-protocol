@@ -158,8 +158,9 @@ var sourcesIndex = JSON.parse('{\
 "linera_sdk":["",[["contract",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs"]],["service",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs"]]],["base.rs","crypto.rs","ensure.rs","exported_future.rs","extensions.rs","lib.rs","log.rs"]],\
 "linera_service":["",[],["config.rs","grpc_proxy.rs","lib.rs","node_service.rs","storage.rs","tracker.rs"]],\
 "linera_storage":["",[],["chain_guards.rs","dynamo_db.rs","lib.rs","memory.rs","rocksdb.rs"]],\
-"linera_views":["",[["test_utils",[],["mod.rs"]]],["batch.rs","collection_view.rs","common.rs","dynamo_db.rs","hashable_wrapper.rs","key_value_store_view.rs","lib.rs","localstack.rs","log_view.rs","map_view.rs","memory.rs","queue_view.rs","reentrant_collection_view.rs","register_view.rs","rocksdb.rs","set_view.rs","views.rs"]],\
+"linera_views":["",[["test_utils",[],["mod.rs"]]],["batch.rs","collection_view.rs","common.rs","dynamo_db.rs","hashable_wrapper.rs","key_value_store_view.rs","lib.rs","localstack.rs","log_view.rs","lru_caching.rs","map_view.rs","memory.rs","queue_view.rs","reentrant_collection_view.rs","register_view.rs","rocksdb.rs","set_view.rs","views.rs"]],\
 "linera_views_derive":["",[],["lib.rs","util.rs"]],\
+"linked_hash_map":["",[],["lib.rs"]],\
 "linux_raw_sys":["",[["x86_64",[],["errno.rs","general.rs","ioctl.rs"]]],["lib.rs"]],\
 "lock_api":["",[],["lib.rs","mutex.rs","remutex.rs","rwlock.rs"]],\
 "log":["",[],["lib.rs","macros.rs"]],\
