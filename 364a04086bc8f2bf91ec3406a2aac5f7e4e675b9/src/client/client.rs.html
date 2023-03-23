@@ -1022,6 +1022,9 @@
 <span id="1022">1022</span>
 <span id="1023">1023</span>
 <span id="1024">1024</span>
+<span id="1025">1025</span>
+<span id="1026">1026</span>
+<span id="1027">1027</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1998,7 +2001,10 @@
 
 <span class="attribute">#[tokio::main]
 </span><span class="kw">async fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;(), anyhow::Error&gt; {
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt()
+        .with_writer(std::io::stderr)
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
     <span class="kw">let </span>options = ClientOptions::from_args();
     <span class="kw">let </span><span class="kw-2">mut </span>context = ClientContext::from_options(<span class="kw-2">&amp;</span>options);
     <span class="kw">match </span>options.command {
