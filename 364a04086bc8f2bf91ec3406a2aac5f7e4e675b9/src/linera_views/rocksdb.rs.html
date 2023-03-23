@@ -281,7 +281,7 @@
                 <span class="kw">if </span>get_upper_bound(key_prefix) == Bound::Unbounded {
                     <span class="kw">for </span>short_key <span class="kw">in </span><span class="self">self</span>.find_keys_by_prefix(key_prefix).<span class="kw">await</span><span class="question-mark">? </span>{
                         <span class="kw">let </span><span class="kw-2">mut </span>key = key_prefix.clone();
-                        key.extend_from_slice(<span class="kw-2">&amp;</span>short_key);
+                        key.extend(short_key);
                         keys.push(key);
                     }
                 }

@@ -277,6 +277,65 @@
 <span id="277">277</span>
 <span id="278">278</span>
 <span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -288,12 +347,16 @@
 <span class="kw">use </span>async_lock::Mutex;
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>serde::{de::DeserializeOwned, Serialize};
-<span class="kw">use </span>std::{collections::VecDeque, fmt::Debug, ops::Range};
+<span class="kw">use </span>std::{
+    collections::{vec_deque::IterMut, VecDeque},
+    fmt::Debug,
+    ops::Range,
+};
 
 <span class="doccomment">/// Key tags to create the sub-keys of a QueueView on top of the base key.
 </span><span class="attribute">#[repr(u8)]
 </span><span class="kw">enum </span>KeyTag {
-    <span class="doccomment">/// Prefix for the storing of the variable stored_count
+    <span class="doccomment">/// Prefix for the storing of the variable stored_indices
     </span>Store = MIN_VIEW_TAG,
     <span class="doccomment">/// Prefix for the indices of the log
     </span>Index,
@@ -307,6 +370,7 @@
     context: C,
     stored_indices: Range&lt;usize&gt;,
     front_delete_count: usize,
+    was_cleared: bool,
     new_back_values: VecDeque&lt;T&gt;,
     stored_hash: <span class="prelude-ty">Option</span>&lt;HasherOutput&gt;,
     hash: Mutex&lt;<span class="prelude-ty">Option</span>&lt;HasherOutput&gt;&gt;,
@@ -332,6 +396,7 @@
             context,
             stored_indices,
             front_delete_count: <span class="number">0</span>,
+            was_cleared: <span class="bool-val">false</span>,
             new_back_values: VecDeque::new(),
             stored_hash: hash,
             hash: Mutex::new(hash),
@@ -339,17 +404,23 @@
     }
 
     <span class="kw">fn </span>rollback(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.was_cleared = <span class="bool-val">false</span>;
         <span class="self">self</span>.front_delete_count = <span class="number">0</span>;
         <span class="self">self</span>.new_back_values.clear();
         <span class="kw-2">*</span><span class="self">self</span>.hash.get_mut() = <span class="self">self</span>.stored_hash;
     }
 
     <span class="kw">fn </span>flush(<span class="kw-2">&amp;mut </span><span class="self">self</span>, batch: <span class="kw-2">&amp;mut </span>Batch) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; {
-        <span class="kw">if </span><span class="self">self</span>.front_delete_count &gt; <span class="number">0 </span>{
+        <span class="kw">let </span><span class="kw-2">mut </span>save_stored_indices = <span class="bool-val">false</span>;
+        <span class="kw">if </span><span class="self">self</span>.stored_count() == <span class="number">0 </span>{
+            <span class="kw">let </span>key_prefix = <span class="self">self</span>.context.base_tag(KeyTag::Index <span class="kw">as </span>u8);
+            batch.delete_key_prefix(key_prefix);
+            <span class="self">self</span>.stored_indices = Range::default();
+            save_stored_indices = <span class="bool-val">true</span>;
+        } <span class="kw">else if </span><span class="self">self</span>.front_delete_count &gt; <span class="number">0 </span>{
             <span class="kw">let </span>deletion_range = <span class="self">self</span>.stored_indices.clone().take(<span class="self">self</span>.front_delete_count);
             <span class="self">self</span>.stored_indices.start += <span class="self">self</span>.front_delete_count;
-            <span class="kw">let </span>key = <span class="self">self</span>.context.base_tag(KeyTag::Store <span class="kw">as </span>u8);
-            batch.put_key_value(key, <span class="kw-2">&amp;</span><span class="self">self</span>.stored_indices)<span class="question-mark">?</span>;
+            save_stored_indices = <span class="bool-val">true</span>;
             <span class="kw">for </span>index <span class="kw">in </span>deletion_range {
                 <span class="kw">let </span>key = <span class="self">self</span>.context.derive_tag_key(KeyTag::Index <span class="kw">as </span>u8, <span class="kw-2">&amp;</span>index)<span class="question-mark">?</span>;
                 batch.delete_key(key);
@@ -363,11 +434,15 @@
                 batch.put_key_value(key, value)<span class="question-mark">?</span>;
                 <span class="self">self</span>.stored_indices.end += <span class="number">1</span>;
             }
-            <span class="kw">let </span>key = <span class="self">self</span>.context.base_tag(KeyTag::Store <span class="kw">as </span>u8);
-            batch.put_key_value(key, <span class="kw-2">&amp;</span><span class="self">self</span>.stored_indices)<span class="question-mark">?</span>;
+            save_stored_indices = <span class="bool-val">true</span>;
             <span class="self">self</span>.new_back_values.clear();
         }
+        <span class="kw">if </span>save_stored_indices {
+            <span class="kw">let </span>key = <span class="self">self</span>.context.base_tag(KeyTag::Store <span class="kw">as </span>u8);
+            batch.put_key_value(key, <span class="kw-2">&amp;</span><span class="self">self</span>.stored_indices)<span class="question-mark">?</span>;
+        }
         <span class="self">self</span>.front_delete_count = <span class="number">0</span>;
+        <span class="self">self</span>.was_cleared = <span class="bool-val">false</span>;
         <span class="kw">let </span>hash = <span class="kw-2">*</span><span class="self">self</span>.hash.get_mut();
         <span class="kw">if </span><span class="self">self</span>.stored_hash != hash {
             <span class="kw">let </span>key = <span class="self">self</span>.context.base_tag(KeyTag::Hash <span class="kw">as </span>u8);
@@ -385,13 +460,23 @@
     }
 
     <span class="kw">fn </span>clear(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="self">self</span>.front_delete_count = <span class="self">self</span>.stored_indices.len();
+        <span class="self">self</span>.was_cleared = <span class="bool-val">true</span>;
         <span class="self">self</span>.new_back_values.clear();
         <span class="kw-2">*</span><span class="self">self</span>.hash.get_mut() = <span class="prelude-val">None</span>;
     }
 }
 
-<span class="kw">impl</span>&lt;C, T&gt; QueueView&lt;C, T&gt;
+<span class="kw">impl</span>&lt;C, T&gt; QueueView&lt;C, T&gt; {
+    <span class="kw">fn </span>stored_count(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="kw">if </span><span class="self">self</span>.was_cleared {
+            <span class="number">0
+        </span>} <span class="kw">else </span>{
+            <span class="self">self</span>.stored_indices.len() - <span class="self">self</span>.front_delete_count
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, C, T&gt; QueueView&lt;C, T&gt;
 <span class="kw">where
     </span>C: Context + Send + Sync,
     ViewError: From&lt;C::Error&gt;,
@@ -404,7 +489,7 @@
 
     <span class="doccomment">/// Read the front value, if any.
     </span><span class="kw">pub async fn </span>front(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;T&gt;, ViewError&gt; {
-        <span class="kw">let </span>stored_remainder = <span class="self">self</span>.stored_indices.len() - <span class="self">self</span>.front_delete_count;
+        <span class="kw">let </span>stored_remainder = <span class="self">self</span>.stored_count();
         <span class="kw">let </span>value = <span class="kw">if </span>stored_remainder &gt; <span class="number">0 </span>{
             <span class="self">self</span>.get(<span class="self">self</span>.stored_indices.end - stored_remainder).<span class="kw">await</span><span class="question-mark">?
         </span>} <span class="kw">else </span>{
@@ -417,9 +502,7 @@
     </span><span class="kw">pub async fn </span>back(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;T&gt;, ViewError&gt; {
         <span class="kw">let </span>value = <span class="kw">match </span><span class="self">self</span>.new_back_values.back() {
             <span class="prelude-val">Some</span>(value) =&gt; <span class="prelude-val">Some</span>(value.clone()),
-            <span class="prelude-val">None </span><span class="kw">if </span><span class="self">self</span>.stored_indices.len() &gt; <span class="self">self</span>.front_delete_count =&gt; {
-                <span class="self">self</span>.get(<span class="self">self</span>.stored_indices.end - <span class="number">1</span>).<span class="kw">await</span><span class="question-mark">?
-            </span>}
+            <span class="prelude-val">None </span><span class="kw">if </span><span class="self">self</span>.stored_count() &gt; <span class="number">0 </span>=&gt; <span class="self">self</span>.get(<span class="self">self</span>.stored_indices.end - <span class="number">1</span>).<span class="kw">await</span><span class="question-mark">?</span>,
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         };
         <span class="prelude-val">Ok</span>(value)
@@ -428,7 +511,7 @@
     <span class="doccomment">/// Delete the front value, if any.
     </span><span class="kw">pub fn </span>delete_front(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw-2">*</span><span class="self">self</span>.hash.get_mut() = <span class="prelude-val">None</span>;
-        <span class="kw">if </span><span class="self">self</span>.front_delete_count &lt; <span class="self">self</span>.stored_indices.len() {
+        <span class="kw">if </span><span class="self">self</span>.stored_count() &gt; <span class="number">0 </span>{
             <span class="self">self</span>.front_delete_count += <span class="number">1</span>;
         } <span class="kw">else </span>{
             <span class="self">self</span>.new_back_values.pop_front();
@@ -443,7 +526,7 @@
 
     <span class="doccomment">/// Read the size of the queue.
     </span><span class="kw">pub fn </span>count(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="self">self</span>.stored_indices.len() - <span class="self">self</span>.front_delete_count + <span class="self">self</span>.new_back_values.len()
+        <span class="self">self</span>.stored_count() + <span class="self">self</span>.new_back_values.len()
     }
 
     <span class="doccomment">/// Obtain the extra data.
@@ -473,17 +556,21 @@
         }
         <span class="kw">let </span><span class="kw-2">mut </span>values = Vec::new();
         values.reserve(count);
-        <span class="kw">let </span>stored_remainder = <span class="self">self</span>.stored_indices.len() - <span class="self">self</span>.front_delete_count;
-        <span class="kw">let </span>start = <span class="self">self</span>.stored_indices.end - stored_remainder;
-        <span class="kw">if </span>count &lt;= stored_remainder {
-            values.extend(<span class="self">self</span>.read_context(start..(start + count)).<span class="kw">await</span><span class="question-mark">?</span>);
+        <span class="kw">if </span>!<span class="self">self</span>.was_cleared {
+            <span class="kw">let </span>stored_remainder = <span class="self">self</span>.stored_count();
+            <span class="kw">let </span>start = <span class="self">self</span>.stored_indices.end - stored_remainder;
+            <span class="kw">if </span>count &lt;= stored_remainder {
+                values.extend(<span class="self">self</span>.read_context(start..(start + count)).<span class="kw">await</span><span class="question-mark">?</span>);
+            } <span class="kw">else </span>{
+                values.extend(<span class="self">self</span>.read_context(start..<span class="self">self</span>.stored_indices.end).<span class="kw">await</span><span class="question-mark">?</span>);
+                values.extend(
+                    <span class="self">self</span>.new_back_values
+                        .range(<span class="number">0</span>..(count - stored_remainder))
+                        .cloned(),
+                );
+            }
         } <span class="kw">else </span>{
-            values.extend(<span class="self">self</span>.read_context(start..<span class="self">self</span>.stored_indices.end).<span class="kw">await</span><span class="question-mark">?</span>);
-            values.extend(
-                <span class="self">self</span>.new_back_values
-                    .range(<span class="number">0</span>..(count - stored_remainder))
-                    .cloned(),
-            );
+            values.extend(<span class="self">self</span>.new_back_values.range(<span class="number">0</span>..count).cloned());
         }
         <span class="prelude-val">Ok</span>(values)
     }
@@ -499,7 +586,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>values = Vec::new();
         values.reserve(count);
         <span class="kw">let </span>new_back_len = <span class="self">self</span>.new_back_values.len();
-        <span class="kw">if </span>count &lt;= new_back_len {
+        <span class="kw">if </span>count &lt;= new_back_len || <span class="self">self</span>.was_cleared {
             values.extend(
                 <span class="self">self</span>.new_back_values
                     .range((new_back_len - count)..new_back_len)
@@ -513,12 +600,43 @@
         <span class="prelude-val">Ok</span>(values)
     }
 
+    <span class="doccomment">/// Read all the elements
+    </span><span class="kw">pub async fn </span>elements(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;T&gt;, ViewError&gt; {
+        <span class="kw">let </span>count = <span class="self">self</span>.count();
+        <span class="self">self</span>.read_front(count).<span class="kw">await
+    </span>}
+
     <span class="kw">async fn </span>compute_hash(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;&lt;sha3::Sha3_256 <span class="kw">as </span>Hasher&gt;::Output, ViewError&gt; {
         <span class="kw">let </span>count = <span class="self">self</span>.count();
         <span class="kw">let </span>elements = <span class="self">self</span>.read_front(count).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>hasher = sha3::Sha3_256::default();
         hasher.update_with_bcs_bytes(<span class="kw-2">&amp;</span>elements)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(hasher.finalize())
+    }
+
+    <span class="kw">async fn </span>load_all(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; {
+        <span class="kw">if </span>!<span class="self">self</span>.was_cleared {
+            <span class="kw">let </span>stored_remainder = <span class="self">self</span>.stored_count();
+            <span class="kw">let </span>start = <span class="self">self</span>.stored_indices.end - stored_remainder;
+            <span class="kw">let </span>elements = <span class="self">self</span>.read_context(start..<span class="self">self</span>.stored_indices.end).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>shift = <span class="self">self</span>.stored_indices.end - start;
+            <span class="kw">for </span>elt <span class="kw">in </span>elements {
+                <span class="self">self</span>.new_back_values.push_back(elt);
+            }
+            <span class="self">self</span>.new_back_values.rotate_right(shift);
+            <span class="comment">// All indices are being deleted at the next flush. This is because they are deleted either:
+            // * Because a self.front_delete_count forces them to be removed
+            // * Or because loading them means that their value can be changed which invalidates
+            //   the entries on storage
+            </span><span class="self">self</span>.was_cleared = <span class="bool-val">true</span>;
+        }
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="doccomment">/// Get a mutable iterator on the entries of the queue
+    </span><span class="kw">pub async fn </span>iter_mut(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;IterMut&lt;<span class="lifetime">&#39;a</span>, T&gt;, ViewError&gt; {
+        <span class="self">self</span>.load_all().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.new_back_values.iter_mut())
     }
 }
 

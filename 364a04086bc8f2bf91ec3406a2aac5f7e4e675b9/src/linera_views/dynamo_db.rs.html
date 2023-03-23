@@ -1316,8 +1316,8 @@
     <span class="comment">// We used the value 0 because it does not collide with other key values.
     // since other tags are starting from 1.
     </span><span class="kw">let </span><span class="kw-2">mut </span>key = base_key.to_vec();
-    key.extend_from_slice(<span class="kw-2">&amp;</span>[JOURNAL_TAG]);
-    key.extend_from_slice(<span class="kw-2">&amp;</span>[tag]);
+    key.extend([JOURNAL_TAG]);
+    key.extend([tag]);
     bcs::serialize_into(<span class="kw-2">&amp;mut </span>key, <span class="kw-2">&amp;</span>pos)<span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>(key)
 }

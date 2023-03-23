@@ -459,15 +459,6 @@
 <span id="459">459</span>
 <span id="460">460</span>
 <span id="461">461</span>
-<span id="462">462</span>
-<span id="463">463</span>
-<span id="464">464</span>
-<span id="465">465</span>
-<span id="466">466</span>
-<span id="467">467</span>
-<span id="468">468</span>
-<span id="469">469</span>
-<span id="470">470</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -714,9 +705,6 @@
     <span class="doccomment">/// Obtain the short `Vec&lt;u8&gt;` key from the key by serialization
     </span><span class="kw">fn </span>derive_short_key&lt;I: Serialize + <span class="question-mark">?</span>Sized&gt;(index: <span class="kw-2">&amp;</span>I) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Obtain the `Vec&lt;u8&gt;` key from the key by appending to the base_key
-    </span><span class="kw">fn </span>derive_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, index: <span class="kw-2">&amp;</span>[u8]) -&gt; Vec&lt;u8&gt;;
-
     <span class="doccomment">/// Deserialize `value_byte`.
     </span><span class="kw">fn </span>deserialize_value&lt;Item: DeserializeOwned&gt;(bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Item, <span class="self">Self</span>::Error&gt;;
 
@@ -784,14 +772,14 @@
     <span class="kw">fn </span>base_tag(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: u8) -&gt; Vec&lt;u8&gt; {
         <span class="macro">assert!</span>(tag &gt;= MIN_VIEW_TAG, <span class="string">&quot;tag should be at least MIN_VIEW_TAG&quot;</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>key = <span class="self">self</span>.base_key.clone();
-        key.extend_from_slice(<span class="kw-2">&amp;</span>[tag]);
+        key.extend([tag]);
         key
     }
 
     <span class="kw">fn </span>base_tag_index(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: u8, index: <span class="kw-2">&amp;</span>[u8]) -&gt; Vec&lt;u8&gt; {
         <span class="macro">assert!</span>(tag &gt;= MIN_VIEW_TAG, <span class="string">&quot;tag should be at least MIN_VIEW_TAG&quot;</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>key = <span class="self">self</span>.base_key.clone();
-        key.extend_from_slice(<span class="kw-2">&amp;</span>[tag]);
+        key.extend([tag]);
         key.extend_from_slice(index);
         key
     }
@@ -809,7 +797,7 @@
     <span class="kw">fn </span>derive_tag_key&lt;I: Serialize&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: u8, index: <span class="kw-2">&amp;</span>I) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, <span class="self">Self</span>::Error&gt; {
         <span class="macro">assert!</span>(tag &gt;= MIN_VIEW_TAG, <span class="string">&quot;tag should be at least MIN_VIEW_TAG&quot;</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>key = <span class="self">self</span>.base_key.clone();
-        key.extend_from_slice(<span class="kw-2">&amp;</span>[tag]);
+        key.extend([tag]);
         bcs::serialize_into(<span class="kw-2">&amp;mut </span>key, index)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(key)
     }
@@ -818,12 +806,6 @@
         <span class="kw">let </span><span class="kw-2">mut </span>key = Vec::new();
         bcs::serialize_into(<span class="kw-2">&amp;mut </span>key, index)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(key)
-    }
-
-    <span class="kw">fn </span>derive_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, index: <span class="kw-2">&amp;</span>[u8]) -&gt; Vec&lt;u8&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>key = <span class="self">self</span>.base_key.clone();
-        key.extend_from_slice(index);
-        key
     }
 
     <span class="kw">fn </span>deserialize_value&lt;Item: DeserializeOwned&gt;(bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Item, <span class="self">Self</span>::Error&gt; {
