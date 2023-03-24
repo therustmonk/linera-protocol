@@ -249,15 +249,6 @@
 <span id="249">249</span>
 <span id="250">250</span>
 <span id="251">251</span>
-<span id="252">252</span>
-<span id="253">253</span>
-<span id="254">254</span>
-<span id="255">255</span>
-<span id="256">256</span>
-<span id="257">257</span>
-<span id="258">258</span>
-<span id="259">259</span>
-<span id="260">260</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -270,10 +261,10 @@
 
 </span><span class="kw">use super</span>::{contract, queryable_system, service, writable_system};
 <span class="kw">use crate</span>::{
-    system::Balance, CallResult, CalleeContext, EffectContext, EffectId, OperationContext,
-    QueryContext, SessionId, UserApplicationId,
+    CallResult, CalleeContext, EffectContext, EffectId, OperationContext, QueryContext, SessionId,
+    UserApplicationId,
 };
-<span class="kw">use </span>linera_base::{crypto::CryptoHash, data_types::ChainId};
+<span class="kw">use </span>linera_base::{crypto::CryptoHash, data_types::Balance, identifiers::ChainId};
 
 <span class="kw">impl </span>From&lt;OperationContext&gt; <span class="kw">for </span>contract::OperationContext {
     <span class="kw">fn </span>from(host: OperationContext) -&gt; <span class="self">Self </span>{
@@ -305,10 +296,7 @@
         queryable_system::EffectId {
             chain_id: host.chain_id.into(),
             height: host.height.<span class="number">0</span>,
-            index: host
-                .index
-                .try_into()
-                .expect(<span class="string">&quot;Effect index should fit in a `u64`&quot;</span>),
+            index: host.index,
         }
     }
 }
@@ -318,10 +306,7 @@
         writable_system::EffectId {
             chain_id: host.chain_id.into(),
             height: host.height.<span class="number">0</span>,
-            index: host
-                .index
-                .try_into()
-                .expect(<span class="string">&quot;Effect index should fit in a `u64`&quot;</span>),
+            index: host.index,
         }
     }
 }
@@ -331,10 +316,7 @@
         contract::EffectId {
             chain_id: host.chain_id.into(),
             height: host.height.<span class="number">0</span>,
-            index: host
-                .index
-                .try_into()
-                .expect(<span class="string">&quot;Effect index should fit in a `u64`&quot;</span>),
+            index: host.index,
         }
     }
 }
@@ -495,18 +477,18 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;Balance&gt; <span class="kw">for </span>queryable_system::SystemBalance {
+<span class="kw">impl </span>From&lt;Balance&gt; <span class="kw">for </span>queryable_system::Balance {
     <span class="kw">fn </span>from(host: Balance) -&gt; <span class="self">Self </span>{
-        queryable_system::SystemBalance {
+        queryable_system::Balance {
             lower_half: host.lower_half(),
             upper_half: host.upper_half(),
         }
     }
 }
 
-<span class="kw">impl </span>From&lt;Balance&gt; <span class="kw">for </span>writable_system::SystemBalance {
+<span class="kw">impl </span>From&lt;Balance&gt; <span class="kw">for </span>writable_system::Balance {
     <span class="kw">fn </span>from(host: Balance) -&gt; <span class="self">Self </span>{
-        writable_system::SystemBalance {
+        writable_system::Balance {
             lower_half: host.lower_half(),
             upper_half: host.upper_half(),
         }

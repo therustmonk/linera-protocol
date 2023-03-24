@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Committee","A set of validators (identified by their public keys) and their voting rights."],["Epoch","A number identifying the configuration of the chain (aka the committee)."],["ValidatorName","The identity of a validator."],["ValidatorState","Public state of validator."]]};

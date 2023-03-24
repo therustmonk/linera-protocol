@@ -840,9 +840,10 @@
 <span id="840">840</span>
 <span id="841">841</span>
 <span id="842">842</span>
-<span id="843">843</span>
-<span id="844">844</span>
-</pre><pre class="rust"><code><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>util;
+</pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
+// SPDX-License-Identifier: Apache-2.0
+
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>util;
 
 <span class="kw">extern crate </span>proc_macro;
 <span class="kw">extern crate </span>syn;
@@ -1050,8 +1051,7 @@
     }
 }
 
-<span class="attribute">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
-</span><span class="kw">fn </span>generate_crypto_hash_code(input: ItemStruct) -&gt; TokenStream2 {
+<span class="kw">fn </span>generate_crypto_hash_code(input: ItemStruct) -&gt; TokenStream2 {
     <span class="kw">let </span>struct_name = input.ident;
     <span class="kw">let </span>generics = input.generics;
     <span class="kw">let </span>template_vect = get_seq_parameter(generics.clone());
@@ -1336,7 +1336,6 @@
 }
 
 <span class="attribute">#[proc_macro_derive(CryptoHashView)]
-#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">pub fn </span>derive_crypto_hash_view(input: TokenStream) -&gt; TokenStream {
     <span class="kw">let </span>input = <span class="macro">parse_macro_input!</span>(input <span class="kw">as </span>ItemStruct);
     <span class="kw">let </span><span class="kw-2">mut </span>stream = generate_view_code(input.clone(), <span class="bool-val">false</span>);
@@ -1346,7 +1345,6 @@
 }
 
 <span class="attribute">#[proc_macro_derive(CryptoHashRootView)]
-#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">pub fn </span>derive_crypto_hash_root_view(input: TokenStream) -&gt; TokenStream {
     <span class="kw">let </span>input = <span class="macro">parse_macro_input!</span>(input <span class="kw">as </span>ItemStruct);
     <span class="kw">let </span><span class="kw-2">mut </span>stream = generate_view_code(input.clone(), <span class="bool-val">true</span>);
@@ -1357,7 +1355,6 @@
 }
 
 <span class="attribute">#[proc_macro_derive(HashableRootView)]
-#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 #[cfg(test)]
 </span><span class="kw">pub fn </span>derive_hashable_root_view(input: TokenStream) -&gt; TokenStream {
     <span class="kw">let </span>input = <span class="macro">parse_macro_input!</span>(input <span class="kw">as </span>ItemStruct);
@@ -1558,7 +1555,6 @@
 
     <span class="attribute">#[test]
     #[rustfmt::skip]
-    #[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
     </span><span class="kw">fn </span>test_generate_crypto_hash_code() {
         <span class="kw">let </span>input: ItemStruct = <span class="macro">parse_quote!</span>(
             <span class="kw">struct </span>TestView&lt;C&gt; {

@@ -219,11 +219,6 @@
 <span id="219">219</span>
 <span id="220">220</span>
 <span id="221">221</span>
-<span id="222">222</span>
-<span id="223">223</span>
-<span id="224">224</span>
-<span id="225">225</span>
-<span id="226">226</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -236,12 +231,13 @@
 
 </span><span class="kw">use super</span>::{contract, queryable_system, writable_system};
 <span class="kw">use crate</span>::{
-    ApplicationCallResult, BytecodeId, ChannelName, Destination, NewSession, RawExecutionResult,
+    ApplicationCallResult, ChannelName, Destination, NewSession, RawExecutionResult,
     SessionCallResult, SessionId, UserApplicationId,
 };
 <span class="kw">use </span>linera_base::{
     crypto::CryptoHash,
-    data_types::{BlockHeight, ChainId, EffectId},
+    data_types::BlockHeight,
+    identifiers::{BytecodeId, ChainId, EffectId},
 };
 
 <span class="kw">impl </span>From&lt;contract::SessionCallResult&gt; <span class="kw">for </span>(SessionCallResult, Vec&lt;u8&gt;) {
@@ -377,10 +373,7 @@
         EffectId {
             chain_id: guest.chain_id.into(),
             height: BlockHeight(guest.height),
-            index: guest
-                .index
-                .try_into()
-                .expect(<span class="string">&quot;Incorrect assumption that `usize` is 64-bits&quot;</span>),
+            index: guest.index,
         }
     }
 }
@@ -424,10 +417,7 @@
         EffectId {
             chain_id: guest.chain_id.into(),
             height: BlockHeight(guest.height),
-            index: guest
-                .index
-                .try_into()
-                .expect(<span class="string">&quot;Incorrect assumption that `usize` is 64-bits&quot;</span>),
+            index: guest.index,
         }
     }
 }

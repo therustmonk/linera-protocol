@@ -433,7 +433,13 @@
 <span id="433">433</span>
 <span id="434">434</span>
 <span id="435">435</span>
-</pre><pre class="rust"><code><span class="doccomment">/// Generates an implementation of `WritableSystem` for the provided `contract_system_api` type.
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+</pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
+// SPDX-License-Identifier: Apache-2.0
+
+</span><span class="doccomment">/// Generates an implementation of `WritableSystem` for the provided `contract_system_api` type.
 ///
 /// Generates the common code for contract system API types for all WASM runtimes.
 </span><span class="macro">macro_rules! </span>impl_writable_system {
@@ -476,7 +482,7 @@
 
             <span class="kw">fn </span>read_system_balance(
                 <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-            ) -&gt; <span class="prelude-ty">Result</span>&lt;writable_system::SystemBalance, <span class="self">Self</span>::Error&gt; {
+            ) -&gt; <span class="prelude-ty">Result</span>&lt;writable_system::Balance, <span class="self">Self</span>::Error&gt; {
                 <span class="prelude-val">Ok</span>(<span class="self">self</span>.storage().read_system_balance().into())
             }
 
@@ -734,7 +740,7 @@
                 <span class="self">self</span>.storage().application_parameters()
             }
 
-            <span class="kw">fn </span>read_system_balance(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; queryable_system::SystemBalance {
+            <span class="kw">fn </span>read_system_balance(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; queryable_system::Balance {
                 <span class="self">self</span>.storage().read_system_balance().into()
             }
 

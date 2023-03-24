@@ -17,20 +17,110 @@
 <span id="17">17</span>
 <span id="18">18</span>
 <span id="19">19</span>
-</pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
-// Copyright (c) Zefchain Labs, Inc.
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+</pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="kw">use </span>std::fmt;
+</span><span class="doccomment">//! This module provides a common set of types and library functions that are shared
+//! between the Linera protocol (compiled from Rust to native code) and Linera
+//! applications (compiled from Rust to Wasm).
 
-<span class="kw">pub mod </span>committee;
-<span class="kw">pub mod </span>crypto;
+</span><span class="kw">pub mod </span>crypto;
 <span class="kw">pub mod </span>data_types;
-<span class="kw">pub mod </span>ensure;
 <span class="kw">mod </span>graphql;
+<span class="kw">pub mod </span>identifiers;
 
-<span class="doccomment">/// Prints a vector of bytes in hexadecimal.
-</span><span class="kw">pub fn </span>hex_debug&lt;T: AsRef&lt;[u8]&gt;&gt;(bytes: <span class="kw-2">&amp;</span>T, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
+<span class="doccomment">/// A macro for asserting that a condition is true, returning an error if it is not.
+///
+/// # Examples
+///
+/// ```
+/// # use linera_base::ensure;
+/// fn divide(x: i32, y: i32) -&gt; Result&lt;i32, String&gt; {
+///     ensure!(y != 0, &quot;division by zero&quot;);
+///     Ok(x / y)
+/// }
+///
+/// assert_eq!(divide(10, 2), Ok(5));
+/// assert_eq!(divide(10, 0), Err(String::from(&quot;division by zero&quot;)));
+/// ```
+</span><span class="attribute">#[macro_export]
+</span><span class="macro">macro_rules! </span>ensure {
+    (<span class="macro-nonterminal">$cond</span>:expr, <span class="macro-nonterminal">$e</span>:expr) =&gt; {
+        <span class="kw">if </span>!(<span class="macro-nonterminal">$cond</span>) {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="macro-nonterminal">$e</span>.into());
+        }
+    };
+}
+
+<span class="doccomment">/// Formats a byte sequence as a hexadecimal string.
+///
+/// This function is intended to be used with the `#[debug(with = &quot;hex_debug&quot;)]` field
+/// annotation of `custom_debug_derive::Debug`.
+///
+/// # Examples
+///
+/// ```
+/// # use linera_base::hex_debug;
+/// use custom_debug_derive::Debug;
+///
+/// #[derive(Debug)]
+/// struct Message {
+///     #[debug(with = &quot;hex_debug&quot;)]
+///     bytes: Vec&lt;u8&gt;,
+/// }
+///
+/// let msg = Message {
+///     bytes: vec![0x12, 0x34, 0x56, 0x78],
+/// };
+///
+/// assert_eq!(format!(&quot;{:?}&quot;, msg), &quot;Message { bytes: 12345678 }&quot;);
+/// ```
+</span><span class="kw">pub fn </span>hex_debug&lt;T: AsRef&lt;[u8]&gt;&gt;(bytes: <span class="kw-2">&amp;</span>T, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter) -&gt; std::fmt::Result {
     <span class="kw">for </span>byte <span class="kw">in </span>bytes.as_ref() {
         <span class="macro">write!</span>(f, <span class="string">&quot;{:02x}&quot;</span>, byte)<span class="question-mark">?</span>;
     }

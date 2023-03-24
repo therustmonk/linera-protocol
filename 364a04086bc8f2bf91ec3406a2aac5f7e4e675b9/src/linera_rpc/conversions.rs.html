@@ -1036,6 +1036,7 @@
 <span id="1036">1036</span>
 <span id="1037">1037</span>
 <span id="1038">1038</span>
+<span id="1039">1039</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -1046,8 +1047,9 @@
 <span class="kw">use </span>ed25519::signature::Signature <span class="kw">as </span>edSignature;
 <span class="kw">use </span>linera_base::{
     crypto::{CryptoError, CryptoHash, PublicKey, Signature},
-    data_types::{BlockHeight, ChainId, EffectId, Owner, ValidatorName},
+    data_types::BlockHeight,
     ensure,
+    identifiers::{BytecodeId, ChainId, EffectId, Owner},
 };
 <span class="kw">use </span>linera_chain::data_types::{
     BlockAndRound, BlockProposal, Certificate, CertificateWithDependencies, HashedValue,
@@ -1061,7 +1063,7 @@
     node::NodeError,
     worker::{Notification, Reason},
 };
-<span class="kw">use </span>linera_execution::{ApplicationId, BytecodeId, UserApplicationId};
+<span class="kw">use </span>linera_execution::{committee::ValidatorName, ApplicationId, UserApplicationId};
 <span class="kw">use </span>thiserror::Error;
 <span class="kw">use </span>tonic::{Code, Status};
 
@@ -1639,7 +1641,7 @@
         <span class="self">Self </span>{
             chain_id: <span class="prelude-val">Some</span>(effect_id.chain_id.into()),
             height: <span class="prelude-val">Some</span>(effect_id.height.into()),
-            index: effect_id.index <span class="kw">as </span>u64,
+            index: effect_id.index,
         }
     }
 }
@@ -1651,7 +1653,7 @@
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             chain_id: <span class="macro">try_proto_convert!</span>(effect_id.chain_id),
             height: <span class="macro">proto_convert!</span>(effect_id.height),
-            index: effect_id.index <span class="kw">as </span>usize,
+            index: effect_id.index,
         })
     }
 }
@@ -1865,7 +1867,7 @@
 
     <span class="attribute">#[test]
     </span><span class="kw">pub fn </span>test_block_height() {
-        <span class="kw">let </span>block_height = BlockHeight::from(<span class="number">10u64</span>);
+        <span class="kw">let </span>block_height = BlockHeight::from(<span class="number">10</span>);
         round_trip_check::&lt;<span class="kw">_</span>, grpc::BlockHeight&gt;(block_height);
     }
 
@@ -1904,13 +1906,13 @@
     <span class="attribute">#[test]
     </span><span class="kw">pub fn </span>test_block_height_range() {
         <span class="kw">let </span>block_height_range_none = BlockHeightRange {
-            start: BlockHeight::from(<span class="number">10u64</span>),
+            start: BlockHeight::from(<span class="number">10</span>),
             limit: <span class="prelude-val">None</span>,
         };
         round_trip_check::&lt;<span class="kw">_</span>, grpc::BlockHeightRange&gt;(block_height_range_none);
 
         <span class="kw">let </span>block_height_range_some = BlockHeightRange {
-            start: BlockHeight::from(<span class="number">10u64</span>),
+            start: BlockHeight::from(<span class="number">10</span>),
             limit: <span class="prelude-val">Some</span>(<span class="number">20</span>),
         };
         round_trip_check::&lt;<span class="kw">_</span>, grpc::BlockHeightRange&gt;(block_height_range_some);

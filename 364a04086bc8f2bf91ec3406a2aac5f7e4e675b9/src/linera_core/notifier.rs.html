@@ -186,8 +186,14 @@
 <span id="186">186</span>
 <span id="187">187</span>
 <span id="188">188</span>
-</pre><pre class="rust"><code><span class="kw">use </span>dashmap::DashMap;
-<span class="kw">use </span>linera_base::data_types::ChainId;
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+</pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
+// SPDX-License-Identifier: Apache-2.0
+
+</span><span class="kw">use </span>dashmap::DashMap;
+<span class="kw">use </span>linera_base::identifiers::ChainId;
 <span class="kw">use </span>tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 <span class="kw">use </span>tracing::trace;
 

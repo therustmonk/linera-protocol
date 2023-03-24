@@ -646,44 +646,11 @@
 <span id="646">646</span>
 <span id="647">647</span>
 <span id="648">648</span>
-<span id="649">649</span>
-<span id="650">650</span>
-<span id="651">651</span>
-<span id="652">652</span>
-<span id="653">653</span>
-<span id="654">654</span>
-<span id="655">655</span>
-<span id="656">656</span>
-<span id="657">657</span>
-<span id="658">658</span>
-<span id="659">659</span>
-<span id="660">660</span>
-<span id="661">661</span>
-<span id="662">662</span>
-<span id="663">663</span>
-<span id="664">664</span>
-<span id="665">665</span>
-<span id="666">666</span>
-<span id="667">667</span>
-<span id="668">668</span>
-<span id="669">669</span>
-<span id="670">670</span>
-<span id="671">671</span>
-<span id="672">672</span>
-<span id="673">673</span>
-<span id="674">674</span>
-<span id="675">675</span>
-<span id="676">676</span>
-<span id="677">677</span>
-<span id="678">678</span>
-<span id="679">679</span>
-<span id="680">680</span>
-<span id="681">681</span>
-<span id="682">682</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">mod </span>applications;
+<span class="kw">pub mod </span>committee;
 <span class="kw">mod </span>execution;
 <span class="kw">mod </span>graphql;
 <span class="kw">mod </span>ownership;
@@ -692,7 +659,7 @@
 <span class="kw">mod </span>wasm;
 
 <span class="kw">pub use </span>applications::{
-    ApplicationDescription, ApplicationId, ApplicationRegistryView, BytecodeId, BytecodeLocation,
+    ApplicationDescription, ApplicationId, ApplicationRegistryView, BytecodeLocation,
     UserApplicationDescription, UserApplicationId,
 };
 <span class="kw">pub use </span>execution::ExecutionStateView;
@@ -718,8 +685,9 @@
 <span class="kw">use </span>derive_more::Display;
 <span class="kw">use </span>linera_base::{
     crypto::CryptoHash,
-    data_types::{BlockHeight, ChainId, EffectId, Owner, Timestamp},
+    data_types::{Balance, BlockHeight, Timestamp},
     hex_debug,
+    identifiers::{BytecodeId, ChainId, ChannelName, Destination, EffectId, Owner, SessionId},
 };
 <span class="kw">use </span>linera_views::{batch::Batch, views::ViewError};
 <span class="kw">use </span>serde::{Deserialize, Serialize};
@@ -941,7 +909,7 @@
     </span><span class="kw">fn </span>application_parameters(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;u8&gt;;
 
     <span class="doccomment">/// Read the system balance.
-    </span><span class="kw">fn </span>read_system_balance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">crate</span>::system::Balance;
+    </span><span class="kw">fn </span>read_system_balance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Balance;
 
     <span class="doccomment">/// Read the system timestamp.
     </span><span class="kw">fn </span>read_system_timestamp(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Timestamp;
@@ -979,17 +947,6 @@
         queried_id: UserApplicationId,
         argument: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, ExecutionError&gt;;
-}
-
-<span class="doccomment">/// The identifier of a session.
-</span><span class="attribute">#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]
-</span><span class="kw">pub struct </span>SessionId {
-    <span class="doccomment">/// The application that runs the session.
-    </span><span class="kw">pub </span>application_id: UserApplicationId,
-    <span class="doccomment">/// User-defined tag.
-    </span><span class="kw">pub </span>kind: u64,
-    <span class="doccomment">/// Unique index set by the runtime.
-    </span>index: u64,
 }
 
 <span class="doccomment">/// The result of calling into an application or a session.
@@ -1109,22 +1066,6 @@
     </span><span class="kw">pub </span>unsubscribe: Vec&lt;(ChannelName, ChainId)&gt;,
 }
 
-<span class="doccomment">/// The name of a subscription channel.
-</span><span class="attribute">#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Deserialize)]
-</span><span class="kw">pub struct </span>ChannelName(<span class="attribute">#[serde(with = <span class="string">&quot;serde_bytes&quot;</span>)] </span>Vec&lt;u8&gt;);
-
-<span class="kw">impl </span>From&lt;Vec&lt;u8&gt;&gt; <span class="kw">for </span>ChannelName {
-    <span class="kw">fn </span>from(name: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
-        ChannelName(name)
-    }
-}
-
-<span class="kw">impl </span>AsRef&lt;[u8]&gt; <span class="kw">for </span>ChannelName {
-    <span class="kw">fn </span>as_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u8] {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0
-    </span>}
-}
-
 <span class="doccomment">/// The identifier of a channel, relative to a particular application.
 </span><span class="attribute">#[derive(
     Eq, PartialEq, Ord, PartialOrd, Debug, Clone, Hash, Serialize, Deserialize, SimpleObject,
@@ -1132,15 +1073,6 @@
 </span><span class="kw">pub struct </span>ChannelId {
     <span class="kw">pub </span>chain_id: ChainId,
     <span class="kw">pub </span>name: ChannelName,
-}
-
-<span class="doccomment">/// The destination of a message, relative to a particular application.
-</span><span class="attribute">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
-</span><span class="kw">pub enum </span>Destination {
-    <span class="doccomment">/// Direct message to a chain.
-    </span>Recipient(ChainId),
-    <span class="doccomment">/// Broadcast to the current subscribers of our channel.
-    </span>Subscribers(ChannelName),
 }
 
 <span class="doccomment">/// Externally visible results of an execution, tagged by their application.
@@ -1184,7 +1116,7 @@
         <span class="self">Self </span>{
             chain_id: context.chain_id,
             height: context.height,
-            index: context.index,
+            index: context.index <span class="kw">as </span>u64,
         }
     }
 }

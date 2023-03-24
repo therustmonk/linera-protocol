@@ -600,6 +600,7 @@
 <span id="600">600</span>
 <span id="601">601</span>
 <span id="602">602</span>
+<span id="603">603</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -607,13 +608,14 @@
 </span><span class="kw">use </span><span class="kw">crate</span>::ChainError;
 <span class="kw">use </span>async_graphql::SimpleObject;
 <span class="kw">use </span>linera_base::{
-    committee::Committee,
     crypto::{BcsHashable, BcsSignable, CryptoHash, KeyPair, Signature},
-    data_types::{BlockHeight, ChainId, Epoch, Owner, RoundNumber, Timestamp, ValidatorName},
+    data_types::{BlockHeight, RoundNumber, Timestamp},
     ensure,
+    identifiers::{ChainId, ChannelName, Destination, Owner},
 };
 <span class="kw">use </span>linera_execution::{
-    ApplicationId, BytecodeLocation, ChannelName, Destination, Effect, Operation,
+    committee::{Committee, Epoch, ValidatorName},
+    ApplicationId, BytecodeLocation, Effect, Operation,
 };
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>std::collections::{HashMap, HashSet};

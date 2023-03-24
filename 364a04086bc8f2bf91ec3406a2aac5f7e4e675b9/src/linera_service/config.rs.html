@@ -226,12 +226,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use </span>linera_base::{
-    committee::{Committee, ValidatorState},
     crypto::{CryptoHash, KeyPair, PublicKey},
-    data_types::{BlockHeight, ChainDescription, ChainId, Timestamp, ValidatorName},
+    data_types::{Balance, BlockHeight, Timestamp},
+    identifiers::{ChainDescription, ChainId},
 };
 <span class="kw">use </span>linera_core::client::{ChainClient, ValidatorNodeProvider};
-<span class="kw">use </span>linera_execution::system::Balance;
+<span class="kw">use </span>linera_execution::committee::{Committee, ValidatorName, ValidatorState};
 <span class="kw">use </span>linera_rpc::config::{ValidatorInternalNetworkConfig, ValidatorPublicNetworkConfig};
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;

@@ -723,6 +723,8 @@
 <span id="723">723</span>
 <span id="724">724</span>
 <span id="725">725</span>
+<span id="726">726</span>
+<span id="727">727</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -736,7 +738,8 @@
 <span class="kw">use </span>futures::{future, lock::Mutex, Stream};
 <span class="kw">use </span>linera_base::{
     crypto::CryptoError,
-    data_types::{ArithmeticError, BlockHeight, ChainId, ValidatorName},
+    data_types::{ArithmeticError, BlockHeight},
+    identifiers::ChainId,
 };
 <span class="kw">use </span>linera_chain::{
     data_types::{
@@ -745,7 +748,8 @@
     ChainError, ChainManagerInfo,
 };
 <span class="kw">use </span>linera_execution::{
-    ApplicationId, BytecodeLocation, Query, Response, UserApplicationDescription, UserApplicationId,
+    committee::ValidatorName, ApplicationId, BytecodeLocation, Query, Response,
+    UserApplicationDescription, UserApplicationId,
 };
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;
@@ -1304,7 +1308,7 @@
     {
         <span class="kw">let </span>range = BlockHeightRange {
             start,
-            limit: <span class="prelude-val">Some</span>(usize::from(stop) - usize::from(start)),
+            limit: <span class="prelude-val">Some</span>((u64::from(stop) - u64::from(start)) <span class="kw">as </span>usize),
         };
         <span class="kw">let </span>query = ChainInfoQuery::new(chain_id).with_sent_certificates_in_range(range);
         <span class="kw">if let </span><span class="prelude-val">Ok</span>(response) = client.handle_chain_info_query(query).<span class="kw">await </span>{

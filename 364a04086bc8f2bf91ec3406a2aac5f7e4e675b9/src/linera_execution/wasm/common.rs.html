@@ -419,22 +419,6 @@
 <span id="419">419</span>
 <span id="420">420</span>
 <span id="421">421</span>
-<span id="422">422</span>
-<span id="423">423</span>
-<span id="424">424</span>
-<span id="425">425</span>
-<span id="426">426</span>
-<span id="427">427</span>
-<span id="428">428</span>
-<span id="429">429</span>
-<span id="430">430</span>
-<span id="431">431</span>
-<span id="432">432</span>
-<span id="433">433</span>
-<span id="434">434</span>
-<span id="435">435</span>
-<span id="436">436</span>
-<span id="437">437</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -446,8 +430,8 @@
     ExecutionError,
 };
 <span class="kw">use crate</span>::{
-    system::Balance, ApplicationCallResult, CalleeContext, EffectContext, OperationContext,
-    QueryContext, RawExecutionResult, SessionCallResult, SessionId,
+    ApplicationCallResult, CalleeContext, EffectContext, OperationContext, QueryContext,
+    RawExecutionResult, SessionCallResult, SessionId,
 };
 <span class="kw">use </span>futures::future::{<span class="self">self</span>, TryFutureExt};
 
@@ -854,22 +838,6 @@
 {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         A::finalize(<span class="self">self</span>);
-    }
-}
-
-<span class="kw">impl </span>Balance {
-    <span class="doccomment">/// Helper function to obtain the 64 most significant bits of the balance.
-    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>upper_half(<span class="self">self</span>) -&gt; u64 {
-        (u128::from(<span class="self">self</span>) &gt;&gt; <span class="number">64</span>)
-            .try_into()
-            .expect(<span class="string">&quot;Insufficient shift right for u128 -&gt; u64 conversion&quot;</span>)
-    }
-
-    <span class="doccomment">/// Helper function to obtain the 64 least significant bits of the balance.
-    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>lower_half(<span class="self">self</span>) -&gt; u64 {
-        (u128::from(<span class="self">self</span>) &amp; <span class="number">0xFFFF_FFFF_FFFF_FFFF</span>)
-            .try_into()
-            .expect(<span class="string">&quot;Incorrect mask for u128 -&gt; u64 conversion&quot;</span>)
     }
 }
 </code></pre></div>

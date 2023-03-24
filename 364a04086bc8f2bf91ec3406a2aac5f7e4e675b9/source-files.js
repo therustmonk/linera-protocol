@@ -150,12 +150,12 @@ var sourcesIndex = JSON.parse('{\
 "libc":["",[["unix",[["linux_like",[["linux",[["arch",[["generic",[],["mod.rs"]]],["mod.rs"]],["gnu",[["b64",[["x86_64",[],["align.rs","mod.rs","not_x32.rs"]]],["mod.rs"]]],["align.rs","mod.rs"]]],["align.rs","mod.rs","non_exhaustive.rs"]]],["mod.rs"]]],["align.rs","mod.rs"]]],["fixed_width_ints.rs","lib.rs","macros.rs"]],\
 "librocksdb_sys":["",[],["lib.rs"]],\
 "libz_sys":["",[],["lib.rs"]],\
-"linera_base":["",[],["committee.rs","crypto.rs","data_types.rs","ensure.rs","graphql.rs","lib.rs"]],\
+"linera_base":["",[],["crypto.rs","data_types.rs","graphql.rs","identifiers.rs","lib.rs"]],\
 "linera_chain":["",[],["chain.rs","data_types.rs","graphql.rs","inbox.rs","lib.rs","manager.rs","outbox.rs"]],\
 "linera_core":["",[["unit_tests",[],["client_test_utils.rs"]]],["client.rs","data_types.rs","graphql.rs","lib.rs","node.rs","notifier.rs","updater.rs","worker.rs"]],\
-"linera_execution":["",[["wasm",[],["async_boundary.rs","async_determinism.rs","common.rs","conversions_from_wit.rs","conversions_to_wit.rs","guest_futures.rs","mod.rs","sanitizer.rs","system_api.rs","wasmer.rs","wasmtime.rs"]]],["applications.rs","execution.rs","graphql.rs","lib.rs","ownership.rs","runtime.rs","system.rs"]],\
+"linera_execution":["",[["wasm",[],["async_boundary.rs","async_determinism.rs","common.rs","conversions_from_wit.rs","conversions_to_wit.rs","guest_futures.rs","mod.rs","sanitizer.rs","system_api.rs","wasmer.rs","wasmtime.rs"]]],["applications.rs","committee.rs","execution.rs","graphql.rs","lib.rs","ownership.rs","runtime.rs","system.rs"]],\
 "linera_rpc":["",[],["client.rs","codec.rs","config.rs","conversions.rs","grpc_network.rs","grpc_pool.rs","lib.rs","mass.rs","node_provider.rs","rpc.rs","simple_network.rs","transport.rs"]],\
-"linera_sdk":["",[["contract",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs"]],["service",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs"]]],["base.rs","crypto.rs","ensure.rs","exported_future.rs","extensions.rs","lib.rs","log.rs"]],\
+"linera_sdk":["",[["contract",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs"]],["service",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs"]]],["base.rs","ensure.rs","exported_future.rs","extensions.rs","lib.rs","log.rs"]],\
 "linera_service":["",[],["config.rs","grpc_proxy.rs","lib.rs","node_service.rs","storage.rs","tracker.rs"]],\
 "linera_storage":["",[],["chain_guards.rs","dynamo_db.rs","lib.rs","memory.rs","rocksdb.rs"]],\
 "linera_views":["",[["test_utils",[],["mod.rs"]]],["batch.rs","collection_view.rs","common.rs","dynamo_db.rs","hashable_wrapper.rs","key_value_store_view.rs","lib.rs","localstack.rs","log_view.rs","lru_caching.rs","map_view.rs","memory.rs","queue_view.rs","reentrant_collection_view.rs","register_view.rs","rocksdb.rs","set_view.rs","views.rs"]],\
@@ -259,8 +259,6 @@ var sourcesIndex = JSON.parse('{\
 "serde_name":["",[],["de_adapter.rs","lib.rs","ser_adapter.rs","trace.rs"]],\
 "serde_path_to_error":["",[],["de.rs","lib.rs","path.rs","ser.rs","wrap.rs"]],\
 "serde_urlencoded":["",[["ser",[],["key.rs","mod.rs","pair.rs","part.rs","value.rs"]]],["de.rs","lib.rs"]],\
-"serde_with":["",[["content",[],["mod.rs","ser.rs"]],["de",[],["impls.rs","mod.rs"]],["duplicate_key_impls",[],["error_on_duplicate.rs","first_value_wins.rs","last_value_wins.rs","mod.rs"]],["ser",[],["impls.rs","mod.rs"]],["utils",[],["duration.rs"]]],["enum_map.rs","flatten_maybe.rs","formats.rs","lib.rs","rust.rs","serde_conv.rs","utils.rs","with_prefix.rs"]],\
-"serde_with_macros":["",[],["apply.rs","lib.rs","utils.rs"]],\
 "server":["",[],["server.rs"]],\
 "sha1":["",[["compress",[],["soft.rs","x86.rs"]]],["compress.rs","lib.rs"]],\
 "sha2":["",[["sha256",[],["soft.rs","x86.rs"]],["sha512",[],["soft.rs","x86.rs"]]],["consts.rs","lib.rs","sha256.rs","sha512.rs"]],\

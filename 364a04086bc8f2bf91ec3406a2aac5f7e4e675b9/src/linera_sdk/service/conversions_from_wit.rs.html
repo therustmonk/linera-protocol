@@ -122,6 +122,8 @@
 <span id="122">122</span>
 <span id="123">123</span>
 <span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -129,9 +131,11 @@
 </span><span class="kw">use </span><span class="kw">super</span>::queryable_system::{
     <span class="self">self</span>, PollFindKeyValues, PollFindKeys, PollLoad, PollLock, PollReadKeyBytes,
 };
-<span class="kw">use crate</span>::{
-    base::{ApplicationId, BlockHeight, BytecodeId, ChainId, CryptoHash, EffectId, SystemBalance},
-    QueryContext,
+<span class="kw">use </span><span class="kw">crate</span>::QueryContext;
+<span class="kw">use </span>linera_base::{
+    crypto::CryptoHash,
+    data_types::{Balance, BlockHeight},
+    identifiers::{ApplicationId, BytecodeId, ChainId, EffectId},
 };
 <span class="kw">use </span>linera_views::views::ViewError;
 <span class="kw">use </span>std::task::Poll;
@@ -169,7 +173,7 @@
 <span class="kw">impl </span>From&lt;queryable_system::ApplicationId&gt; <span class="kw">for </span>ApplicationId {
     <span class="kw">fn </span>from(application_id: queryable_system::ApplicationId) -&gt; <span class="self">Self </span>{
         ApplicationId {
-            bytecode: BytecodeId(application_id.bytecode_id.into()),
+            bytecode_id: BytecodeId(application_id.bytecode_id.into()),
             creation: application_id.creation.into(),
         }
     }
@@ -185,10 +189,10 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;queryable_system::SystemBalance&gt; <span class="kw">for </span>SystemBalance {
-    <span class="kw">fn </span>from(balance: queryable_system::SystemBalance) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;queryable_system::Balance&gt; <span class="kw">for </span>Balance {
+    <span class="kw">fn </span>from(balance: queryable_system::Balance) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>value = ((balance.upper_half <span class="kw">as </span>u128) &lt;&lt; <span class="number">64</span>) | (balance.lower_half <span class="kw">as </span>u128);
-        SystemBalance(value)
+        Balance::from(value)
     }
 }
 

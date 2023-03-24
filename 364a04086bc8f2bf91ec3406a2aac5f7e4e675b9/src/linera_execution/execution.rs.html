@@ -401,8 +401,8 @@
     UserApplicationId, WritableStorage,
 };
 <span class="kw">use </span>linera_base::{
-    data_types::{ChainId, Owner},
     ensure,
+    identifiers::{ChainId, Owner},
 };
 <span class="kw">use </span>linera_views::{
     key_value_store_view::KeyValueStoreView,
@@ -512,7 +512,7 @@
             chain_id,
             authenticated_signer: <span class="prelude-val">None</span>,
             height: application_description.creation.height,
-            index: application_description.creation.index,
+            index: application_description.creation.index <span class="kw">as </span>usize,
         };
 
         <span class="kw">let </span>action = UserAction::Initialize(<span class="kw-2">&amp;</span>context, initialization_argument);

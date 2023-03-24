@@ -408,6 +408,8 @@
 <span id="408">408</span>
 <span id="409">409</span>
 <span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -418,10 +420,11 @@
 };
 <span class="kw">use </span>futures::{future, StreamExt};
 <span class="kw">use </span>linera_base::{
-    committee::Committee,
-    data_types::{BlockHeight, ChainDescription, ChainId, EffectId, ValidatorName},
+    data_types::BlockHeight,
+    identifiers::{ChainDescription, ChainId, EffectId},
 };
 <span class="kw">use </span>linera_chain::data_types::{BlockProposal, Certificate, LiteVote};
+<span class="kw">use </span>linera_execution::committee::{Committee, ValidatorName};
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;
 <span class="kw">use </span>std::{
@@ -727,7 +730,8 @@
             </span>jobs.into_iter().rev()
         {
             <span class="comment">// Obtain chain state.
-            </span><span class="kw">let </span>range = usize::from(initial_block_height)..usize::from(target_block_height);
+            </span><span class="kw">let </span>range = (u64::from(initial_block_height) <span class="kw">as </span>usize)
+                ..(u64::from(target_block_height) <span class="kw">as </span>usize);
             <span class="kw">if </span>!range.is_empty() {
                 <span class="kw">let </span>keys = {
                     <span class="kw">let </span>chain = <span class="self">self</span>.store.load_chain(chain_id).<span class="kw">await</span><span class="question-mark">?</span>;

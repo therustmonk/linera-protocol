@@ -1024,7 +1024,6 @@
 <span id="1024">1024</span>
 <span id="1025">1025</span>
 <span id="1026">1026</span>
-<span id="1027">1027</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1035,11 +1034,9 @@
 <span class="kw">use </span>colored::Colorize;
 <span class="kw">use </span>futures::StreamExt;
 <span class="kw">use </span>linera_base::{
-    committee::ValidatorState,
     crypto::{KeyPair, PublicKey},
-    data_types::{
-        BlockHeight, ChainDescription, ChainId, Epoch, RoundNumber, Timestamp, ValidatorName,
-    },
+    data_types::{Amount, Balance, BlockHeight, RoundNumber, Timestamp},
+    identifiers::{ChainDescription, ChainId},
 };
 <span class="kw">use </span>linera_chain::data_types::{
     Block, BlockAndRound, BlockProposal, Certificate, HashedValue, SignatureAggregator, Vote,
@@ -1051,7 +1048,8 @@
     worker::{Reason, WorkerState},
 };
 <span class="kw">use </span>linera_execution::{
-    system::{Account, Amount, Balance, Recipient, SystemOperation, UserData},
+    committee::{Epoch, ValidatorName, ValidatorState},
+    system::{Account, Recipient, SystemOperation, UserData},
     ApplicationId, Bytecode, Operation, WasmRuntime, WithWasmDefault,
 };
 <span class="kw">use </span>linera_rpc::{

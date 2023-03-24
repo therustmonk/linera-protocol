@@ -250,14 +250,16 @@
 <span id="250">250</span>
 <span id="251">251</span>
 <span id="252">252</span>
+<span id="253">253</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use crate</span>::{data_types::Event, ChainError, Origin};
 <span class="kw">use </span>async_graphql::SimpleObject;
 <span class="kw">use </span>linera_base::{
-    data_types::{ArithmeticError, BlockHeight, ChainId},
+    data_types::{ArithmeticError, BlockHeight},
     ensure,
+    identifiers::ChainId,
 };
 <span class="kw">use </span>linera_execution::ApplicationId;
 <span class="kw">use </span>linera_views::{

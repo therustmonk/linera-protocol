@@ -1312,8 +1312,6 @@
 <span id="1312">1312</span>
 <span id="1313">1313</span>
 <span id="1314">1314</span>
-<span id="1315">1315</span>
-<span id="1316">1316</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1331,11 +1329,9 @@
     stream::{select_all, FuturesUnordered, StreamExt},
 };
 <span class="kw">use </span>linera_base::{
-    committee::{Committee, ValidatorState},
     crypto::{CryptoHash, KeyPair, PublicKey},
-    data_types::{
-        BlockHeight, ChainId, EffectId, Epoch, Owner, RoundNumber, Timestamp, ValidatorName,
-    },
+    data_types::{Amount, Balance, BlockHeight, RoundNumber, Timestamp},
+    identifiers::{BytecodeId, ChainId, EffectId, Owner},
 };
 <span class="kw">use </span>linera_chain::{
     data_types::{
@@ -1344,9 +1340,9 @@
     ChainManagerInfo, ChainStateView,
 };
 <span class="kw">use </span>linera_execution::{
-    system::{Account, Amount, Balance, Recipient, SystemChannel, SystemOperation, UserData},
-    ApplicationId, Bytecode, BytecodeId, Effect, Operation, Query, Response, SystemEffect,
-    UserApplicationId,
+    committee::{Committee, Epoch, ValidatorName, ValidatorState},
+    system::{Account, Recipient, SystemChannel, SystemOperation, UserData},
+    ApplicationId, Bytecode, Effect, Operation, Query, Response, SystemEffect, UserApplicationId,
 };
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;

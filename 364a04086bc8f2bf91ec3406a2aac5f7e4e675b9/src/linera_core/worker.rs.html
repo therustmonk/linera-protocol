@@ -1085,6 +1085,8 @@
 <span id="1085">1085</span>
 <span id="1086">1086</span>
 <span id="1087">1087</span>
+<span id="1088">1088</span>
+<span id="1089">1089</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1093,10 +1095,10 @@
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>futures::{future, FutureExt};
 <span class="kw">use </span>linera_base::{
-    committee::Committee,
     crypto::{CryptoHash, KeyPair},
-    data_types::{ArithmeticError, BlockHeight, ChainId, Epoch, Owner, Timestamp},
+    data_types::{ArithmeticError, BlockHeight, Timestamp},
     ensure,
+    identifiers::{ChainId, Owner},
 };
 <span class="kw">use </span>linera_chain::{
     data_types::{
@@ -1106,7 +1108,9 @@
     ChainManagerOutcome, ChainStateView,
 };
 <span class="kw">use </span>linera_execution::{
-    ApplicationId, BytecodeLocation, Query, Response, UserApplicationDescription, UserApplicationId,
+    committee::{Committee, Epoch},
+    ApplicationId, BytecodeLocation, Query, Response, UserApplicationDescription,
+    UserApplicationId,
 };
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::{
@@ -1442,7 +1446,7 @@
         );
         <span class="kw">let </span><span class="kw-2">mut </span>keys = Vec::new();
         <span class="kw">for </span>height <span class="kw">in </span>heights {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(key) = confirmed_log.get(usize::from(height)).<span class="kw">await</span><span class="question-mark">? </span>{
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(key) = confirmed_log.get(u64::from(height) <span class="kw">as </span>usize).<span class="kw">await</span><span class="question-mark">? </span>{
                 keys.push(key);
             }
         }
@@ -2006,7 +2010,7 @@
             info.requested_pending_messages = messages;
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(range) = query.request_sent_certificates_in_range {
-            <span class="kw">let </span>start = range.start.into();
+            <span class="kw">let </span>start = u64::from(range.start) <span class="kw">as </span>usize;
             <span class="kw">let </span>end = <span class="kw">match </span>range.limit {
                 <span class="prelude-val">None </span>=&gt; chain.confirmed_log.count(),
                 <span class="prelude-val">Some</span>(limit) =&gt; std::cmp::min(start + limit, chain.confirmed_log.count()),

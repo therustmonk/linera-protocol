@@ -224,21 +224,27 @@
 <span id="224">224</span>
 <span id="225">225</span>
 <span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use </span><span class="kw">crate</span>::node::NodeError;
 <span class="kw">use </span>linera_base::{
-    committee::Committee,
     crypto::{BcsSignable, CryptoHash, KeyPair, Signature},
-    data_types::{BlockHeight, ChainDescription, ChainId, Epoch, Timestamp, ValidatorName},
+    data_types::{Balance, BlockHeight, Timestamp},
+    identifiers::{ChainDescription, ChainId},
 };
 <span class="kw">use </span>linera_chain::{
     data_types::{Certificate, ChainAndHeight, HashedValue, Medium, Message, Origin},
     ChainManagerInfo, ChainStateView,
 };
-<span class="kw">use </span>linera_execution::{system::Balance, ApplicationId, ExecutionRuntimeContext};
+<span class="kw">use </span>linera_execution::{
+    committee::{Committee, Epoch, ValidatorName},
+    ApplicationId, ExecutionRuntimeContext,
+};
 <span class="kw">use </span>linera_storage::ChainRuntimeContext;
 <span class="kw">use </span>linera_views::{common::Context, views::ViewError};
 <span class="kw">use </span>serde::{Deserialize, Serialize};

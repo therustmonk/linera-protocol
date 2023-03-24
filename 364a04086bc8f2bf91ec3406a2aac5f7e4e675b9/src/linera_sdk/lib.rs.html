@@ -210,14 +210,11 @@
 <span id="210">210</span>
 <span id="211">211</span>
 <span id="212">212</span>
-<span id="213">213</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">pub mod </span>base;
 <span class="kw">pub mod </span>contract;
-<span class="attribute">#[cfg(feature = <span class="string">&quot;crypto&quot;</span>)]
-</span><span class="kw">pub mod </span>crypto;
 <span class="kw">mod </span>ensure;
 <span class="kw">mod </span>exported_future;
 <span class="kw">mod </span>extensions;
@@ -225,10 +222,11 @@
 <span class="kw">pub mod </span>service;
 
 <span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>base::{
-    ApplicationId, BlockHeight, ChainId, ChannelName, Destination, EffectId, Owner, SessionId,
-};
 <span class="kw">use </span>custom_debug_derive::Debug;
+<span class="kw">use </span>linera_base::{
+    data_types::BlockHeight,
+    identifiers::{ApplicationId, ChainId, ChannelName, Destination, EffectId, Owner, SessionId},
+};
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>std::{error::Error, sync::Arc};
 
@@ -397,7 +395,7 @@
 #[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Eq, PartialEq))]
 </span><span class="kw">pub struct </span>ApplicationCallResult {
     <span class="doccomment">/// The return value.
-    </span><span class="attribute">#[debug(with = <span class="string">&quot;crate::base::hex_debug&quot;</span>)]
+    </span><span class="attribute">#[debug(with = <span class="string">&quot;linera_base::hex_debug&quot;</span>)]
     </span><span class="kw">pub </span>value: Vec&lt;u8&gt;,
     <span class="doccomment">/// The externally-visible result.
     </span><span class="kw">pub </span>execution_result: ExecutionResult,
@@ -412,7 +410,7 @@
     <span class="doccomment">/// A kind provided by the creator (meant to be visible to other applications).
     </span><span class="kw">pub </span>kind: u64,
     <span class="doccomment">/// The data associated to the session.
-    </span><span class="attribute">#[debug(with = <span class="string">&quot;crate::base::hex_debug&quot;</span>)]
+    </span><span class="attribute">#[debug(with = <span class="string">&quot;linera_base::hex_debug&quot;</span>)]
     </span><span class="kw">pub </span>data: Vec&lt;u8&gt;,
 }
 

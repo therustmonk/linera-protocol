@@ -245,113 +245,14 @@
 <span id="245">245</span>
 <span id="246">246</span>
 <span id="247">247</span>
-<span id="248">248</span>
-<span id="249">249</span>
-<span id="250">250</span>
-<span id="251">251</span>
-<span id="252">252</span>
-<span id="253">253</span>
-<span id="254">254</span>
-<span id="255">255</span>
-<span id="256">256</span>
-<span id="257">257</span>
-<span id="258">258</span>
-<span id="259">259</span>
-<span id="260">260</span>
-<span id="261">261</span>
-<span id="262">262</span>
-<span id="263">263</span>
-<span id="264">264</span>
-<span id="265">265</span>
-<span id="266">266</span>
-<span id="267">267</span>
-<span id="268">268</span>
-<span id="269">269</span>
-<span id="270">270</span>
-<span id="271">271</span>
-<span id="272">272</span>
-<span id="273">273</span>
-<span id="274">274</span>
-<span id="275">275</span>
-<span id="276">276</span>
-<span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
-<span id="283">283</span>
-<span id="284">284</span>
-<span id="285">285</span>
-<span id="286">286</span>
-<span id="287">287</span>
-<span id="288">288</span>
-<span id="289">289</span>
-<span id="290">290</span>
-<span id="291">291</span>
-<span id="292">292</span>
-<span id="293">293</span>
-<span id="294">294</span>
-<span id="295">295</span>
-<span id="296">296</span>
-<span id="297">297</span>
-<span id="298">298</span>
-<span id="299">299</span>
-<span id="300">300</span>
-<span id="301">301</span>
-<span id="302">302</span>
-<span id="303">303</span>
-<span id="304">304</span>
-<span id="305">305</span>
-<span id="306">306</span>
-<span id="307">307</span>
-<span id="308">308</span>
-<span id="309">309</span>
-<span id="310">310</span>
-<span id="311">311</span>
-<span id="312">312</span>
-<span id="313">313</span>
-<span id="314">314</span>
-<span id="315">315</span>
-<span id="316">316</span>
-<span id="317">317</span>
-<span id="318">318</span>
-<span id="319">319</span>
-<span id="320">320</span>
-<span id="321">321</span>
-<span id="322">322</span>
-<span id="323">323</span>
-<span id="324">324</span>
-<span id="325">325</span>
-<span id="326">326</span>
-<span id="327">327</span>
-<span id="328">328</span>
-<span id="329">329</span>
-<span id="330">330</span>
-<span id="331">331</span>
-<span id="332">332</span>
-<span id="333">333</span>
-<span id="334">334</span>
-<span id="335">335</span>
-<span id="336">336</span>
-<span id="337">337</span>
-<span id="338">338</span>
-<span id="339">339</span>
-<span id="340">340</span>
-<span id="341">341</span>
-<span id="342">342</span>
-<span id="343">343</span>
-<span id="344">344</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="kw">use </span><span class="kw">crate</span>::crypto::{BcsHashable, CryptoHash, PublicKey};
-<span class="kw">use </span>serde::{Deserialize, Serialize};
-<span class="kw">use </span>std::{str::FromStr, time::SystemTime};
+</span><span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="kw">use </span>std::time::SystemTime;
 <span class="kw">use </span>thiserror::Error;
 
-<span class="kw">use </span><span class="kw">crate</span>::crypto::CryptoError;
 <span class="attribute">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">use </span>std::fmt;
 <span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
@@ -359,6 +260,18 @@
 
 <span class="attribute">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">use </span>chrono::NaiveDateTime;
+
+<span class="doccomment">/// A non-negative amount of money to be transferred.
+</span><span class="attribute">#[derive(
+    Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Default, Debug, Serialize, Deserialize,
+)]
+</span><span class="kw">pub struct </span>Amount(u64);
+
+<span class="doccomment">/// The balance of a chain.
+</span><span class="attribute">#[derive(
+    Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Default, Debug, Serialize, Deserialize,
+)]
+</span><span class="kw">pub struct </span>Balance(u128);
 
 <span class="doccomment">/// A block height to identify blocks in a chain.
 </span><span class="attribute">#[derive(
@@ -423,43 +336,6 @@
     }
 }
 
-<span class="doccomment">/// The identity of a validator.
-</span><span class="attribute">#[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Debug, Serialize, Deserialize)]
-</span><span class="kw">pub struct </span>ValidatorName(<span class="kw">pub </span>PublicKey);
-
-<span class="doccomment">/// The owner of a chain. This is currently the hash of the owner&#39;s public key used to
-/// verify signatures.
-</span><span class="attribute">#[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Debug, Serialize, Deserialize)]
-</span><span class="kw">pub struct </span>Owner(<span class="kw">pub </span>CryptoHash);
-
-<span class="doccomment">/// A number identifying the configuration of the chain (aka the committee).
-</span><span class="attribute">#[derive(
-    Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Default, Debug, Serialize, Deserialize,
-)]
-</span><span class="kw">pub struct </span>Epoch(<span class="kw">pub </span>u64);
-
-<span class="doccomment">/// How to create a chain.
-</span><span class="attribute">#[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Debug, Serialize, Deserialize)]
-</span><span class="kw">pub enum </span>ChainDescription {
-    <span class="doccomment">/// The chain was created by the genesis configuration.
-    </span>Root(usize),
-    <span class="doccomment">/// The chain was created by an effect from another chain.
-    </span>Child(EffectId),
-}
-
-<span class="doccomment">/// The unique identifier (UID) of a chain. This is the hash value of a ChainDescription.
-</span><span class="attribute">#[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Serialize, Deserialize)]
-#[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Arbitrary))]
-</span><span class="kw">pub struct </span>ChainId(<span class="kw">pub </span>CryptoHash);
-
-<span class="doccomment">/// The index of an effect in a chain.
-</span><span class="attribute">#[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Debug, Serialize, Deserialize)]
-</span><span class="kw">pub struct </span>EffectId {
-    <span class="kw">pub </span>chain_id: ChainId,
-    <span class="kw">pub </span>height: BlockHeight,
-    <span class="kw">pub </span>index: usize,
-}
-
 <span class="attribute">#[derive(Debug, Error)]
 </span><span class="doccomment">/// An error type for arithmetic errors.
 </span><span class="kw">pub enum </span>ArithmeticError {
@@ -469,222 +345,152 @@
     </span>Underflow,
 }
 
-<span class="kw">impl </span>std::fmt::Display <span class="kw">for </span>BlockHeight {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.<span class="number">0</span>)
+<span class="macro">macro_rules! </span>impl_strictly_wrapped_number {
+    (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$wrapped</span>:ident) =&gt; {
+        <span class="kw">impl </span><span class="macro-nonterminal">$name </span>{
+            <span class="kw">pub fn </span>zero() -&gt; <span class="self">Self </span>{
+                <span class="self">Self</span>(<span class="number">0</span>)
+            }
+
+            <span class="kw">pub fn </span>max() -&gt; <span class="self">Self </span>{
+                <span class="self">Self</span>(<span class="macro-nonterminal">$wrapped::MAX</span>)
+            }
+
+            <span class="kw">pub fn </span>try_add(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArithmeticError&gt; {
+                <span class="kw">let </span>val = <span class="self">self
+                    </span>.<span class="number">0
+                    </span>.checked_add(other.<span class="number">0</span>)
+                    .ok_or(ArithmeticError::Overflow)<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(<span class="self">Self</span>(val))
+            }
+
+            <span class="kw">pub fn </span>try_add_one(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArithmeticError&gt; {
+                <span class="kw">let </span>val = <span class="self">self</span>.<span class="number">0</span>.checked_add(<span class="number">1</span>).ok_or(ArithmeticError::Overflow)<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(<span class="self">Self</span>(val))
+            }
+
+            <span class="kw">pub fn </span>saturating_add(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="self">Self </span>{
+                <span class="kw">let </span>val = <span class="self">self</span>.<span class="number">0</span>.saturating_add(other.<span class="number">0</span>);
+                <span class="self">Self</span>(val)
+            }
+
+            <span class="kw">pub fn </span>try_sub(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArithmeticError&gt; {
+                <span class="kw">let </span>val = <span class="self">self
+                    </span>.<span class="number">0
+                    </span>.checked_sub(other.<span class="number">0</span>)
+                    .ok_or(ArithmeticError::Underflow)<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(<span class="self">Self</span>(val))
+            }
+
+            <span class="kw">pub fn </span>try_sub_one(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArithmeticError&gt; {
+                <span class="kw">let </span>val = <span class="self">self</span>.<span class="number">0</span>.checked_sub(<span class="number">1</span>).ok_or(ArithmeticError::Underflow)<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(<span class="self">Self</span>(val))
+            }
+
+            <span class="kw">pub fn </span>try_add_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArithmeticError&gt; {
+                <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self
+                    </span>.<span class="number">0
+                    </span>.checked_add(other.<span class="number">0</span>)
+                    .ok_or(ArithmeticError::Overflow)<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(())
+            }
+
+            <span class="kw">pub fn </span>try_add_assign_one(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArithmeticError&gt; {
+                <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self</span>.<span class="number">0</span>.checked_add(<span class="number">1</span>).ok_or(ArithmeticError::Overflow)<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(())
+            }
+
+            <span class="kw">pub fn </span>saturating_add_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="self">Self</span>) {
+                <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self</span>.<span class="number">0</span>.saturating_add(other.<span class="number">0</span>);
+            }
+
+            <span class="kw">pub fn </span>try_sub_assign(<span class="kw-2">&amp;mut </span><span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArithmeticError&gt; {
+                <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self
+                    </span>.<span class="number">0
+                    </span>.checked_sub(other.<span class="number">0</span>)
+                    .ok_or(ArithmeticError::Underflow)<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(())
+            }
+        }
+
+        <span class="kw">impl </span>std::fmt::Display <span class="kw">for </span><span class="macro-nonterminal">$name </span>{
+            <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+                <span class="self">self</span>.<span class="number">0</span>.fmt(f)
+            }
+        }
+
+        <span class="kw">impl </span>std::str::FromStr <span class="kw">for </span><span class="macro-nonterminal">$name </span>{
+            <span class="kw">type </span><span class="prelude-val">Err </span>= std::num::ParseIntError;
+
+            <span class="kw">fn </span>from_str(src: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
+                <span class="prelude-val">Ok</span>(<span class="self">Self</span>(<span class="macro-nonterminal">$wrapped::from_str</span>(src)<span class="question-mark">?</span>))
+            }
+        }
+
+        <span class="kw">impl </span>From&lt;<span class="macro-nonterminal">$name</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$wrapped </span>{
+            <span class="kw">fn </span>from(value: <span class="macro-nonterminal">$name</span>) -&gt; <span class="self">Self </span>{
+                value.<span class="number">0
+            </span>}
+        }
+
+        <span class="comment">// Cannot directly create values for a strictly wrapped type, except for testing.
+        </span><span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+        </span><span class="kw">impl </span>From&lt;<span class="macro-nonterminal">$wrapped</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$name </span>{
+            <span class="kw">fn </span>from(value: <span class="macro-nonterminal">$wrapped</span>) -&gt; <span class="self">Self </span>{
+                <span class="self">Self</span>(value)
+            }
+        }
+    };
+}
+
+<span class="macro">macro_rules! </span>impl_wrapped_number {
+    (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$wrapped</span>:ident) =&gt; {
+        <span class="macro">impl_strictly_wrapped_number!</span>(<span class="macro-nonterminal">$name</span>, <span class="macro-nonterminal">$wrapped</span>);
+
+        <span class="attribute">#[cfg(not(any(test, feature = <span class="string">&quot;test&quot;</span>)))]
+        </span><span class="kw">impl </span>From&lt;<span class="macro-nonterminal">$wrapped</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$name </span>{
+            <span class="kw">fn </span>from(value: <span class="macro-nonterminal">$wrapped</span>) -&gt; <span class="self">Self </span>{
+                <span class="self">Self</span>(value)
+            }
+        }
+    };
+}
+
+<span class="macro">impl_wrapped_number!</span>(Balance, u128);
+<span class="macro">impl_strictly_wrapped_number!</span>(Amount, u64);
+<span class="macro">impl_wrapped_number!</span>(BlockHeight, u64);
+<span class="macro">impl_strictly_wrapped_number!</span>(RoundNumber, u64);
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::iter::Sum&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Amount&gt; <span class="kw">for </span>Amount {
+    <span class="kw">fn </span>sum&lt;I: Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">Self</span>&gt;&gt;(iter: I) -&gt; <span class="self">Self </span>{
+        iter.fold(<span class="self">Self</span>::zero(), |a, b| a.saturating_add(<span class="kw-2">*</span>b))
     }
 }
 
-<span class="kw">impl </span>std::fmt::Display <span class="kw">for </span>Epoch {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::result::Result&lt;(), std::fmt::Error&gt; {
-        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.<span class="number">0</span>)
+<span class="kw">impl </span>Balance {
+    <span class="doccomment">/// Helper function to obtain the 64 most significant bits of the balance.
+    </span><span class="kw">pub fn </span>upper_half(<span class="self">self</span>) -&gt; u64 {
+        (<span class="self">self</span>.<span class="number">0 </span>&gt;&gt; <span class="number">64</span>) <span class="kw">as </span>u64
+    }
+
+    <span class="doccomment">/// Helper function to obtain the 64 least significant bits of the balance.
+    </span><span class="kw">pub fn </span>lower_half(<span class="self">self</span>) -&gt; u64 {
+        <span class="self">self</span>.<span class="number">0 </span><span class="kw">as </span>u64
     }
 }
 
-<span class="kw">impl </span>std::fmt::Display <span class="kw">for </span>Owner {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::result::Result&lt;(), std::fmt::Error&gt; {
-        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.<span class="number">0</span>)
+<span class="kw">impl </span>From&lt;Amount&gt; <span class="kw">for </span>Balance {
+    <span class="kw">fn </span>from(val: Amount) -&gt; <span class="self">Self </span>{
+        Balance(val.<span class="number">0 </span><span class="kw">as </span>u128)
     }
 }
 
-<span class="kw">impl </span>std::fmt::Display <span class="kw">for </span>ValidatorName {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::result::Result&lt;(), std::fmt::Error&gt; {
-        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.<span class="number">0</span>)
+<span class="kw">impl </span>TryFrom&lt;Balance&gt; <span class="kw">for </span>Amount {
+    <span class="kw">type </span>Error = std::num::TryFromIntError;
+
+    <span class="kw">fn </span>try_from(val: Balance) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+        <span class="prelude-val">Ok</span>(Amount(val.<span class="number">0</span>.try_into()<span class="question-mark">?</span>))
     }
-}
-
-<span class="kw">impl </span>std::str::FromStr <span class="kw">for </span>ValidatorName {
-    <span class="kw">type </span><span class="prelude-val">Err </span>= CryptoError;
-
-    <span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
-        <span class="prelude-val">Ok</span>(ValidatorName(PublicKey::from_str(s)<span class="question-mark">?</span>))
-    }
-}
-
-<span class="kw">impl </span>std::str::FromStr <span class="kw">for </span>Epoch {
-    <span class="kw">type </span><span class="prelude-val">Err </span>= CryptoError;
-
-    <span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
-        <span class="prelude-val">Ok</span>(Epoch(s.parse()<span class="question-mark">?</span>))
-    }
-}
-
-<span class="kw">impl </span>BlockHeight {
-    <span class="attribute">#[inline]
-    </span><span class="kw">pub fn </span>max() -&gt; <span class="self">Self </span>{
-        BlockHeight(<span class="number">0x7fff_ffff_ffff_ffff</span>)
-    }
-
-    <span class="attribute">#[inline]
-    </span><span class="kw">pub fn </span>try_add_one(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;BlockHeight, ArithmeticError&gt; {
-        <span class="kw">let </span>val = <span class="self">self</span>.<span class="number">0</span>.checked_add(<span class="number">1</span>).ok_or(ArithmeticError::Overflow)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span>(val))
-    }
-
-    <span class="attribute">#[inline]
-    </span><span class="kw">pub fn </span>try_sub_one(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;BlockHeight, ArithmeticError&gt; {
-        <span class="kw">let </span>val = <span class="self">self</span>.<span class="number">0</span>.checked_sub(<span class="number">1</span>).ok_or(ArithmeticError::Underflow)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span>(val))
-    }
-
-    <span class="attribute">#[inline]
-    </span><span class="kw">pub fn </span>try_add_assign_one(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArithmeticError&gt; {
-        <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self</span>.<span class="number">0</span>.checked_add(<span class="number">1</span>).ok_or(ArithmeticError::Overflow)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(())
-    }
-
-    <span class="attribute">#[inline]
-    </span><span class="kw">pub fn </span>try_sub_assign_one(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArithmeticError&gt; {
-        <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self</span>.<span class="number">0</span>.checked_sub(<span class="number">1</span>).ok_or(ArithmeticError::Underflow)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(())
-    }
-}
-
-<span class="kw">impl </span>RoundNumber {
-    <span class="attribute">#[inline]
-    </span><span class="kw">pub fn </span>max() -&gt; <span class="self">Self </span>{
-        RoundNumber(<span class="number">0x7fff_ffff_ffff_ffff</span>)
-    }
-
-    <span class="attribute">#[inline]
-    </span><span class="kw">pub fn </span>try_add_one(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;RoundNumber, ArithmeticError&gt; {
-        <span class="kw">let </span>val = <span class="self">self</span>.<span class="number">0</span>.checked_add(<span class="number">1</span>).ok_or(ArithmeticError::Overflow)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span>(val))
-    }
-
-    <span class="attribute">#[inline]
-    </span><span class="kw">pub fn </span>try_sub_one(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;RoundNumber, ArithmeticError&gt; {
-        <span class="kw">let </span>val = <span class="self">self</span>.<span class="number">0</span>.checked_sub(<span class="number">1</span>).ok_or(ArithmeticError::Underflow)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span>(val))
-    }
-
-    <span class="attribute">#[inline]
-    </span><span class="kw">pub fn </span>try_add_assign_one(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArithmeticError&gt; {
-        <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self</span>.<span class="number">0</span>.checked_add(<span class="number">1</span>).ok_or(ArithmeticError::Overflow)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(())
-    }
-
-    <span class="attribute">#[inline]
-    </span><span class="kw">pub fn </span>try_sub_assign_one(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArithmeticError&gt; {
-        <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self</span>.<span class="number">0</span>.checked_sub(<span class="number">1</span>).ok_or(ArithmeticError::Underflow)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(())
-    }
-}
-
-<span class="kw">impl </span>Epoch {
-    <span class="attribute">#[inline]
-    </span><span class="kw">pub fn </span>try_add_one(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ArithmeticError&gt; {
-        <span class="kw">let </span>val = <span class="self">self</span>.<span class="number">0</span>.checked_add(<span class="number">1</span>).ok_or(ArithmeticError::Overflow)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span>(val))
-    }
-
-    <span class="attribute">#[inline]
-    </span><span class="kw">pub fn </span>try_add_assign_one(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ArithmeticError&gt; {
-        <span class="self">self</span>.<span class="number">0 </span>= <span class="self">self</span>.<span class="number">0</span>.checked_add(<span class="number">1</span>).ok_or(ArithmeticError::Overflow)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(())
-    }
-}
-
-<span class="kw">impl </span>From&lt;BlockHeight&gt; <span class="kw">for </span>u64 {
-    <span class="kw">fn </span>from(val: BlockHeight) -&gt; <span class="self">Self </span>{
-        val.<span class="number">0
-    </span>}
-}
-
-<span class="kw">impl </span>From&lt;u64&gt; <span class="kw">for </span>BlockHeight {
-    <span class="kw">fn </span>from(value: u64) -&gt; <span class="self">Self </span>{
-        BlockHeight(value)
-    }
-}
-
-<span class="kw">impl </span>From&lt;BlockHeight&gt; <span class="kw">for </span>usize {
-    <span class="kw">fn </span>from(value: BlockHeight) -&gt; <span class="self">Self </span>{
-        value.<span class="number">0 </span><span class="kw">as </span>usize
-    }
-}
-
-<span class="kw">impl </span>From&lt;u64&gt; <span class="kw">for </span>Epoch {
-    <span class="kw">fn </span>from(value: u64) -&gt; <span class="self">Self </span>{
-        Epoch(value)
-    }
-}
-
-<span class="kw">impl </span>From&lt;PublicKey&gt; <span class="kw">for </span>ValidatorName {
-    <span class="kw">fn </span>from(value: PublicKey) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>(value)
-    }
-}
-
-<span class="kw">impl </span>From&lt;PublicKey&gt; <span class="kw">for </span>Owner {
-    <span class="kw">fn </span>from(value: PublicKey) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>(CryptoHash::new(<span class="kw-2">&amp;</span>value))
-    }
-}
-
-<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>PublicKey&gt; <span class="kw">for </span>Owner {
-    <span class="kw">fn </span>from(value: <span class="kw-2">&amp;</span>PublicKey) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>(CryptoHash::new(value))
-    }
-}
-
-<span class="kw">impl </span>std::str::FromStr <span class="kw">for </span>Owner {
-    <span class="kw">type </span><span class="prelude-val">Err </span>= CryptoError;
-
-    <span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
-        <span class="prelude-val">Ok</span>(Owner(CryptoHash::from_str(s)<span class="question-mark">?</span>))
-    }
-}
-
-<span class="kw">impl </span>std::fmt::Display <span class="kw">for </span>ChainId {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="self">self</span>.<span class="number">0</span>.fmt(f)
-    }
-}
-
-<span class="kw">impl </span>FromStr <span class="kw">for </span>ChainId {
-    <span class="kw">type </span><span class="prelude-val">Err </span>= CryptoError;
-
-    <span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
-        <span class="prelude-val">Ok</span>(ChainId(CryptoHash::from_str(s)<span class="question-mark">?</span>))
-    }
-}
-
-<span class="kw">impl </span>TryFrom&lt;<span class="kw-2">&amp;</span>[u8]&gt; <span class="kw">for </span>ChainId {
-    <span class="kw">type </span>Error = CryptoError;
-
-    <span class="kw">fn </span>try_from(value: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
-        <span class="prelude-val">Ok</span>(ChainId(CryptoHash::try_from(value)<span class="question-mark">?</span>))
-    }
-}
-
-<span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span>ChainId {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::result::Result&lt;(), std::fmt::Error&gt; {
-        <span class="macro">write!</span>(f, <span class="string">&quot;{:?}&quot;</span>, <span class="self">self</span>.<span class="number">0</span>)
-    }
-}
-
-<span class="kw">impl </span>From&lt;ChainDescription&gt; <span class="kw">for </span>ChainId {
-    <span class="kw">fn </span>from(description: ChainDescription) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>(CryptoHash::new(<span class="kw-2">&amp;</span>description))
-    }
-}
-
-<span class="kw">impl </span>ChainId {
-    <span class="kw">pub fn </span>root(index: usize) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>(CryptoHash::new(<span class="kw-2">&amp;</span>ChainDescription::Root(index)))
-    }
-
-    <span class="kw">pub fn </span>child(id: EffectId) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>(CryptoHash::new(<span class="kw-2">&amp;</span>ChainDescription::Child(id)))
-    }
-}
-
-<span class="kw">impl </span>BcsHashable <span class="kw">for </span>ChainDescription {}
-
-<span class="attribute">#[test]
-</span><span class="kw">fn </span>test_max_block_height() {
-    <span class="kw">let </span>max = BlockHeight::max();
-    <span class="macro">assert_eq!</span>(max.<span class="number">0 </span>* <span class="number">2 </span>+ <span class="number">1</span>, std::u64::MAX);
 }
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="linera_base" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

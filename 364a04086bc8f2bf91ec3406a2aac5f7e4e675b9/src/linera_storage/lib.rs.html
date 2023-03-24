@@ -241,6 +241,7 @@
 <span id="241">241</span>
 <span id="242">242</span>
 <span id="243">243</span>
+<span id="244">244</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -259,16 +260,17 @@
 <span class="kw">use </span>dashmap::{mapref::entry::Entry, DashMap};
 <span class="kw">use </span>futures::future;
 <span class="kw">use </span>linera_base::{
-    committee::Committee,
     crypto::{CryptoHash, PublicKey},
-    data_types::{ChainDescription, ChainId, Epoch, Timestamp},
+    data_types::{Balance, Timestamp},
+    identifiers::{ChainDescription, ChainId},
 };
 <span class="kw">use </span>linera_chain::{
     data_types::{Certificate, HashedValue},
     ChainError, ChainStateView,
 };
 <span class="kw">use </span>linera_execution::{
-    system::Balance, ChainOwnership, ExecutionError, ExecutionRuntimeContext, UserApplicationCode,
+    committee::{Committee, Epoch},
+    ChainOwnership, ExecutionError, ExecutionRuntimeContext, UserApplicationCode,
     UserApplicationDescription, UserApplicationId, WasmRuntime,
 };
 <span class="kw">use </span>linera_views::{

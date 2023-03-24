@@ -579,6 +579,7 @@
 <span id="579">579</span>
 <span id="580">580</span>
 <span id="581">581</span>
+<span id="582">582</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -591,13 +592,14 @@
 <span class="kw">use </span>async_graphql::SimpleObject;
 <span class="kw">use </span>linera_base::{
     crypto::CryptoHash,
-    data_types::{BlockHeight, ChainId, EffectId, Timestamp},
+    data_types::{BlockHeight, Timestamp},
     ensure,
+    identifiers::{ChainId, ChannelName, Destination, EffectId},
 };
 <span class="kw">use </span>linera_execution::{
-    system::SystemEffect, ApplicationId, ChannelName, Destination, Effect, EffectContext,
-    ExecutionResult, ExecutionRuntimeContext, ExecutionStateView, OperationContext, Query,
-    QueryContext, RawExecutionResult, Response, UserApplicationDescription, UserApplicationId,
+    system::SystemEffect, ApplicationId, Effect, EffectContext, ExecutionResult,
+    ExecutionRuntimeContext, ExecutionStateView, OperationContext, Query, QueryContext,
+    RawExecutionResult, Response, UserApplicationDescription, UserApplicationId,
 };
 <span class="kw">use </span>linera_views::{
     collection_view::CollectionView,
@@ -843,7 +845,7 @@
                 </span><span class="kw">let </span>effect_id = EffectId {
                     chain_id: origin.sender,
                     height,
-                    index,
+                    index: index <span class="kw">as </span>u64,
                 };
                 <span class="self">self</span>.execute_immediate_effect(effect_id, <span class="kw-2">&amp;</span>effect, chain_id, timestamp)
                     .<span class="kw">await</span><span class="question-mark">?</span>;
@@ -990,7 +992,7 @@
                 effect_id: EffectId {
                     chain_id: message.origin.sender,
                     height: message.event.height,
-                    index: message.event.index,
+                    index: message.event.index <span class="kw">as </span>u64,
                 },
                 authenticated_signer: message.event.authenticated_signer,
             };

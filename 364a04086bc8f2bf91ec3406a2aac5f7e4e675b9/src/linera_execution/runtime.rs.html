@@ -619,6 +619,7 @@
 <span id="619">619</span>
 <span id="620">620</span>
 <span id="621">621</span>
+<span id="622">622</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -630,8 +631,9 @@
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>custom_debug_derive::Debug;
 <span class="kw">use </span>linera_base::{
-    data_types::{ChainId, Owner, Timestamp},
+    data_types::Timestamp,
     ensure, hex_debug,
+    identifiers::{ChainId, Owner},
 };
 <span class="kw">use </span>linera_views::{
     batch::Batch,
@@ -941,7 +943,7 @@
             .clone()
     }
 
-    <span class="kw">fn </span>read_system_balance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">crate</span>::system::Balance {
+    <span class="kw">fn </span>read_system_balance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; linera_base::data_types::Balance {
         <span class="kw-2">*</span><span class="self">self</span>.execution_state_mut().system.balance.get()
     }
 

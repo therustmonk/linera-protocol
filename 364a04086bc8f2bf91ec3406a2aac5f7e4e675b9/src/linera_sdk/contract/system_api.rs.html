@@ -226,13 +226,19 @@
 <span id="226">226</span>
 <span id="227">227</span>
 <span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use </span><span class="kw">super</span>::writable_system <span class="kw">as </span>system;
-<span class="kw">use </span><span class="kw">crate</span>::base::{ApplicationId, ChainId, SessionId, SystemBalance, Timestamp};
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>futures::future;
+<span class="kw">use </span>linera_base::{
+    data_types::{Balance, Timestamp},
+    identifiers::{ApplicationId, ChainId, SessionId},
+};
 <span class="kw">use </span>linera_views::{
     batch::{Batch, WriteOperation},
     common::{ContextFromDb, KeyValueStoreClient},
@@ -397,7 +403,7 @@
 }
 
 <span class="doccomment">/// Retrieve the current system balance.
-</span><span class="kw">pub fn </span>current_system_balance() -&gt; SystemBalance {
+</span><span class="kw">pub fn </span>current_system_balance() -&gt; Balance {
     system::read_system_balance().into()
 }
 

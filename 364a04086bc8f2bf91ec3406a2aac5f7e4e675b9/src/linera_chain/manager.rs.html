@@ -430,6 +430,8 @@
 <span id="430">430</span>
 <span id="431">431</span>
 <span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -442,8 +444,9 @@
 };
 <span class="kw">use </span>linera_base::{
     crypto::{CryptoHash, KeyPair, PublicKey},
-    data_types::{BlockHeight, Owner, RoundNumber},
+    data_types::{BlockHeight, RoundNumber},
     ensure,
+    identifiers::Owner,
 };
 <span class="kw">use </span>linera_execution::ChainOwnership;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
@@ -603,13 +606,14 @@
                 found_block_height: new_block.height
             }
         );
+        <span class="comment">// When a block is certified, incrementing its height must succeed.
+        </span><span class="macro">ensure!</span>(
+            new_block.height &lt; BlockHeight::max(),
+            ChainError::InvalidBlockHeight
+        );
         <span class="macro">ensure!</span>(
             new_block.previous_block_hash == block_hash,
             ChainError::UnexpectedPreviousBlockHash
-        );
-        <span class="macro">ensure!</span>(
-            new_block.height &lt;= BlockHeight::max(),
-            ChainError::InvalidBlockHeight
         );
         <span class="kw">match </span><span class="self">self </span>{
             ChainManager::Single(manager) =&gt; {

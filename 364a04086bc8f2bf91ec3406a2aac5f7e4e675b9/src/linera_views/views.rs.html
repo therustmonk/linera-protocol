@@ -172,17 +172,13 @@
 <span id="172">172</span>
 <span id="173">173</span>
 <span id="174">174</span>
-<span id="175">175</span>
-<span id="176">176</span>
-<span id="177">177</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">extern crate </span>linera_views_derive;
 <span class="kw">use crate</span>::{batch::Batch, common::HasherOutput};
 <span class="kw">use </span>async_trait::async_trait;
-<span class="attribute">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
-</span><span class="kw">use </span>linera_base::crypto::CryptoHash;
+<span class="kw">use </span>linera_base::crypto::CryptoHash;
 <span class="kw">pub use </span>linera_views_derive::{
     CryptoHashRootView, CryptoHashView, GraphQLView, HashableView, RootView, View,
 };
@@ -342,7 +338,6 @@
 
 <span class="doccomment">/// A [`View`] that also supports crypto hash
 </span><span class="attribute">#[async_trait]
-#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">pub trait </span>CryptoHashView&lt;C&gt;: HashableView&lt;C&gt; {
     <span class="doccomment">/// Computing the hash and attributing the type to it.
     </span><span class="kw">async fn </span>crypto_hash(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CryptoHash, ViewError&gt;;
@@ -350,7 +345,6 @@
 
 <span class="doccomment">/// A [`RootView`] that also supports crypto hash
 </span><span class="attribute">#[async_trait]
-#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">pub trait </span>CryptoHashRootView&lt;C&gt;: RootView&lt;C&gt; + CryptoHashView&lt;C&gt; {}
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="linera_views" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

@@ -21,64 +21,28 @@
 <span id="21">21</span>
 <span id="22">22</span>
 <span id="23">23</span>
-<span id="24">24</span>
-<span id="25">25</span>
-<span id="26">26</span>
-<span id="27">27</span>
-<span id="28">28</span>
-<span id="29">29</span>
-<span id="30">30</span>
-<span id="31">31</span>
-<span id="32">32</span>
-<span id="33">33</span>
-<span id="34">34</span>
-<span id="35">35</span>
-<span id="36">36</span>
-<span id="37">37</span>
-<span id="38">38</span>
-<span id="39">39</span>
-<span id="40">40</span>
-<span id="41">41</span>
-</pre><pre class="rust"><code><span class="kw">use crate</span>::{
-    committee::{Committee, ValidatorState},
-    crypto::{CryptoHash, PublicKey, Signature},
-    data_types::{BlockHeight, ChainDescription, ChainId, Epoch, Owner, Timestamp, ValidatorName},
-};
-<span class="kw">use </span>async_graphql::{scalar, Object};
-<span class="kw">use </span>std::collections::BTreeMap;
+</pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
+// SPDX-License-Identifier: Apache-2.0
 
+</span><span class="kw">use crate</span>::{
+    crypto::{CryptoHash, PublicKey, Signature},
+    data_types::{Amount, Balance, BlockHeight, Timestamp},
+    identifiers::{ApplicationId, BytecodeId, ChainDescription, ChainId, ChannelName, Owner},
+};
+<span class="kw">use </span>async_graphql::scalar;
+
+<span class="macro">scalar!</span>(Amount);
+<span class="macro">scalar!</span>(ApplicationId);
+<span class="macro">scalar!</span>(Balance);
 <span class="macro">scalar!</span>(BlockHeight);
+<span class="macro">scalar!</span>(BytecodeId);
 <span class="macro">scalar!</span>(ChainDescription);
 <span class="macro">scalar!</span>(ChainId);
+<span class="macro">scalar!</span>(ChannelName);
 <span class="macro">scalar!</span>(CryptoHash);
-<span class="macro">scalar!</span>(Epoch);
 <span class="macro">scalar!</span>(Owner);
 <span class="macro">scalar!</span>(PublicKey);
 <span class="macro">scalar!</span>(Signature);
 <span class="macro">scalar!</span>(Timestamp);
-<span class="macro">scalar!</span>(ValidatorName);
-
-<span class="attribute">#[Object]
-</span><span class="kw">impl </span>Committee {
-    <span class="attribute">#[graphql(derived(name = <span class="string">&quot;validators&quot;</span>))]
-    </span><span class="kw">async fn </span>_validators(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>BTreeMap&lt;ValidatorName, ValidatorState&gt; {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.validators
-    }
-
-    <span class="attribute">#[graphql(derived(name = <span class="string">&quot;total_votes&quot;</span>))]
-    </span><span class="kw">async fn </span>_total_votes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
-        <span class="self">self</span>.total_votes
-    }
-
-    <span class="attribute">#[graphql(derived(name = <span class="string">&quot;quorum_threshold&quot;</span>))]
-    </span><span class="kw">async fn </span>_quorum_threshold(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
-        <span class="self">self</span>.quorum_threshold
-    }
-
-    <span class="attribute">#[graphql(derived(name = <span class="string">&quot;validity_threshold&quot;</span>))]
-    </span><span class="kw">async fn </span>_validity_threshold(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
-        <span class="self">self</span>.validity_threshold
-    }
-}
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="linera_base" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

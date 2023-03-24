@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["hex_debug","Prints a vector of bytes in hexadecimal."]],"macro":[["ensure",""]],"mod":[["committee",""],["crypto",""],["data_types",""],["ensure",""]]};
+window.SIDEBAR_ITEMS = {"fn":[["hex_debug","Formats a byte sequence as a hexadecimal string."]],"macro":[["ensure","A macro for asserting that a condition is true, returning an error if it is not."]],"mod":[["crypto",""],["data_types",""],["identifiers",""]]};
