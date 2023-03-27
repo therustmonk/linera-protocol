@@ -242,6 +242,120 @@
 <span id="242">242</span>
 <span id="243">243</span>
 <span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -255,6 +369,7 @@
 </span><span class="kw">pub use </span><span class="kw">crate</span>::dynamo_db::DynamoDbStoreClient;
 <span class="kw">pub use crate</span>::{memory::MemoryStoreClient, rocksdb::RocksdbStoreClient};
 
+<span class="kw">use </span><span class="kw">crate</span>::chain_guards::ChainGuards;
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>chain_guards::ChainGuard;
 <span class="kw">use </span>dashmap::{mapref::entry::Entry, DashMap};
@@ -265,7 +380,7 @@
     identifiers::{ChainDescription, ChainId},
 };
 <span class="kw">use </span>linera_chain::{
-    data_types::{Certificate, HashedValue},
+    data_types::{Certificate, HashedValue, LiteCertificate, Value},
     ChainError, ChainStateView,
 };
 <span class="kw">use </span>linera_execution::{
@@ -274,9 +389,12 @@
     UserApplicationDescription, UserApplicationId, WasmRuntime,
 };
 <span class="kw">use </span>linera_views::{
-    common::Context,
-    views::{CryptoHashView, RootView, ViewError},
+    batch::Batch,
+    common::{Context, ContextFromDb, KeyValueStoreClient},
+    views::{CryptoHashView, RootView, View, ViewError},
 };
+<span class="kw">use </span>metrics::increment_counter;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>std::{fmt::Debug, sync::Arc};
 
 <span class="doccomment">/// The metric counting how often a value is read from storage.
@@ -448,6 +566,116 @@
             Please enable the `wasmer` or the `wasmtime` feature flags \
             when compiling `linera-storage`.&quot;
         </span>);
+    }
+}
+
+<span class="doccomment">/// A store implemented from a [`KeyValueStoreClient`]
+</span><span class="kw">pub struct </span>DbStore&lt;CL&gt; {
+    client: CL,
+    guards: ChainGuards,
+    user_applications: Arc&lt;DashMap&lt;UserApplicationId, UserApplicationCode&gt;&gt;,
+    wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
+}
+
+<span class="attribute">#[derive(Clone)]
+</span><span class="doccomment">/// A DbStoreClient wrapping with Arc
+</span><span class="kw">pub struct </span>DbStoreClient&lt;CL&gt; {
+    client: Arc&lt;DbStore&lt;CL&gt;&gt;,
+}
+
+<span class="attribute">#[derive(Debug, Serialize, Deserialize)]
+</span><span class="kw">enum </span>BaseKey {
+    ChainState(ChainId),
+    Certificate(CryptoHash),
+    Value(CryptoHash),
+}
+
+<span class="attribute">#[async_trait]
+</span><span class="kw">impl</span>&lt;CL&gt; Store <span class="kw">for </span>DbStoreClient&lt;CL&gt;
+<span class="kw">where
+    </span>CL: KeyValueStoreClient + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
+    ViewError: From&lt;&lt;CL <span class="kw">as </span>KeyValueStoreClient&gt;::Error&gt;,
+    &lt;CL <span class="kw">as </span>KeyValueStoreClient&gt;::Error: From&lt;bcs::Error&gt; + Send + Sync + serde::ser::StdError,
+{
+    <span class="kw">type </span>Context = ContextFromDb&lt;ChainRuntimeContext&lt;<span class="self">Self</span>&gt;, CL&gt;;
+    <span class="kw">type </span>ContextError = &lt;CL <span class="kw">as </span>KeyValueStoreClient&gt;::Error;
+
+    <span class="kw">async fn </span>load_chain(<span class="kw-2">&amp;</span><span class="self">self</span>, id: ChainId) -&gt; <span class="prelude-ty">Result</span>&lt;ChainStateView&lt;<span class="self">Self</span>::Context&gt;, ViewError&gt; {
+        <span class="macro">tracing::trace!</span>(<span class="string">&quot;Acquiring lock on {:?}&quot;</span>, id);
+        <span class="kw">let </span>guard = <span class="self">self</span>.client.guards.guard(id).<span class="kw">await</span>;
+        <span class="kw">let </span>runtime_context = ChainRuntimeContext {
+            store: <span class="self">self</span>.clone(),
+            chain_id: id,
+            user_applications: <span class="self">self</span>.client.user_applications.clone(),
+            chain_guard: <span class="prelude-val">Some</span>(Arc::new(guard)),
+        };
+        <span class="kw">let </span>client = <span class="self">self</span>.client.client.clone();
+        <span class="kw">let </span>base_key = bcs::to_bytes(<span class="kw-2">&amp;</span>BaseKey::ChainState(id))<span class="question-mark">?</span>;
+        <span class="kw">let </span>context = ContextFromDb::create(client, base_key, runtime_context).<span class="kw">await</span><span class="question-mark">?</span>;
+        ChainStateView::load(context).<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>read_value(<span class="kw-2">&amp;</span><span class="self">self</span>, hash: CryptoHash) -&gt; <span class="prelude-ty">Result</span>&lt;HashedValue, ViewError&gt; {
+        <span class="kw">let </span>value_key = bcs::to_bytes(<span class="kw-2">&amp;</span>BaseKey::Value(hash))<span class="question-mark">?</span>;
+        <span class="kw">let </span>maybe_value: <span class="prelude-ty">Option</span>&lt;Value&gt; = <span class="self">self</span>.client.client.read_key(<span class="kw-2">&amp;</span>value_key).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>id = <span class="kw">match </span><span class="kw-2">&amp;</span>maybe_value {
+            <span class="prelude-val">Some</span>(value) =&gt; value.block.chain_id.to_string(),
+            <span class="prelude-val">None </span>=&gt; <span class="string">&quot;not found&quot;</span>.to_string(),
+        };
+        <span class="macro">increment_counter!</span>(READ_VALUE_COUNTER, <span class="kw-2">&amp;</span>[(<span class="string">&quot;chain_id&quot;</span>, id)]);
+        <span class="kw">let </span>value = maybe_value.ok_or_else(|| ViewError::not_found(<span class="string">&quot;value for hash&quot;</span>, hash))<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(value.with_hash_unchecked(hash))
+    }
+
+    <span class="kw">async fn </span>write_value(<span class="kw-2">&amp;</span><span class="self">self</span>, value: HashedValue) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; {
+        <span class="kw">let </span>id = value.block().chain_id.to_string();
+        <span class="macro">increment_counter!</span>(WRITE_VALUE_COUNTER, <span class="kw-2">&amp;</span>[(<span class="string">&quot;chain_id&quot;</span>, id)]);
+        <span class="kw">let </span>value_key = bcs::to_bytes(<span class="kw-2">&amp;</span>BaseKey::Value(value.hash()))<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>batch = Batch::new();
+        batch.put_key_value(value_key.to_vec(), <span class="kw-2">&amp;</span>value)<span class="question-mark">?</span>;
+        <span class="self">self</span>.client.client.write_batch(batch, <span class="kw-2">&amp;</span>[]).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">async fn </span>read_certificate(<span class="kw-2">&amp;</span><span class="self">self</span>, hash: CryptoHash) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ViewError&gt; {
+        <span class="kw">let </span>cert_key = bcs::to_bytes(<span class="kw-2">&amp;</span>BaseKey::Certificate(hash))<span class="question-mark">?</span>;
+        <span class="kw">let </span>value_key = bcs::to_bytes(<span class="kw-2">&amp;</span>BaseKey::Value(hash))<span class="question-mark">?</span>;
+        <span class="kw">let </span>(cert_result, value_result) = <span class="macro">tokio::join!</span>(
+            <span class="self">self</span>.client.client.read_key::&lt;LiteCertificate&gt;(<span class="kw-2">&amp;</span>cert_key),
+            <span class="self">self</span>.client.client.read_key::&lt;Value&gt;(<span class="kw-2">&amp;</span>value_key)
+        );
+        <span class="kw">if let </span><span class="prelude-val">Ok</span>(maybe_value) = <span class="kw-2">&amp;</span>value_result {
+            <span class="kw">let </span>id = <span class="kw">match </span>maybe_value {
+                <span class="prelude-val">Some</span>(value) =&gt; value.block.chain_id.to_string(),
+                <span class="prelude-val">None </span>=&gt; <span class="string">&quot;not found&quot;</span>.to_string(),
+            };
+            <span class="macro">increment_counter!</span>(READ_CERTIFICATE_COUNTER, <span class="kw-2">&amp;</span>[(<span class="string">&quot;chain_id&quot;</span>, id)]);
+        };
+        <span class="kw">let </span>value: Value =
+            value_result<span class="question-mark">?</span>.ok_or_else(|| ViewError::not_found(<span class="string">&quot;value for hash&quot;</span>, hash))<span class="question-mark">?</span>;
+        <span class="kw">let </span>cert: LiteCertificate =
+            cert_result<span class="question-mark">?</span>.ok_or_else(|| ViewError::not_found(<span class="string">&quot;certificate for hash&quot;</span>, hash))<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(cert
+            .with_value(value.with_hash_unchecked(hash))
+            .ok_or(ViewError::InconsistentEntries)<span class="question-mark">?</span>)
+    }
+
+    <span class="kw">async fn </span>write_certificate(<span class="kw-2">&amp;</span><span class="self">self</span>, certificate: Certificate) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; {
+        <span class="kw">let </span>id = certificate.value.block().chain_id.to_string();
+        <span class="macro">increment_counter!</span>(WRITE_CERTIFICATE_COUNTER, <span class="kw-2">&amp;</span>[(<span class="string">&quot;chain_id&quot;</span>, id)]);
+        <span class="kw">let </span>hash = certificate.value.hash();
+        <span class="kw">let </span>cert_key = bcs::to_bytes(<span class="kw-2">&amp;</span>BaseKey::Certificate(hash))<span class="question-mark">?</span>;
+        <span class="kw">let </span>value_key = bcs::to_bytes(<span class="kw-2">&amp;</span>BaseKey::Value(hash))<span class="question-mark">?</span>;
+        <span class="kw">let </span>(cert, value) = certificate.split();
+        <span class="kw">let </span><span class="kw-2">mut </span>batch = Batch::new();
+        batch.put_key_value(cert_key.to_vec(), <span class="kw-2">&amp;</span>cert)<span class="question-mark">?</span>;
+        batch.put_key_value(value_key.to_vec(), <span class="kw-2">&amp;</span>value)<span class="question-mark">?</span>;
+        <span class="self">self</span>.client.client.write_batch(batch, <span class="kw-2">&amp;</span>[]).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">fn </span>wasm_runtime(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt; {
+        <span class="self">self</span>.client.wasm_runtime
     }
 }
 

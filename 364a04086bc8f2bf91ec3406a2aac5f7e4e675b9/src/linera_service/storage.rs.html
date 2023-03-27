@@ -283,7 +283,7 @@
         <span class="kw">use </span>StorageConfig::<span class="kw-2">*</span>;
         <span class="kw">match </span><span class="self">self </span>{
             Memory =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>client = MemoryStoreClient::new(wasm_runtime);
+                <span class="kw">let </span><span class="kw-2">mut </span>client = MemoryStoreClient::new(wasm_runtime).<span class="kw">await</span>;
                 config.initialize_store(<span class="kw-2">&amp;mut </span>client).<span class="kw">await</span><span class="question-mark">?</span>;
                 job.run(client).<span class="kw">await
             </span>}

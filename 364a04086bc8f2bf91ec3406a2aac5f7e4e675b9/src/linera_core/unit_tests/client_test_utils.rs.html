@@ -1022,7 +1022,7 @@
     <span class="kw">type </span>Store = MemoryStoreClient;
 
     <span class="kw">async fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Store, anyhow::Error&gt; {
-        <span class="prelude-val">Ok</span>(MemoryStoreClient::new(<span class="self">self</span>.wasm_runtime))
+        <span class="prelude-val">Ok</span>(MemoryStoreClient::new(<span class="self">self</span>.wasm_runtime).<span class="kw">await</span>)
     }
 }
 

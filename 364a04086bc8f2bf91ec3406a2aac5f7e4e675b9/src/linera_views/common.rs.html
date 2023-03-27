@@ -459,6 +459,28 @@
 <span id="459">459</span>
 <span id="460">460</span>
 <span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -746,6 +768,28 @@
     </span><span class="kw">pub </span>base_key: Vec&lt;u8&gt;,
     <span class="doccomment">/// User-defined data attached to the view.
     </span><span class="kw">pub </span>extra: E,
+}
+
+<span class="kw">impl</span>&lt;E, DB&gt; ContextFromDb&lt;E, DB&gt;
+<span class="kw">where
+    </span>E: Clone + Send + Sync,
+    DB: KeyValueStoreClient + Clone + Send + Sync,
+    DB::Error: From&lt;bcs::Error&gt; + Send + Sync + std::error::Error + <span class="lifetime">&#39;static</span>,
+    ViewError: From&lt;DB::Error&gt;,
+{
+    <span class="doccomment">/// Create a context from db that also clears the journal before making it available
+    </span><span class="kw">pub async fn </span>create(
+        db: DB,
+        base_key: Vec&lt;u8&gt;,
+        extra: E,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, &lt;ContextFromDb&lt;E, DB&gt; <span class="kw">as </span>Context&gt;::Error&gt; {
+        db.clear_journal(<span class="kw-2">&amp;</span>base_key).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(ContextFromDb {
+            db,
+            base_key,
+            extra,
+        })
+    }
 }
 
 <span class="attribute">#[async_trait]
