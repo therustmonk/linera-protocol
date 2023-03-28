@@ -221,11 +221,38 @@
 <span id="221">221</span>
 <span id="222">222</span>
 <span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="kw">use </span>linera_base::{
+</span><span class="kw">use </span>anyhow::anyhow;
+<span class="kw">use </span>linera_base::{
     crypto::{CryptoHash, KeyPair, PublicKey},
     data_types::{Balance, BlockHeight, Timestamp},
     identifiers::{ChainDescription, ChainId},
@@ -237,9 +264,9 @@
 <span class="kw">use </span>linera_views::views::ViewError;
 <span class="kw">use </span>serde::{de::DeserializeOwned, Deserialize, Serialize};
 <span class="kw">use </span>std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, HashMap},
     fs::{<span class="self">self</span>, OpenOptions},
-    io::{BufReader, BufWriter, Write},
+    io::{BufRead, BufReader, BufWriter, Write},
     path::Path,
 };
 
@@ -331,8 +358,10 @@
     }
 }
 
-<span class="kw">pub struct </span>WalletState {
+<span class="attribute">#[derive(Default, Serialize, Deserialize)]
+</span><span class="kw">pub struct </span>WalletState {
     chains: BTreeMap&lt;ChainId, UserChain&gt;,
+    unassigned: HashMap&lt;PublicKey, KeyPair&gt;,
 }
 
 <span class="kw">impl </span>WalletState {
@@ -360,6 +389,34 @@
         <span class="self">self</span>.chains.values_mut()
     }
 
+    <span class="kw">pub fn </span>add_unassigned_keypair(<span class="kw-2">&amp;mut </span><span class="self">self</span>, keypair: KeyPair) {
+        <span class="self">self</span>.unassigned.insert(keypair.public(), keypair);
+    }
+
+    <span class="kw">pub fn </span>key_pair_for_pk(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>PublicKey) -&gt; <span class="prelude-ty">Option</span>&lt;KeyPair&gt; {
+        <span class="self">self</span>.unassigned.get(key).map(|key_pair| key_pair.copy())
+    }
+
+    <span class="kw">pub fn </span>assign_new_chain_to_key(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        key: PublicKey,
+        chain_id: ChainId,
+        timestamp: Timestamp,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), anyhow::Error&gt; {
+        <span class="kw">let </span>key_pair = <span class="self">self</span>.unassigned.remove(<span class="kw-2">&amp;</span>key).ok_or_else(|| {
+            <span class="macro">anyhow!</span>(<span class="string">&quot;could not assign chain to key as unassigned key was not found&quot;</span>)
+        })<span class="question-mark">?</span>;
+        <span class="kw">let </span>user_chain = UserChain {
+            chain_id,
+            key_pair: <span class="prelude-val">Some</span>(key_pair),
+            block_hash: <span class="prelude-val">None</span>,
+            timestamp,
+            next_block_height: BlockHeight(<span class="number">0</span>),
+        };
+        <span class="self">self</span>.insert(user_chain);
+        <span class="prelude-val">Ok</span>(())
+    }
+
     <span class="kw">pub async fn </span>update_from_state&lt;P, S&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, state: <span class="kw-2">&amp;mut </span>ChainClient&lt;P, S&gt;)
     <span class="kw">where
         </span>P: ValidatorNodeProvider + Send + <span class="lifetime">&#39;static</span>,
@@ -384,23 +441,18 @@
             .write(<span class="bool-val">true</span>)
             .read(<span class="bool-val">true</span>)
             .open(path)<span class="question-mark">?</span>;
-        <span class="kw">let </span>reader = BufReader::new(file);
-        <span class="kw">let </span>stream = serde_json::Deserializer::from_reader(reader).into_iter();
-        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
-            chains: stream
-                .filter_map(Result::ok)
-                .map(|chain: UserChain| (chain.chain_id, chain))
-                .collect(),
-        })
+        <span class="kw">let </span><span class="kw-2">mut </span>reader = BufReader::new(file);
+        <span class="kw">if </span>reader.fill_buf()<span class="question-mark">?</span>.is_empty() {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="self">Self</span>::default());
+        }
+        <span class="prelude-val">Ok</span>(serde_json::from_reader(reader)<span class="question-mark">?</span>)
     }
 
     <span class="kw">pub fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;(), std::io::Error&gt; {
         <span class="kw">let </span>file = OpenOptions::new().write(<span class="bool-val">true</span>).open(path)<span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>writer = BufWriter::new(file);
-        <span class="kw">for </span>chain <span class="kw">in </span><span class="self">self</span>.chains.values() {
-            serde_json::to_writer(<span class="kw-2">&amp;mut </span>writer, chain)<span class="question-mark">?</span>;
-            writer.write_all(<span class="string">b&quot;\n&quot;</span>)<span class="question-mark">?</span>;
-        }
+        serde_json::to_writer_pretty(<span class="kw-2">&amp;mut </span>writer, <span class="kw-2">&amp;</span><span class="self">self</span>)<span class="question-mark">?</span>;
+        writer.flush()<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 }
