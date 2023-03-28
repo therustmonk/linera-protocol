@@ -553,7 +553,7 @@
 
     <span class="attribute">#[tokio::test]
     </span><span class="kw">async fn </span>test_simplify_batch3() {
-        <span class="kw">let </span>context = create_test_context().<span class="kw">await</span>;
+        <span class="kw">let </span>context = create_test_context();
         <span class="kw">let </span><span class="kw-2">mut </span>batch = Batch::new();
         batch.put_key_value_bytes(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>], <span class="macro">vec!</span>[]);
         batch.put_key_value_bytes(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>], <span class="macro">vec!</span>[]);

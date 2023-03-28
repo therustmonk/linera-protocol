@@ -32,11 +32,16 @@
 <span id="32">32</span>
 <span id="33">33</span>
 <span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use crate</span>::{chain_guards::ChainGuards, DbStore, DbStoreClient};
 <span class="kw">use </span>async_lock::{Mutex, RwLock};
+<span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>linera_execution::WasmRuntime;
 <span class="kw">use </span>linera_views::memory::MemoryClient;
 <span class="kw">use </span>std::{collections::BTreeMap, sync::Arc};
@@ -46,17 +51,20 @@
 <span class="kw">pub type </span>MemoryStoreClient = DbStoreClient&lt;MemoryClient&gt;;
 
 <span class="kw">impl </span>MemoryStoreClient {
-    <span class="kw">pub async fn </span>new(wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;) -&gt; <span class="self">Self </span>{
         DbStoreClient {
-            client: Arc::new(MemoryStore::new(wasm_runtime).<span class="kw">await</span>),
+            client: Arc::new(MemoryStore::new(wasm_runtime)),
         }
     }
 }
 
 <span class="kw">impl </span>MemoryStore {
-    <span class="kw">pub async fn </span>new(wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>state = Arc::new(Mutex::new(BTreeMap::new()));
-        <span class="kw">let </span>guard = state.lock_arc().<span class="kw">await</span>;
+        <span class="kw">let </span>guard = state
+            .lock_arc()
+            .now_or_never()
+            .expect(<span class="string">&quot;We should be able to acquire what we just created&quot;</span>);
         <span class="kw">let </span>client = Arc::new(RwLock::new(guard));
         <span class="self">Self </span>{
             client,
