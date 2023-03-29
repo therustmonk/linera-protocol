@@ -288,6 +288,14 @@
 <span id="288">288</span>
 <span id="289">289</span>
 <span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -549,7 +557,15 @@
             .current_dir(<span class="string">&quot;../linera-examples&quot;</span>)
             .args([<span class="string">&quot;build&quot;</span>, <span class="string">&quot;--release&quot;</span>, <span class="string">&quot;--target&quot;</span>, <span class="string">&quot;wasm32-unknown-unknown&quot;</span>])
             .output()<span class="question-mark">?</span>;
-        <span class="macro">assert!</span>(output.status.success());
+        <span class="kw">if </span>!output.status.success() {
+            <span class="macro">panic!</span>(
+                <span class="string">&quot;Failed to build example applications.\n\n\
+                stdout:\n-------\n{}\n\n\
+                stderr:\n-------\n{}&quot;</span>,
+                String::from_utf8_lossy(<span class="kw-2">&amp;</span>output.stdout),
+                String::from_utf8_lossy(<span class="kw-2">&amp;</span>output.stderr),
+            );
+        }
         <span class="prelude-val">Ok</span>(())
     }
 
