@@ -657,6 +657,40 @@
 <span id="657">657</span>
 <span id="658">658</span>
 <span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -812,10 +846,11 @@
     </span>C: Send + Context,
     ViewError: From&lt;C::Error&gt;,
 {
-    <span class="doccomment">/// Iterate over all indices.
-    </span><span class="kw">pub async fn </span>for_each_index&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>f: F) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;
+    <span class="doccomment">/// Iterates over all indices. If the function f returns false, then the loop
+    /// prematurely ends
+    </span><span class="kw">pub async fn </span>for_each_index_while&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>f: F) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;
     <span class="kw">where
-        </span>F: FnMut(<span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; + Send,
+        </span>F: FnMut(<span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;bool, ViewError&gt; + Send,
     {
         <span class="kw">let </span>key_prefix = <span class="self">self</span>.context.base_tag(KeyTag::Index <span class="kw">as </span>u8);
         <span class="kw">let </span><span class="kw-2">mut </span>updates = <span class="self">self</span>.updates.iter();
@@ -833,7 +868,9 @@
                     <span class="kw">match </span>update {
                         <span class="prelude-val">Some</span>((key, value)) <span class="kw">if </span>key.as_slice() &lt;= index =&gt; {
                             <span class="kw">if let </span>Update::Set(<span class="kw">_</span>) = value {
-                                f(key)<span class="question-mark">?</span>;
+                                <span class="kw">if </span>!f(key)<span class="question-mark">? </span>{
+                                    <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+                                }
                             }
                             update = updates.next();
                             <span class="kw">if </span>key == index {
@@ -841,8 +878,8 @@
                             }
                         }
                         <span class="kw">_ </span>=&gt; {
-                            <span class="kw">if </span>lower_bound.is_index_present(index) {
-                                f(index)<span class="question-mark">?</span>;
+                            <span class="kw">if </span>lower_bound.is_index_present(index) &amp;&amp; !f(index)<span class="question-mark">? </span>{
+                                <span class="kw">return </span><span class="prelude-val">Ok</span>(());
                             }
                             <span class="kw">break</span>;
                         }
@@ -852,17 +889,32 @@
         }
         <span class="kw">while let </span><span class="prelude-val">Some</span>((key, value)) = update {
             <span class="kw">if let </span>Update::Set(<span class="kw">_</span>) = value {
-                f(key)<span class="question-mark">?</span>;
+                <span class="kw">if </span>!f(key)<span class="question-mark">? </span>{
+                    <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+                }
             }
             update = updates.next();
         }
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Iterate over all the indices and values.
-    </span><span class="kw">pub async fn </span>for_each_index_value&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>f: F) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;
+    <span class="doccomment">/// Iterates over all indices.
+    </span><span class="kw">pub async fn </span>for_each_index&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>f: F) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;
     <span class="kw">where
-        </span>F: FnMut(<span class="kw-2">&amp;</span>[u8], <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; + Send,
+        </span>F: FnMut(<span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; + Send,
+    {
+        <span class="self">self</span>.for_each_index_while(|key| {
+            f(key)<span class="question-mark">?</span>;
+            <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)
+        })
+        .<span class="kw">await
+    </span>}
+
+    <span class="doccomment">/// Iterates over all the indices and values. If the function f returns false then
+    /// the loop prematurely ends.
+    </span><span class="kw">pub async fn </span>for_each_index_value_while&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>f: F) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;
+    <span class="kw">where
+        </span>F: FnMut(<span class="kw-2">&amp;</span>[u8], <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;bool, ViewError&gt; + Send,
     {
         <span class="kw">let </span>key_prefix = <span class="self">self</span>.context.base_tag(KeyTag::Index <span class="kw">as </span>u8);
         <span class="kw">let </span><span class="kw-2">mut </span>updates = <span class="self">self</span>.updates.iter();
@@ -880,7 +932,9 @@
                     <span class="kw">match </span>update {
                         <span class="prelude-val">Some</span>((key, value)) <span class="kw">if </span>key.as_slice() &lt;= index =&gt; {
                             <span class="kw">if let </span>Update::Set(value) = value {
-                                f(key, value)<span class="question-mark">?</span>;
+                                <span class="kw">if </span>!f(key, value)<span class="question-mark">? </span>{
+                                    <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+                                }
                             }
                             update = updates.next();
                             <span class="kw">if </span>key == index {
@@ -888,8 +942,8 @@
                             }
                         }
                         <span class="kw">_ </span>=&gt; {
-                            <span class="kw">if </span>lower_bound.is_index_present(index) {
-                                f(index, index_val)<span class="question-mark">?</span>;
+                            <span class="kw">if </span>lower_bound.is_index_present(index) &amp;&amp; !f(index, index_val)<span class="question-mark">? </span>{
+                                <span class="kw">return </span><span class="prelude-val">Ok</span>(());
                             }
                             <span class="kw">break</span>;
                         }
@@ -899,12 +953,26 @@
         }
         <span class="kw">while let </span><span class="prelude-val">Some</span>((key, value)) = update {
             <span class="kw">if let </span>Update::Set(value) = value {
-                f(key, value)<span class="question-mark">?</span>;
+                <span class="kw">if </span>!f(key, value)<span class="question-mark">? </span>{
+                    <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+                }
             }
             update = updates.next();
         }
         <span class="prelude-val">Ok</span>(())
     }
+
+    <span class="doccomment">/// Iterates over all the indices and values.
+    </span><span class="kw">pub async fn </span>for_each_index_value&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>f: F) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;
+    <span class="kw">where
+        </span>F: FnMut(<span class="kw-2">&amp;</span>[u8], <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; + Send,
+    {
+        <span class="self">self</span>.for_each_index_value_while(|key, value| {
+            f(key, value)<span class="question-mark">?</span>;
+            <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)
+        })
+        .<span class="kw">await
+    </span>}
 
     <span class="doccomment">/// Return the list of indices. The order is stable, yet not specified.
     </span><span class="kw">pub async fn </span>indices(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Vec&lt;u8&gt;&gt;, ViewError&gt; {
@@ -974,7 +1042,7 @@
         }
     }
 
-    <span class="doccomment">/// Iterate over all the keys matching the given prefix. The prefix is not included in the returned keys.
+    <span class="doccomment">/// Iterates over all the keys matching the given prefix. The prefix is not included in the returned keys.
     </span><span class="kw">pub async fn </span>find_keys_by_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Vec&lt;u8&gt;&gt;, ViewError&gt; {
         <span class="kw">let </span>len = key_prefix.len();
         <span class="kw">let </span>key_prefix_full = <span class="self">self</span>.context.base_tag_index(KeyTag::Index <span class="kw">as </span>u8, key_prefix);
@@ -1026,7 +1094,7 @@
         <span class="prelude-val">Ok</span>(keys)
     }
 
-    <span class="doccomment">/// Iterate over all the key-value pairs, for keys matching the given prefix. The
+    <span class="doccomment">/// Iterates over all the key-value pairs, for keys matching the given prefix. The
     /// prefix is not included in the returned keys.
     </span><span class="kw">pub async fn </span>find_key_values_by_prefix(
         <span class="kw-2">&amp;</span><span class="self">self</span>,

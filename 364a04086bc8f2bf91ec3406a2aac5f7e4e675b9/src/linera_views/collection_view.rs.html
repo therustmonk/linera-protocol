@@ -736,6 +736,41 @@
 <span id="736">736</span>
 <span id="737">737</span>
 <span id="738">738</span>
+<span id="739">739</span>
+<span id="740">740</span>
+<span id="741">741</span>
+<span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
+<span id="745">745</span>
+<span id="746">746</span>
+<span id="747">747</span>
+<span id="748">748</span>
+<span id="749">749</span>
+<span id="750">750</span>
+<span id="751">751</span>
+<span id="752">752</span>
+<span id="753">753</span>
+<span id="754">754</span>
+<span id="755">755</span>
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -1024,11 +1059,12 @@
     ViewError: From&lt;C::Error&gt;,
     W: View&lt;C&gt; + Sync,
 {
-    <span class="doccomment">/// Execute a function on each serialized index (aka key). Keys are visited in a
-    /// stable, yet unspecified order.
-    </span><span class="kw">pub async fn </span>for_each_key&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>f: F) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;
+    <span class="doccomment">/// Executes a function on each serialized index (aka key). Keys are visited in a
+    /// lexicographic order. If the function returns false, then the loop
+    /// is prematurely ended.
+    </span><span class="kw">pub async fn </span>for_each_key_while&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>f: F) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;
     <span class="kw">where
-        </span>F: FnMut(<span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; + Send,
+        </span>F: FnMut(<span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;bool, ViewError&gt; + Send,
     {
         <span class="kw">let </span>updates = <span class="self">self</span>.updates.write().<span class="kw">await</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>updates = updates.iter();
@@ -1041,7 +1077,9 @@
                     <span class="kw">match </span>update {
                         <span class="prelude-val">Some</span>((key, value)) <span class="kw">if </span>key.as_slice() &lt;= index =&gt; {
                             <span class="kw">if let </span>Update::Set(<span class="kw">_</span>) = value {
-                                f(key)<span class="question-mark">?</span>;
+                                <span class="kw">if </span>!f(key)<span class="question-mark">? </span>{
+                                    <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+                                }
                             }
                             update = updates.next();
                             <span class="kw">if </span>key == index {
@@ -1049,7 +1087,9 @@
                             }
                         }
                         <span class="kw">_ </span>=&gt; {
-                            f(index)<span class="question-mark">?</span>;
+                            <span class="kw">if </span>!f(index)<span class="question-mark">? </span>{
+                                <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+                            }
                             <span class="kw">break</span>;
                         }
                     }
@@ -1058,12 +1098,27 @@
         }
         <span class="kw">while let </span><span class="prelude-val">Some</span>((key, value)) = update {
             <span class="kw">if let </span>Update::Set(<span class="kw">_</span>) = value {
-                f(key)<span class="question-mark">?</span>;
+                <span class="kw">if </span>!f(key)<span class="question-mark">? </span>{
+                    <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+                }
             }
             update = updates.next();
         }
         <span class="prelude-val">Ok</span>(())
     }
+
+    <span class="doccomment">/// Executes a function on each serialized index (aka key). Keys are visited in a
+    /// lexicographic order.
+    </span><span class="kw">pub async fn </span>for_each_key&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>f: F) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;
+    <span class="kw">where
+        </span>F: FnMut(<span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; + Send,
+    {
+        <span class="self">self</span>.for_each_key_while(|key| {
+            f(key)<span class="question-mark">?</span>;
+            <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)
+        })
+        .<span class="kw">await
+    </span>}
 
     <span class="doccomment">/// Return the list of indices in the collection.
     </span><span class="kw">pub async fn </span>keys(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Vec&lt;u8&gt;&gt;, ViewError&gt; {
@@ -1267,8 +1322,24 @@
     I: Debug + DeserializeOwned,
     W: View&lt;C&gt; + Sync,
 {
-    <span class="doccomment">/// Execute a function on each index. Indices are visited in a stable, yet unspecified
-    /// order.
+    <span class="doccomment">/// Executes a function on each index. Indices are visited in an order
+    /// determined by the serialization. If the function returns false then
+    /// the function early terminates.
+    </span><span class="kw">pub async fn </span>for_each_index_while&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>f: F) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;
+    <span class="kw">where
+        </span>F: FnMut(I) -&gt; <span class="prelude-ty">Result</span>&lt;bool, ViewError&gt; + Send,
+    {
+        <span class="self">self</span>.collection
+            .for_each_key_while(|key| {
+                <span class="kw">let </span>index = C::deserialize_value(key)<span class="question-mark">?</span>;
+                f(index)
+            })
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="doccomment">/// Executes a function on each index. Indices are visited in an order
+    /// determined by the serialization.
     </span><span class="kw">pub async fn </span>for_each_index&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>f: F) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;
     <span class="kw">where
         </span>F: FnMut(I) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; + Send,
@@ -1276,8 +1347,7 @@
         <span class="self">self</span>.collection
             .for_each_key(|key| {
                 <span class="kw">let </span>index = C::deserialize_value(key)<span class="question-mark">?</span>;
-                f(index)<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(())
+                f(index)
             })
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
@@ -1439,8 +1509,8 @@
     I: Debug + CustomSerialize,
     W: View&lt;C&gt; + Sync,
 {
-    <span class="doccomment">/// Execute a function on each index. Indices are visited in a stable, yet unspecified
-    /// order.
+    <span class="doccomment">/// Executes a function on each index. Indices are visited in an order
+    /// determined by the custom serialization.
     </span><span class="kw">pub async fn </span>for_each_index&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>f: F) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;
     <span class="kw">where
         </span>F: FnMut(I) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; + Send,
