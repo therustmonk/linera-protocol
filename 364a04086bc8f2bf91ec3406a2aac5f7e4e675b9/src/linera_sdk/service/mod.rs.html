@@ -67,7 +67,7 @@
 /// necessary resource types and functions so that the host can call the service application.
 </span><span class="attribute">#[macro_export]
 </span><span class="macro">macro_rules! </span>service {
-    (<span class="macro-nonterminal">$application</span>:ident) =&gt; {
+    (<span class="macro-nonterminal">$application</span>:ty) =&gt; {
         <span class="comment">// Export the service interface.
         </span><span class="macro-nonterminal">$</span><span class="macro">crate::export_service!</span>(<span class="macro-nonterminal">$application</span>);
 
