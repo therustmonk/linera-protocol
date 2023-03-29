@@ -1156,8 +1156,8 @@
                     <span class="kw">let </span>outbox = outboxes.load_entry_mut(<span class="kw-2">&amp;</span>Target::channel(id, name)).<span class="kw">await</span><span class="question-mark">?</span>;
                     outbox.schedule_message(<span class="kw-2">*</span>latest_height)<span class="question-mark">?</span>;
                 }
+                channel.subscribers.insert(<span class="kw-2">&amp;</span>id)<span class="question-mark">?</span>;
             }
-            channel.subscribers.insert(<span class="kw-2">&amp;</span>id)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
