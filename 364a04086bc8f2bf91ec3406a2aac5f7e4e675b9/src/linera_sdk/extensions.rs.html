@@ -15,13 +15,36 @@
 <span id="15">15</span>
 <span id="16">16</span>
 <span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="kw">use </span>serde::de::DeserializeOwned;
+</span><span class="doccomment">//! Extension traits with some common functionality.
 
-<span class="kw">pub trait </span>FromBcsBytes: Sized {
-    <span class="kw">fn </span>from_bcs_bytes(bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, bcs::Error&gt;;
+</span><span class="kw">use </span>serde::{de::DeserializeOwned, Serialize};
+
+<span class="doccomment">/// Extension trait to deserialize a type from a vector of bytes using [`bcs`].
+</span><span class="kw">pub trait </span>FromBcsBytes: Sized {
+    <span class="doccomment">/// Deserializes itself from a vector of bytes using [`bcs`].
+    </span><span class="kw">fn </span>from_bcs_bytes(bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, bcs::Error&gt;;
 }
 
 <span class="kw">impl</span>&lt;T&gt; FromBcsBytes <span class="kw">for </span>T
@@ -30,6 +53,21 @@
 {
     <span class="kw">fn </span>from_bcs_bytes(bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, bcs::Error&gt; {
         bcs::from_bytes(bytes)
+    }
+}
+
+<span class="doccomment">/// Extension trait to serialize a type into a vector of bytes using [`bcs`].
+</span><span class="kw">pub trait </span>ToBcsBytes {
+    <span class="doccomment">/// Serializes itself into a vector of bytes using [`bcs`].
+    </span><span class="kw">fn </span>to_bcs_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, bcs::Error&gt;;
+}
+
+<span class="kw">impl</span>&lt;T&gt; ToBcsBytes <span class="kw">for </span>T
+<span class="kw">where
+    </span>T: Serialize,
+{
+    <span class="kw">fn </span>to_bcs_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, bcs::Error&gt; {
+        bcs::to_bytes(<span class="self">self</span>)
     }
 }
 </code></pre></div>

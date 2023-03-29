@@ -1087,6 +1087,106 @@
 <span id="1087">1087</span>
 <span id="1088">1088</span>
 <span id="1089">1089</span>
+<span id="1090">1090</span>
+<span id="1091">1091</span>
+<span id="1092">1092</span>
+<span id="1093">1093</span>
+<span id="1094">1094</span>
+<span id="1095">1095</span>
+<span id="1096">1096</span>
+<span id="1097">1097</span>
+<span id="1098">1098</span>
+<span id="1099">1099</span>
+<span id="1100">1100</span>
+<span id="1101">1101</span>
+<span id="1102">1102</span>
+<span id="1103">1103</span>
+<span id="1104">1104</span>
+<span id="1105">1105</span>
+<span id="1106">1106</span>
+<span id="1107">1107</span>
+<span id="1108">1108</span>
+<span id="1109">1109</span>
+<span id="1110">1110</span>
+<span id="1111">1111</span>
+<span id="1112">1112</span>
+<span id="1113">1113</span>
+<span id="1114">1114</span>
+<span id="1115">1115</span>
+<span id="1116">1116</span>
+<span id="1117">1117</span>
+<span id="1118">1118</span>
+<span id="1119">1119</span>
+<span id="1120">1120</span>
+<span id="1121">1121</span>
+<span id="1122">1122</span>
+<span id="1123">1123</span>
+<span id="1124">1124</span>
+<span id="1125">1125</span>
+<span id="1126">1126</span>
+<span id="1127">1127</span>
+<span id="1128">1128</span>
+<span id="1129">1129</span>
+<span id="1130">1130</span>
+<span id="1131">1131</span>
+<span id="1132">1132</span>
+<span id="1133">1133</span>
+<span id="1134">1134</span>
+<span id="1135">1135</span>
+<span id="1136">1136</span>
+<span id="1137">1137</span>
+<span id="1138">1138</span>
+<span id="1139">1139</span>
+<span id="1140">1140</span>
+<span id="1141">1141</span>
+<span id="1142">1142</span>
+<span id="1143">1143</span>
+<span id="1144">1144</span>
+<span id="1145">1145</span>
+<span id="1146">1146</span>
+<span id="1147">1147</span>
+<span id="1148">1148</span>
+<span id="1149">1149</span>
+<span id="1150">1150</span>
+<span id="1151">1151</span>
+<span id="1152">1152</span>
+<span id="1153">1153</span>
+<span id="1154">1154</span>
+<span id="1155">1155</span>
+<span id="1156">1156</span>
+<span id="1157">1157</span>
+<span id="1158">1158</span>
+<span id="1159">1159</span>
+<span id="1160">1160</span>
+<span id="1161">1161</span>
+<span id="1162">1162</span>
+<span id="1163">1163</span>
+<span id="1164">1164</span>
+<span id="1165">1165</span>
+<span id="1166">1166</span>
+<span id="1167">1167</span>
+<span id="1168">1168</span>
+<span id="1169">1169</span>
+<span id="1170">1170</span>
+<span id="1171">1171</span>
+<span id="1172">1172</span>
+<span id="1173">1173</span>
+<span id="1174">1174</span>
+<span id="1175">1175</span>
+<span id="1176">1176</span>
+<span id="1177">1177</span>
+<span id="1178">1178</span>
+<span id="1179">1179</span>
+<span id="1180">1180</span>
+<span id="1181">1181</span>
+<span id="1182">1182</span>
+<span id="1183">1183</span>
+<span id="1184">1184</span>
+<span id="1185">1185</span>
+<span id="1186">1186</span>
+<span id="1187">1187</span>
+<span id="1188">1188</span>
+<span id="1189">1189</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1127,6 +1227,12 @@
 };
 <span class="kw">use </span>thiserror::Error;
 <span class="kw">use </span>tracing::instrument;
+
+<span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+</span><span class="kw">use </span>{
+    linera_base::identifiers::{Destination, EffectId},
+    linera_execution::ApplicationRegistryView,
+};
 
 <span class="attribute">#[cfg(test)]
 #[path = <span class="string">&quot;unit_tests/worker_tests.rs&quot;</span>]
@@ -1349,7 +1455,16 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.nickname
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>storage_client(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Client {
+    <span class="doccomment">/// Returns the storage client so that it can be manipulated or queried.
+    </span><span class="attribute">#[cfg(not(feature = <span class="string">&quot;test&quot;</span>))]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>storage_client(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Client {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.storage
+    }
+
+    <span class="doccomment">/// Returns the storage client so that it can be manipulated or queried by tests in other
+    /// crates.
+    </span><span class="attribute">#[cfg(feature = <span class="string">&quot;test&quot;</span>)]
+    </span><span class="kw">pub fn </span>storage_client(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Client {
         <span class="kw-2">&amp;</span><span class="self">self</span>.storage
     }
 
@@ -1365,7 +1480,7 @@
 {
     <span class="comment">// NOTE: This only works for non-sharded workers!
     </span><span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>fully_handle_certificate(
+    </span><span class="kw">pub async fn </span>fully_handle_certificate(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         certificate: Certificate,
         blobs: Vec&lt;HashedValue&gt;,
@@ -1405,7 +1520,8 @@
         </span><span class="prelude-val">Ok</span>((effects, info))
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>query_application(
+    <span class="doccomment">/// Executes a [`Query`] for an application&#39;s state on a specific chain.
+    </span><span class="kw">pub async fn </span>query_application(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         chain_id: ChainId,
         application_id: ApplicationId,
@@ -1804,6 +1920,90 @@
         }
         <span class="comment">// Cache the certificate so that clients don&#39;t have to send the value again.
         </span><span class="self">self</span>.recent_values.push(hash, value);
+    }
+
+    <span class="doccomment">/// Returns a stored [`Certificate`] for a chain&#39;s block.
+    </span><span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+    </span><span class="kw">pub async fn </span>read_certificate(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        chain_id: ChainId,
+        height: BlockHeight,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Certificate&gt;, WorkerError&gt; {
+        <span class="kw">let </span>chain = <span class="self">self</span>.storage.load_active_chain(chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>certificate_hash = <span class="kw">match </span>chain.confirmed_log.get(height.<span class="number">0 </span><span class="kw">as </span>usize).<span class="kw">await</span><span class="question-mark">? </span>{
+            <span class="prelude-val">Some</span>(hash) =&gt; hash,
+            <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+        };
+        <span class="kw">let </span>certificate = <span class="self">self</span>.storage.read_certificate(certificate_hash).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(certificate))
+    }
+
+    <span class="doccomment">/// Returns the application registry for a specific chain.
+    ///
+    /// # Notes
+    ///
+    /// The returned [`ApplicationRegistryView`] holds a lock of the chain it belongs to. Incorrect
+    /// usage of this method may cause deadlocks.
+    </span><span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+    </span><span class="kw">pub async fn </span>load_application_registry(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        chain_id: ChainId,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ApplicationRegistryView&lt;Client::Context&gt;, WorkerError&gt; {
+        <span class="kw">let </span>chain = <span class="self">self</span>.storage.load_active_chain(chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(chain.execution_state.system.registry)
+    }
+
+    <span class="doccomment">/// Returns a [`Message`] that&#39;s awaiting to be received by the chain specified by `chain_id`.
+    </span><span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+    </span><span class="kw">pub async fn </span>find_incoming_message(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        chain_id: ChainId,
+        effect_id: EffectId,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Message&gt;, WorkerError&gt; {
+        <span class="kw">let </span><span class="prelude-val">Some</span>(certificate) = <span class="self">self</span>.read_certificate(effect_id.chain_id, effect_id.height).<span class="kw">await</span><span class="question-mark">?
+            </span><span class="kw">else </span>{ <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) };
+
+        <span class="kw">let </span><span class="prelude-val">Some</span>(outgoing_effect) =
+            certificate.value.effects().get(effect_id.index <span class="kw">as </span>usize).cloned()
+            <span class="kw">else </span>{ <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) };
+
+        <span class="kw">let </span>application_id = outgoing_effect.application_id;
+        <span class="kw">let </span>origin = Origin {
+            sender: effect_id.chain_id,
+            medium: <span class="kw">match </span>outgoing_effect.destination {
+                Destination::Recipient(<span class="kw">_</span>) =&gt; Medium::Direct,
+                Destination::Subscribers(channel) =&gt; Medium::Channel(channel),
+            },
+        };
+
+        <span class="kw">let </span><span class="kw-2">mut </span>chain = <span class="self">self</span>.storage.load_active_chain(chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>communication_state = chain
+            .communication_states
+            .load_entry_mut(<span class="kw-2">&amp;</span>application_id)
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>inbox = communication_state.inboxes.load_entry_mut(<span class="kw-2">&amp;</span>origin).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span>certificate_hash = certificate.value.hash();
+        <span class="kw">let </span><span class="prelude-val">Some</span>(event) =
+            inbox
+                .added_events
+                .iter_mut()
+                .<span class="kw">await</span><span class="question-mark">?
+                </span>.find(|event| {
+                    event.certificate_hash == certificate_hash
+                        &amp;&amp; event.height == effect_id.height
+                        &amp;&amp; event.index == effect_id.index <span class="kw">as </span>usize
+                })
+                .cloned()
+            <span class="kw">else </span>{ <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) };
+
+        <span class="macro">assert_eq!</span>(event.effect, outgoing_effect.effect);
+
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Message {
+            application_id,
+            origin,
+            event,
+        }))
     }
 }
 

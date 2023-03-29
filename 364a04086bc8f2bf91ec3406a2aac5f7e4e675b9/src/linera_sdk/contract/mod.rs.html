@@ -132,6 +132,11 @@
 <span id="132">132</span>
 <span id="133">133</span>
 <span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -264,6 +269,11 @@
                 forwarded_sessions: Vec&lt;<span class="macro-nonterminal">$crate::contract::SessionId</span>&gt;,
             ) -&gt; PollCallSession
         }
+
+        <span class="doccomment">/// Stub of a `main` entrypoint so that the binary doesn&#39;t fail to compile on targets other
+        /// than WebAssembly.
+        </span><span class="attribute">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
+        </span><span class="kw">fn </span>main() {}
     };
 }
 </code></pre></div>

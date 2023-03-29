@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/toml-0.5.9/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../toml/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/toml-0.7.3/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../toml/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -178,11 +178,9 @@
 <span id="178">178</span>
 <span id="179">179</span>
 <span id="180">180</span>
-</pre><pre class="rust"><code><span class="doccomment">//! A [TOML]-parsing library
-//!
-//! This library implements a [TOML] v0.5.0 compatible parser,
-//! primarily supporting the [`serde`] library for encoding/decoding
-//! various types in Rust.
+<span id="181">181</span>
+<span id="182">182</span>
+</pre><pre class="rust"><code><span class="doccomment">//! A [serde]-compatible [TOML]-parsing library
 //!
 //! TOML itself is a simple, ergonomic, and readable configuration format:
 //!
@@ -201,9 +199,10 @@
 //!
 //! ## TOML values
 //!
-//! A value in TOML is represented with the [`Value`] enum in this crate:
+//! A TOML document is represented with the [`Table`] type which maps `String` to the [`Value`] enum:
 //!
-//! ```rust,ignore
+//! ```rust
+//! # use toml::value::{Datetime, Array, Table};
 //! pub enum Value {
 //!     String(String),
 //!     Integer(i64),
@@ -215,25 +214,22 @@
 //! }
 //! ```
 //!
-//! TOML is similar to JSON with the notable addition of a [`Datetime`]
-//! type. In general, TOML and JSON are interchangeable in terms of
-//! formats.
-//!
 //! ## Parsing TOML
 //!
-//! The easiest way to parse a TOML document is via the [`Value`] type:
+//! The easiest way to parse a TOML document is via the [`Table`] type:
 //!
-//! ```rust
-//! use toml::Value;
+</span><span class="attribute">#![cfg_attr(not(feature = <span class="string">&quot;parse&quot;</span>), doc = <span class="string">&quot; ```ignore&quot;</span>)]
+#![cfg_attr(feature = <span class="string">&quot;parse&quot;</span>, doc = <span class="string">&quot; ```&quot;</span>)]
+</span><span class="doccomment">//! use toml::Table;
 //!
-//! let value = &quot;foo = &#39;bar&#39;&quot;.parse::&lt;Value&gt;().unwrap();
+//! let value = &quot;foo = &#39;bar&#39;&quot;.parse::&lt;Table&gt;().unwrap();
 //!
 //! assert_eq!(value[&quot;foo&quot;].as_str(), Some(&quot;bar&quot;));
 //! ```
 //!
-//! The [`Value`] type implements a number of convenience methods and
+//! The [`Table`] type implements a number of convenience methods and
 //! traits; the example above uses [`FromStr`] to parse a [`str`] into a
-//! [`Value`].
+//! [`Table`].
 //!
 //! ## Deserialization and Serialization
 //!
@@ -241,23 +237,27 @@
 //! implementations of the `Deserialize`, `Serialize`, `Deserializer`, and
 //! `Serializer` traits. Namely, you&#39;ll find:
 //!
+//! * `Deserialize for Table`
+//! * `Serialize for Table`
 //! * `Deserialize for Value`
 //! * `Serialize for Value`
 //! * `Deserialize for Datetime`
 //! * `Serialize for Datetime`
 //! * `Deserializer for de::Deserializer`
 //! * `Serializer for ser::Serializer`
+//! * `Deserializer for Table`
 //! * `Deserializer for Value`
 //!
 //! This means that you can use Serde to deserialize/serialize the
-//! [`Value`] type as well as the [`Datetime`] type in this crate. You can also
-//! use the [`Deserializer`], [`Serializer`], or [`Value`] type itself to act as
+//! [`Table`] type as well as [`Value`] and [`Datetime`] type in this crate. You can also
+//! use the [`Deserializer`], [`Serializer`], or [`Table`] type itself to act as
 //! a deserializer/serializer for arbitrary types.
 //!
 //! An example of deserializing with TOML is:
 //!
-//! ```rust
-//! use serde_derive::Deserialize;
+</span><span class="attribute">#![cfg_attr(not(feature = <span class="string">&quot;parse&quot;</span>), doc = <span class="string">&quot; ```ignore&quot;</span>)]
+#![cfg_attr(feature = <span class="string">&quot;parse&quot;</span>, doc = <span class="string">&quot; ```&quot;</span>)]
+</span><span class="doccomment">//! use serde::Deserialize;
 //!
 //! #[derive(Deserialize)]
 //! struct Config {
@@ -272,26 +272,25 @@
 //!     travis: Option&lt;String&gt;,
 //! }
 //!
-//! fn main() {
-//!     let config: Config = toml::from_str(r#&quot;
-//!         ip = &#39;127.0.0.1&#39;
+//! let config: Config = toml::from_str(r#&quot;
+//!     ip = &#39;127.0.0.1&#39;
 //!
-//!         [keys]
-//!         github = &#39;xxxxxxxxxxxxxxxxx&#39;
-//!         travis = &#39;yyyyyyyyyyyyyyyyy&#39;
-//!     &quot;#).unwrap();
+//!     [keys]
+//!     github = &#39;xxxxxxxxxxxxxxxxx&#39;
+//!     travis = &#39;yyyyyyyyyyyyyyyyy&#39;
+//! &quot;#).unwrap();
 //!
-//!     assert_eq!(config.ip, &quot;127.0.0.1&quot;);
-//!     assert_eq!(config.port, None);
-//!     assert_eq!(config.keys.github, &quot;xxxxxxxxxxxxxxxxx&quot;);
-//!     assert_eq!(config.keys.travis.as_ref().unwrap(), &quot;yyyyyyyyyyyyyyyyy&quot;);
-//! }
+//! assert_eq!(config.ip, &quot;127.0.0.1&quot;);
+//! assert_eq!(config.port, None);
+//! assert_eq!(config.keys.github, &quot;xxxxxxxxxxxxxxxxx&quot;);
+//! assert_eq!(config.keys.travis.as_ref().unwrap(), &quot;yyyyyyyyyyyyyyyyy&quot;);
 //! ```
 //!
 //! You can serialize types in a similar fashion:
 //!
-//! ```rust
-//! use serde_derive::Serialize;
+</span><span class="attribute">#![cfg_attr(not(feature = <span class="string">&quot;display&quot;</span>), doc = <span class="string">&quot; ```ignore&quot;</span>)]
+#![cfg_attr(feature = <span class="string">&quot;display&quot;</span>, doc = <span class="string">&quot; ```&quot;</span>)]
+</span><span class="doccomment">//! use serde::Serialize;
 //!
 //! #[derive(Serialize)]
 //! struct Config {
@@ -306,57 +305,62 @@
 //!     travis: Option&lt;String&gt;,
 //! }
 //!
-//! fn main() {
-//!     let config = Config {
-//!         ip: &quot;127.0.0.1&quot;.to_string(),
-//!         port: None,
-//!         keys: Keys {
-//!             github: &quot;xxxxxxxxxxxxxxxxx&quot;.to_string(),
-//!             travis: Some(&quot;yyyyyyyyyyyyyyyyy&quot;.to_string()),
-//!         },
-//!     };
+//! let config = Config {
+//!     ip: &quot;127.0.0.1&quot;.to_string(),
+//!     port: None,
+//!     keys: Keys {
+//!         github: &quot;xxxxxxxxxxxxxxxxx&quot;.to_string(),
+//!         travis: Some(&quot;yyyyyyyyyyyyyyyyy&quot;.to_string()),
+//!     },
+//! };
 //!
-//!     let toml = toml::to_string(&amp;config).unwrap();
-//! }
+//! let toml = toml::to_string(&amp;config).unwrap();
 //! ```
 //!
 //! [TOML]: https://github.com/toml-lang/toml
 //! [Cargo]: https://crates.io/
 //! [`serde`]: https://serde.rs/
+//! [serde]: https://serde.rs/
 
-</span><span class="attribute">#![doc(html_root_url = <span class="string">&quot;https://docs.rs/toml/0.5&quot;</span>)]
-#![deny(missing_docs)]
+</span><span class="attribute">#![deny(missing_docs)]
 #![warn(rust_2018_idioms)]
 </span><span class="comment">// Makes rustc abort compilation if there are any unsafe blocks in the crate.
 // Presence of this annotation is picked up by tools such as cargo-geiger
 // and lets them ensure that there is indeed no unsafe code as opposed to
 // something they couldn&#39;t detect (e.g. unsafe added via macro expansion, etc).
 </span><span class="attribute">#![forbid(unsafe_code)]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 
 </span><span class="kw">pub mod </span>map;
 <span class="kw">pub mod </span>value;
-<span class="attribute">#[doc(no_inline)]
-</span><span class="kw">pub use </span><span class="kw">crate</span>::value::Value;
-<span class="kw">mod </span>datetime;
 
-<span class="kw">pub mod </span>ser;
-<span class="attribute">#[doc(no_inline)]
-</span><span class="kw">pub use </span><span class="kw">crate</span>::ser::{to_string, to_string_pretty, to_vec, Serializer};
 <span class="kw">pub mod </span>de;
-<span class="attribute">#[doc(no_inline)]
-</span><span class="kw">pub use </span><span class="kw">crate</span>::de::{from_slice, from_str, Deserializer};
-<span class="kw">mod </span>tokens;
+<span class="kw">pub mod </span>ser;
 
 <span class="attribute">#[doc(hidden)]
 </span><span class="kw">pub mod </span>macros;
 
-<span class="kw">mod </span>spanned;
-<span class="kw">pub use </span><span class="kw">crate</span>::spanned::Spanned;
+<span class="kw">mod </span>edit;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;display&quot;</span>)]
+</span><span class="kw">mod </span>fmt;
+<span class="kw">mod </span>table;
 
-<span class="comment">// Just for rustdoc
+<span class="attribute">#[cfg(feature = <span class="string">&quot;parse&quot;</span>)]
+#[doc(inline)]
+</span><span class="kw">pub use </span><span class="kw">crate</span>::de::{from_str, Deserializer};
+<span class="attribute">#[cfg(feature = <span class="string">&quot;display&quot;</span>)]
+#[doc(inline)]
+</span><span class="kw">pub use </span><span class="kw">crate</span>::ser::{to_string, to_string_pretty, Serializer};
+<span class="attribute">#[doc(inline)]
+</span><span class="kw">pub use </span><span class="kw">crate</span>::value::Value;
+
+<span class="kw">pub use </span>serde_spanned::Spanned;
+<span class="kw">pub use </span>table::Table;
+
+<span class="comment">// Shortcuts for the module doc-comment
 </span><span class="attribute">#[allow(unused_imports)]
-</span><span class="kw">use </span><span class="kw">crate</span>::datetime::Datetime;
-<span class="attribute">#[allow(unused_imports)]
 </span><span class="kw">use </span>core::str::FromStr;
+<span class="attribute">#[allow(unused_imports)]
+</span><span class="kw">use </span>toml_datetime::Datetime;
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="toml" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>
