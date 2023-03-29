@@ -881,18 +881,17 @@
 <span id="881">881</span>
 <span id="882">882</span>
 <span id="883">883</span>
-<span id="884">884</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use crate</span>::{
-    applications::ApplicationRegistry,
     committee::{Committee, Epoch},
     ApplicationRegistryView, Bytecode, BytecodeLocation, ChainOwnership, ChannelId, ChannelName,
     Destination, EffectContext, OperationContext, QueryContext, RawExecutionResult,
     UserApplicationDescription, UserApplicationId,
 };
+<span class="kw">use </span>async_graphql::Enum;
 <span class="kw">use </span>custom_debug_derive::Debug;
 <span class="kw">use </span>linera_base::{
     crypto::{CryptoHash, PublicKey},
@@ -916,9 +915,8 @@
 };
 <span class="kw">use </span>thiserror::Error;
 
-<span class="kw">use </span>async_graphql::Enum;
 <span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
-</span><span class="kw">use </span>std::collections::BTreeSet;
+</span><span class="kw">use </span>{<span class="kw">crate</span>::applications::ApplicationRegistry, std::collections::BTreeSet};
 
 <span class="doccomment">/// A view accessing the execution state of the system of a chain.
 </span><span class="attribute">#[derive(Debug, HashableView)]

@@ -388,8 +388,6 @@
 <span id="388">388</span>
 <span id="389">389</span>
 <span id="390">390</span>
-<span id="391">391</span>
-<span id="392">392</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -398,13 +396,14 @@
     system::SystemExecutionStateView,
     ApplicationId, Effect, EffectContext, ExecutionError, ExecutionResult, ExecutionRuntimeContext,
     Operation, OperationContext, Query, QueryContext, RawExecutionResult, Response, SystemEffect,
-    UserApplicationId, WritableStorage,
+    UserApplicationDescription, UserApplicationId, WritableStorage,
 };
 <span class="kw">use </span>linera_base::{
     ensure,
     identifiers::{ChainId, Owner},
 };
 <span class="kw">use </span>linera_views::{
+    common::Context,
     key_value_store_view::KeyValueStoreView,
     reentrant_collection_view::ReentrantCollectionView,
     register_view::RegisterView,
@@ -414,12 +413,9 @@
 
 <span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
 </span><span class="kw">use </span>{
-    <span class="kw">crate</span>::{
-        system::SystemExecutionState, TestExecutionRuntimeContext, UserApplicationCode,
-        UserApplicationDescription,
-    },
+    <span class="kw">crate</span>::{system::SystemExecutionState, TestExecutionRuntimeContext, UserApplicationCode},
     async_lock::Mutex,
-    linera_views::{common::Context, memory::MemoryContext},
+    linera_views::memory::MemoryContext,
     std::collections::BTreeMap,
     std::sync::Arc,
 };

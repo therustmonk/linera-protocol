@@ -90,12 +90,23 @@
 <span id="90">90</span>
 <span id="91">91</span>
 <span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use </span>linera_base::data_types::{ArithmeticError, BlockHeight};
 <span class="kw">use </span>linera_views::{
-    common::Context, queue_view::QueueView, register_view::RegisterView, views::ViewError,
+    common::Context,
+    queue_view::QueueView,
+    register_view::RegisterView,
+    views::{GraphQLView, View, ViewError},
+};
+
+<span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+</span><span class="kw">use </span>{
+    async_lock::Mutex, linera_views::memory::MemoryContext, std::collections::BTreeMap,
+    std::sync::Arc,
 };
 
 <span class="attribute">#[cfg(test)]
@@ -160,13 +171,6 @@
         <span class="prelude-val">Ok</span>(updated)
     }
 }
-
-<span class="kw">use </span>linera_views::views::GraphQLView;
-<span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
-</span><span class="kw">use </span>{
-    async_lock::Mutex, linera_views::memory::MemoryContext, linera_views::views::View,
-    std::collections::BTreeMap, std::sync::Arc,
-};
 
 <span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
 </span><span class="kw">impl </span>OutboxStateView&lt;MemoryContext&lt;()&gt;&gt;

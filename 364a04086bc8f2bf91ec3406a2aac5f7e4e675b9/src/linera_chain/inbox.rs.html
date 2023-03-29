@@ -251,6 +251,8 @@
 <span id="251">251</span>
 <span id="252">252</span>
 <span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -263,10 +265,19 @@
 };
 <span class="kw">use </span>linera_execution::ApplicationId;
 <span class="kw">use </span>linera_views::{
-    common::Context, queue_view::QueueView, register_view::RegisterView, views::ViewError,
+    common::Context,
+    queue_view::QueueView,
+    register_view::RegisterView,
+    views::{GraphQLView, View, ViewError},
 };
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>thiserror::Error;
+
+<span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+</span><span class="kw">use </span>{
+    async_lock::Mutex, linera_views::memory::MemoryContext, std::collections::BTreeMap,
+    std::sync::Arc,
+};
 
 <span class="attribute">#[cfg(test)]
 #[path = <span class="string">&quot;unit_tests/inbox_tests.rs&quot;</span>]
@@ -482,13 +493,6 @@
         <span class="prelude-val">Ok</span>(())
     }
 }
-
-<span class="kw">use </span>linera_views::views::GraphQLView;
-<span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
-</span><span class="kw">use </span>{
-    async_lock::Mutex, linera_views::memory::MemoryContext, linera_views::views::View,
-    std::collections::BTreeMap, std::sync::Arc,
-};
 
 <span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
 </span><span class="kw">impl </span>InboxStateView&lt;MemoryContext&lt;()&gt;&gt;
