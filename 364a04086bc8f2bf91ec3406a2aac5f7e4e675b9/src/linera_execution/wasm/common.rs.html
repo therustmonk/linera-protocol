@@ -425,7 +425,7 @@
 </span><span class="doccomment">//! Runtime independent code for interfacing with user applications in WebAssembly modules.
 
 </span><span class="kw">use super</span>::{
-    async_boundary::{ContextForwarder, GuestFuture, GuestFutureInterface},
+    async_boundary::{GuestFuture, GuestFutureInterface, WakerForwarder},
     async_determinism::HostFutureQueue,
     ExecutionError,
 };
@@ -623,7 +623,7 @@
 {
     <span class="doccomment">/// Where to store the async task context to later be reused in async calls from the guest WASM
     /// module.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) context_forwarder: ContextForwarder,
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) waker_forwarder: WakerForwarder,
 
     <span class="doccomment">/// The application type.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) application: A,

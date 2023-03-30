@@ -535,7 +535,7 @@
 
 <span class="kw">use </span><span class="self">self</span>::{queryable_system::QueryableSystem, writable_system::WritableSystem};
 <span class="kw">use super</span>::{
-    async_boundary::{ContextForwarder, HostFuture},
+    async_boundary::{HostFuture, WakerForwarder},
     async_determinism::{HostFutureQueue, QueuedHostFutureFactory},
     common::{<span class="self">self</span>, ApplicationRuntimeContext, WasmRuntimeContext},
     WasmApplication, WasmExecutionError,
@@ -617,10 +617,10 @@
         <span class="kw">let </span>module = Module::new(<span class="kw-2">&amp;</span>store, <span class="kw-2">&amp;</span><span class="self">self</span>.contract_bytecode)
             .map_err(wit_bindgen_host_wasmer_rust::anyhow::Error::from)<span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>imports = <span class="macro">imports! </span>{};
-        <span class="kw">let </span>context_forwarder = ContextForwarder::default();
+        <span class="kw">let </span>waker_forwarder = WakerForwarder::default();
         <span class="kw">let </span>(future_queue, queued_future_factory) = HostFutureQueue::new();
         <span class="kw">let </span>(system_api, storage_guard) =
-            ContractSystemApi::new(context_forwarder.clone(), storage, queued_future_factory);
+            ContractSystemApi::new(waker_forwarder.clone(), storage, queued_future_factory);
         <span class="kw">let </span>system_api_setup =
             writable_system::add_to_imports(<span class="kw-2">&amp;mut </span>store, <span class="kw-2">&amp;mut </span>imports, system_api);
         <span class="kw">let </span>(contract, instance) =
@@ -633,7 +633,7 @@
         system_api_setup(<span class="kw-2">&amp;</span>instance, <span class="kw-2">&amp;</span>store)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(WasmRuntimeContext {
-            context_forwarder,
+            waker_forwarder,
             application,
             future_queue,
             store,
@@ -653,9 +653,9 @@
         <span class="kw">let </span>module = Module::new(<span class="kw-2">&amp;</span>store, <span class="kw-2">&amp;</span><span class="self">self</span>.service_bytecode)
             .map_err(wit_bindgen_host_wasmer_rust::anyhow::Error::from)<span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>imports = <span class="macro">imports! </span>{};
-        <span class="kw">let </span>context_forwarder = ContextForwarder::default();
+        <span class="kw">let </span>waker_forwarder = WakerForwarder::default();
         <span class="kw">let </span>(future_queue, _queued_future_factory) = HostFutureQueue::new();
-        <span class="kw">let </span>(system_api, storage_guard) = ServiceSystemApi::new(context_forwarder.clone(), storage);
+        <span class="kw">let </span>(system_api, storage_guard) = ServiceSystemApi::new(waker_forwarder.clone(), storage);
         <span class="kw">let </span>system_api_setup =
             queryable_system::add_to_imports(<span class="kw-2">&amp;mut </span>store, <span class="kw-2">&amp;mut </span>imports, system_api);
         <span class="kw">let </span>(service, instance) = service::Service::instantiate(<span class="kw-2">&amp;mut </span>store, <span class="kw-2">&amp;</span>module, <span class="kw-2">&amp;mut </span>imports)<span class="question-mark">?</span>;
@@ -667,7 +667,7 @@
         system_api_setup(<span class="kw-2">&amp;</span>instance, <span class="kw-2">&amp;</span>store)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(WasmRuntimeContext {
-            context_forwarder,
+            waker_forwarder,
             application,
             future_queue,
             store,
@@ -836,7 +836,7 @@
 <span class="doccomment">/// Helper type with common functionality across the contract and service system API
 /// implementations.
 </span><span class="kw">struct </span>SystemApi&lt;S&gt; {
-    context: ContextForwarder,
+    waker: WakerForwarder,
     storage: Arc&lt;Mutex&lt;<span class="prelude-ty">Option</span>&lt;S&gt;&gt;&gt;,
 }
 
@@ -861,7 +861,7 @@
     /// The [`StorageGuard`] instance must be kept alive while the trait object is still expected to
     /// be alive and usable by the WASM application.
     </span><span class="kw">pub fn </span>new&lt;<span class="lifetime">&#39;storage</span>&gt;(
-        context: ContextForwarder,
+        waker: WakerForwarder,
         storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>WritableStorage,
         queued_future_factory: QueuedHostFutureFactory&lt;<span class="lifetime">&#39;static</span>&gt;,
     ) -&gt; (<span class="self">Self</span>, StorageGuard&lt;<span class="lifetime">&#39;storage</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>WritableStorage&gt;) {
@@ -875,7 +875,7 @@
 
         (
             ContractSystemApi {
-                shared: SystemApi { context, storage },
+                shared: SystemApi { waker, storage },
                 queued_future_factory,
             },
             guard,
@@ -900,9 +900,9 @@
             .expect(<span class="string">&quot;Application called storage after it should have stopped&quot;</span>)
     }
 
-    <span class="doccomment">/// Returns the [`ContextForwarder`] to be used for asynchronous system calls.
-    </span><span class="kw">fn </span>context(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>ContextForwarder {
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>.shared.context
+    <span class="doccomment">/// Returns the [`WakerForwarder`] to be used for asynchronous system calls.
+    </span><span class="kw">fn </span>waker(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>WakerForwarder {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.shared.waker
     }
 }
 
@@ -928,7 +928,7 @@
     /// The [`StorageGuard`] instance must be kept alive while the trait object is still expected to
     /// be alive and usable by the WASM application.
     </span><span class="kw">pub fn </span>new&lt;<span class="lifetime">&#39;storage</span>&gt;(
-        context: ContextForwarder,
+        waker: WakerForwarder,
         storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>QueryableStorage,
     ) -&gt; (<span class="self">Self</span>, StorageGuard&lt;<span class="lifetime">&#39;storage</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>QueryableStorage&gt;) {
         <span class="kw">let </span>storage_without_lifetime = <span class="kw">unsafe </span>{ mem::transmute(storage) };
@@ -941,7 +941,7 @@
 
         (
             ServiceSystemApi {
-                shared: SystemApi { context, storage },
+                shared: SystemApi { waker, storage },
             },
             guard,
         )
@@ -965,9 +965,9 @@
             .expect(<span class="string">&quot;Application called storage after it should have stopped&quot;</span>)
     }
 
-    <span class="doccomment">/// Returns the [`ContextForwarder`] to be used for asynchronous system calls.
-    </span><span class="kw">fn </span>context(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>ContextForwarder {
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>.shared.context
+    <span class="doccomment">/// Returns the [`WakerForwarder`] to be used for asynchronous system calls.
+    </span><span class="kw">fn </span>waker(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>WakerForwarder {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.shared.waker
     }
 }
 

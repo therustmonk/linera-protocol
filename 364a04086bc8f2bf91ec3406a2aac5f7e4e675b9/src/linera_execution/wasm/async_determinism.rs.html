@@ -607,7 +607,7 @@
 <span class="attribute">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::{
-        <span class="kw">super</span>::async_boundary::{ContextForwarder, HostFuture},
+        <span class="kw">super</span>::async_boundary::{HostFuture, WakerForwarder},
         HostFutureQueue,
     };
     <span class="kw">use </span>futures::{future, stream::FuturesUnordered, task::noop_waker, FutureExt, StreamExt};
@@ -648,7 +648,7 @@
             .map(|host_future| {
                 <span class="comment">// Convert a `HostFuture` into an `impl Future`
                 </span>future::poll_fn(<span class="kw">move </span>|context| {
-                    <span class="kw">let </span><span class="kw-2">mut </span>forwarder = ContextForwarder::default();
+                    <span class="kw">let </span><span class="kw-2">mut </span>forwarder = WakerForwarder::default();
                     <span class="kw">let </span>_guard = forwarder.forward(context);
                     host_future.poll(<span class="kw-2">&amp;mut </span>forwarder)
                 })
@@ -765,7 +765,7 @@
 
         <span class="kw">let </span>fake_waker = noop_waker();
         <span class="kw">let </span><span class="kw-2">mut </span>fake_context = Context::from_waker(<span class="kw-2">&amp;</span>fake_waker);
-        <span class="kw">let </span><span class="kw-2">mut </span>forwarder = ContextForwarder::default();
+        <span class="kw">let </span><span class="kw-2">mut </span>forwarder = WakerForwarder::default();
         <span class="kw">let </span>_guard = forwarder.forward(<span class="kw-2">&amp;mut </span>fake_context);
 
         <span class="kw">let </span><span class="kw-2">mut </span>outputs = Vec::new();

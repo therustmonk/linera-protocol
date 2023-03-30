@@ -520,7 +520,7 @@
                 future: <span class="kw-2">&amp;</span><span class="self">Self</span>::Lock,
             ) -&gt; <span class="prelude-ty">Result</span>&lt;writable_system::PollLock, <span class="self">Self</span>::Error&gt; {
                 <span class="kw">use </span>writable_system::PollLock;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.context()) {
+                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; <span class="prelude-val">Ok</span>(PollLock::Pending),
                     Poll::Ready(<span class="prelude-val">Ok</span>(())) =&gt; <span class="prelude-val">Ok</span>(PollLock::ReadyLocked),
                     Poll::Ready(<span class="prelude-val">Err</span>(ExecutionError::ViewError(ViewError::TryLockError(<span class="kw">_</span>)))) =&gt; {
@@ -544,7 +544,7 @@
                 future: <span class="kw-2">&amp;</span><span class="self">Self</span>::ReadKeyBytes,
             ) -&gt; <span class="prelude-ty">Result</span>&lt;writable_system::PollReadKeyBytes, <span class="self">Self</span>::Error&gt; {
                 <span class="kw">use </span>writable_system::PollReadKeyBytes;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.context()) {
+                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; <span class="prelude-val">Ok</span>(PollReadKeyBytes::Pending),
                     Poll::Ready(opt_list) =&gt; <span class="prelude-val">Ok</span>(PollReadKeyBytes::Ready(opt_list<span class="question-mark">?</span>)),
                 }
@@ -561,7 +561,7 @@
                 future: <span class="kw-2">&amp;</span><span class="self">Self</span>::FindKeys,
             ) -&gt; <span class="prelude-ty">Result</span>&lt;writable_system::PollFindKeys, <span class="self">Self</span>::Error&gt; {
                 <span class="kw">use </span>writable_system::PollFindKeys;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.context()) {
+                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; <span class="prelude-val">Ok</span>(PollFindKeys::Pending),
                     Poll::Ready(keys) =&gt; <span class="prelude-val">Ok</span>(PollFindKeys::Ready(keys<span class="question-mark">?</span>)),
                 }
@@ -582,7 +582,7 @@
                 future: <span class="kw-2">&amp;</span><span class="self">Self</span>::FindKeyValues,
             ) -&gt; <span class="prelude-ty">Result</span>&lt;writable_system::PollFindKeyValues, <span class="self">Self</span>::Error&gt; {
                 <span class="kw">use </span>writable_system::PollFindKeyValues;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.context()) {
+                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; <span class="prelude-val">Ok</span>(PollFindKeyValues::Pending),
                     Poll::Ready(key_values) =&gt; <span class="prelude-val">Ok</span>(PollFindKeyValues::Ready(key_values<span class="question-mark">?</span>)),
                 }
@@ -616,7 +616,7 @@
                 future: <span class="kw-2">&amp;</span><span class="self">Self</span>::WriteBatch,
             ) -&gt; <span class="prelude-ty">Result</span>&lt;writable_system::PollUnit, <span class="self">Self</span>::Error&gt; {
                 <span class="kw">use </span>writable_system::PollUnit;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.context()) {
+                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; <span class="prelude-val">Ok</span>(PollUnit::Pending),
                     Poll::Ready(<span class="prelude-val">Ok</span>(())) =&gt; <span class="prelude-val">Ok</span>(PollUnit::Ready),
                     Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; <span class="prelude-val">Err</span>(error),
@@ -754,7 +754,7 @@
 
             <span class="kw">fn </span>load_poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>, future: <span class="kw-2">&amp;</span><span class="self">Self</span>::Load) -&gt; queryable_system::PollLoad {
                 <span class="kw">use </span>queryable_system::PollLoad;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.context()) {
+                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; PollLoad::Pending,
                     Poll::Ready(<span class="prelude-val">Ok</span>(bytes)) =&gt; PollLoad::Ready(<span class="prelude-val">Ok</span>(bytes)),
                     Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; PollLoad::Ready(<span class="prelude-val">Err</span>(error.to_string())),
@@ -767,7 +767,7 @@
 
             <span class="kw">fn </span>lock_poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>, future: <span class="kw-2">&amp;</span><span class="self">Self</span>::Lock) -&gt; queryable_system::PollLock {
                 <span class="kw">use </span>queryable_system::PollLock;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.context()) {
+                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; PollLock::Pending,
                     Poll::Ready(<span class="prelude-val">Ok</span>(())) =&gt; PollLock::Ready(<span class="prelude-val">Ok</span>(())),
                     Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; PollLock::Ready(<span class="prelude-val">Err</span>(error.to_string())),
@@ -780,7 +780,7 @@
 
             <span class="kw">fn </span>unlock_poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>, future: <span class="kw-2">&amp;</span><span class="self">Self</span>::Lock) -&gt; queryable_system::PollUnlock {
                 <span class="kw">use </span>queryable_system::PollUnlock;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.context()) {
+                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; PollUnlock::Pending,
                     Poll::Ready(<span class="prelude-val">Ok</span>(())) =&gt; PollUnlock::Ready(<span class="prelude-val">Ok</span>(())),
                     Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; PollUnlock::Ready(<span class="prelude-val">Err</span>(error.to_string())),
@@ -796,7 +796,7 @@
                 future: <span class="kw-2">&amp;</span><span class="self">Self</span>::ReadKeyBytes,
             ) -&gt; queryable_system::PollReadKeyBytes {
                 <span class="kw">use </span>queryable_system::PollReadKeyBytes;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.context()) {
+                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; PollReadKeyBytes::Pending,
                     Poll::Ready(<span class="prelude-val">Ok</span>(opt_list)) =&gt; PollReadKeyBytes::Ready(<span class="prelude-val">Ok</span>(opt_list)),
                     Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; PollReadKeyBytes::Ready(<span class="prelude-val">Err</span>(error.to_string())),
@@ -809,7 +809,7 @@
 
             <span class="kw">fn </span>find_keys_poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>, future: <span class="kw-2">&amp;</span><span class="self">Self</span>::FindKeys) -&gt; queryable_system::PollFindKeys {
                 <span class="kw">use </span>queryable_system::PollFindKeys;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.context()) {
+                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; PollFindKeys::Pending,
                     Poll::Ready(<span class="prelude-val">Ok</span>(keys)) =&gt; PollFindKeys::Ready(<span class="prelude-val">Ok</span>(keys)),
                     Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; PollFindKeys::Ready(<span class="prelude-val">Err</span>(error.to_string())),
@@ -828,7 +828,7 @@
                 future: <span class="kw-2">&amp;</span><span class="self">Self</span>::FindKeyValues,
             ) -&gt; queryable_system::PollFindKeyValues {
                 <span class="kw">use </span>queryable_system::PollFindKeyValues;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.context()) {
+                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; PollFindKeyValues::Pending,
                     Poll::Ready(<span class="prelude-val">Ok</span>(key_values)) =&gt; PollFindKeyValues::Ready(<span class="prelude-val">Ok</span>(key_values)),
                     Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; PollFindKeyValues::Ready(<span class="prelude-val">Err</span>(error.to_string())),
@@ -855,7 +855,7 @@
                 future: <span class="kw-2">&amp;</span><span class="self">Self</span>::TryQueryApplication,
             ) -&gt; queryable_system::PollLoad {
                 <span class="kw">use </span>queryable_system::PollLoad;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.context()) {
+                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; PollLoad::Pending,
                     Poll::Ready(<span class="prelude-val">Ok</span>(result)) =&gt; PollLoad::Ready(<span class="prelude-val">Ok</span>(result)),
                     Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; PollLoad::Ready(<span class="prelude-val">Err</span>(error.to_string())),

@@ -224,14 +224,6 @@
 <span id="224">224</span>
 <span id="225">225</span>
 <span id="226">226</span>
-<span id="227">227</span>
-<span id="228">228</span>
-<span id="229">229</span>
-<span id="230">230</span>
-<span id="231">231</span>
-<span id="232">232</span>
-<span id="233">233</span>
-<span id="234">234</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -248,10 +240,9 @@
     fmt::{<span class="self">self</span>, Debug, Formatter},
     future::Future,
     marker::PhantomData,
-    mem,
     pin::Pin,
     sync::Arc,
-    task::{Context, Poll},
+    task::{Context, Poll, Waker},
 };
 <span class="kw">use </span>tokio::sync::Mutex;
 
@@ -280,31 +271,33 @@
 
     <span class="doccomment">/// Poll a future from a WASM module.
     ///
-    /// Requires the task [`Context`] to have been saved in the provided `context`. If it hasn&#39;t,
-    /// or if the context for a task other than the task used to call the WASM module code is
-    /// provided, the call may panic or the future may not be scheduled to resume afterwards,
-    /// leading the module to hang.
+    /// Requires the task [`Waker`] to have been saved in the provided `waker`. If it hasn&#39;t, or if
+    /// the waker for a task other than the task used to call the WASM module code is provided, the
+    /// call may panic or the future may not be scheduled to resume afterwards, leading the module
+    /// to hang.
     ///
     /// # Panics
     ///
-    /// If the `context` does not contain a valid exclusive task [`Context`] reference, or if this
+    /// If the `context` does not contain a valid exclusive task [`Waker`] reference, or if this
     /// future is polled concurrently in different tasks.
-    </span><span class="kw">pub fn </span>poll(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>ContextForwarder) -&gt; Poll&lt;Output&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>context_reference = context
+    </span><span class="kw">pub fn </span>poll(<span class="kw-2">&amp;</span><span class="self">self</span>, waker: <span class="kw-2">&amp;mut </span>WakerForwarder) -&gt; Poll&lt;Output&gt; {
+        <span class="kw">let </span>waker_reference = waker
             .<span class="number">0
             </span>.try_lock()
             .expect(<span class="string">&quot;Unexpected concurrent application call&quot;</span>);
 
-        <span class="kw">let </span>context = context_reference
-            .as_mut()
-            .expect(<span class="string">&quot;Application called without an async task context&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>context = Context::from_waker(
+            waker_reference
+                .as_ref()
+                .expect(<span class="string">&quot;Application called without an async task context&quot;</span>),
+        );
 
         <span class="kw">let </span><span class="kw-2">mut </span>future = <span class="self">self
             </span>.future
             .try_lock()
             .expect(<span class="string">&quot;Application can&#39;t call the future concurrently because it&#39;s single threaded&quot;</span>);
 
-        future.as_mut().poll(context)
+        future.as_mut().poll(<span class="kw-2">&amp;mut </span>context)
     }
 }
 
@@ -362,7 +355,7 @@
     ///
     /// Uses the runtime context to call the WASM future&#39;s `poll` method, as implemented in the
     /// [`GuestFutureInterface`]. The `task_context` is stored in the runtime context&#39;s
-    /// [`ContextForwarder`], so that any host futures the guest calls can use the correct task
+    /// [`WakerForwarder`], so that any host futures the guest calls can use the correct task
     /// context.
     </span><span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, task_context: <span class="kw-2">&amp;mut </span>Context) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="kw">match </span><span class="self">self</span>.get_mut() {
@@ -373,7 +366,7 @@
             GuestFuture::Active { future, context } =&gt; {
                 <span class="macro">ready!</span>(context.future_queue.poll_next_unpin(task_context));
 
-                <span class="kw">let </span>_context_guard = context.context_forwarder.forward(task_context);
+                <span class="kw">let </span>_context_guard = context.waker_forwarder.forward(task_context);
                 future.poll(<span class="kw-2">&amp;</span>context.application, <span class="kw-2">&amp;mut </span>context.store)
             }
         }
@@ -398,16 +391,16 @@
     ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Output, ExecutionError&gt;&gt;;
 }
 
-<span class="doccomment">/// A type to keep track of a [`std::task::Context`] so that it can be forwarded to any async code
-/// called from the guest WASM module.
+<span class="doccomment">/// A type to keep track of a [`Waker`] so that it can be forwarded to any async code called from
+/// the guest WASM module.
 ///
-/// When a [`Future`] is polled, a [`Context`] is used so that the task can be scheduled to be
-/// woken up and polled again if it&#39;s still awaiting something. The context has a lifetime, and can
-/// only be used during the call to the future&#39;s poll method.
+/// When a [`Future`] is polled, a [`Waker`] is used so that the task can be scheduled to be
+/// woken up and polled again if it&#39;s still awaiting something.
 ///
 /// The problem is that calling a WASM module from an async task can lead to that guest code
-/// calling back some host async code. The task context must then be forwarded from the host code
-/// that called the guest code to the host code that was called from the guest code.
+/// calling back some host async code. A [`Context`] for the new host code must be created with the
+/// same [`Waker`] to ensure that the wake events are forwarded back correctly to the host code
+/// that called the guest.
 ///
 /// Because the context has a lifetime and that forwarding lifetimes through the runtime calls is
 /// not possible, this type erases the lifetime of the context and stores it in an `Arc&lt;Mutex&lt;_&gt;&gt;`
@@ -415,55 +408,46 @@
 /// [`ActiveContextGuard`] instance is used to remove the context from memory before the lifetime
 /// ends.
 </span><span class="attribute">#[derive(Clone, Default)]
-</span><span class="kw">pub struct </span>ContextForwarder(Arc&lt;Mutex&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>Context&lt;<span class="lifetime">&#39;static</span>&gt;&gt;&gt;&gt;);
+</span><span class="kw">pub struct </span>WakerForwarder(Arc&lt;Mutex&lt;<span class="prelude-ty">Option</span>&lt;Waker&gt;&gt;&gt;);
 
-<span class="kw">impl </span>ContextForwarder {
-    <span class="doccomment">/// Forwards the task `context` into shared memory so that it can be obtained later.
-    ///
-    /// # Safety
-    ///
-    /// This method uses a [`mem::transmute`] call to erase the lifetime of the `context`
-    /// reference. However, this is safe because the lifetime is transfered to the returned
-    /// [`ActiveContextGuard`], which removes the unsafe reference from memory when it is dropped,
-    /// ensuring the lifetime is respected.
-    </span><span class="kw">pub fn </span>forward&lt;<span class="lifetime">&#39;context</span>&gt;(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        context: <span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span><span class="kw-2">mut </span>Context,
-    ) -&gt; ActiveContextGuard&lt;<span class="lifetime">&#39;context</span>&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>context_reference = <span class="self">self
+<span class="kw">impl </span>WakerForwarder {
+    <span class="doccomment">/// Forwards the waker from the task `context` into shared memory so that it can be obtained
+    /// later.
+    </span><span class="kw">pub fn </span>forward&lt;<span class="lifetime">&#39;context</span>&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, context: <span class="kw-2">&amp;mut </span>Context) -&gt; ActiveContextGuard&lt;<span class="lifetime">&#39;context</span>&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>waker_reference = <span class="self">self
             </span>.<span class="number">0
             </span>.try_lock()
             .expect(<span class="string">&quot;Unexpected concurrent task context access&quot;</span>);
 
         <span class="macro">assert!</span>(
-            context_reference.is_none(),
-            <span class="string">&quot;`ContextForwarder` accessed by concurrent tasks&quot;
+            waker_reference.is_none(),
+            <span class="string">&quot;`WakerForwarder` accessed by concurrent tasks&quot;
         </span>);
 
-        <span class="kw-2">*</span>context_reference = <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ mem::transmute(context) });
+        <span class="kw-2">*</span>waker_reference = <span class="prelude-val">Some</span>(context.waker().clone());
 
         ActiveContextGuard {
-            context: <span class="self">self</span>.<span class="number">0</span>.clone(),
+            waker: <span class="self">self</span>.<span class="number">0</span>.clone(),
             lifetime: PhantomData,
         }
     }
 }
 
-<span class="doccomment">/// A guard type responsible for ensuring the context stored in shared memory does not outlive its
-/// lifetime.
+<span class="doccomment">/// A guard type responsible for ensuring the [`Waker`] stored in shared memory does not outlive
+/// the task [`Context`] it was obtained from.
 </span><span class="kw">pub struct </span>ActiveContextGuard&lt;<span class="lifetime">&#39;context</span>&gt; {
-    context: Arc&lt;Mutex&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>Context&lt;<span class="lifetime">&#39;static</span>&gt;&gt;&gt;&gt;,
+    waker: Arc&lt;Mutex&lt;<span class="prelude-ty">Option</span>&lt;Waker&gt;&gt;&gt;,
     lifetime: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;context </span><span class="kw-2">mut </span>()&gt;,
 }
 
 <span class="kw">impl </span>Drop <span class="kw">for </span>ActiveContextGuard&lt;<span class="lifetime">&#39;_</span>&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="kw">let </span><span class="kw-2">mut </span>context_reference = <span class="self">self
-            </span>.context
+        <span class="kw">let </span><span class="kw-2">mut </span>waker_reference = <span class="self">self
+            </span>.waker
             .try_lock()
             .expect(<span class="string">&quot;Unexpected concurrent task context access&quot;</span>);
 
-        <span class="kw-2">*</span>context_reference = <span class="prelude-val">None</span>;
+        <span class="kw-2">*</span>waker_reference = <span class="prelude-val">None</span>;
     }
 }
 </code></pre></div>

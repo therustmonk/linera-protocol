@@ -483,7 +483,7 @@
     writable_system::{WritableSystem, WritableSystemTables},
 };
 <span class="kw">use super</span>::{
-    async_boundary::{ContextForwarder, HostFuture},
+    async_boundary::{HostFuture, WakerForwarder},
     async_determinism::{HostFutureQueue, QueuedHostFutureFactory},
     common::{<span class="self">self</span>, ApplicationRuntimeContext, WasmRuntimeContext},
     WasmApplication, WasmExecutionError,
@@ -544,9 +544,9 @@
         writable_system::add_to_linker(<span class="kw-2">&amp;mut </span>linker, ContractState::system_api)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>module = Module::new(<span class="kw-2">&amp;</span>engine, <span class="kw-2">&amp;</span><span class="self">self</span>.contract_bytecode)<span class="question-mark">?</span>;
-        <span class="kw">let </span>context_forwarder = ContextForwarder::default();
+        <span class="kw">let </span>waker_forwarder = WakerForwarder::default();
         <span class="kw">let </span>(future_queue, queued_future_factory) = HostFutureQueue::new();
-        <span class="kw">let </span>state = ContractState::new(storage, context_forwarder.clone(), queued_future_factory);
+        <span class="kw">let </span>state = ContractState::new(storage, waker_forwarder.clone(), queued_future_factory);
         <span class="kw">let </span><span class="kw-2">mut </span>store = Store::new(<span class="kw-2">&amp;</span>engine, state);
         <span class="kw">let </span>(contract, _instance) =
             contract::Contract::instantiate(<span class="kw-2">&amp;mut </span>store, <span class="kw-2">&amp;</span>module, <span class="kw-2">&amp;mut </span>linker, ContractState::data)<span class="question-mark">?</span>;
@@ -557,7 +557,7 @@
             .expect(<span class="string">&quot;Fuel consumption wasn&#39;t properly enabled&quot;</span>);
 
         <span class="prelude-val">Ok</span>(WasmRuntimeContext {
-            context_forwarder,
+            waker_forwarder,
             application,
             future_queue,
             store,
@@ -576,16 +576,16 @@
         queryable_system::add_to_linker(<span class="kw-2">&amp;mut </span>linker, ServiceState::system_api)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>module = Module::new(<span class="kw-2">&amp;</span>engine, <span class="kw-2">&amp;</span><span class="self">self</span>.service_bytecode)<span class="question-mark">?</span>;
-        <span class="kw">let </span>context_forwarder = ContextForwarder::default();
+        <span class="kw">let </span>waker_forwarder = WakerForwarder::default();
         <span class="kw">let </span>(future_queue, _queued_future_factory) = HostFutureQueue::new();
-        <span class="kw">let </span>state = ServiceState::new(storage, context_forwarder.clone());
+        <span class="kw">let </span>state = ServiceState::new(storage, waker_forwarder.clone());
         <span class="kw">let </span><span class="kw-2">mut </span>store = Store::new(<span class="kw-2">&amp;</span>engine, state);
         <span class="kw">let </span>(service, _instance) =
             service::Service::instantiate(<span class="kw-2">&amp;mut </span>store, <span class="kw-2">&amp;</span>module, <span class="kw-2">&amp;mut </span>linker, ServiceState::data)<span class="question-mark">?</span>;
         <span class="kw">let </span>application = Service { service };
 
         <span class="prelude-val">Ok</span>(WasmRuntimeContext {
-            context_forwarder,
+            waker_forwarder,
             application,
             future_queue,
             store,
@@ -611,16 +611,16 @@
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;storage</span>&gt; ContractState&lt;<span class="lifetime">&#39;storage</span>&gt; {
     <span class="doccomment">/// Create a new instance of [`ContractState`].
     ///
-    /// Uses `storage` to export the system API, and the `context` to be able to correctly handle
+    /// Uses `storage` to export the system API, and the `waker` to be able to correctly handle
     /// asynchronous calls from the guest WASM module.
     </span><span class="kw">pub fn </span>new(
         storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>WritableStorage,
-        context: ContextForwarder,
+        waker: WakerForwarder,
         queued_future_factory: QueuedHostFutureFactory&lt;<span class="lifetime">&#39;storage</span>&gt;,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             data: ContractData::default(),
-            system_api: ContractSystemApi::new(context, storage, queued_future_factory),
+            system_api: ContractSystemApi::new(waker, storage, queued_future_factory),
             system_tables: WritableSystemTables::default(),
         }
     }
@@ -644,12 +644,12 @@
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;storage</span>&gt; ServiceState&lt;<span class="lifetime">&#39;storage</span>&gt; {
     <span class="doccomment">/// Create a new instance of [`ServiceState`].
     ///
-    /// Uses `storage` to export the system API, and the `context` to be able to correctly handle
+    /// Uses `storage` to export the system API, and the `waker` to be able to correctly handle
     /// asynchronous calls from the guest WASM module.
-    </span><span class="kw">pub fn </span>new(storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>QueryableStorage, context: ContextForwarder) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>QueryableStorage, waker: WakerForwarder) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             data: ServiceData::default(),
-            system_api: ServiceSystemApi::new(context, storage),
+            system_api: ServiceSystemApi::new(waker, storage),
             system_tables: QueryableSystemTables::default(),
         }
     }
@@ -813,7 +813,7 @@
 <span class="doccomment">/// Helper type with common functionality across the contract and service system API
 /// implementations.
 </span><span class="kw">struct </span>SystemApi&lt;S&gt; {
-    context: ContextForwarder,
+    waker: WakerForwarder,
     storage: S,
 }
 
@@ -825,15 +825,15 @@
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;storage</span>&gt; ContractSystemApi&lt;<span class="lifetime">&#39;storage</span>&gt; {
-    <span class="doccomment">/// Creates a new [`ContractSystemApi`] instance using the provided asynchronous `context` and
+    <span class="doccomment">/// Creates a new [`ContractSystemApi`] instance using the provided asynchronous `waker` and
     /// exporting the API from `storage`.
     </span><span class="kw">pub fn </span>new(
-        context: ContextForwarder,
+        waker: WakerForwarder,
         storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>WritableStorage,
         queued_future_factory: QueuedHostFutureFactory&lt;<span class="lifetime">&#39;storage</span>&gt;,
     ) -&gt; <span class="self">Self </span>{
         ContractSystemApi {
-            shared: SystemApi { context, storage },
+            shared: SystemApi { waker, storage },
             queued_future_factory,
         }
     }
@@ -843,9 +843,9 @@
         <span class="self">self</span>.shared.storage
     }
 
-    <span class="doccomment">/// Returns the [`ContextForwarder`] to be used for asynchronous system calls.
-    </span><span class="kw">fn </span>context(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>ContextForwarder {
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>.shared.context
+    <span class="doccomment">/// Returns the [`WakerForwarder`] to be used for asynchronous system calls.
+    </span><span class="kw">fn </span>waker(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>WakerForwarder {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.shared.waker
     }
 }
 
@@ -858,11 +858,11 @@
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;storage</span>&gt; ServiceSystemApi&lt;<span class="lifetime">&#39;storage</span>&gt; {
-    <span class="doccomment">/// Creates a new [`ServiceSystemApi`] instance using the provided asynchronous `context` and
+    <span class="doccomment">/// Creates a new [`ServiceSystemApi`] instance using the provided asynchronous `waker` and
     /// exporting the API from `storage`.
-    </span><span class="kw">pub fn </span>new(context: ContextForwarder, storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>QueryableStorage) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(waker: WakerForwarder, storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>QueryableStorage) -&gt; <span class="self">Self </span>{
         ServiceSystemApi {
-            shared: SystemApi { context, storage },
+            shared: SystemApi { waker, storage },
         }
     }
 
@@ -871,9 +871,9 @@
         <span class="self">self</span>.shared.storage
     }
 
-    <span class="doccomment">/// Returns the [`ContextForwarder`] to be used for asynchronous system calls.
-    </span><span class="kw">fn </span>context(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>ContextForwarder {
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>.shared.context
+    <span class="doccomment">/// Returns the [`WakerForwarder`] to be used for asynchronous system calls.
+    </span><span class="kw">fn </span>waker(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>WakerForwarder {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.shared.waker
     }
 }
 
