@@ -1010,7 +1010,7 @@
 }
 
 <span class="doccomment">/// Limit concurrency for rocksdb tests to avoid &quot;too many open files&quot; errors.
-</span><span class="kw">pub static </span>ROCKSDB_SEMAPHORE: Semaphore = Semaphore::const_new(<span class="number">20</span>);
+</span><span class="kw">pub static </span>ROCKSDB_SEMAPHORE: Semaphore = Semaphore::const_new(<span class="number">5</span>);
 
 <span class="attribute">#[derive(Default)]
 </span><span class="kw">pub struct </span>MakeMemoryStoreClient {

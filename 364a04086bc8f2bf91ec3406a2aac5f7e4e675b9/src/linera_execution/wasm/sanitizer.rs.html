@@ -982,7 +982,7 @@
     }
 }
 
-<span class="attribute">#[cfg(test)]
+<span class="attribute">#[cfg(all(test, feature = <span class="string">&quot;wasmer&quot;</span>))]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span><span class="kw">super</span>::sanitize;
     <span class="kw">use </span><span class="kw">crate</span>::Bytecode;
