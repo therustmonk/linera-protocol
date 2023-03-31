@@ -111,7 +111,7 @@
 </span><span class="kw">use crate</span>::{
     service::{
         <span class="self">self</span>,
-        system_api::{<span class="self">self</span>, ReadableWasmContext},
+        system_api::{<span class="self">self</span>, ReadOnlyViewStorageContext},
     },
     ExportedFuture, Service, ServiceLogger, SimpleStateStorage, ViewStateStorage,
 };
@@ -148,7 +148,7 @@
 
 <span class="kw">impl</span>&lt;Application&gt; ServiceStateStorage <span class="kw">for </span>ViewStateStorage&lt;Application&gt;
 <span class="kw">where
-    </span>Application: Service + RootView&lt;ReadableWasmContext&gt;,
+    </span>Application: Service + RootView&lt;ReadOnlyViewStorageContext&gt;,
 {
     <span class="kw">fn </span>query_application(
         context: service::QueryContext,

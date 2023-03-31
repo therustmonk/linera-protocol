@@ -218,17 +218,6 @@
 <span id="218">218</span>
 <span id="219">219</span>
 <span id="220">220</span>
-<span id="221">221</span>
-<span id="222">222</span>
-<span id="223">223</span>
-<span id="224">224</span>
-<span id="225">225</span>
-<span id="226">226</span>
-<span id="227">227</span>
-<span id="228">228</span>
-<span id="229">229</span>
-<span id="230">230</span>
-<span id="231">231</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -285,10 +274,11 @@
     system::store_and_unlock(<span class="kw-2">&amp;</span>bcs::to_bytes(<span class="kw-2">&amp;</span>state).expect(<span class="string">&quot;State serialization failed&quot;</span>));
 }
 
-<span class="attribute">#[derive(Default, Clone)]
-</span><span class="kw">pub struct </span>WasmClient;
+<span class="doccomment">/// A type to interface with the key value storage provided to applications.
+</span><span class="attribute">#[derive(Default, Clone)]
+</span><span class="kw">pub struct </span>KeyValueStore;
 
-<span class="kw">impl </span>WasmClient {
+<span class="kw">impl </span>KeyValueStore {
     <span class="kw">async fn </span>find_keys_by_prefix_load(<span class="kw-2">&amp;</span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; Vec&lt;Vec&lt;u8&gt;&gt; {
         <span class="kw">let </span>future = system::FindKeys::new(key_prefix);
         future::poll_fn(|_context| future.poll().into()).<span class="kw">await
@@ -301,7 +291,7 @@
 }
 
 <span class="attribute">#[async_trait]
-</span><span class="kw">impl </span>KeyValueStoreClient <span class="kw">for </span>WasmClient {
+</span><span class="kw">impl </span>KeyValueStoreClient <span class="kw">for </span>KeyValueStore {
     <span class="kw">type </span>Error = ViewError;
     <span class="kw">type </span>Keys = Vec&lt;Vec&lt;u8&gt;&gt;;
     <span class="kw">type </span>KeyValues = Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt;;
@@ -349,24 +339,12 @@
     }
 }
 
-<span class="kw">pub type </span>WasmContext = ContextFromDb&lt;(), WasmClient&gt;;
-
-<span class="kw">pub trait </span>WasmContextExt {
-    <span class="kw">fn </span>new() -&gt; <span class="self">Self</span>;
-}
-
-<span class="kw">impl </span>WasmContextExt <span class="kw">for </span>WasmContext {
-    <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            db: WasmClient::default(),
-            base_key: Vec::new(),
-            extra: (),
-        }
-    }
-}
+<span class="doccomment">/// Implementation of [`linera_views::common::Context`] that uses the [`KeyValueStore`] to
+/// allow views to store data in the storage layer provided to Linera applications.
+</span><span class="kw">pub type </span>ViewStorageContext = ContextFromDb&lt;(), KeyValueStore&gt;;
 
 <span class="doccomment">/// Load the contract state and lock it for writes.
-</span><span class="kw">pub async fn </span>load_and_lock_view&lt;State: View&lt;WasmContext&gt;&gt;() -&gt; <span class="prelude-ty">Option</span>&lt;State&gt; {
+</span><span class="kw">pub async fn </span>load_and_lock_view&lt;State: View&lt;ViewStorageContext&gt;&gt;() -&gt; <span class="prelude-ty">Option</span>&lt;State&gt; {
     <span class="kw">let </span>future = system::Lock::new();
     <span class="kw">if </span>future::poll_fn(|_context| future.poll().into()).<span class="kw">await </span>{
         <span class="prelude-val">Some</span>(load_view_using::&lt;State&gt;().<span class="kw">await</span>)
@@ -376,14 +354,14 @@
 }
 
 <span class="doccomment">/// Helper function to load the contract state or create a new one if it doesn&#39;t exist.
-</span><span class="kw">pub async fn </span>load_view_using&lt;State: View&lt;WasmContext&gt;&gt;() -&gt; State {
-    <span class="kw">let </span>context = WasmContext::new();
+</span><span class="kw">pub async fn </span>load_view_using&lt;State: View&lt;ViewStorageContext&gt;&gt;() -&gt; State {
+    <span class="kw">let </span>context = ViewStorageContext::default();
     <span class="kw">let </span>r = State::load(context).<span class="kw">await</span>;
     r.expect(<span class="string">&quot;Failed to load contract state&quot;</span>)
 }
 
 <span class="doccomment">/// Save the contract state and unlock it.
-</span><span class="kw">pub async fn </span>store_and_unlock_view&lt;State: RootView&lt;WasmContext&gt;&gt;(<span class="kw-2">mut </span>state: State) {
+</span><span class="kw">pub async fn </span>store_and_unlock_view&lt;State: RootView&lt;ViewStorageContext&gt;&gt;(<span class="kw-2">mut </span>state: State) {
     state.save().<span class="kw">await</span>.expect(<span class="string">&quot;save operation failed&quot;</span>);
 }
 

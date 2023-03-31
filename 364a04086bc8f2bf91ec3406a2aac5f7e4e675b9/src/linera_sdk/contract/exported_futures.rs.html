@@ -374,7 +374,7 @@
 </span><span class="kw">use crate</span>::{
     contract::{
         <span class="self">self</span>,
-        system_api::{<span class="self">self</span>, WasmContext},
+        system_api::{<span class="self">self</span>, ViewStorageContext},
     },
     ApplicationCallResult, Contract, ContractLogger, ExecutionResult, ExportedFuture,
     SessionCallResult, SessionId, SimpleStateStorage, ViewStateStorage,
@@ -466,7 +466,7 @@
 <span class="attribute">#[async_trait]
 </span><span class="kw">impl</span>&lt;Application&gt; ContractStateStorage&lt;Application&gt; <span class="kw">for </span>ViewStateStorage&lt;Application&gt;
 <span class="kw">where
-    </span>Application: Contract + RootView&lt;WasmContext&gt; + Send + <span class="lifetime">&#39;static</span>,
+    </span>Application: Contract + RootView&lt;ViewStorageContext&gt; + Send + <span class="lifetime">&#39;static</span>,
 {
     <span class="kw">async fn </span>load_and_lock() -&gt; Application {
         system_api::load_and_lock_view()

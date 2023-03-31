@@ -158,17 +158,6 @@
 <span id="158">158</span>
 <span id="159">159</span>
 <span id="160">160</span>
-<span id="161">161</span>
-<span id="162">162</span>
-<span id="163">163</span>
-<span id="164">164</span>
-<span id="165">165</span>
-<span id="166">166</span>
-<span id="167">167</span>
-<span id="168">168</span>
-<span id="169">169</span>
-<span id="170">170</span>
-<span id="171">171</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -209,10 +198,11 @@
     }
 }
 
-<span class="attribute">#[derive(Default, Clone)]
-</span><span class="kw">pub struct </span>ReadableWasmClient;
+<span class="doccomment">/// A type to interface in a read-only manner with the key value storage provided to applications.
+</span><span class="attribute">#[derive(Default, Clone)]
+</span><span class="kw">pub struct </span>ReadOnlyKeyValueStore;
 
-<span class="kw">impl </span>ReadableWasmClient {
+<span class="kw">impl </span>ReadOnlyKeyValueStore {
     <span class="kw">async fn </span>find_keys_by_prefix_load(<span class="kw-2">&amp;</span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Vec&lt;u8&gt;&gt;, ViewError&gt; {
         <span class="kw">let </span>future = system::FindKeys::new(key_prefix);
         future::poll_fn(|_context| future.poll().into()).<span class="kw">await
@@ -228,7 +218,7 @@
 }
 
 <span class="attribute">#[async_trait]
-</span><span class="kw">impl </span>KeyValueStoreClient <span class="kw">for </span>ReadableWasmClient {
+</span><span class="kw">impl </span>KeyValueStoreClient <span class="kw">for </span>ReadOnlyKeyValueStore {
     <span class="kw">type </span>Error = ViewError;
     <span class="kw">type </span>Keys = Vec&lt;Vec&lt;u8&gt;&gt;;
     <span class="kw">type </span>KeyValues = Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt;;
@@ -260,24 +250,12 @@
     }
 }
 
-<span class="kw">pub type </span>ReadableWasmContext = ContextFromDb&lt;(), ReadableWasmClient&gt;;
-
-<span class="kw">pub trait </span>ReadableWasmContextExt {
-    <span class="kw">fn </span>new() -&gt; <span class="self">Self</span>;
-}
-
-<span class="kw">impl </span>ReadableWasmContextExt <span class="kw">for </span>ReadableWasmContext {
-    <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            db: ReadableWasmClient::default(),
-            base_key: Vec::new(),
-            extra: (),
-        }
-    }
-}
+<span class="doccomment">/// Implementation of [`linera_views::common::Context`] that uses the [`ReadOnlyKeyValueStore`] to
+/// allow views to read data from the storage layer provided to Linera applications.
+</span><span class="kw">pub type </span>ReadOnlyViewStorageContext = ContextFromDb&lt;(), ReadOnlyKeyValueStore&gt;;
 
 <span class="doccomment">/// Load the service state, without locking it for writes.
-</span><span class="kw">pub async fn </span>lock_and_load_view&lt;State: View&lt;ReadableWasmContext&gt;&gt;() -&gt; State {
+</span><span class="kw">pub async fn </span>lock_and_load_view&lt;State: View&lt;ReadOnlyViewStorageContext&gt;&gt;() -&gt; State {
     <span class="kw">let </span>future = system::Lock::new();
     future::poll_fn(|_context| -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), ViewError&gt;&gt; { future.poll().into() })
         .<span class="kw">await
@@ -292,8 +270,8 @@
 }
 
 <span class="doccomment">/// Helper function to load the service state or create a new one if it doesn&#39;t exist.
-</span><span class="kw">pub async fn </span>load_view_using&lt;State: View&lt;ReadableWasmContext&gt;&gt;() -&gt; State {
-    <span class="kw">let </span>context = ReadableWasmContext::new();
+</span><span class="kw">pub async fn </span>load_view_using&lt;State: View&lt;ReadOnlyViewStorageContext&gt;&gt;() -&gt; State {
+    <span class="kw">let </span>context = ReadOnlyViewStorageContext::default();
     State::load(context)
         .<span class="kw">await
         </span>.expect(<span class="string">&quot;Failed to load contract state&quot;</span>)
