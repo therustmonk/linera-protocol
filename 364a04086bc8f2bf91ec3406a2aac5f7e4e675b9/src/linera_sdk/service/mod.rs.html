@@ -41,29 +41,19 @@
 <span id="41">41</span>
 <span id="42">42</span>
 <span id="43">43</span>
-<span id="44">44</span>
-<span id="45">45</span>
-<span id="46">46</span>
-<span id="47">47</span>
-<span id="48">48</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
+
+</span><span class="doccomment">//! Types and macros useful for writing an application service.
 
 </span><span class="kw">mod </span>conversions_from_wit;
 <span class="kw">mod </span>conversions_to_wit;
 <span class="kw">pub mod </span>exported_futures;
 <span class="kw">pub mod </span>system_api;
+<span class="kw">pub mod </span>wit_types;
 
 <span class="comment">// Import the system interface.
 </span><span class="macro">wit_bindgen_guest_rust::import!</span>(<span class="string">&quot;queryable_system.wit&quot;</span>);
-
-<span class="comment">// Export the service interface.
-</span><span class="macro">wit_bindgen_guest_rust::export!</span>(
-    export_macro = <span class="string">&quot;export_service&quot;
-    </span>types_path = <span class="string">&quot;service&quot;
-    </span>reexported_crate_path = <span class="string">&quot;wit_bindgen_guest_rust&quot;
-    &quot;service.wit&quot;
-</span>);
 
 <span class="doccomment">/// Declares an implementation of the [`Service`][`crate::Service`] trait, exporting it from the
 /// WASM module.
@@ -77,13 +67,13 @@
         </span><span class="macro-nonterminal">$</span><span class="macro">crate::export_service!</span>(<span class="macro-nonterminal">$application</span>);
 
         <span class="doccomment">/// Mark the service type to be exported.
-        </span><span class="kw">impl </span><span class="macro-nonterminal">$crate::service::Service </span><span class="kw">for </span><span class="macro-nonterminal">$application </span>{
+        </span><span class="kw">impl </span><span class="macro-nonterminal">$crate::service::wit_types::Service </span><span class="kw">for </span><span class="macro-nonterminal">$application </span>{
             <span class="kw">type </span>QueryApplication = QueryApplication;
         }
 
         <span class="macro-nonterminal">$</span><span class="macro">crate::instance_exported_future! </span>{
             <span class="macro-nonterminal">service::QueryApplication</span>&lt;<span class="macro-nonterminal">$application</span>&gt;(
-                context: <span class="macro-nonterminal">$crate::service::QueryContext</span>,
+                context: <span class="macro-nonterminal">$crate::service::wit_types::QueryContext</span>,
                 argument: Vec&lt;u8&gt;,
             ) -&gt; PollQuery
         }

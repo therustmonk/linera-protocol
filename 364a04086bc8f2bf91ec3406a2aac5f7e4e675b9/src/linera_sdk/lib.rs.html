@@ -212,12 +212,82 @@
 <span id="212">212</span>
 <span id="213">213</span>
 <span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
+</span><span class="doccomment">//! An SDK for developing Linera applications using Rust.
+//!
+//! A Linera application consists of two WebAssembly binaries: a contract and a service. In both
+//! binaries, there should be a shared application state. The state is a type that represents what
+//! the application would like to persist in storage across blocks, and must implement the
+//! [`Contract`] trait in the contract binary and the [`Service`] trait in the service binary.
+//!
+//! The application can select between two storage backends to use. Selecting the storage backend
+//! is done by specifying both the [`Contract::Storage`] and the [`Service::Storage`] associated
+//! types.
+//!
+//! The [`SimpleStateStorage`] backend stores the application&#39;s state type by serializing it into
+//! binary blob. This allows the entire contents of the state to be persisted and made available to
+//! the application when it is executed.
+//!
+//! The [`ViewStateStorage`] backend stores the application&#39;s state using the [`linera-views`], a
+//! framework that allows loading selected parts of the state. This is useful if the application&#39;s
+//! state is large and doesn&#39;t need to be loaded in its entirety for every execution.
+//!
+//! The contract binary should use the [`contract!`] macro to export the application&#39;s contract
+//! endpoints implemented via the [`Contract`] trait implementation.
+//!
+//! The service binary should use the [`service!`] macro to export the application&#39;s service
+//! endpoints implemented via the [`Service`] trait implementation.
+//!
+//! # Examples
+//!
+//! The [`linera-examples`](https://github.com/linera-io/linera-protocol/tree/main/linera-examples)
+//! directory contains some example applications.
+
+</span><span class="attribute">#![deny(missing_docs)]
+
 </span><span class="kw">pub mod </span>base;
 <span class="kw">pub mod </span>contract;
-<span class="kw">mod </span>ensure;
 <span class="kw">mod </span>exported_future;
 <span class="kw">mod </span>extensions;
 <span class="kw">mod </span>log;
@@ -239,6 +309,7 @@
     extensions::{FromBcsBytes, ToBcsBytes},
     log::{ContractLogger, ServiceLogger},
 };
+<span class="kw">pub use </span>linera_base::ensure;
 <span class="attribute">#[doc(hidden)]
 </span><span class="kw">pub use </span>wit_bindgen_guest_rust;
 
@@ -248,37 +319,39 @@
 <span class="doccomment">/// A state management runtime based on `linera-views`.
 </span><span class="kw">pub struct </span>ViewStateStorage&lt;A&gt;(std::marker::PhantomData&lt;A&gt;);
 
-<span class="doccomment">/// The public entry points provided by a contract.
+<span class="doccomment">/// The public entry points provided by an application&#39;s contract.
+///
+/// Execution of these endpoints consume fuel, because they can change the application&#39;s state and
+/// are therefore consensus criticial.
 </span><span class="attribute">#[async_trait]
 </span><span class="kw">pub trait </span>Contract: Sized {
     <span class="doccomment">/// Message reports for application execution errors.
     </span><span class="kw">type </span>Error: Error;
-    <span class="doccomment">/// Tag the contract with the desired state management runtime.
+    <span class="doccomment">/// The desired storage backend to use to store the application&#39;s state.
     </span><span class="kw">type </span>Storage;
 
-    <span class="doccomment">/// Initialize the application on the chain that created it.
+    <span class="doccomment">/// Initializes the application on the chain that created it.
     </span><span class="kw">async fn </span>initialize(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         context: <span class="kw-2">&amp;</span>OperationContext,
         argument: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ExecutionResult, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Apply an operation from the current block.
+    <span class="doccomment">/// Applies an operation from the current block.
     </span><span class="kw">async fn </span>execute_operation(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         context: <span class="kw-2">&amp;</span>OperationContext,
         operation: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ExecutionResult, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Apply an effect originating from a cross-chain message.
+    <span class="doccomment">/// Applies an effect originating from a cross-chain message.
     </span><span class="kw">async fn </span>execute_effect(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         context: <span class="kw-2">&amp;</span>EffectContext,
         effect: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ExecutionResult, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Allow an operation or an effect of other applications to call into this
-    /// application.
+    <span class="doccomment">/// Handles a call from another application.
     </span><span class="kw">async fn </span>handle_application_call(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         context: <span class="kw-2">&amp;</span>CalleeContext,
@@ -286,8 +359,7 @@
         forwarded_sessions: Vec&lt;SessionId&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ApplicationCallResult, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Allow an operation or an effect of other applications to call into a session that
-    /// we previously created.
+    <span class="doccomment">/// Handles a call into a session created by this application.
     </span><span class="kw">async fn </span>handle_session_call(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         context: <span class="kw-2">&amp;</span>CalleeContext,
@@ -297,16 +369,18 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;SessionCallResult, <span class="self">Self</span>::Error&gt;;
 }
 
-<span class="doccomment">/// The public entry points provided by a service.
+<span class="doccomment">/// The public entry points provided by an application&#39;s service.
+///
+/// Execution of these endpoints does *not* consume fuel, because they can&#39;t change the
+/// application&#39;s state and are therefore *not* consensus criticial.
 </span><span class="attribute">#[async_trait]
 </span><span class="kw">pub trait </span>Service {
     <span class="doccomment">/// Message reports for service execution errors.
     </span><span class="kw">type </span>Error: Error;
-    <span class="doccomment">/// Mark the contract with the desired state management runtime.
+    <span class="doccomment">/// The desired storage backend to use to read the application&#39;s state.
     </span><span class="kw">type </span>Storage;
 
-    <span class="doccomment">/// Allow an end user to execute read-only queries on the state of this application.
-    /// NOTE: This is not meant to be metered and may not be exposed by validators.
+    <span class="doccomment">/// Executes a read-only query on the state of this application.
     </span><span class="kw">async fn </span>query_application(
         <span class="self">self</span>: Arc&lt;<span class="self">Self</span>&gt;,
         context: <span class="kw-2">&amp;</span>QueryContext,
@@ -314,7 +388,8 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, <span class="self">Self</span>::Error&gt;;
 }
 
-<span class="attribute">#[derive(Debug, Clone, Deserialize, Serialize)]
+<span class="doccomment">/// The context of the execution of an application&#39;s operation.
+</span><span class="attribute">#[derive(Debug, Clone, Deserialize, Serialize)]
 </span><span class="kw">pub struct </span>OperationContext {
     <span class="doccomment">/// The current chain id.
     </span><span class="kw">pub </span>chain_id: ChainId,
@@ -326,7 +401,8 @@
     </span><span class="kw">pub </span>index: u64,
 }
 
-<span class="attribute">#[derive(Debug, Clone, Deserialize, Serialize)]
+<span class="doccomment">/// The context of the execution of an application&#39;s effect.
+</span><span class="attribute">#[derive(Debug, Clone, Deserialize, Serialize)]
 </span><span class="kw">pub struct </span>EffectContext {
     <span class="doccomment">/// The current chain id.
     </span><span class="kw">pub </span>chain_id: ChainId,
@@ -339,7 +415,8 @@
     </span><span class="kw">pub </span>effect_id: EffectId,
 }
 
-<span class="attribute">#[derive(Debug, Clone, Deserialize, Serialize)]
+<span class="doccomment">/// The context of the execution of an application&#39;s cross-application call or session call handler.
+</span><span class="attribute">#[derive(Debug, Clone, Deserialize, Serialize)]
 </span><span class="kw">pub struct </span>CalleeContext {
     <span class="doccomment">/// The current chain id.
     </span><span class="kw">pub </span>chain_id: ChainId,
@@ -350,7 +427,8 @@
     </span><span class="kw">pub </span>authenticated_caller_id: <span class="prelude-ty">Option</span>&lt;ApplicationId&gt;,
 }
 
-<span class="attribute">#[derive(Debug, Clone, Deserialize, Serialize)]
+<span class="doccomment">/// The context of the execution of an application&#39;s query.
+</span><span class="attribute">#[derive(Debug, Clone, Deserialize, Serialize)]
 </span><span class="kw">pub struct </span>QueryContext {
     <span class="doccomment">/// The current chain id.
     </span><span class="kw">pub </span>chain_id: ChainId,

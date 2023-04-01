@@ -110,8 +110,8 @@
 
 </span><span class="kw">use crate</span>::{
     service::{
-        <span class="self">self</span>,
         system_api::{<span class="self">self</span>, ReadOnlyViewStorageContext},
+        wit_types,
     },
     ExportedFuture, Service, ServiceLogger, SimpleStateStorage, ViewStateStorage,
 };
@@ -123,7 +123,7 @@
 </span><span class="kw">pub trait </span>ServiceStateStorage {
     <span class="doccomment">/// Loads the application state and run the given query.
     </span><span class="kw">fn </span>query_application(
-        context: service::QueryContext,
+        context: wit_types::QueryContext,
         argument: Vec&lt;u8&gt;,
     ) -&gt; ExportedFuture&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, String&gt;&gt;;
 }
@@ -133,7 +133,7 @@
     </span>Application: Service + Default + DeserializeOwned + Serialize,
 {
     <span class="kw">fn </span>query_application(
-        context: service::QueryContext,
+        context: wit_types::QueryContext,
         argument: Vec&lt;u8&gt;,
     ) -&gt; ExportedFuture&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, String&gt;&gt; {
         ExportedFuture::new(<span class="kw">async move </span>{
@@ -151,7 +151,7 @@
     </span>Application: Service + RootView&lt;ReadOnlyViewStorageContext&gt;,
 {
     <span class="kw">fn </span>query_application(
-        context: service::QueryContext,
+        context: wit_types::QueryContext,
         argument: Vec&lt;u8&gt;,
     ) -&gt; ExportedFuture&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, String&gt;&gt; {
         ExportedFuture::new(<span class="kw">async move </span>{
@@ -185,7 +185,7 @@
     <span class="doccomment">/// Creates the exported future that the host can poll.
     ///
     /// This is called from the host.
-    </span><span class="kw">pub fn </span>new(context: service::QueryContext, argument: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(context: wit_types::QueryContext, argument: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
         ServiceLogger::install();
         QueryApplication {
             future: Application::Storage::query_application(context, argument),
@@ -196,7 +196,7 @@
     <span class="doccomment">/// Polls the future export from the guest.
     ///
     /// This is called from the host.
-    </span><span class="kw">pub fn </span>poll(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; service::PollQuery {
+    </span><span class="kw">pub fn </span>poll(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; wit_types::PollQuery {
         <span class="self">self</span>.future.poll()
     }
 }

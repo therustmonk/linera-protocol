@@ -323,7 +323,7 @@
     ) =&gt; {
         <span class="kw">pub struct </span><span class="macro-nonterminal">$future</span>(<span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">$module::exported_futures</span>::<span class="macro-nonterminal">$future</span>&lt;<span class="macro-nonterminal">$application</span>&gt;);
 
-        <span class="kw">impl </span><span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">$module</span>::<span class="macro-nonterminal">$future </span><span class="kw">for </span><span class="macro-nonterminal">$future </span>{
+        <span class="kw">impl </span><span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">$module::wit_types</span>::<span class="macro-nonterminal">$future </span><span class="kw">for </span><span class="macro-nonterminal">$future </span>{
             <span class="kw">fn </span>new(
                 $( <span class="macro-nonterminal">$parameters</span>: <span class="macro-nonterminal">$parameter_types </span>),*
             ) -&gt; <span class="macro-nonterminal">$crate::wit_bindgen_guest_rust::Handle</span>&lt;<span class="self">Self</span>&gt; {
@@ -334,7 +334,7 @@
                 )
             }
 
-            <span class="kw">fn </span>poll(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">$module</span>::<span class="macro-nonterminal">$return_type </span>{
+            <span class="kw">fn </span>poll(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">$module::wit_types</span>::<span class="macro-nonterminal">$return_type </span>{
                 <span class="self">self</span>.<span class="number">0</span>.poll()
             }
         }

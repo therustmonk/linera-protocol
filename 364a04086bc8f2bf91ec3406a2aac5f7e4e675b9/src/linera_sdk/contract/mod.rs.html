@@ -132,29 +132,19 @@
 <span id="132">132</span>
 <span id="133">133</span>
 <span id="134">134</span>
-<span id="135">135</span>
-<span id="136">136</span>
-<span id="137">137</span>
-<span id="138">138</span>
-<span id="139">139</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
+
+</span><span class="doccomment">//! Types and macros useful for writing an application contract.
 
 </span><span class="kw">mod </span>conversions_from_wit;
 <span class="kw">mod </span>conversions_to_wit;
 <span class="kw">pub mod </span>exported_futures;
 <span class="kw">pub mod </span>system_api;
+<span class="kw">pub mod </span>wit_types;
 
 <span class="comment">// Import the system interface.
 </span><span class="macro">wit_bindgen_guest_rust::import!</span>(<span class="string">&quot;writable_system.wit&quot;</span>);
-
-<span class="comment">// Export the contract interface.
-</span><span class="macro">wit_bindgen_guest_rust::export!</span>(
-    export_macro = <span class="string">&quot;export_contract&quot;
-    </span>types_path = <span class="string">&quot;contract&quot;
-    </span>reexported_crate_path = <span class="string">&quot;wit_bindgen_guest_rust&quot;
-    &quot;contract.wit&quot;
-</span>);
 
 <span class="doccomment">/// Declares an implementation of the [`Contract`][`crate::Contract`] trait, exporting it from the
 /// WASM module.
@@ -168,7 +158,7 @@
         </span><span class="macro-nonterminal">$</span><span class="macro">crate::export_contract!</span>(<span class="macro-nonterminal">$application</span>);
 
         <span class="doccomment">/// Mark the contract type to be exported.
-        </span><span class="kw">impl </span><span class="macro-nonterminal">$crate::contract::Contract </span><span class="kw">for </span><span class="macro-nonterminal">$application </span>{
+        </span><span class="kw">impl </span><span class="macro-nonterminal">$crate::contract::wit_types::Contract </span><span class="kw">for </span><span class="macro-nonterminal">$application </span>{
             <span class="kw">type </span>Initialize = Initialize;
             <span class="kw">type </span>ExecuteOperation = ExecuteOperation;
             <span class="kw">type </span>ExecuteEffect = ExecuteEffect;
@@ -234,39 +224,39 @@
 
         <span class="macro-nonterminal">$</span><span class="macro">crate::instance_exported_future! </span>{
             <span class="macro-nonterminal">contract::Initialize</span>&lt;<span class="macro-nonterminal">$application</span>&gt;(
-                context: <span class="macro-nonterminal">$crate::contract::OperationContext</span>,
+                context: <span class="macro-nonterminal">$crate::contract::wit_types::OperationContext</span>,
                 argument: Vec&lt;u8&gt;,
             ) -&gt; PollExecutionResult
         }
 
         <span class="macro-nonterminal">$</span><span class="macro">crate::instance_exported_future! </span>{
             <span class="macro-nonterminal">contract::ExecuteOperation</span>&lt;<span class="macro-nonterminal">$application</span>&gt;(
-                context: <span class="macro-nonterminal">$crate::contract::OperationContext</span>,
+                context: <span class="macro-nonterminal">$crate::contract::wit_types::OperationContext</span>,
                 operation: Vec&lt;u8&gt;,
             ) -&gt; PollExecutionResult
         }
 
         <span class="macro-nonterminal">$</span><span class="macro">crate::instance_exported_future! </span>{
             <span class="macro-nonterminal">contract::ExecuteEffect</span>&lt;<span class="macro-nonterminal">$application</span>&gt;(
-                context: <span class="macro-nonterminal">$crate::contract::EffectContext</span>,
+                context: <span class="macro-nonterminal">$crate::contract::wit_types::EffectContext</span>,
                 effect: Vec&lt;u8&gt;,
             ) -&gt; PollExecutionResult
         }
 
         <span class="macro-nonterminal">$</span><span class="macro">crate::instance_exported_future! </span>{
             <span class="macro-nonterminal">contract::HandleApplicationCall</span>&lt;<span class="macro-nonterminal">$application</span>&gt;(
-                context: <span class="macro-nonterminal">$crate::contract::CalleeContext</span>,
+                context: <span class="macro-nonterminal">$crate::contract::wit_types::CalleeContext</span>,
                 argument: Vec&lt;u8&gt;,
-                forwarded_sessions: Vec&lt;<span class="macro-nonterminal">$crate::contract::SessionId</span>&gt;,
+                forwarded_sessions: Vec&lt;<span class="macro-nonterminal">$crate::contract::wit_types::SessionId</span>&gt;,
             ) -&gt; PollCallApplication
         }
 
         <span class="macro-nonterminal">$</span><span class="macro">crate::instance_exported_future! </span>{
             <span class="macro-nonterminal">contract::HandleSessionCall</span>&lt;<span class="macro-nonterminal">$application</span>&gt;(
-                context: <span class="macro-nonterminal">$crate::contract::CalleeContext</span>,
-                session: <span class="macro-nonterminal">$crate::contract::Session</span>,
+                context: <span class="macro-nonterminal">$crate::contract::wit_types::CalleeContext</span>,
+                session: <span class="macro-nonterminal">$crate::contract::wit_types::Session</span>,
                 argument: Vec&lt;u8&gt;,
-                forwarded_sessions: Vec&lt;<span class="macro-nonterminal">$crate::contract::SessionId</span>&gt;,
+                forwarded_sessions: Vec&lt;<span class="macro-nonterminal">$crate::contract::wit_types::SessionId</span>&gt;,
             ) -&gt; PollCallSession
         }
 

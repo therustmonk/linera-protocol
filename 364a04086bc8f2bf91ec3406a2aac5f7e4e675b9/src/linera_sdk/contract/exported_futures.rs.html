@@ -373,8 +373,8 @@
 
 </span><span class="kw">use crate</span>::{
     contract::{
-        <span class="self">self</span>,
         system_api::{<span class="self">self</span>, ViewStorageContext},
+        wit_types,
     },
     ApplicationCallResult, Contract, ContractLogger, ExecutionResult, ExportedFuture,
     SessionCallResult, SessionId, SimpleStateStorage, ViewStateStorage,
@@ -511,7 +511,7 @@
     <span class="doccomment">/// Creates the exported future that the host can poll.
     ///
     /// This is called from the host.
-    </span><span class="kw">pub fn </span>new(context: contract::OperationContext, argument: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(context: wit_types::OperationContext, argument: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
         ContractLogger::install();
         Initialize {
             future: ExportedFuture::new(Application::Storage::execute_with_state(
@@ -526,7 +526,7 @@
     <span class="doccomment">/// Polls the future export from the guest.
     ///
     /// This is called from the host.
-    </span><span class="kw">pub fn </span>poll(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; contract::PollExecutionResult {
+    </span><span class="kw">pub fn </span>poll(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; wit_types::PollExecutionResult {
         <span class="self">self</span>.future.poll()
     }
 }
@@ -550,7 +550,7 @@
     <span class="doccomment">/// Creates the exported future that the host can poll.
     ///
     /// This is called from the host.
-    </span><span class="kw">pub fn </span>new(context: contract::OperationContext, operation: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(context: wit_types::OperationContext, operation: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
         ContractLogger::install();
         ExecuteOperation {
             future: ExportedFuture::new(Application::Storage::execute_with_state(
@@ -570,7 +570,7 @@
     <span class="doccomment">/// Polls the future export from the guest.
     ///
     /// This is called from the host.
-    </span><span class="kw">pub fn </span>poll(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; contract::PollExecutionResult {
+    </span><span class="kw">pub fn </span>poll(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; wit_types::PollExecutionResult {
         <span class="self">self</span>.future.poll()
     }
 }
@@ -594,7 +594,7 @@
     <span class="doccomment">/// Creates the exported future that the host can poll.
     ///
     /// This is called from the host.
-    </span><span class="kw">pub fn </span>new(context: contract::EffectContext, effect: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(context: wit_types::EffectContext, effect: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
         ContractLogger::install();
         ExecuteEffect {
             future: ExportedFuture::new(Application::Storage::execute_with_state(
@@ -610,7 +610,7 @@
     <span class="doccomment">/// Polls the future export from the guest.
     ///
     /// This is called from the host.
-    </span><span class="kw">pub fn </span>poll(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; contract::PollExecutionResult {
+    </span><span class="kw">pub fn </span>poll(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; wit_types::PollExecutionResult {
         <span class="self">self</span>.future.poll()
     }
 }
@@ -635,9 +635,9 @@
     ///
     /// This is called from the host.
     </span><span class="kw">pub fn </span>new(
-        context: contract::CalleeContext,
+        context: wit_types::CalleeContext,
         argument: Vec&lt;u8&gt;,
-        forwarded_sessions: Vec&lt;contract::SessionId&gt;,
+        forwarded_sessions: Vec&lt;wit_types::SessionId&gt;,
     ) -&gt; <span class="self">Self </span>{
         ContractLogger::install();
         HandleApplicationCall {
@@ -663,7 +663,7 @@
     <span class="doccomment">/// Polls the future export from the guest.
     ///
     /// This is called from the host.
-    </span><span class="kw">pub fn </span>poll(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; contract::PollCallApplication {
+    </span><span class="kw">pub fn </span>poll(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; wit_types::PollCallApplication {
         <span class="self">self</span>.future.poll()
     }
 }
@@ -688,10 +688,10 @@
     ///
     /// This is called from the host.
     </span><span class="kw">pub fn </span>new(
-        context: contract::CalleeContext,
-        session: contract::Session,
+        context: wit_types::CalleeContext,
+        session: wit_types::Session,
         argument: Vec&lt;u8&gt;,
-        forwarded_sessions: Vec&lt;contract::SessionId&gt;,
+        forwarded_sessions: Vec&lt;wit_types::SessionId&gt;,
     ) -&gt; <span class="self">Self </span>{
         ContractLogger::install();
         HandleSessionCall {
@@ -722,7 +722,7 @@
     <span class="doccomment">/// Polls the future export from the guest.
     ///
     /// This is called from the host.
-    </span><span class="kw">pub fn </span>poll(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; contract::PollCallSession {
+    </span><span class="kw">pub fn </span>poll(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; wit_types::PollCallSession {
         <span class="self">self</span>.future.poll()
     }
 }
