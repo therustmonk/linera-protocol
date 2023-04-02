@@ -107,38 +107,38 @@
 </span><span class="doccomment">/// The definition of the batches for writing in the datatbase.
 </span><span class="kw">pub mod </span>batch;
 
-<span class="doccomment">/// The definitions used for the memory/rocksdb/dynamo_db
+<span class="doccomment">/// The definitions used for the memory/rocksdb/dynamo_db.
 </span><span class="kw">pub mod </span>common;
 
-<span class="doccomment">/// The main definitions
+<span class="doccomment">/// The definition of the `View` and related traits.
 </span><span class="kw">pub mod </span>views;
 
-<span class="doccomment">/// The lru caching
+<span class="doccomment">/// The LRU (least recently used) caching.
 </span><span class="kw">pub mod </span>lru_caching;
 
-<span class="doccomment">/// The register_view
+<span class="doccomment">/// The `RegisterView` allows to implement a register for a single value.
 </span><span class="kw">pub mod </span>register_view;
 
-<span class="doccomment">/// The log_view
+<span class="doccomment">/// The `LogView` implements a log list that can be pushed.
 </span><span class="kw">pub mod </span>log_view;
 
-<span class="doccomment">/// The queue_view
+<span class="doccomment">/// The `QueueView` implements a queue that can pushed_backed and deleted on the front.
 </span><span class="kw">pub mod </span>queue_view;
 
-<span class="doccomment">/// The map_view
+<span class="doccomment">/// The `MapView` implements a map with ordered keys.
 </span><span class="kw">pub mod </span>map_view;
 
-<span class="doccomment">/// The map_view
+<span class="doccomment">/// The `SetView` implements a set with ordered entries.
 </span><span class="kw">pub mod </span>set_view;
 
-<span class="doccomment">/// The collection_view
+<span class="doccomment">/// The `CollectionView` implements a map structure whose keys are ordered and the values are views.
 </span><span class="kw">pub mod </span>collection_view;
 
-<span class="doccomment">/// The reentrant_collection_view
+<span class="doccomment">/// The `ReentrantCollectionView` implements a map structure whose keys are ordered and the values are views with concurrent access.
 </span><span class="attribute">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">pub mod </span>reentrant_collection_view;
 
-<span class="doccomment">/// The key value store view
+<span class="doccomment">/// The implementation of a key value store view.
 </span><span class="attribute">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">pub mod </span>key_value_store_view;
 
@@ -157,7 +157,7 @@
 </span><span class="attribute">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
 </span><span class="kw">pub mod </span>localstack;
 
-<span class="doccomment">/// Wrapping a view to compute a hash
+<span class="doccomment">/// Wrapping a view to compute a hash.
 </span><span class="attribute">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">pub mod </span>hashable_wrapper;
 
@@ -166,7 +166,7 @@
 #[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">pub mod </span>test_utils;
 
-<span class="doccomment">/// For macros.
+<span class="doccomment">/// Macros used for the library.
 </span><span class="attribute">#[doc(hidden)]
 </span><span class="kw">pub use </span>{async_trait::async_trait, generic_array, serde, sha3};
 

@@ -316,7 +316,7 @@
 }
 
 <span class="kw">impl</span>&lt;E: Clone + Send + Sync&gt; RocksdbContext&lt;E&gt; {
-    <span class="doccomment">/// Create a [`RocksdbContext`]
+    <span class="doccomment">/// Creates a [`RocksdbContext`].
     </span><span class="kw">pub fn </span>new(db: RocksdbClient, base_key: Vec&lt;u8&gt;, extra: E) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             db,
@@ -329,15 +329,15 @@
 <span class="doccomment">/// The error type for [`RocksdbContext`]
 </span><span class="attribute">#[derive(Error, Debug)]
 </span><span class="kw">pub enum </span>RocksdbContextError {
-    <span class="doccomment">/// Tokio join error in Rocksdb
+    <span class="doccomment">/// Tokio join error in Rocksdb.
     </span><span class="attribute">#[error(<span class="string">&quot;tokio join error: {0}&quot;</span>)]
     </span>TokioJoinError(<span class="attribute">#[from] </span>tokio::task::JoinError),
 
-    <span class="doccomment">/// Rocksdb error
+    <span class="doccomment">/// Rocksdb error.
     </span><span class="attribute">#[error(<span class="string">&quot;Rocksdb error: {0}&quot;</span>)]
     </span>Rocksdb(<span class="attribute">#[from] </span>rocksdb::Error),
 
-    <span class="doccomment">/// BCS serialization error
+    <span class="doccomment">/// BCS serialization error.
     </span><span class="attribute">#[error(<span class="string">&quot;BCS error: {0}&quot;</span>)]
     </span>Bcs(<span class="attribute">#[from] </span>bcs::Error),
 }

@@ -151,7 +151,7 @@
 </span><span class="kw">pub type </span>MemoryContext&lt;E&gt; = ContextFromDb&lt;E, MemoryClient&gt;;
 
 <span class="kw">impl</span>&lt;E&gt; MemoryContext&lt;E&gt; {
-    <span class="doccomment">/// Create a [`MemoryContext`]
+    <span class="doccomment">/// Create a [`MemoryContext`].
     </span><span class="kw">pub fn </span>new(guard: MutexGuardArc&lt;MemoryStoreMap&gt;, extra: E) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             db: Arc::new(RwLock::new(guard)),
@@ -238,10 +238,10 @@
     }
 }
 
-<span class="doccomment">/// The error type for [`MemoryContext`]
+<span class="doccomment">/// The error type for [`MemoryContext`].
 </span><span class="attribute">#[derive(Error, Debug)]
 </span><span class="kw">pub enum </span>MemoryContextError {
-    <span class="doccomment">/// Serialization error with BCS
+    <span class="doccomment">/// Serialization error with BCS.
     </span><span class="attribute">#[error(<span class="string">&quot;BCS error: {0}&quot;</span>)]
     </span>Bcs(<span class="attribute">#[from] </span>bcs::Error),
 }

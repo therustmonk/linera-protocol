@@ -302,6 +302,7 @@ var sourcesIndex = JSON.parse('{\
 "tokio_macros":["",[],["entry.rs","lib.rs","select.rs"]],\
 "tokio_rustls":["",[["common",[],["handshake.rs","mod.rs"]]],["client.rs","lib.rs","server.rs"]],\
 "tokio_stream":["",[["stream_ext",[],["all.rs","any.rs","chain.rs","chunks_timeout.rs","collect.rs","filter.rs","filter_map.rs","fold.rs","fuse.rs","map.rs","map_while.rs","merge.rs","next.rs","skip.rs","skip_while.rs","take.rs","take_while.rs","then.rs","throttle.rs","timeout.rs","try_next.rs"]],["wrappers",[],["interval.rs","mpsc_bounded.rs","mpsc_unbounded.rs"]]],["empty.rs","iter.rs","lib.rs","macros.rs","once.rs","pending.rs","stream_ext.rs","stream_map.rs","wrappers.rs"]],\
+"tokio_test":["",[],["io.rs","lib.rs","macros.rs","task.rs"]],\
 "tokio_tungstenite":["",[],["compat.rs","connect.rs","handshake.rs","lib.rs","stream.rs","tls.rs"]],\
 "tokio_util":["",[["codec",[],["any_delimiter_codec.rs","bytes_codec.rs","decoder.rs","encoder.rs","framed.rs","framed_impl.rs","framed_read.rs","framed_write.rs","length_delimited.rs","lines_codec.rs","mod.rs"]],["io",[],["mod.rs","read_buf.rs","reader_stream.rs","stream_reader.rs"]],["sync",[["cancellation_token",[],["guard.rs","tree_node.rs"]]],["cancellation_token.rs","mod.rs","mpsc.rs","poll_semaphore.rs","reusable_box.rs"]]],["cfg.rs","compat.rs","either.rs","lib.rs","loom.rs"]],\
 "toml":["",[],["de.rs","edit.rs","fmt.rs","lib.rs","macros.rs","map.rs","ser.rs","table.rs","value.rs"]],\

@@ -218,7 +218,7 @@
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; LruPrefixCache {
-    <span class="doccomment">/// Create a LruPrefixCache
+    <span class="doccomment">/// Creates a LruPrefixCache.
     </span><span class="kw">pub fn </span>new(max_cache_size: usize) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             map: BTreeMap::new(),
@@ -227,7 +227,7 @@
         }
     }
 
-    <span class="doccomment">/// Insert an entry into the cache.
+    <span class="doccomment">/// Inserts an entry into the cache.
     </span><span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: Vec&lt;u8&gt;, value: <span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;) {
         <span class="kw">match </span><span class="self">self</span>.map.entry(key.clone()) {
             btree_map::Entry::Occupied(<span class="kw-2">mut </span>entry) =&gt; {
@@ -247,14 +247,14 @@
         }
     }
 
-    <span class="doccomment">/// Mark cached keys that match the prefix as deleted. Importantly, this does not create new entries in the cache.
+    <span class="doccomment">/// Marks cached keys that match the prefix as deleted. Importantly, this does not create new entries in the cache.
     </span><span class="kw">pub fn </span>delete_prefix(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) {
         <span class="kw">for </span>(<span class="kw">_</span>, value) <span class="kw">in </span><span class="self">self</span>.map.range_mut(get_interval(key_prefix.to_vec())) {
             <span class="kw-2">*</span>value = <span class="prelude-val">None</span>;
         }
     }
 
-    <span class="doccomment">/// Get the entry from the key
+    <span class="doccomment">/// Gets the entry from the key.
     </span><span class="kw">pub fn </span>query(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
         <span class="self">self</span>.map.get(key)
     }
@@ -328,7 +328,7 @@
 <span class="kw">where
     </span>K: KeyValueStoreClient,
 {
-    <span class="doccomment">/// Create a new Key Value Store Client that implements LRU caching
+    <span class="doccomment">/// Creates a new Key Value Store Client that implements LRU caching.
     </span><span class="kw">pub fn </span>new(client: K, max_size: usize) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>lru_read_keys = Arc::new(Mutex::new(LruPrefixCache::new(max_size)));
         <span class="self">Self </span>{
@@ -344,7 +344,7 @@
 
 <span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
 </span><span class="kw">impl</span>&lt;E&gt; LruCachingMemoryContext&lt;E&gt; {
-    <span class="doccomment">/// Create a [`crate::key_value_store_view::KeyValueStoreMemoryContext`].
+    <span class="doccomment">/// Creates a [`crate::key_value_store_view::KeyValueStoreMemoryContext`].
     </span><span class="kw">pub async fn </span>new(
         guard: MutexGuardArc&lt;MemoryStoreMap&gt;,
         base_key: Vec&lt;u8&gt;,

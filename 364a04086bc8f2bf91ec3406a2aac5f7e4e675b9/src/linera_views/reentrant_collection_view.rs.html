@@ -769,11 +769,11 @@
 /// collection is stored inside the collection).
 </span><span class="attribute">#[repr(u8)]
 </span><span class="kw">enum </span>KeyTag {
-    <span class="doccomment">/// Prefix for specifying an index and serves to indicate the existence of an entry in the collection
+    <span class="doccomment">/// Prefix for specifying an index and serves to indicate the existence of an entry in the collection.
     </span>Index = MIN_VIEW_TAG,
     <span class="doccomment">/// Prefix for specifying as the prefix for the sub-view.
     </span>Subview,
-    <span class="doccomment">/// Prefix for the hash value
+    <span class="doccomment">/// Prefix for the hash value.
     </span>Hash,
 }
 
@@ -883,7 +883,7 @@
     ViewError: From&lt;C::Error&gt;,
     W: View&lt;C&gt; + Send + Sync,
 {
-    <span class="doccomment">/// Obtain a subview for the data at the given index in the collection. If an entry
+    <span class="doccomment">/// Loads a subview for the data at the given index in the collection. If an entry
     /// was removed before then a default entry is put on this index.
     </span><span class="kw">pub async fn </span>try_load_entry_mut(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -926,7 +926,7 @@
         }
     }
 
-    <span class="doccomment">/// Obtain a read-only access to a subview for the data at the given index in the collection. If an entry
+    <span class="doccomment">/// Loads a read-only access to a subview for the data at the given index in the collection. If an entry
     /// was removed before then a default entry is put on this index.
     </span><span class="kw">pub async fn </span>try_load_entry(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -968,7 +968,7 @@
         }
     }
 
-    <span class="doccomment">/// Mark the entry so that it is removed in the next flush
+    <span class="doccomment">/// Marks the entry so that it is removed in the next flush.
     </span><span class="kw">pub fn </span>remove_entry(<span class="kw-2">&amp;mut </span><span class="self">self</span>, short_key: Vec&lt;u8&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; {
         <span class="kw-2">*</span><span class="self">self</span>.hash.get_mut() = <span class="prelude-val">None</span>;
         <span class="kw">if </span><span class="self">self</span>.was_cleared {
@@ -979,7 +979,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Mark the entry so that it is removed in the next flush
+    <span class="doccomment">/// Marks the entry so that it is removed in the next flush.
     </span><span class="kw">pub async fn </span>try_reset_entry_to_default(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         short_key: Vec&lt;u8&gt;,
@@ -990,7 +990,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Obtain the extra data.
+    <span class="doccomment">/// Gets the extra data.
     </span><span class="kw">pub fn </span>extra(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>C::Extra {
         <span class="self">self</span>.context.extra()
     }
@@ -1002,7 +1002,7 @@
     ViewError: From&lt;C::Error&gt;,
     W: View&lt;C&gt; + Send + Sync,
 {
-    <span class="doccomment">/// Return the list of indices in the collection.
+    <span class="doccomment">/// Returns the list of indices in the collection.
     </span><span class="kw">pub async fn </span>keys(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Vec&lt;u8&gt;&gt;, ViewError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>keys = Vec::new();
         <span class="self">self</span>.for_each_key(|key| {
@@ -1180,7 +1180,7 @@
     I: Sync + Clone + Send + Debug + Serialize + DeserializeOwned,
     W: View&lt;C&gt; + Send + Sync,
 {
-    <span class="doccomment">/// Obtain a subview for the data at the given index in the collection. If an entry
+    <span class="doccomment">/// Loads a subview for the data at the given index in the collection. If an entry
     /// was removed before then a default entry is put on this index.
     </span><span class="kw">pub async fn </span>try_load_entry_mut&lt;Q&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -1194,7 +1194,7 @@
         <span class="self">self</span>.collection.try_load_entry_mut(short_key).<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Obtain a read-only access to a subview for the data at the given index in the collection. If an entry
+    <span class="doccomment">/// Loads a read-only access to a subview for the data at the given index in the collection. If an entry
     /// was removed before then a default entry is put on this index.
     </span><span class="kw">pub async fn </span>try_load_entry&lt;Q&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, index: <span class="kw-2">&amp;</span>Q) -&gt; <span class="prelude-ty">Result</span>&lt;OwnedRwLockReadGuard&lt;W&gt;, ViewError&gt;
     <span class="kw">where
@@ -1205,7 +1205,7 @@
         <span class="self">self</span>.collection.try_load_entry(short_key).<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Mark the entry so that it is removed in the next flush
+    <span class="doccomment">/// Marks the entry so that it is removed in the next flush.
     </span><span class="kw">pub fn </span>remove_entry&lt;Q&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: <span class="kw-2">&amp;</span>Q) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;
     <span class="kw">where
         </span>I: Borrow&lt;Q&gt;,
@@ -1215,7 +1215,7 @@
         <span class="self">self</span>.collection.remove_entry(short_key)
     }
 
-    <span class="doccomment">/// Mark the entry so that it is removed in the next flush
+    <span class="doccomment">/// Marks the entry so that it is removed in the next flush.
     </span><span class="kw">pub async fn </span>try_reset_entry_to_default&lt;Q&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: <span class="kw-2">&amp;</span>Q) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;
     <span class="kw">where
         </span>I: Borrow&lt;Q&gt;,
@@ -1225,7 +1225,7 @@
         <span class="self">self</span>.collection.try_reset_entry_to_default(short_key).<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Obtain the extra data.
+    <span class="doccomment">/// Get the extra data.
     </span><span class="kw">pub fn </span>extra(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>C::Extra {
         <span class="self">self</span>.collection.extra()
     }
@@ -1238,7 +1238,7 @@
     I: Sync + Clone + Send + Debug + Serialize + DeserializeOwned,
     W: View&lt;C&gt; + Send + Sync,
 {
-    <span class="doccomment">/// Return the list of indices in the collection.
+    <span class="doccomment">/// Returns the list of indices in the collection.
     </span><span class="kw">pub async fn </span>indices(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;I&gt;, ViewError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>indices = Vec::new();
         <span class="self">self</span>.for_each_index(|index: I| {
@@ -1352,7 +1352,7 @@
     I: Sync + Clone + Send + Debug + CustomSerialize,
     W: View&lt;C&gt; + Send + Sync,
 {
-    <span class="doccomment">/// Obtain a subview for the data at the given index in the collection. If an entry
+    <span class="doccomment">/// Loads a subview for the data at the given index in the collection. If an entry
     /// was removed before then a default entry is put on this index.
     </span><span class="kw">pub async fn </span>try_load_entry_mut&lt;Q&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -1366,7 +1366,7 @@
         <span class="self">self</span>.collection.try_load_entry_mut(short_key).<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Obtain a read-only access to a subview for the data at the given index in the collection. If an entry
+    <span class="doccomment">/// Loads a read-only access to a subview for the data at the given index in the collection. If an entry
     /// was removed before then a default entry is put on this index.
     </span><span class="kw">pub async fn </span>try_load_entry&lt;Q&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, index: <span class="kw-2">&amp;</span>Q) -&gt; <span class="prelude-ty">Result</span>&lt;OwnedRwLockReadGuard&lt;W&gt;, ViewError&gt;
     <span class="kw">where
@@ -1377,7 +1377,7 @@
         <span class="self">self</span>.collection.try_load_entry(short_key).<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Mark the entry so that it is removed in the next flush
+    <span class="doccomment">/// Marks the entry so that it is removed in the next flush.
     </span><span class="kw">pub fn </span>remove_entry&lt;Q&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: <span class="kw-2">&amp;</span>Q) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;
     <span class="kw">where
         </span>I: Borrow&lt;Q&gt;,
@@ -1387,7 +1387,7 @@
         <span class="self">self</span>.collection.remove_entry(short_key)
     }
 
-    <span class="doccomment">/// Mark the entry so that it is removed in the next flush
+    <span class="doccomment">/// Marks the entry so that it is removed in the next flush.
     </span><span class="kw">pub async fn </span>try_reset_entry_to_default&lt;Q&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: <span class="kw-2">&amp;</span>Q) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;
     <span class="kw">where
         </span>I: Borrow&lt;Q&gt;,
@@ -1397,7 +1397,7 @@
         <span class="self">self</span>.collection.try_reset_entry_to_default(short_key).<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Obtain the extra data.
+    <span class="doccomment">/// Get the extra data.
     </span><span class="kw">pub fn </span>extra(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>C::Extra {
         <span class="self">self</span>.collection.extra()
     }
@@ -1410,7 +1410,7 @@
     I: Sync + Clone + Send + Debug + CustomSerialize,
     W: View&lt;C&gt; + Send + Sync,
 {
-    <span class="doccomment">/// Return the list of indices in the collection.
+    <span class="doccomment">/// Returns the list of indices in the collection.
     </span><span class="kw">pub async fn </span>indices(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;I&gt;, ViewError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>indices = Vec::new();
         <span class="self">self</span>.for_each_index(|index: I| {

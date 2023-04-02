@@ -481,8 +481,26 @@
 <span id="481">481</span>
 <span id="482">482</span>
 <span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
+
+</span><span class="doccomment">//! This provides several functionalities for the handling of data.
+//! The most important traits are:
+//! * [`KeyValueStoreClient`][trait1] which manages the access to a database and is clonable. It has a minimal interface
+//! * [`Context`][trait2] which provides the access to a database plus a `base_key` and some extra type `E` which is carried along
+//! and has no impact on the running of the system. There is also a bunch of other helper functions.
+//!
+//! [trait1]: common::KeyValueStoreClient
+//! [trait2]: common::Context
 
 </span><span class="kw">use crate</span>::{batch::Batch, views::ViewError};
 <span class="kw">use </span>async_trait::async_trait;
@@ -510,8 +528,8 @@
     Set(T),
 }
 
-<span class="doccomment">/// The minimum value for the view tags. values in 0..MIN_VIEW_TAG are used for other purposes
-</span><span class="kw">pub const </span>MIN_VIEW_TAG: u8 = <span class="number">1</span>;
+<span class="doccomment">/// The minimum value for the view tags. Values in 0..MIN_VIEW_TAG are used for other purposes.
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>MIN_VIEW_TAG: u8 = <span class="number">1</span>;
 
 <span class="doccomment">/// When wanting to find the entries in a BTreeMap with a specific prefix,
 /// one option is to iterate over all keys. Another is to select an interval
@@ -577,22 +595,22 @@
     <span class="doccomment">/// Return type for key-value search operations.
     </span><span class="kw">type </span>KeyValues: KeyValueIterable&lt;<span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Retrieve a `Vec&lt;u8&gt;` from the database using the provided `key`
+    <span class="doccomment">/// Retrieves a `Vec&lt;u8&gt;` from the database using the provided `key`.
     </span><span class="kw">async fn </span>read_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Find the keys matching the prefix. The prefix is not included in the returned keys.
+    <span class="doccomment">/// Finds the `key` matching the prefix. The prefix is not included in the returned keys.
     </span><span class="kw">async fn </span>find_keys_by_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Keys, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Find the key-value pairs matching the prefix. The prefix is not included in the returned keys.
+    <span class="doccomment">/// Finds the `(key,value)` pairs matching the prefix. The prefix is not included in the returned keys.
     </span><span class="kw">async fn </span>find_key_values_by_prefix(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         key_prefix: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::KeyValues, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Write the batch in the database.
+    <span class="doccomment">/// Writes the `batch` in the database with `base_key` the base key of the entries for the journal.
     </span><span class="kw">async fn </span>write_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, batch: Batch, base_key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Read a single key and deserialize the result if present.
+    <span class="doccomment">/// Reads a single `key` and deserialize the result if present.
     </span><span class="kw">async fn </span>read_key&lt;V: DeserializeOwned&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;V&gt;, <span class="self">Self</span>::Error&gt;
     <span class="kw">where
         </span><span class="self">Self</span>::Error: From&lt;bcs::Error&gt;,
@@ -606,8 +624,8 @@
         }
     }
 
-    <span class="doccomment">/// Clearing any journal entry that may remain.
-    /// The journal located at the base_key will be cleared if existing.
+    <span class="doccomment">/// Clears any journal entry that may remain.
+    /// The journal is located at the `base_key`.
     </span><span class="kw">async fn </span>clear_journal(<span class="kw-2">&amp;</span><span class="self">self</span>, base_key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;;
 }
 
@@ -709,28 +727,28 @@
     <span class="doccomment">/// Getter for the user provided data.
     </span><span class="kw">fn </span>extra(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Extra;
 
-    <span class="doccomment">/// Getter for the address of the current entry (aka the base_key)
+    <span class="doccomment">/// Getter for the address of the current entry (aka the base_key).
     </span><span class="kw">fn </span>base_key(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;u8&gt;;
 
-    <span class="doccomment">/// Concatenate the base_key and tag
+    <span class="doccomment">/// Concatenates the base_key and tag.
     </span><span class="kw">fn </span>base_tag(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: u8) -&gt; Vec&lt;u8&gt;;
 
-    <span class="doccomment">/// Concatenate the base_key, tag and index
+    <span class="doccomment">/// Concatenates the base_key, tag and index.
     </span><span class="kw">fn </span>base_tag_index(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: u8, index: <span class="kw-2">&amp;</span>[u8]) -&gt; Vec&lt;u8&gt;;
 
-    <span class="doccomment">/// Obtain the `Vec&lt;u8&gt;` key from the key by serialization and using the base_key
+    <span class="doccomment">/// Obtains the `Vec&lt;u8&gt;` key from the key by serialization and using the base_key.
     </span><span class="kw">fn </span>derive_key&lt;I: Serialize&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, index: <span class="kw-2">&amp;</span>I) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Obtain the `Vec&lt;u8&gt;` key from the key by serialization and using the base_key
+    <span class="doccomment">/// Obtains the `Vec&lt;u8&gt;` key from the key by serialization and using the `base_key`.
     </span><span class="kw">fn </span>derive_tag_key&lt;I: Serialize&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: u8, index: <span class="kw-2">&amp;</span>I) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Obtain the short `Vec&lt;u8&gt;` key from the key by serialization
+    <span class="doccomment">/// Obtains the short `Vec&lt;u8&gt;` key from the key by serialization.
     </span><span class="kw">fn </span>derive_short_key&lt;I: Serialize + <span class="question-mark">?</span>Sized&gt;(index: <span class="kw-2">&amp;</span>I) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Deserialize `value_byte`.
+    <span class="doccomment">/// Deserialize `bytes` into type `Item`.
     </span><span class="kw">fn </span>deserialize_value&lt;Item: DeserializeOwned&gt;(bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Item, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Retrieve a generic `Item` from the database using the provided `key` prefixed by the current
+    <span class="doccomment">/// Retrieves a generic `Item` from the database using the provided `key` prefixed by the current
     /// context.
     /// The `Item` is deserialized using [`bcs`].
     </span><span class="kw">async fn </span>read_key&lt;Item: DeserializeOwned&gt;(
@@ -738,23 +756,23 @@
         key: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Item&gt;, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Retrieve a `Vec&lt;u8&gt;` from the database using the provided `key` prefixed by the current
+    <span class="doccomment">/// Retrieves a `Vec&lt;u8&gt;` from the database using the provided `key` prefixed by the current
     /// context.
     </span><span class="kw">async fn </span>read_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Find keys matching the prefix. The prefix is not included in the returned keys.
+    <span class="doccomment">/// Find keys matching the `key_prefix`. The `key_prefix` is not included in the returned keys.
     </span><span class="kw">async fn </span>find_keys_by_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Keys, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Find the key-value pairs matching the prefix. The prefix is not included in the returned keys.
+    <span class="doccomment">/// Find the `(key,value)` pairs matching the `key_prefix`. The `key_prefix` is not included in the returned keys.
     </span><span class="kw">async fn </span>find_key_values_by_prefix(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         key_prefix: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::KeyValues, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Apply the operations from the `batch`, persisting the changes.
+    <span class="doccomment">/// Applies the operations from the `batch`, persisting the changes.
     </span><span class="kw">async fn </span>write_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, batch: Batch) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Obtain a similar [`Context`] implementation with a different base key.
+    <span class="doccomment">/// Obtains a similar [`Context`] implementation with a different base key.
     </span><span class="kw">fn </span>clone_with_base_key(<span class="kw-2">&amp;</span><span class="self">self</span>, base_key: Vec&lt;u8&gt;) -&gt; <span class="self">Self</span>;
 }
 
@@ -764,7 +782,7 @@
 </span><span class="kw">pub struct </span>ContextFromDb&lt;E, DB&gt; {
     <span class="doccomment">/// The DB client, usually shared between views.
     </span><span class="kw">pub </span>db: DB,
-    <span class="doccomment">/// The key prefix for the current view.
+    <span class="doccomment">/// The base key for the current view.
     </span><span class="kw">pub </span>base_key: Vec&lt;u8&gt;,
     <span class="doccomment">/// User-defined data attached to the view.
     </span><span class="kw">pub </span>extra: E,
@@ -777,7 +795,7 @@
     DB::Error: From&lt;bcs::Error&gt; + Send + Sync + std::error::Error + <span class="lifetime">&#39;static</span>,
     ViewError: From&lt;DB::Error&gt;,
 {
-    <span class="doccomment">/// Create a context from db that also clears the journal before making it available
+    <span class="doccomment">/// Creates a context from db that also clears the journal before making it available.
     </span><span class="kw">pub async fn </span>create(
         db: DB,
         base_key: Vec&lt;u8&gt;,
@@ -894,7 +912,7 @@
 }
 
 <span class="doccomment">/// Sometimes we need a serialization that is different from the usual one and
-/// and for example preserves order.
+/// for example preserves order.
 /// The {to/from}_custom_bytes has to be coherent with the Borrow trait.
 </span><span class="kw">pub trait </span>CustomSerialize {
     <span class="doccomment">/// Serializes the value

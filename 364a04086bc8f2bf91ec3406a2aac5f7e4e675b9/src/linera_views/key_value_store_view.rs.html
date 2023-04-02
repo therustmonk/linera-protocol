@@ -732,13 +732,13 @@
 /// Key tags to create the sub-keys of a KeyValueStoreView on top of the base key.
 </span><span class="attribute">#[repr(u8)]
 </span><span class="kw">enum </span>KeyTag {
-    <span class="doccomment">/// Prefix for the indices of the view
+    <span class="doccomment">/// Prefix for the indices of the view.
     </span>Index = MIN_VIEW_TAG,
-    <span class="doccomment">/// Prefix for the hash
+    <span class="doccomment">/// Prefix for the hash.
     </span>Hash,
 }
 
-<span class="doccomment">/// A view that represents the function of KeyValueStoreClient (though not KeyValueStoreClient)
+<span class="doccomment">/// A view that represents the function of KeyValueStoreClient (though not KeyValueStoreClient).
 ///
 /// Comment on the data set:
 /// In order to work, the view needs to store the updates and deleted_prefixes.
@@ -847,7 +847,7 @@
     ViewError: From&lt;C::Error&gt;,
 {
     <span class="doccomment">/// Iterates over all indices. If the function f returns false, then the loop
-    /// prematurely ends
+    /// prematurely ends.
     </span><span class="kw">pub async fn </span>for_each_index_while&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>f: F) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;
     <span class="kw">where
         </span>F: FnMut(<span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;bool, ViewError&gt; + Send,
@@ -974,7 +974,7 @@
         .<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Return the list of indices. The order is stable, yet not specified.
+    <span class="doccomment">/// Returns the list of indices. The order is stable, yet not specified.
     </span><span class="kw">pub async fn </span>indices(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Vec&lt;u8&gt;&gt;, ViewError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>indices = Vec::new();
         <span class="self">self</span>.for_each_index(|index| {
@@ -985,7 +985,7 @@
         <span class="prelude-val">Ok</span>(indices)
     }
 
-    <span class="doccomment">/// Obtain the value at the given index, if any.
+    <span class="doccomment">/// Obtains the value at the given index, if any.
     </span><span class="kw">pub async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, ViewError&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(update) = <span class="self">self</span>.updates.get(index) {
             <span class="kw">let </span>value = <span class="kw">match </span>update {
@@ -1002,13 +1002,13 @@
         <span class="prelude-val">Ok</span>(value)
     }
 
-    <span class="doccomment">/// Set or insert a value.
+    <span class="doccomment">/// Sets or inserts a value.
     </span><span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: Vec&lt;u8&gt;, value: Vec&lt;u8&gt;) {
         <span class="self">self</span>.updates.insert(index, Update::Set(value));
         <span class="kw-2">*</span><span class="self">self</span>.hash.get_mut() = <span class="prelude-val">None</span>;
     }
 
-    <span class="doccomment">/// Remove a value.
+    <span class="doccomment">/// Removes a value.
     </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: Vec&lt;u8&gt;) {
         <span class="kw-2">*</span><span class="self">self</span>.hash.get_mut() = <span class="prelude-val">None</span>;
         <span class="kw">if </span><span class="self">self</span>.was_cleared {
@@ -1018,7 +1018,7 @@
         }
     }
 
-    <span class="doccomment">/// Delete a key_prefix
+    <span class="doccomment">/// Deletes a key_prefix.
     </span><span class="kw">pub fn </span>delete_prefix(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key_prefix: Vec&lt;u8&gt;) {
         <span class="kw-2">*</span><span class="self">self</span>.hash.get_mut() = <span class="prelude-val">None</span>;
         <span class="kw">let </span>key_list: Vec&lt;Vec&lt;u8&gt;&gt; = <span class="self">self
@@ -1151,7 +1151,7 @@
         <span class="prelude-val">Ok</span>(key_values)
     }
 
-    <span class="doccomment">/// Apply the given batch of `crate::common::WriteOperation`.
+    <span class="doccomment">/// Applies the given batch of `crate::common::WriteOperation`.
     </span><span class="kw">pub async fn </span>write_batch(<span class="kw-2">&amp;mut </span><span class="self">self</span>, batch: Batch) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; {
         <span class="kw-2">*</span><span class="self">self</span>.hash.get_mut() = <span class="prelude-val">None</span>;
         <span class="kw">for </span>op <span class="kw">in </span>batch.operations {

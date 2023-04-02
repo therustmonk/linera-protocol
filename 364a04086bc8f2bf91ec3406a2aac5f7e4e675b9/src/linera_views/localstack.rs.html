@@ -39,7 +39,7 @@
 <span class="doccomment">/// Name of the environment variable with the address to a LocalStack instance.
 </span><span class="kw">pub const </span>LOCALSTACK_ENDPOINT: <span class="kw-2">&amp;</span>str = <span class="string">&quot;LOCALSTACK_ENDPOINT&quot;</span>;
 
-<span class="doccomment">/// Get the [`Endpoint`] to connect to a LocalStack instance.
+<span class="doccomment">/// Gets the [`Endpoint`] to connect to a LocalStack instance.
 ///
 /// The endpoint must be configured through a [`LOCALSTACK_ENDPOINT`] environment variable.
 </span><span class="kw">pub fn </span>get_endpoint() -&gt; <span class="prelude-ty">Result</span>&lt;Endpoint, EndpointError&gt; {
@@ -50,7 +50,7 @@
 <span class="doccomment">/// Failure to get the LocalStack endpoint.
 </span><span class="attribute">#[derive(Debug, Error)]
 </span><span class="kw">pub enum </span>EndpointError {
-    <span class="doccomment">/// The endpoint was missing for the {LOCALSTACK_ENDPOINT:?} environment variable
+    <span class="doccomment">/// The endpoint was missing for the {LOCALSTACK_ENDPOINT:?} environment variable.
     </span><span class="attribute">#[error(<span class="string">&quot;Missing LocalStack endpoint address in {LOCALSTACK_ENDPOINT:?} environment variable&quot;</span>)]
     </span>MissingEndpoint(<span class="attribute">#[from] </span>env::VarError),
 

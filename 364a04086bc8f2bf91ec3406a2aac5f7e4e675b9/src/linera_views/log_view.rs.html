@@ -252,6 +252,53 @@
 <span id="252">252</span>
 <span id="253">253</span>
 <span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -271,11 +318,11 @@
 <span class="doccomment">/// Key tags to create the sub-keys of a LogView on top of the base key.
 </span><span class="attribute">#[repr(u8)]
 </span><span class="kw">enum </span>KeyTag {
-    <span class="doccomment">/// Prefix for the storing of the variable stored_count
+    <span class="doccomment">/// Prefix for the storing of the variable stored_count.
     </span>Store = MIN_VIEW_TAG,
-    <span class="doccomment">/// Prefix for the indices of the log
+    <span class="doccomment">/// Prefix for the indices of the log.
     </span>Index,
-    <span class="doccomment">/// Prefix for the hash
+    <span class="doccomment">/// Prefix for the hash.
     </span>Hash,
 }
 
@@ -369,13 +416,35 @@
 <span class="kw">where
     </span>C: Context,
 {
-    <span class="doccomment">/// Push a value to the end of the log.
+    <span class="doccomment">/// Pushes a value to the end of the log.
+    /// ```rust
+    /// # tokio_test::block_on(async {
+    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::log_view::LogView;
+    /// # use crate::linera_views::views::View;
+    /// # let context = create_test_context();
+    ///   let mut log = LogView::load(context).await.unwrap();
+    ///   log.push(34);
+    /// # })
+    /// ```
     </span><span class="kw">pub fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: T) {
         <span class="self">self</span>.new_values.push(value);
         <span class="kw-2">*</span><span class="self">self</span>.hash.get_mut() = <span class="prelude-val">None</span>;
     }
 
-    <span class="doccomment">/// Read the size of the log.
+    <span class="doccomment">/// Reads the size of the log.
+    /// ```rust
+    /// # tokio_test::block_on(async {
+    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::log_view::LogView;
+    /// # use crate::linera_views::views::View;
+    /// # let context = create_test_context();
+    ///   let mut log = LogView::load(context).await.unwrap();
+    ///   log.push(34);
+    ///   log.push(42);
+    ///   assert_eq!(log.count(), 2);
+    /// # })
+    /// ```
     </span><span class="kw">pub fn </span>count(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="kw">if </span><span class="self">self</span>.was_cleared {
             <span class="self">self</span>.new_values.len()
@@ -384,7 +453,7 @@
         }
     }
 
-    <span class="doccomment">/// Obtain the extra data.
+    <span class="doccomment">/// Obtains the extra data.
     </span><span class="kw">pub fn </span>extra(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>C::Extra {
         <span class="self">self</span>.context.extra()
     }
@@ -396,7 +465,18 @@
     ViewError: From&lt;C::Error&gt;,
     T: Clone + DeserializeOwned + Serialize,
 {
-    <span class="doccomment">/// Read the logged values in the given range (including staged ones).
+    <span class="doccomment">/// Reads the logged value with the given index (including staged ones).
+    /// ```rust
+    /// # tokio_test::block_on(async {
+    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::log_view::LogView;
+    /// # use crate::linera_views::views::View;
+    /// # let context = create_test_context();
+    ///   let mut log = LogView::load(context).await.unwrap();
+    ///   log.push(34);
+    ///   assert_eq!(log.get(0).await.unwrap(), Some(34));
+    /// # })
+    /// ```
     </span><span class="kw">pub async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;T&gt;, ViewError&gt; {
         <span class="kw">let </span>value = <span class="kw">if </span><span class="self">self</span>.was_cleared {
             <span class="self">self</span>.new_values.get(index).cloned()
@@ -420,7 +500,21 @@
         }
         <span class="prelude-val">Ok</span>(values)
     }
-    <span class="doccomment">/// Read the logged values in the given range (including staged ones).
+
+    <span class="doccomment">/// Reads the logged values in the given range (including staged ones).
+    /// ```rust
+    /// # tokio_test::block_on(async {
+    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::log_view::LogView;
+    /// # use crate::linera_views::views::View;
+    /// # let context = create_test_context();
+    ///   let mut log = LogView::load(context).await.unwrap();
+    ///   log.push(34);
+    ///   log.push(42);
+    ///   log.push(56);
+    ///   assert_eq!(log.read(0..2).await.unwrap(), vec![34,42]);
+    /// # })
+    /// ```
     </span><span class="kw">pub async fn </span>read&lt;R&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, range: R) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;T&gt;, ViewError&gt;
     <span class="kw">where
         </span>R: RangeBounds&lt;usize&gt;,
