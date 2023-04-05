@@ -449,45 +449,11 @@
 <span id="449">449</span>
 <span id="450">450</span>
 <span id="451">451</span>
-<span id="452">452</span>
-<span id="453">453</span>
-<span id="454">454</span>
-<span id="455">455</span>
-<span id="456">456</span>
-<span id="457">457</span>
-<span id="458">458</span>
-<span id="459">459</span>
-<span id="460">460</span>
-<span id="461">461</span>
-<span id="462">462</span>
-<span id="463">463</span>
-<span id="464">464</span>
-<span id="465">465</span>
-<span id="466">466</span>
-<span id="467">467</span>
-<span id="468">468</span>
-<span id="469">469</span>
-<span id="470">470</span>
-<span id="471">471</span>
-<span id="472">472</span>
-<span id="473">473</span>
-<span id="474">474</span>
-<span id="475">475</span>
-<span id="476">476</span>
-<span id="477">477</span>
-<span id="478">478</span>
-<span id="479">479</span>
-<span id="480">480</span>
-<span id="481">481</span>
-<span id="482">482</span>
-<span id="483">483</span>
-<span id="484">484</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="kw">use </span>anyhow::{anyhow, ensure};
-<span class="kw">use </span>async_trait::async_trait;
+</span><span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>futures::future::join_all;
 <span class="kw">use </span>linera_base::crypto::KeyPair;
 <span class="kw">use </span>linera_core::worker::WorkerState;
@@ -509,12 +475,10 @@
 };
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;
-<span class="kw">use </span>std::{
-    net::SocketAddr,
-    path::{Path, PathBuf},
-    str::FromStr,
-};
+<span class="kw">use </span>serde::Deserialize;
+<span class="kw">use </span>std::{net::SocketAddr, path::PathBuf};
 <span class="kw">use </span>structopt::StructOpt;
+<span class="kw">use </span>tokio::fs;
 <span class="kw">use </span>tracing::{error, info};
 
 <span class="kw">struct </span>ServerContext {
@@ -684,7 +648,7 @@
     </span>command: ServerCommand,
 }
 
-<span class="attribute">#[derive(Debug, PartialEq, Eq)]
+<span class="attribute">#[derive(Debug, PartialEq, Eq, Deserialize)]
 </span><span class="kw">struct </span>ValidatorOptions {
     <span class="doccomment">/// Path to the file containing the server configuration of this Linera validator (including its secret key)
     </span>server_config_path: PathBuf,
@@ -715,57 +679,6 @@
 
     <span class="doccomment">/// The public name and the port of each of the shards
     </span>shards: Vec&lt;ShardConfig&gt;,
-}
-
-<span class="kw">impl </span>FromStr <span class="kw">for </span>ValidatorOptions {
-    <span class="kw">type </span><span class="prelude-val">Err </span>= anyhow::Error;
-
-    <span class="comment">// TODO(#543): Use a config file instead of this string.
-    </span><span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
-        <span class="kw">let </span>parts: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = s.split(<span class="string">&#39;:&#39;</span>).collect();
-        <span class="macro">ensure!</span>(
-            parts.len() &gt;= <span class="number">9 </span>&amp;&amp; parts.len() % <span class="number">2 </span>== <span class="number">1</span>,
-            <span class="string">&quot;Expecting format `file.json:(udp|tcp):host:port:(udp|tcp):internal_host:\
-            internal_port:metrics_host:metrics_port:host1:port1:...:hostN:portN`&quot;
-        </span>);
-
-        <span class="kw">let </span>server_config_path = Path::new(parts[<span class="number">0</span>]).to_path_buf();
-        <span class="kw">let </span>external_protocol = parts[<span class="number">1</span>].parse().map_err(|s| <span class="macro">anyhow!</span>(<span class="string">&quot;{}&quot;</span>, s))<span class="question-mark">?</span>;
-        <span class="kw">let </span>host = parts[<span class="number">2</span>].to_owned();
-        <span class="kw">let </span>port = parts[<span class="number">3</span>].parse()<span class="question-mark">?</span>;
-        <span class="kw">let </span>internal_protocol = parts[<span class="number">4</span>].parse().map_err(|s| <span class="macro">anyhow!</span>(<span class="string">&quot;{}&quot;</span>, s))<span class="question-mark">?</span>;
-        <span class="kw">let </span>internal_host = parts[<span class="number">5</span>].to_owned();
-        <span class="kw">let </span>internal_port = parts[<span class="number">6</span>].parse()<span class="question-mark">?</span>;
-        <span class="kw">let </span>metrics_host = parts[<span class="number">7</span>].to_owned();
-        <span class="kw">let </span>metrics_port = <span class="kw">if </span>parts[<span class="number">8</span>].is_empty() {
-            <span class="prelude-val">None
-        </span>} <span class="kw">else </span>{
-            <span class="prelude-val">Some</span>(parts[<span class="number">8</span>].parse()<span class="question-mark">?</span>)
-        };
-
-        <span class="kw">let </span>shards = parts[<span class="number">9</span>..]
-            .chunks_exact(<span class="number">2</span>)
-            .map(|shard_address| {
-                <span class="kw">let </span>host = shard_address[<span class="number">0</span>].to_owned();
-                <span class="kw">let </span>port = shard_address[<span class="number">1</span>].parse()<span class="question-mark">?</span>;
-
-                <span class="prelude-val">Ok</span>(ShardConfig { host, port })
-            })
-            .collect::&lt;<span class="prelude-ty">Result</span>&lt;<span class="kw">_</span>, <span class="self">Self</span>::Err&gt;&gt;()<span class="question-mark">?</span>;
-
-        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
-            server_config_path,
-            external_protocol,
-            internal_protocol,
-            host,
-            port,
-            internal_host,
-            internal_port,
-            shards,
-            metrics_host,
-            metrics_port,
-        })
-    }
 }
 
 <span class="kw">fn </span>make_server_config(options: ValidatorOptions) -&gt; ValidatorServerConfig {
@@ -834,9 +747,9 @@
     <span class="doccomment">/// Act as a trusted third-party and generate all server configurations
     </span><span class="attribute">#[structopt(name = <span class="string">&quot;generate&quot;</span>)]
     </span>Generate {
-        <span class="doccomment">/// Configuration of each validator in the committee encoded as `(Udp|Tcp):host:port:num-shards`
+        <span class="doccomment">/// Configuration file of each validator in the committee
         </span><span class="attribute">#[structopt(long)]
-        </span>validators: Vec&lt;ValidatorOptions&gt;,
+        </span>validators: Vec&lt;PathBuf&gt;,
 
         <span class="doccomment">/// Path where to write the description of the Linera committee
         </span><span class="attribute">#[structopt(long)]
@@ -906,7 +819,12 @@
             committee,
         } =&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>config_validators = Vec::new();
-            <span class="kw">for </span>options <span class="kw">in </span>validators {
+            <span class="kw">for </span>options_path <span class="kw">in </span>validators {
+                <span class="kw">let </span>options_string = fs::read_to_string(options_path)
+                    .<span class="kw">await
+                    </span>.expect(<span class="string">&quot;Unable to read validator options file&quot;</span>);
+                <span class="kw">let </span>options: ValidatorOptions =
+                    toml::from_str(<span class="kw-2">&amp;</span>options_string).expect(<span class="string">&quot;Invalid options file format&quot;</span>);
                 <span class="kw">let </span>path = options.server_config_path.clone();
                 <span class="kw">let </span>server = make_server_config(options);
                 server
@@ -936,10 +854,26 @@
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>test_validator_options() {
-        <span class="kw">let </span>options = ValidatorOptions::from_str(
-            <span class="string">&quot;server.json:tcp:host:9000:udp:internal_host:10000:metrics_host:5000:host1:9001:host2:9002&quot;</span>,
-        )
-        .unwrap();
+        <span class="kw">let </span>toml_str = <span class="string">r#&quot;
+            server_config_path = &quot;server.json&quot;
+            host = &quot;host&quot;
+            port = 9000
+            internal_host = &quot;internal_host&quot;
+            internal_port = 10000
+            metrics_host = &quot;metrics_host&quot;
+            metrics_port = 5000
+            external_protocol = { Simple = &quot;Tcp&quot; }
+            internal_protocol = { Simple = &quot;Udp&quot; }
+
+            [[shards]]
+            host = &quot;host1&quot;
+            port = 9001
+
+            [[shards]]
+            host = &quot;host2&quot;
+            port = 9002
+        &quot;#</span>;
+        <span class="kw">let </span>options: ValidatorOptions = toml::from_str(toml_str).unwrap();
         <span class="macro">assert_eq!</span>(
             options,
             ValidatorOptions {
