@@ -1263,55 +1263,6 @@
 <span id="1263">1263</span>
 <span id="1264">1264</span>
 <span id="1265">1265</span>
-<span id="1266">1266</span>
-<span id="1267">1267</span>
-<span id="1268">1268</span>
-<span id="1269">1269</span>
-<span id="1270">1270</span>
-<span id="1271">1271</span>
-<span id="1272">1272</span>
-<span id="1273">1273</span>
-<span id="1274">1274</span>
-<span id="1275">1275</span>
-<span id="1276">1276</span>
-<span id="1277">1277</span>
-<span id="1278">1278</span>
-<span id="1279">1279</span>
-<span id="1280">1280</span>
-<span id="1281">1281</span>
-<span id="1282">1282</span>
-<span id="1283">1283</span>
-<span id="1284">1284</span>
-<span id="1285">1285</span>
-<span id="1286">1286</span>
-<span id="1287">1287</span>
-<span id="1288">1288</span>
-<span id="1289">1289</span>
-<span id="1290">1290</span>
-<span id="1291">1291</span>
-<span id="1292">1292</span>
-<span id="1293">1293</span>
-<span id="1294">1294</span>
-<span id="1295">1295</span>
-<span id="1296">1296</span>
-<span id="1297">1297</span>
-<span id="1298">1298</span>
-<span id="1299">1299</span>
-<span id="1300">1300</span>
-<span id="1301">1301</span>
-<span id="1302">1302</span>
-<span id="1303">1303</span>
-<span id="1304">1304</span>
-<span id="1305">1305</span>
-<span id="1306">1306</span>
-<span id="1307">1307</span>
-<span id="1308">1308</span>
-<span id="1309">1309</span>
-<span id="1310">1310</span>
-<span id="1311">1311</span>
-<span id="1312">1312</span>
-<span id="1313">1313</span>
-<span id="1314">1314</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1342,7 +1293,7 @@
 <span class="kw">use </span>linera_execution::{
     committee::{Committee, Epoch, ValidatorName, ValidatorState},
     system::{Account, Recipient, SystemChannel, SystemOperation, UserData},
-    ApplicationId, Bytecode, Effect, Operation, Query, Response, SystemEffect, UserApplicationId,
+    Bytecode, Effect, Operation, Query, Response, SystemEffect, UserApplicationId,
 };
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;
@@ -2034,15 +1985,12 @@
         </span><span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.execute_block(
             messages,
-            <span class="macro">vec!</span>[(
-                ApplicationId::System,
-                Operation::System(SystemOperation::Transfer {
-                    owner,
-                    recipient,
-                    amount,
-                    user_data,
-                }),
-            )],
+            <span class="macro">vec!</span>[Operation::System(SystemOperation::Transfer {
+                owner,
+                recipient,
+                amount,
+                user_data,
+            })],
         )
         .<span class="kw">await
     </span>}
@@ -2059,16 +2007,13 @@
         <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.execute_block(
             messages,
-            <span class="macro">vec!</span>[(
-                ApplicationId::System,
-                Operation::System(SystemOperation::Claim {
-                    owner,
-                    target,
-                    recipient,
-                    amount,
-                    user_data,
-                }),
-            )],
+            <span class="macro">vec!</span>[Operation::System(SystemOperation::Claim {
+                owner,
+                target,
+                recipient,
+                amount,
+                user_data,
+            })],
         )
         .<span class="kw">await
     </span>}
@@ -2203,22 +2148,17 @@
     }
 
     <span class="doccomment">/// Execute an operation.
-    </span><span class="kw">pub async fn </span>execute_operation(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        application_id: ApplicationId,
-        operation: Operation,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    </span><span class="kw">pub async fn </span>execute_operation(<span class="kw-2">&amp;mut </span><span class="self">self</span>, operation: Operation) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="self">self</span>.execute_block(messages, <span class="macro">vec!</span>[(application_id, operation)])
-            .<span class="kw">await
+        <span class="self">self</span>.execute_block(messages, <span class="macro">vec!</span>[operation]).<span class="kw">await
     </span>}
 
     <span class="doccomment">/// Execute a new block
     </span><span class="kw">async fn </span>execute_block(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         incoming_messages: Vec&lt;Message&gt;,
-        operations: Vec&lt;(ApplicationId, Operation)&gt;,
+        operations: Vec&lt;Operation&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="kw">let </span>timestamp = <span class="self">self</span>.next_timestamp(<span class="kw-2">&amp;</span>incoming_messages);
         <span class="kw">let </span>block = Block {
@@ -2249,14 +2189,10 @@
     }
 
     <span class="doccomment">/// Query an application.
-    </span><span class="kw">pub async fn </span>query_application(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        application_id: ApplicationId,
-        query: <span class="kw-2">&amp;</span>Query,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&gt; {
+    </span><span class="kw">pub async fn </span>query_application(<span class="kw-2">&amp;mut </span><span class="self">self</span>, query: <span class="kw-2">&amp;</span>Query) -&gt; <span class="prelude-ty">Result</span>&lt;Response&gt; {
         <span class="kw">let </span>response = <span class="self">self
             </span>.node_client
-            .query_application(<span class="self">self</span>.chain_id, application_id, query)
+            .query_application(<span class="self">self</span>.chain_id, query)
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(response)
     }
@@ -2360,10 +2296,9 @@
 
     <span class="doccomment">/// Transfer ownership of the chain.
     </span><span class="kw">pub async fn </span>transfer_ownership(<span class="kw-2">&amp;mut </span><span class="self">self</span>, new_public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
-        <span class="self">self</span>.execute_operation(
-            ApplicationId::System,
-            Operation::System(SystemOperation::ChangeOwner { new_public_key }),
-        )
+        <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::ChangeOwner {
+            new_public_key,
+        }))
         .<span class="kw">await
     </span>}
 
@@ -2374,12 +2309,9 @@
         <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.execute_block(
             messages,
-            <span class="macro">vec!</span>[(
-                ApplicationId::System,
-                Operation::System(SystemOperation::ChangeMultipleOwners {
-                    new_public_keys: <span class="macro">vec!</span>[public_key, new_public_key],
-                }),
-            )],
+            <span class="macro">vec!</span>[Operation::System(SystemOperation::ChangeMultipleOwners {
+                new_public_keys: <span class="macro">vec!</span>[public_key, new_public_key],
+            })],
         )
         .<span class="kw">await
     </span>}
@@ -2398,16 +2330,13 @@
             </span>.execute_block(
                 <span class="comment">// Cannot add incoming messages to preserve the effect id.
                 </span><span class="macro">vec!</span>[],
-                <span class="macro">vec!</span>[(
-                    ApplicationId::System,
-                    Operation::System(SystemOperation::OpenChain {
-                        id,
-                        public_key,
-                        committees,
-                        admin_id: <span class="self">self</span>.admin_id,
-                        epoch,
-                    }),
-                )],
+                <span class="macro">vec!</span>[Operation::System(SystemOperation::OpenChain {
+                    id,
+                    public_key,
+                    committees,
+                    admin_id: <span class="self">self</span>.admin_id,
+                    epoch,
+                })],
             )
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>((id, certificate))
@@ -2415,11 +2344,8 @@
 
     <span class="doccomment">/// Close the chain (and lose everything in it!!).
     </span><span class="kw">pub async fn </span>close_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
-        <span class="self">self</span>.execute_operation(
-            ApplicationId::System,
-            Operation::System(SystemOperation::CloseChain),
-        )
-        .<span class="kw">await
+        <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::CloseChain))
+            .<span class="kw">await
     </span>}
 
     <span class="doccomment">/// Publish some bytecode.
@@ -2438,10 +2364,10 @@
             </span>.execute_block(
                 <span class="comment">// Cannot add incoming messages to preserve the effect id.
                 </span><span class="macro">vec!</span>[],
-                <span class="macro">vec!</span>[(
-                    ApplicationId::System,
-                    Operation::System(SystemOperation::PublishBytecode { contract, service }),
-                )],
+                <span class="macro">vec!</span>[Operation::System(SystemOperation::PublishBytecode {
+                    contract,
+                    service,
+                })],
             )
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>((id, certificate))
@@ -2468,15 +2394,12 @@
             </span>.execute_block(
                 <span class="comment">// Cannot add incoming messages to preserve the effect id.
                 </span><span class="macro">vec!</span>[],
-                <span class="macro">vec!</span>[(
-                    ApplicationId::System,
-                    Operation::System(SystemOperation::CreateApplication {
-                        bytecode_id,
-                        parameters,
-                        initialization_argument,
-                        required_application_ids,
-                    }),
-                )],
+                <span class="macro">vec!</span>[Operation::System(SystemOperation::CreateApplication {
+                    bytecode_id,
+                    parameters,
+                    initialization_argument,
+                    required_application_ids,
+                })],
             )
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>((id, certificate))
@@ -2493,14 +2416,11 @@
         <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.execute_block(
             messages,
-            <span class="macro">vec!</span>[(
-                ApplicationId::System,
-                Operation::System(SystemOperation::CreateCommittee {
-                    admin_id: <span class="self">self</span>.chain_id,
-                    epoch: epoch.try_add_one()<span class="question-mark">?</span>,
-                    committee,
-                }),
-            )],
+            <span class="macro">vec!</span>[Operation::System(SystemOperation::CreateCommittee {
+                admin_id: <span class="self">self</span>.chain_id,
+                epoch: epoch.try_add_one()<span class="question-mark">?</span>,
+                committee,
+            })],
         )
         .<span class="kw">await
     </span>}
@@ -2523,26 +2443,20 @@
     <span class="doccomment">/// Start listening to the admin chain for new committees. (This is only useful for
     /// other genesis chains or for testing.)
     </span><span class="kw">pub async fn </span>subscribe_to_new_committees(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
-        <span class="self">self</span>.execute_operation(
-            ApplicationId::System,
-            Operation::System(SystemOperation::Subscribe {
-                chain_id: <span class="self">self</span>.admin_id,
-                channel: SystemChannel::Admin,
-            }),
-        )
+        <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::Subscribe {
+            chain_id: <span class="self">self</span>.admin_id,
+            channel: SystemChannel::Admin,
+        }))
         .<span class="kw">await
     </span>}
 
     <span class="doccomment">/// Stop listening to the admin chain for new committees. (This is only useful for
     /// testing.)
     </span><span class="kw">pub async fn </span>unsubscribe_to_new_committees(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
-        <span class="self">self</span>.execute_operation(
-            ApplicationId::System,
-            Operation::System(SystemOperation::Unsubscribe {
-                chain_id: <span class="self">self</span>.admin_id,
-                channel: SystemChannel::Admin,
-            }),
-        )
+        <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::Unsubscribe {
+            chain_id: <span class="self">self</span>.admin_id,
+            channel: SystemChannel::Admin,
+        }))
         .<span class="kw">await
     </span>}
 
@@ -2551,13 +2465,10 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         chain_id: ChainId,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
-        <span class="self">self</span>.execute_operation(
-            ApplicationId::System,
-            Operation::System(SystemOperation::Subscribe {
-                chain_id,
-                channel: SystemChannel::PublishedBytecodes,
-            }),
-        )
+        <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::Subscribe {
+            chain_id,
+            channel: SystemChannel::PublishedBytecodes,
+        }))
         .<span class="kw">await
     </span>}
 
@@ -2566,13 +2477,10 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         chain_id: ChainId,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
-        <span class="self">self</span>.execute_operation(
-            ApplicationId::System,
-            Operation::System(SystemOperation::Unsubscribe {
-                chain_id,
-                channel: SystemChannel::PublishedBytecodes,
-            }),
-        )
+        <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::Unsubscribe {
+            chain_id,
+            channel: SystemChannel::PublishedBytecodes,
+        }))
         .<span class="kw">await
     </span>}
 
@@ -2588,13 +2496,10 @@
             .keys()
             .filter_map(|epoch| {
                 <span class="kw">if </span><span class="kw-2">*</span>epoch != current_epoch {
-                    <span class="prelude-val">Some</span>((
-                        ApplicationId::System,
-                        Operation::System(SystemOperation::RemoveCommittee {
-                            admin_id: <span class="self">self</span>.admin_id,
-                            epoch: <span class="kw-2">*</span>epoch,
-                        }),
-                    ))
+                    <span class="prelude-val">Some</span>(Operation::System(SystemOperation::RemoveCommittee {
+                        admin_id: <span class="self">self</span>.admin_id,
+                        epoch: <span class="kw-2">*</span>epoch,
+                    }))
                 } <span class="kw">else </span>{
                     <span class="prelude-val">None
                 </span>}
@@ -2614,15 +2519,12 @@
         account: Account,
         user_data: UserData,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
-        <span class="self">self</span>.execute_operation(
-            ApplicationId::System,
-            Operation::System(SystemOperation::Transfer {
-                owner,
-                recipient: Recipient::Account(account),
-                amount,
-                user_data,
-            }),
-        )
+        <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::Transfer {
+            owner,
+            recipient: Recipient::Account(account),
+            amount,
+            user_data,
+        }))
         .<span class="kw">await
     </span>}
 }

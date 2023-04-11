@@ -250,9 +250,6 @@
 <span id="250">250</span>
 <span id="251">251</span>
 <span id="252">252</span>
-<span id="253">253</span>
-<span id="254">254</span>
-<span id="255">255</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -263,7 +260,6 @@
     ensure,
     identifiers::ChainId,
 };
-<span class="kw">use </span>linera_execution::ApplicationId;
 <span class="kw">use </span>linera_views::{
     common::Context,
     queue_view::QueueView,
@@ -357,9 +353,9 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;(ChainId, ApplicationId, Origin, InboxError)&gt; <span class="kw">for </span>ChainError {
-    <span class="kw">fn </span>from(value: (ChainId, ApplicationId, Origin, InboxError)) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>(chain_id, application_id, origin, error) = value;
+<span class="kw">impl </span>From&lt;(ChainId, Origin, InboxError)&gt; <span class="kw">for </span>ChainError {
+    <span class="kw">fn </span>from(value: (ChainId, Origin, InboxError)) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>(chain_id, origin, error) = value;
         <span class="kw">match </span>error {
             InboxError::ViewError(e) =&gt; ChainError::ViewError(e),
             InboxError::ArithmeticError(e) =&gt; ChainError::ArithmeticError(e),
@@ -368,7 +364,6 @@
                 previous_event,
             } =&gt; ChainError::UnexpectedMessage {
                 chain_id,
-                application_id,
                 origin,
                 event,
                 previous_event,
@@ -376,7 +371,6 @@
             InboxError::IncorrectOrder { event, next_cursor } =&gt; {
                 ChainError::IncorrectMessageOrder {
                     chain_id,
-                    application_id,
                     origin,
                     event,
                     next_height: next_cursor.height,

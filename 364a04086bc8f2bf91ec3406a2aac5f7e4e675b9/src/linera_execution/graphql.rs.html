@@ -100,7 +100,7 @@
 </span><span class="kw">use crate</span>::{
     committee::{Committee, Epoch, ValidatorName, ValidatorState},
     system::{Recipient, UserData},
-    ApplicationId, Bytecode, ChainOwnership, ChannelId, ExecutionStateView,
+    ApplicationId, Bytecode, ChainOwnership, ChannelSubscription, ExecutionStateView,
     SystemExecutionStateView, UserApplicationDescription,
 };
 <span class="kw">use </span>async_graphql::{scalar, Error, Object};
@@ -170,7 +170,7 @@
         <span class="self">self</span>.admin_id.get()
     }
 
-    <span class="kw">async fn </span>subscriptions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;ChannelId&gt;, Error&gt; {
+    <span class="kw">async fn </span>subscriptions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;ChannelSubscription&gt;, Error&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.subscriptions.indices().<span class="kw">await</span><span class="question-mark">?</span>)
     }
 

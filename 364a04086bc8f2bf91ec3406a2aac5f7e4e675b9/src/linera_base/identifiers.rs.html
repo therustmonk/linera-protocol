@@ -178,6 +178,10 @@
 <span id="178">178</span>
 <span id="179">179</span>
 <span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -194,6 +198,7 @@
 <span class="doccomment">/// The owner of a chain. This is currently the hash of the owner&#39;s public key used to
 /// verify signatures.
 </span><span class="attribute">#[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Debug, Serialize, Deserialize)]
+#[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Default))]
 </span><span class="kw">pub struct </span>Owner(<span class="kw">pub </span>CryptoHash);
 
 <span class="doccomment">/// How to create a chain.
@@ -208,11 +213,12 @@
 <span class="doccomment">/// The unique identifier (UID) of a chain. This is currently computed as the hash value
 /// of a [`ChainDescription`].
 </span><span class="attribute">#[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Serialize, Deserialize)]
-#[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Arbitrary))]
+#[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Arbitrary, Default))]
 </span><span class="kw">pub struct </span>ChainId(<span class="kw">pub </span>CryptoHash);
 
 <span class="doccomment">/// The index of an effect in a chain.
 </span><span class="attribute">#[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Debug, Serialize, Deserialize)]
+#[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Default))]
 </span><span class="kw">pub struct </span>EffectId {
     <span class="kw">pub </span>chain_id: ChainId,
     <span class="kw">pub </span>height: BlockHeight,
@@ -221,6 +227,7 @@
 
 <span class="doccomment">/// A unique identifier for a user application.
 </span><span class="attribute">#[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Debug, Serialize, Deserialize)]
+#[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Default))]
 #[serde(rename = <span class="string">&quot;UserApplicationId&quot;</span>)]
 </span><span class="kw">pub struct </span>ApplicationId {
     <span class="doccomment">/// The bytecode to use for the application.
@@ -231,6 +238,7 @@
 
 <span class="doccomment">/// A unique identifier for an application bytecode.
 </span><span class="attribute">#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Default))]
 </span><span class="kw">pub struct </span>BytecodeId(<span class="kw">pub </span>EffectId);
 
 <span class="doccomment">/// The identifier of a session.

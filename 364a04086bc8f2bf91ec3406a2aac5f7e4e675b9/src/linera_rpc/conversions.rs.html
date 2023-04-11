@@ -1037,6 +1037,32 @@
 <span id="1037">1037</span>
 <span id="1038">1038</span>
 <span id="1039">1039</span>
+<span id="1040">1040</span>
+<span id="1041">1041</span>
+<span id="1042">1042</span>
+<span id="1043">1043</span>
+<span id="1044">1044</span>
+<span id="1045">1045</span>
+<span id="1046">1046</span>
+<span id="1047">1047</span>
+<span id="1048">1048</span>
+<span id="1049">1049</span>
+<span id="1050">1050</span>
+<span id="1051">1051</span>
+<span id="1052">1052</span>
+<span id="1053">1053</span>
+<span id="1054">1054</span>
+<span id="1055">1055</span>
+<span id="1056">1056</span>
+<span id="1057">1057</span>
+<span id="1058">1058</span>
+<span id="1059">1059</span>
+<span id="1060">1060</span>
+<span id="1061">1061</span>
+<span id="1062">1062</span>
+<span id="1063">1063</span>
+<span id="1064">1064</span>
+<span id="1065">1065</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -1052,8 +1078,8 @@
     identifiers::{BytecodeId, ChainId, EffectId, Owner},
 };
 <span class="kw">use </span>linera_chain::data_types::{
-    BlockAndRound, BlockProposal, Certificate, CertificateWithDependencies, HashedValue,
-    LiteCertificate, LiteValue, Medium, Origin,
+    BlockAndRound, BlockProposal, Certificate, CertificateWithDependencies, ChannelFullName,
+    HashedValue, LiteCertificate, LiteValue, Medium, Origin,
 };
 <span class="kw">use </span>linera_core::{
     data_types::{
@@ -1163,15 +1189,12 @@
                 Reason::NewBlock { height } =&gt; grpc::reason::Inner::NewBlock(NewBlock {
                     height: <span class="prelude-val">Some</span>(height.into()),
                 }),
-                Reason::NewMessage {
-                    application_id,
-                    origin,
-                    height,
-                } =&gt; grpc::reason::Inner::NewMessage(NewMessage {
-                    application_id: <span class="prelude-val">Some</span>(application_id.into()),
-                    origin: <span class="prelude-val">Some</span>(origin.into()),
-                    height: <span class="prelude-val">Some</span>(height.into()),
-                }),
+                Reason::NewMessage { origin, height } =&gt; {
+                    grpc::reason::Inner::NewMessage(NewMessage {
+                        origin: <span class="prelude-val">Some</span>(origin.into()),
+                        height: <span class="prelude-val">Some</span>(height.into()),
+                    })
+                }
             }),
         }
     }
@@ -1187,7 +1210,6 @@
                     height: <span class="macro">proto_convert!</span>(new_block.height),
                 },
                 grpc::reason::Inner::NewMessage(new_message) =&gt; Reason::NewMessage {
-                    application_id: <span class="macro">try_proto_convert!</span>(new_message.application_id),
                     origin: <span class="macro">try_proto_convert!</span>(new_message.origin),
                     height: <span class="macro">proto_convert!</span>(new_message.height),
                 },
@@ -1280,15 +1302,9 @@
                 certificates,
             }) =&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>height_map = Vec::new();
-                <span class="kw">for </span>grpc::UpdateRecipientEntry {
-                    application_id,
-                    medium,
-                    heights,
-                } <span class="kw">in </span>grpc_height_map
-                {
+                <span class="kw">for </span>grpc::UpdateRecipientEntry { medium, heights } <span class="kw">in </span>grpc_height_map {
                     height_map.push((
-                        <span class="macro">try_proto_convert!</span>(application_id),
-                        <span class="macro">proto_convert!</span>(medium),
+                        <span class="macro">try_proto_convert!</span>(medium),
                         heights.into_iter().map(BlockHeight::from).collect(),
                     ));
                 }
@@ -1300,12 +1316,10 @@
                 }
             }
             Inner::ConfirmUpdatedRecipient(grpc::ConfirmUpdatedRecipient {
-                application_id,
                 origin,
                 recipient,
                 height,
             }) =&gt; ConfirmUpdatedRecipient {
-                application_id: <span class="macro">try_proto_convert!</span>(application_id),
                 origin: <span class="macro">try_proto_convert!</span>(origin),
                 recipient: <span class="macro">try_proto_convert!</span>(recipient),
                 height: <span class="macro">proto_convert!</span>(height),
@@ -1330,25 +1344,20 @@
             } =&gt; Inner::UpdateRecipient(grpc::UpdateRecipient {
                 height_map: height_map
                     .into_iter()
-                    .map(
-                        |(application_id, medium, heights)| grpc::UpdateRecipientEntry {
-                            application_id: <span class="prelude-val">Some</span>(application_id.into()),
-                            medium: <span class="prelude-val">Some</span>(medium.into()),
-                            heights: heights.into_iter().map(|height| height.into()).collect(),
-                        },
-                    )
+                    .map(|(medium, heights)| grpc::UpdateRecipientEntry {
+                        medium: <span class="prelude-val">Some</span>(medium.into()),
+                        heights: heights.into_iter().map(|height| height.into()).collect(),
+                    })
                     .collect(),
                 sender: <span class="prelude-val">Some</span>(sender.into()),
                 recipient: <span class="prelude-val">Some</span>(recipient.into()),
                 certificates: <span class="macro">try_proto_convert_vec!</span>(certificates, grpc::Certificate),
             }),
             ConfirmUpdatedRecipient {
-                application_id,
                 origin,
                 recipient,
                 height,
             } =&gt; Inner::ConfirmUpdatedRecipient(grpc::ConfirmUpdatedRecipient {
-                application_id: <span class="prelude-val">Some</span>(application_id.into()),
                 origin: <span class="prelude-val">Some</span>(origin.into()),
                 recipient: <span class="prelude-val">Some</span>(recipient.into()),
                 height: <span class="prelude-val">Some</span>(height.into()),
@@ -1540,23 +1549,23 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;Medium&gt; <span class="kw">for </span>grpc::Medium {
-    <span class="kw">fn </span>from(medium: Medium) -&gt; <span class="self">Self </span>{
-        <span class="kw">match </span>medium {
-            Medium::Direct =&gt; grpc::Medium { channel: <span class="prelude-val">None </span>},
-            Medium::Channel(channel) =&gt; grpc::Medium {
-                channel: <span class="prelude-val">Some</span>(channel.as_ref().to_owned()),
-            },
+<span class="kw">impl </span>From&lt;ChannelFullName&gt; <span class="kw">for </span>grpc::ChannelFullName {
+    <span class="kw">fn </span>from(full_name: ChannelFullName) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            application_id: <span class="prelude-val">Some</span>(full_name.application_id.into()),
+            name: full_name.name.as_ref().to_owned(),
         }
     }
 }
 
-<span class="kw">impl </span>From&lt;grpc::Medium&gt; <span class="kw">for </span>Medium {
-    <span class="kw">fn </span>from(medium: grpc::Medium) -&gt; <span class="self">Self </span>{
-        <span class="kw">match </span>medium.channel {
-            <span class="prelude-val">None </span>=&gt; Medium::Direct,
-            <span class="prelude-val">Some</span>(medium) =&gt; Medium::Channel(medium.into()),
-        }
+<span class="kw">impl </span>TryFrom&lt;grpc::ChannelFullName&gt; <span class="kw">for </span>ChannelFullName {
+    <span class="kw">type </span>Error = ProtoConversionError;
+
+    <span class="kw">fn </span>try_from(full_name: grpc::ChannelFullName) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+            application_id: <span class="macro">try_proto_convert!</span>(full_name.application_id),
+            name: full_name.name.into(),
+        })
     }
 }
 
@@ -1615,6 +1624,35 @@
                         creation: <span class="macro">try_proto_convert!</span>(user_application_id.creation),
                     })
                 }
+            },
+        )
+    }
+}
+
+<span class="kw">impl </span>From&lt;Medium&gt; <span class="kw">for </span>grpc::Medium {
+    <span class="kw">fn </span>from(medium: Medium) -&gt; <span class="self">Self </span>{
+        <span class="kw">match </span>medium {
+            Medium::Direct =&gt; grpc::Medium {
+                inner: <span class="prelude-val">Some</span>(grpc::medium::Inner::Direct(())),
+            },
+            Medium::Channel(full_name) =&gt; grpc::Medium {
+                inner: <span class="prelude-val">Some</span>(grpc::medium::Inner::Channel(full_name.into())),
+            },
+        }
+    }
+}
+
+<span class="kw">impl </span>TryFrom&lt;grpc::Medium&gt; <span class="kw">for </span>Medium {
+    <span class="kw">type </span>Error = ProtoConversionError;
+
+    <span class="kw">fn </span>try_from(medium: grpc::Medium) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+        <span class="prelude-val">Ok</span>(
+            <span class="kw">match </span>medium.inner.ok_or(ProtoConversionError::MissingField)<span class="question-mark">? </span>{
+                grpc::medium::Inner::Direct(<span class="kw">_</span>) =&gt; Medium::Direct,
+                grpc::medium::Inner::Channel(full_name) =&gt; Medium::Channel(ChannelFullName {
+                    application_id: <span class="macro">try_proto_convert!</span>(full_name.application_id),
+                    name: full_name.name.into(),
+                }),
             },
         )
     }
@@ -1705,7 +1743,7 @@
     <span class="kw">fn </span>try_from(origin: grpc::Origin) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             sender: <span class="macro">try_proto_convert!</span>(origin.sender),
-            medium: <span class="macro">proto_convert!</span>(origin.medium),
+            medium: <span class="macro">try_proto_convert!</span>(origin.medium),
         })
     }
 }
@@ -1847,7 +1885,23 @@
         <span class="kw">let </span>origin_direct = Origin::chain(ChainId::root(<span class="number">0</span>));
         round_trip_check::&lt;<span class="kw">_</span>, grpc::Origin&gt;(origin_direct);
 
-        <span class="kw">let </span>origin_medium = Origin::channel(ChainId::root(<span class="number">0</span>), <span class="macro">vec!</span>[].into());
+        <span class="kw">let </span>effect_id = EffectId {
+            chain_id: ChainId::root(<span class="number">0</span>),
+            height: BlockHeight(<span class="number">10</span>),
+            index: <span class="number">20</span>,
+        };
+
+        <span class="kw">let </span>application_id = ApplicationId::User(UserApplicationId {
+            bytecode_id: BytecodeId(effect_id),
+            creation: effect_id,
+        });
+
+        <span class="kw">let </span>full_name = ChannelFullName {
+            application_id,
+            name: <span class="macro">vec!</span>[].into(),
+        };
+
+        <span class="kw">let </span>origin_medium = Origin::channel(ChainId::root(<span class="number">0</span>), full_name);
         round_trip_check::&lt;<span class="kw">_</span>, grpc::Origin&gt;(origin_medium);
     }
 
@@ -2013,7 +2067,7 @@
     <span class="attribute">#[test]
     </span><span class="kw">pub fn </span>test_cross_chain_request() {
         <span class="kw">let </span>cross_chain_request_update_recipient = UpdateRecipient {
-            height_map: <span class="macro">vec!</span>[(ApplicationId::System, Medium::Direct, <span class="macro">vec!</span>[])],
+            height_map: <span class="macro">vec!</span>[(Medium::Direct, <span class="macro">vec!</span>[])],
             sender: ChainId::root(<span class="number">0</span>),
             recipient: ChainId::root(<span class="number">0</span>),
             certificates: <span class="macro">vec!</span>[],
@@ -2021,7 +2075,6 @@
         round_trip_check::&lt;<span class="kw">_</span>, grpc::CrossChainRequest&gt;(cross_chain_request_update_recipient);
 
         <span class="kw">let </span>cross_chain_request_confirm_updated_recipient = ConfirmUpdatedRecipient {
-            application_id: ApplicationId::System,
             origin: Origin::chain(ChainId::root(<span class="number">0</span>)),
             recipient: ChainId::root(<span class="number">0</span>),
             height: Default::default(),
@@ -2069,7 +2122,6 @@
         round_trip_check::&lt;<span class="kw">_</span>, grpc::Reason&gt;(reason_new_block);
 
         <span class="kw">let </span>reason_new_message = Reason::NewMessage {
-            application_id: ApplicationId::System,
             origin: Origin::chain(ChainId::root(<span class="number">0</span>)),
             height: BlockHeight(<span class="number">0</span>),
         };

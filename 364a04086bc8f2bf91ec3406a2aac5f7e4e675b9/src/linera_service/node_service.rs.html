@@ -563,6 +563,9 @@
 <span id="563">563</span>
 <span id="564">564</span>
 <span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -595,8 +598,8 @@
 <span class="kw">use </span>linera_execution::{
     committee::{Committee, Epoch},
     system::{Recipient, SystemChannel, UserData},
-    ApplicationId, Bytecode, Operation, Query, Response, SystemOperation,
-    UserApplicationDescription, UserApplicationId,
+    Bytecode, Operation, Query, Response, SystemOperation, UserApplicationDescription,
+    UserApplicationId,
 };
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;
@@ -690,11 +693,10 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         system_operation: SystemOperation,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, Error&gt; {
-        <span class="kw">let </span>application_id = ApplicationId::System;
         <span class="kw">let </span>operation = Operation::System(system_operation);
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.<span class="number">0</span>.client.lock().<span class="kw">await</span>;
         client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(client.execute_operation(application_id, operation).<span class="kw">await</span><span class="question-mark">?</span>)
+        <span class="prelude-val">Ok</span>(client.execute_operation(operation).<span class="kw">await</span><span class="question-mark">?</span>)
     }
 }
 
@@ -957,7 +959,7 @@
 /// Pattern matches on the `OperationType` of the query and routes the query
 /// accordingly.
 </span><span class="kw">async fn </span>application_handler&lt;P, S&gt;(
-    Path(user_application_id): Path&lt;String&gt;,
+    Path(application_id): Path&lt;String&gt;,
     service: Extension&lt;Arc&lt;NodeService&lt;P, S&gt;&gt;&gt;,
     req: GraphQLRequest,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;GraphQLResponse, NodeServiceError&gt;
@@ -971,9 +973,8 @@
     <span class="kw">let </span>parsed_query = req.parsed_query()<span class="question-mark">?</span>;
     <span class="kw">let </span>operation_type = operation_type(parsed_query)<span class="question-mark">?</span>;
 
-    <span class="kw">let </span>user_application_id_bytes = hex::decode(user_application_id)<span class="question-mark">?</span>;
-    <span class="kw">let </span>user_application_id: UserApplicationId = bcs::from_bytes(<span class="kw-2">&amp;</span>user_application_id_bytes)<span class="question-mark">?</span>;
-    <span class="kw">let </span>application_id = ApplicationId::User(user_application_id);
+    <span class="kw">let </span>application_id_bytes = hex::decode(application_id)<span class="question-mark">?</span>;
+    <span class="kw">let </span>application_id: UserApplicationId = bcs::from_bytes(<span class="kw-2">&amp;</span>application_id_bytes)<span class="question-mark">?</span>;
 
     <span class="kw">let </span>response = <span class="kw">match </span>operation_type {
         OperationType::Query =&gt; user_application_query(application_id, service, <span class="kw-2">&amp;</span>req).<span class="kw">await</span><span class="question-mark">?</span>,
@@ -1006,23 +1007,26 @@
 
 <span class="doccomment">/// Handles queries for user applications.
 </span><span class="kw">async fn </span>user_application_query&lt;P, S&gt;(
-    application_id: ApplicationId,
+    application_id: UserApplicationId,
     service: Extension&lt;Arc&lt;NodeService&lt;P, S&gt;&gt;&gt;,
-    req: <span class="kw-2">&amp;</span>Request,
+    request: <span class="kw-2">&amp;</span>Request,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;async_graphql::Response, NodeServiceError&gt;
 <span class="kw">where
     </span>P: ValidatorNodeProvider + Send + Sync + <span class="lifetime">&#39;static</span>,
     S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
     ViewError: From&lt;S::ContextError&gt;,
 {
-    <span class="kw">let </span>serialized_request = serde_json::to_vec(<span class="kw-2">&amp;</span>req)<span class="question-mark">?</span>;
-    <span class="kw">let </span>query = Query::User(serialized_request);
+    <span class="kw">let </span>bytes = serde_json::to_vec(<span class="kw-2">&amp;</span>request)<span class="question-mark">?</span>;
+    <span class="kw">let </span>query = Query::User {
+        application_id,
+        bytes,
+    };
     <span class="kw">let </span>response = service
         .<span class="number">0
         </span>.client
         .lock()
         .<span class="kw">await
-        </span>.query_application(application_id, <span class="kw-2">&amp;</span>query)
+        </span>.query_application(<span class="kw-2">&amp;</span>query)
         .<span class="kw">await</span><span class="question-mark">?</span>;
     <span class="kw">let </span>user_response_bytes = <span class="kw">match </span>response {
         Response::System(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;cannot get a system response for a user query&quot;</span>),
@@ -1033,7 +1037,7 @@
 
 <span class="doccomment">/// Handles mutations for user applications.
 </span><span class="kw">async fn </span>user_application_mutation&lt;P, S&gt;(
-    application_id: ApplicationId,
+    application_id: UserApplicationId,
     service: Extension&lt;Arc&lt;NodeService&lt;P, S&gt;&gt;&gt;,
     req: <span class="kw-2">&amp;</span>Request,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;async_graphql::Response, NodeServiceError&gt;
@@ -1044,13 +1048,15 @@
 {
     <span class="kw">let </span>graphql_res = user_application_query(application_id, service.clone(), req).<span class="kw">await</span><span class="question-mark">?</span>;
     <span class="kw">let </span>res_json = graphql_res.data.into_json()<span class="question-mark">?</span>;
-    <span class="kw">let </span>bcs_bytes =
-        bytes_from_res(res_json).ok_or(NodeServiceError::MalformedApplicationResponse)<span class="question-mark">?</span>;
-    <span class="kw">let </span>operation = Operation::User(bcs_bytes);
+    <span class="kw">let </span>bytes = bytes_from_res(res_json).ok_or(NodeServiceError::MalformedApplicationResponse)<span class="question-mark">?</span>;
+    <span class="kw">let </span>operation = Operation::User {
+        application_id,
+        bytes,
+    };
 
     <span class="kw">let </span><span class="kw-2">mut </span>client = service.<span class="number">0</span>.client.lock().<span class="kw">await</span>;
     client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
-    <span class="kw">let </span>certificate = client.execute_operation(application_id, operation).<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="kw">let </span>certificate = client.execute_operation(operation).<span class="kw">await</span><span class="question-mark">?</span>;
     <span class="kw">let </span>value = async_graphql::Value::from_json(serde_json::to_value(certificate)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>(async_graphql::Response::new(value))
 }

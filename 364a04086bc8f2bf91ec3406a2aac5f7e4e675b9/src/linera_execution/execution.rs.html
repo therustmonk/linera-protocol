@@ -388,13 +388,16 @@
 <span id="388">388</span>
 <span id="389">389</span>
 <span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use crate</span>::{
     runtime::{ApplicationStatus, ExecutionRuntime, SessionManager},
     system::SystemExecutionStateView,
-    ApplicationId, ContractRuntime, Effect, EffectContext, ExecutionError, ExecutionResult,
+    ContractRuntime, Effect, EffectContext, ExecutionError, ExecutionResult,
     ExecutionRuntimeContext, Operation, OperationContext, Query, QueryContext, RawExecutionResult,
     Response, SystemEffect, UserApplicationDescription, UserApplicationId,
 };
@@ -467,11 +470,11 @@
         view.system.description.set(description);
         view.system.epoch.set(epoch);
         view.system.admin_id.set(admin_id);
-        <span class="kw">for </span>channel_id <span class="kw">in </span>subscriptions {
+        <span class="kw">for </span>subscription <span class="kw">in </span>subscriptions {
             view.system
                 .subscriptions
-                .insert(<span class="kw-2">&amp;</span>channel_id)
-                .expect(<span class="string">&quot;serialization of channel_id should not fail&quot;</span>);
+                .insert(<span class="kw-2">&amp;</span>subscription)
+                .expect(<span class="string">&quot;serialization of subscription should not fail&quot;</span>);
         }
         view.system.committees.set(committees);
         view.system.ownership.set(ownership);
@@ -654,13 +657,12 @@
 
     <span class="kw">pub async fn </span>execute_operation(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        application_id: ApplicationId,
         context: <span class="kw-2">&amp;</span>OperationContext,
         operation: <span class="kw-2">&amp;</span>Operation,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;ExecutionResult&gt;, ExecutionError&gt; {
         <span class="macro">assert_eq!</span>(context.chain_id, <span class="self">self</span>.context().extra().chain_id());
-        <span class="kw">match </span>(application_id, operation) {
-            (ApplicationId::System, Operation::System(op)) =&gt; {
+        <span class="kw">match </span>operation {
+            Operation::System(op) =&gt; {
                 <span class="kw">let </span>(<span class="kw-2">mut </span>result, new_application) =
                     <span class="self">self</span>.system.execute_operation(context, op).<span class="kw">await</span><span class="question-mark">?</span>;
                 result.authenticated_signer = context.authenticated_signer;
@@ -674,60 +676,65 @@
                 }
                 <span class="prelude-val">Ok</span>(results)
             }
-            (ApplicationId::User(application_id), Operation::User(operation)) =&gt; {
+            Operation::User {
+                application_id,
+                bytes,
+            } =&gt; {
                 <span class="self">self</span>.run_user_action(
-                    application_id,
+                    <span class="kw-2">*</span>application_id,
                     context.chain_id,
-                    UserAction::Operation(context, operation),
+                    UserAction::Operation(context, bytes),
                 )
                 .<span class="kw">await
             </span>}
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(ExecutionError::InvalidOperation),
         }
     }
 
     <span class="kw">pub async fn </span>execute_effect(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        application_id: ApplicationId,
         context: <span class="kw-2">&amp;</span>EffectContext,
         effect: <span class="kw-2">&amp;</span>Effect,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;ExecutionResult&gt;, ExecutionError&gt; {
         <span class="macro">assert_eq!</span>(context.chain_id, <span class="self">self</span>.context().extra().chain_id());
-        <span class="kw">match </span>(application_id, effect) {
-            (ApplicationId::System, Effect::System(effect)) =&gt; {
+        <span class="kw">match </span>effect {
+            Effect::System(effect) =&gt; {
                 <span class="kw">let </span>result = <span class="self">self</span>.system.execute_effect(context, effect).<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[ExecutionResult::System(result)])
             }
-            (ApplicationId::User(application_id), Effect::User(effect)) =&gt; {
+            Effect::User {
+                application_id,
+                bytes,
+            } =&gt; {
                 <span class="self">self</span>.run_user_action(
-                    application_id,
+                    <span class="kw-2">*</span>application_id,
                     context.chain_id,
-                    UserAction::Effect(context, effect),
+                    UserAction::Effect(context, bytes),
                 )
                 .<span class="kw">await
             </span>}
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(ExecutionError::InvalidEffect),
         }
     }
 
     <span class="kw">pub async fn </span>query_application(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        application_id: ApplicationId,
         context: <span class="kw-2">&amp;</span>QueryContext,
         query: <span class="kw-2">&amp;</span>Query,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response, ExecutionError&gt; {
         <span class="macro">assert_eq!</span>(context.chain_id, <span class="self">self</span>.context().extra().chain_id());
-        <span class="kw">match </span>(application_id, query) {
-            (ApplicationId::System, Query::System(query)) =&gt; {
+        <span class="kw">match </span>query {
+            Query::System(query) =&gt; {
                 <span class="kw">let </span>response = <span class="self">self</span>.system.query_application(context, query).<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(Response::System(response))
             }
-            (ApplicationId::User(application_id), Query::User(query)) =&gt; {
+            Query::User {
+                application_id,
+                bytes,
+            } =&gt; {
                 <span class="comment">// Load the application.
                 </span><span class="kw">let </span>description = <span class="self">self
                     </span>.system
                     .registry
-                    .describe_application(application_id)
+                    .describe_application(<span class="kw-2">*</span>application_id)
                     .<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="kw">let </span>application = <span class="self">self
                     </span>.context()
@@ -738,7 +745,7 @@
                 </span><span class="kw">let </span><span class="kw-2">mut </span>session_manager = SessionManager::default();
                 <span class="kw">let </span><span class="kw-2">mut </span>results = Vec::new();
                 <span class="kw">let </span><span class="kw-2">mut </span>applications = <span class="macro">vec!</span>[ApplicationStatus {
-                    id: application_id,
+                    id: <span class="kw-2">*</span>application_id,
                     parameters: description.parameters,
                     signer: <span class="prelude-val">None</span>,
                 }];
@@ -752,14 +759,13 @@
                 );
                 <span class="comment">// Run the query.
                 </span><span class="kw">let </span>response = application
-                    .query_application(context, <span class="kw-2">&amp;</span>runtime, query)
+                    .query_application(context, <span class="kw-2">&amp;</span>runtime, bytes)
                     .<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="comment">// Check that applications were correctly stacked and unstacked.
                 </span><span class="macro">assert_eq!</span>(applications.len(), <span class="number">1</span>);
-                <span class="macro">assert_eq!</span>(applications[<span class="number">0</span>].id, application_id);
+                <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>applications[<span class="number">0</span>].id, application_id);
                 <span class="prelude-val">Ok</span>(Response::User(response))
             }
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(ExecutionError::InvalidQuery),
         }
     }
 

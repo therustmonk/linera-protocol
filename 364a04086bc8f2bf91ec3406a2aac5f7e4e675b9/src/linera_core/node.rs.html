@@ -717,14 +717,6 @@
 <span id="717">717</span>
 <span id="718">718</span>
 <span id="719">719</span>
-<span id="720">720</span>
-<span id="721">721</span>
-<span id="722">722</span>
-<span id="723">723</span>
-<span id="724">724</span>
-<span id="725">725</span>
-<span id="726">726</span>
-<span id="727">727</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -748,8 +740,8 @@
     ChainError, ChainManagerInfo,
 };
 <span class="kw">use </span>linera_execution::{
-    committee::ValidatorName, ApplicationId, BytecodeLocation, Query, Response,
-    UserApplicationDescription, UserApplicationId,
+    committee::ValidatorName, BytecodeLocation, Query, Response, UserApplicationDescription,
+    UserApplicationId,
 };
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;
@@ -825,12 +817,10 @@
     <span class="comment">// This error must be normalized during conversions.
     </span><span class="attribute">#[error(
         <span class="string">&quot;Cannot vote for block proposal of chain {chain_id:?} because a message \
-         from chain {origin:?} at height {height:?} (application {application_id:?}) \
-         has not been received yet&quot;
+         from chain {origin:?} at height {height:?} has not been received yet&quot;
     </span>)]
     </span>MissingCrossChainUpdate {
         chain_id: ChainId,
-        application_id: Box&lt;ApplicationId&gt;,
         origin: Origin,
         height: BlockHeight,
     },
@@ -927,12 +917,10 @@
         <span class="kw">match </span>error {
             ChainError::MissingCrossChainUpdate {
                 chain_id,
-                application_id,
                 origin,
                 height,
             } =&gt; <span class="self">Self</span>::MissingCrossChainUpdate {
                 chain_id,
-                application_id: Box::new(application_id),
                 origin,
                 height,
             },
@@ -1164,15 +1152,11 @@
     <span class="kw">pub async fn </span>query_application(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         chain_id: ChainId,
-        application_id: ApplicationId,
         query: <span class="kw-2">&amp;</span>Query,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response, NodeError&gt; {
         <span class="kw">let </span>node = <span class="self">self</span>.node.clone();
         <span class="kw">let </span><span class="kw-2">mut </span>node = node.lock().<span class="kw">await</span>;
-        <span class="kw">let </span>response = node
-            .state
-            .query_application(chain_id, application_id, query)
-            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>response = node.state.query_application(chain_id, query).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(response)
     }
 

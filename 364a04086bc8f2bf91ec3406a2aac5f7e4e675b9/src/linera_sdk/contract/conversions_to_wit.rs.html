@@ -318,13 +318,13 @@
         <span class="kw">let </span>subscribe = result
             .subscribe
             .into_iter()
-            .map(|(channel_id, chain_id)| (channel_id.into(), chain_id.<span class="number">0</span>.into()))
+            .map(|(subscription, chain_id)| (subscription.into(), chain_id.<span class="number">0</span>.into()))
             .collect();
 
         <span class="kw">let </span>unsubscribe = result
             .unsubscribe
             .into_iter()
-            .map(|(channel_id, chain_id)| (channel_id.into(), chain_id.<span class="number">0</span>.into()))
+            .map(|(subscription, chain_id)| (subscription.into(), chain_id.<span class="number">0</span>.into()))
             .collect();
 
         wit_types::ExecutionResult {
@@ -341,8 +341,8 @@
             Destination::Recipient(chain_id) =&gt; {
                 wit_types::Destination::Recipient(chain_id.<span class="number">0</span>.into())
             }
-            Destination::Subscribers(channel_id) =&gt; {
-                wit_types::Destination::Subscribers(channel_id.into())
+            Destination::Subscribers(subscription) =&gt; {
+                wit_types::Destination::Subscribers(subscription.into())
             }
         }
     }

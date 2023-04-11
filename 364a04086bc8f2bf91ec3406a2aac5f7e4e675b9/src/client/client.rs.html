@@ -1145,9 +1145,6 @@
 <span id="1145">1145</span>
 <span id="1146">1146</span>
 <span id="1147">1147</span>
-<span id="1148">1148</span>
-<span id="1149">1149</span>
-<span id="1150">1150</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1202,7 +1199,7 @@
     linera_execution::{
         committee::Epoch,
         system::{Recipient, SystemOperation},
-        ApplicationId, Operation,
+        Operation,
     },
     linera_rpc::{
         config::NetworkProtocol, grpc_network::GrpcMassClient, mass::MassClient, simple_network,
@@ -1335,15 +1332,12 @@
                 epoch: Epoch::from(<span class="number">0</span>),
                 chain_id: chain.chain_id,
                 incoming_messages: Vec::new(),
-                operations: <span class="macro">vec!</span>[(
-                    ApplicationId::System,
-                    Operation::System(SystemOperation::Transfer {
-                        owner: <span class="prelude-val">None</span>,
-                        recipient: Recipient::Account(Account::chain(next_recipient)),
-                        amount: Amount::from(<span class="number">1</span>),
-                        user_data: UserData::default(),
-                    }),
-                )],
+                operations: <span class="macro">vec!</span>[Operation::System(SystemOperation::Transfer {
+                    owner: <span class="prelude-val">None</span>,
+                    recipient: Recipient::Account(Account::chain(next_recipient)),
+                    amount: Amount::from(<span class="number">1</span>),
+                    user_data: UserData::default(),
+                })],
                 previous_block_hash: chain.block_hash,
                 height: chain.next_block_height,
                 authenticated_signer: <span class="prelude-val">None</span>,

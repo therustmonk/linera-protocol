@@ -505,6 +505,7 @@
 <span id="505">505</span>
 <span id="506">506</span>
 <span id="507">507</span>
+<span id="508">508</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -540,6 +541,7 @@
 
 <span class="doccomment">/// A Sha3-256 value.
 </span><span class="attribute">#[derive(Eq, PartialEq, Ord, PartialOrd, Clone, Copy, Hash)]
+#[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Default))]
 </span><span class="kw">pub struct </span>CryptoHash(HasherOutput);
 
 <span class="doccomment">/// A signature value.

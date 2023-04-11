@@ -1138,55 +1138,6 @@
 <span id="1138">1138</span>
 <span id="1139">1139</span>
 <span id="1140">1140</span>
-<span id="1141">1141</span>
-<span id="1142">1142</span>
-<span id="1143">1143</span>
-<span id="1144">1144</span>
-<span id="1145">1145</span>
-<span id="1146">1146</span>
-<span id="1147">1147</span>
-<span id="1148">1148</span>
-<span id="1149">1149</span>
-<span id="1150">1150</span>
-<span id="1151">1151</span>
-<span id="1152">1152</span>
-<span id="1153">1153</span>
-<span id="1154">1154</span>
-<span id="1155">1155</span>
-<span id="1156">1156</span>
-<span id="1157">1157</span>
-<span id="1158">1158</span>
-<span id="1159">1159</span>
-<span id="1160">1160</span>
-<span id="1161">1161</span>
-<span id="1162">1162</span>
-<span id="1163">1163</span>
-<span id="1164">1164</span>
-<span id="1165">1165</span>
-<span id="1166">1166</span>
-<span id="1167">1167</span>
-<span id="1168">1168</span>
-<span id="1169">1169</span>
-<span id="1170">1170</span>
-<span id="1171">1171</span>
-<span id="1172">1172</span>
-<span id="1173">1173</span>
-<span id="1174">1174</span>
-<span id="1175">1175</span>
-<span id="1176">1176</span>
-<span id="1177">1177</span>
-<span id="1178">1178</span>
-<span id="1179">1179</span>
-<span id="1180">1180</span>
-<span id="1181">1181</span>
-<span id="1182">1182</span>
-<span id="1183">1183</span>
-<span id="1184">1184</span>
-<span id="1185">1185</span>
-<span id="1186">1186</span>
-<span id="1187">1187</span>
-<span id="1188">1188</span>
-<span id="1189">1189</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1202,15 +1153,14 @@
 };
 <span class="kw">use </span>linera_chain::{
     data_types::{
-        Block, BlockAndRound, BlockProposal, Certificate, HashedValue, LiteCertificate, Medium,
-        Message, Origin, OutgoingEffect, Target, ValueKind,
+        Block, BlockAndRound, BlockProposal, Certificate, ChannelFullName, HashedValue,
+        LiteCertificate, Medium, Message, Origin, OutgoingEffect, Target, ValueKind,
     },
     ChainManagerOutcome, ChainStateView,
 };
 <span class="kw">use </span>linera_execution::{
     committee::{Committee, Epoch},
-    ApplicationId, BytecodeLocation, Query, Response, UserApplicationDescription,
-    UserApplicationId,
+    BytecodeLocation, Query, Response, UserApplicationDescription, UserApplicationId,
 };
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::{
@@ -1305,14 +1255,8 @@
 #[allow(clippy::large_enum_variant)]
 </span><span class="doccomment">/// Reason for the notification.
 </span><span class="kw">pub enum </span>Reason {
-    NewBlock {
-        height: BlockHeight,
-    },
-    NewMessage {
-        application_id: ApplicationId,
-        origin: Origin,
-        height: BlockHeight,
-    },
+    NewBlock { height: BlockHeight },
+    NewMessage { origin: Origin, height: BlockHeight },
 }
 
 <span class="doccomment">/// Error type for [`ValidatorWorker`].
@@ -1524,11 +1468,10 @@
     </span><span class="kw">pub async fn </span>query_application(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         chain_id: ChainId,
-        application_id: ApplicationId,
         query: <span class="kw-2">&amp;</span>Query,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response, WorkerError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>chain = <span class="self">self</span>.storage.load_active_chain(chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>response = chain.query_application(application_id, query).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>response = chain.query_application(query).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(response)
     }
 
@@ -1550,16 +1493,12 @@
     <span class="kw">async fn </span>create_cross_chain_request(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         confirmed_log: <span class="kw-2">&amp;mut </span>LogView&lt;Client::Context, CryptoHash&gt;,
-        height_map: Vec&lt;(ApplicationId, Medium, Vec&lt;BlockHeight&gt;)&gt;,
+        height_map: Vec&lt;(Medium, Vec&lt;BlockHeight&gt;)&gt;,
         sender: ChainId,
         recipient: ChainId,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;CrossChainRequest, WorkerError&gt; {
-        <span class="kw">let </span>heights = BTreeSet::from_iter(
-            height_map
-                .iter()
-                .flat_map(|(<span class="kw">_</span>, <span class="kw">_</span>, heights)| heights)
-                .copied(),
-        );
+        <span class="kw">let </span>heights =
+            BTreeSet::from_iter(height_map.iter().flat_map(|(<span class="kw">_</span>, heights)| heights).copied());
         <span class="kw">let </span><span class="kw-2">mut </span>keys = Vec::new();
         <span class="kw">for </span>height <span class="kw">in </span>heights {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(key) = confirmed_log.get(u64::from(height) <span class="kw">as </span>usize).<span class="kw">await</span><span class="question-mark">? </span>{
@@ -1581,19 +1520,13 @@
         chain: <span class="kw-2">&amp;mut </span>ChainStateView&lt;Client::Context&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;NetworkActions, WorkerError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>heights_by_recipient: BTreeMap&lt;<span class="kw">_</span>, BTreeMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt; = Default::default();
-        <span class="kw">for </span>application_id <span class="kw">in </span>chain.communication_states.indices().<span class="kw">await</span><span class="question-mark">? </span>{
-            <span class="kw">let </span>state = chain
-                .communication_states
-                .load_entry(<span class="kw-2">&amp;</span>application_id)
-                .<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="kw">for </span>target <span class="kw">in </span>state.outboxes.indices().<span class="kw">await</span><span class="question-mark">? </span>{
-                <span class="kw">let </span>outbox = state.outboxes.try_load_entry(<span class="kw-2">&amp;</span>target).<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>heights = outbox.block_heights().<span class="kw">await</span><span class="question-mark">?</span>;
-                heights_by_recipient
-                    .entry(target.recipient)
-                    .or_default()
-                    .insert((application_id, target.medium), heights);
-            }
+        <span class="kw">for </span>target <span class="kw">in </span>chain.outboxes.indices().<span class="kw">await</span><span class="question-mark">? </span>{
+            <span class="kw">let </span>outbox = chain.outboxes.load_entry(<span class="kw-2">&amp;</span>target).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>heights = outbox.block_heights().<span class="kw">await</span><span class="question-mark">?</span>;
+            heights_by_recipient
+                .entry(target.recipient)
+                .or_default()
+                .insert(target.medium, heights);
         }
         <span class="kw">let </span><span class="kw-2">mut </span>actions = NetworkActions::default();
         <span class="kw">let </span>chain_id = chain.chain_id();
@@ -1601,10 +1534,7 @@
             <span class="kw">let </span>request = <span class="self">self
                 </span>.create_cross_chain_request(
                     <span class="kw-2">&amp;mut </span>chain.confirmed_log,
-                    height_map
-                        .into_iter()
-                        .map(|((app_id, medium), heights)| (app_id, medium, heights))
-                        .collect(),
+                    height_map.into_iter().collect(),
                     chain_id,
                     recipient,
                 )
@@ -1811,19 +1741,15 @@
 
     <span class="kw">async fn </span>process_cross_chain_update(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        application_id: ApplicationId,
         origin: Origin,
         recipient: ChainId,
         certificates: Vec&lt;Certificate&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;NetworkActions, WorkerError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>chain = <span class="self">self</span>.storage.load_chain(recipient).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="comment">// Only process certificates with relevant heights and epochs.
-        </span><span class="kw">let </span>next_height_to_receive = chain
-            .next_block_height_to_receive(application_id, origin.clone())
-            .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>last_anticipated_block_height = chain
-            .last_anticipated_block_height(application_id, origin.clone())
-            .<span class="kw">await</span><span class="question-mark">?</span>;
+        </span><span class="kw">let </span>next_height_to_receive = chain.next_block_height_to_receive(origin.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>last_anticipated_block_height =
+            chain.last_anticipated_block_height(origin.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>helper = CrossChainUpdateHelper {
             nickname: <span class="kw-2">&amp;</span><span class="self">self</span>.nickname,
             allow_messages_from_deprecated_epochs: <span class="self">self</span>.allow_messages_from_deprecated_epochs,
@@ -1831,7 +1757,6 @@
             committees: chain.execution_state.system.committees.get(),
         };
         <span class="kw">let </span>certificates = helper.select_certificates(
-            application_id,
             <span class="kw-2">&amp;</span>origin,
             recipient,
             next_height_to_receive,
@@ -1845,7 +1770,6 @@
             <span class="comment">// Update the staged chain state with the received block.
             </span>chain
                 .receive_block(
-                    application_id,
                     <span class="kw-2">&amp;</span>origin,
                     block.height,
                     block.timestamp,
@@ -1860,7 +1784,6 @@
         </span><span class="kw">let </span>cross_chain_requests =
             <span class="kw">match </span>last_updated_height.or_else(|| next_height_to_receive.try_sub_one().ok()) {
                 <span class="prelude-val">Some</span>(height) =&gt; <span class="macro">vec!</span>[CrossChainRequest::ConfirmUpdatedRecipient {
-                    application_id,
                     origin: origin.clone(),
                     recipient,
                     height,
@@ -1874,7 +1797,7 @@
                 // now. Accordingly, do not send a confirmation, so that the
                 // cross-chain update is retried later.
                 </span><span class="macro">tracing::warn!</span>(
-                    <span class="string">&quot;[{}] Refusing to deliver messages to {recipient:?} from {application_id:?}::{origin:?} \
+                    <span class="string">&quot;[{}] Refusing to deliver messages to {recipient:?} from {origin:?} \
                      at height {height} because the recipient is still inactive&quot;</span>,
                     <span class="self">self</span>.nickname
                 );
@@ -1887,11 +1810,7 @@
                 cross_chain_requests,
                 notifications: <span class="macro">vec!</span>[Notification {
                     chain_id: recipient,
-                    reason: Reason::NewMessage {
-                        application_id,
-                        origin,
-                        height,
-                    },
+                    reason: Reason::NewMessage { origin, height },
                 }],
             })
         } <span class="kw">else </span>{
@@ -1967,21 +1886,20 @@
             certificate.value.effects().get(effect_id.index <span class="kw">as </span>usize).cloned()
             <span class="kw">else </span>{ <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) };
 
-        <span class="kw">let </span>application_id = outgoing_effect.application_id;
+        <span class="kw">let </span>application_id = outgoing_effect.effect.application_id();
         <span class="kw">let </span>origin = Origin {
             sender: effect_id.chain_id,
             medium: <span class="kw">match </span>outgoing_effect.destination {
                 Destination::Recipient(<span class="kw">_</span>) =&gt; Medium::Direct,
-                Destination::Subscribers(channel) =&gt; Medium::Channel(channel),
+                Destination::Subscribers(name) =&gt; Medium::Channel(ChannelFullName {
+                    application_id,
+                    name,
+                }),
             },
         };
 
         <span class="kw">let </span><span class="kw-2">mut </span>chain = <span class="self">self</span>.storage.load_active_chain(chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>communication_state = chain
-            .communication_states
-            .load_entry_mut(<span class="kw-2">&amp;</span>application_id)
-            .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>inbox = communication_state.inboxes.load_entry_mut(<span class="kw-2">&amp;</span>origin).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>inbox = chain.inboxes.load_entry_mut(<span class="kw-2">&amp;</span>origin).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>certificate_hash = certificate.value.hash();
         <span class="kw">let </span><span class="prelude-val">Some</span>(event) =
@@ -1999,11 +1917,7 @@
 
         <span class="macro">assert_eq!</span>(event.effect, outgoing_effect.effect);
 
-        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Message {
-            application_id,
-            origin,
-            event,
-        }))
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Message { origin, event }))
     }
 }
 
@@ -2190,23 +2104,17 @@
         }
         <span class="kw">if </span>query.request_pending_messages {
             <span class="kw">let </span><span class="kw-2">mut </span>messages = Vec::new();
-            <span class="kw">for </span>application_id <span class="kw">in </span>chain.communication_states.indices().<span class="kw">await</span><span class="question-mark">? </span>{
-                <span class="kw">let </span>state = chain
-                    .communication_states
-                    .load_entry(<span class="kw-2">&amp;</span>application_id)
-                    .<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">for </span>origin <span class="kw">in </span>state.inboxes.indices().<span class="kw">await</span><span class="question-mark">? </span>{
-                    <span class="kw">let </span>inbox = state.inboxes.try_load_entry(<span class="kw-2">&amp;</span>origin).<span class="kw">await</span><span class="question-mark">?</span>;
-                    <span class="kw">let </span>count = inbox.added_events.count();
-                    <span class="kw">for </span>event <span class="kw">in </span>inbox.added_events.read_front(count).<span class="kw">await</span><span class="question-mark">? </span>{
-                        messages.push(Message {
-                            application_id,
-                            origin: origin.clone(),
-                            event: event.clone(),
-                        });
-                    }
+            <span class="kw">for </span>origin <span class="kw">in </span>chain.inboxes.indices().<span class="kw">await</span><span class="question-mark">? </span>{
+                <span class="kw">let </span>inbox = chain.inboxes.load_entry(<span class="kw-2">&amp;</span>origin).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>count = inbox.added_events.count();
+                <span class="kw">for </span>event <span class="kw">in </span>inbox.added_events.read_front(count).<span class="kw">await</span><span class="question-mark">? </span>{
+                    messages.push(Message {
+                        origin: origin.clone(),
+                        event: event.clone(),
+                    });
                 }
             }
+
             info.requested_pending_messages = messages;
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(range) = query.request_sent_certificates_in_range {
@@ -2252,7 +2160,7 @@
                 certificates,
             } =&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>actions = NetworkActions::default();
-                <span class="kw">for </span>(application_id, medium, heights) <span class="kw">in </span>height_map {
+                <span class="kw">for </span>(medium, heights) <span class="kw">in </span>height_map {
                     <span class="kw">let </span>origin = Origin { sender, medium };
                     <span class="kw">let </span>app_certificates = certificates
                         .iter()
@@ -2261,7 +2169,6 @@
                         .collect();
                     actions.merge(
                         <span class="self">self</span>.process_cross_chain_update(
-                            application_id,
                             origin.clone(),
                             recipient,
                             app_certificates,
@@ -2272,17 +2179,13 @@
                 <span class="prelude-val">Ok</span>(actions)
             }
             CrossChainRequest::ConfirmUpdatedRecipient {
-                application_id,
                 origin: Origin { sender, medium },
                 recipient,
                 height,
             } =&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>chain = <span class="self">self</span>.storage.load_chain(sender).<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="kw">let </span>target = Target { recipient, medium };
-                <span class="kw">if </span>chain
-                    .mark_messages_as_received(application_id, target, height)
-                    .<span class="kw">await</span><span class="question-mark">?
-                </span>{
+                <span class="kw">if </span>chain.mark_messages_as_received(target, height).<span class="kw">await</span><span class="question-mark">? </span>{
                     chain.save().<span class="kw">await</span><span class="question-mark">?</span>;
                 }
                 <span class="prelude-val">Ok</span>(NetworkActions::default())
@@ -2310,7 +2213,6 @@
     /// correctly.
     </span><span class="kw">fn </span>select_certificates(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        application_id: ApplicationId,
         origin: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Origin,
         recipient: ChainId,
         next_height_to_receive: BlockHeight,
@@ -2353,7 +2255,7 @@
         <span class="kw">if </span>skipped_len &gt; <span class="number">0 </span>{
             <span class="kw">let </span>sample_block = certificates[skipped_len - <span class="number">1</span>].value.block();
             <span class="macro">tracing::warn!</span>(
-                <span class="string">&quot;[{}] Ignoring repeated messages to {recipient:?} from {application_id:?}::{origin:?} at height {}&quot;</span>,
+                <span class="string">&quot;[{}] Ignoring repeated messages to {recipient:?} from {origin:?} at height {}&quot;</span>,
                 <span class="self">self</span>.nickname,
                 sample_block.height,
             );
@@ -2361,7 +2263,7 @@
         <span class="kw">if </span>skipped_len &lt; certificates.len() &amp;&amp; trusted_len &lt; certificates.len() {
             <span class="kw">let </span>sample_block = certificates[trusted_len].value.block();
             <span class="macro">tracing::warn!</span>(
-                <span class="string">&quot;[{}] Refusing messages to {recipient:?} from {application_id:?}::{origin:?} at height {} \
+                <span class="string">&quot;[{}] Refusing messages to {recipient:?} from {origin:?} at height {} \
                  because the epoch {:?} is not trusted any more&quot;</span>,
                 <span class="self">self</span>.nickname,
                 sample_block.height,

@@ -881,15 +881,21 @@
 <span id="881">881</span>
 <span id="882">882</span>
 <span id="883">883</span>
+<span id="884">884</span>
+<span id="885">885</span>
+<span id="886">886</span>
+<span id="887">887</span>
+<span id="888">888</span>
+<span id="889">889</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use crate</span>::{
     committee::{Committee, Epoch},
-    ApplicationRegistryView, Bytecode, BytecodeLocation, ChainOwnership, ChannelId, ChannelName,
-    Destination, EffectContext, OperationContext, QueryContext, RawExecutionResult,
-    UserApplicationDescription, UserApplicationId,
+    ApplicationRegistryView, Bytecode, BytecodeLocation, ChainOwnership, ChannelName,
+    ChannelSubscription, Destination, EffectContext, OperationContext, QueryContext,
+    RawExecutionResult, UserApplicationDescription, UserApplicationId,
 };
 <span class="kw">use </span>async_graphql::Enum;
 <span class="kw">use </span>custom_debug_derive::Debug;
@@ -928,7 +934,7 @@
     <span class="doccomment">/// The admin of the chain.
     </span><span class="kw">pub </span>admin_id: RegisterView&lt;C, <span class="prelude-ty">Option</span>&lt;ChainId&gt;&gt;,
     <span class="doccomment">/// Track the channels that we have subscribed to.
-    </span><span class="kw">pub </span>subscriptions: SetView&lt;C, ChannelId&gt;,
+    </span><span class="kw">pub </span>subscriptions: SetView&lt;C, ChannelSubscription&gt;,
     <span class="doccomment">/// The committees that we trust, indexed by epoch number.
     /// Not using a `MapView` because the set active of committees is supposed to be
     /// small. Plus, currently, we would create the `BTreeMap` anyway in various places
@@ -953,7 +959,7 @@
     <span class="kw">pub </span>description: <span class="prelude-ty">Option</span>&lt;ChainDescription&gt;,
     <span class="kw">pub </span>epoch: <span class="prelude-ty">Option</span>&lt;Epoch&gt;,
     <span class="kw">pub </span>admin_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
-    <span class="kw">pub </span>subscriptions: BTreeSet&lt;ChannelId&gt;,
+    <span class="kw">pub </span>subscriptions: BTreeSet&lt;ChannelSubscription&gt;,
     <span class="kw">pub </span>committees: BTreeMap&lt;Epoch, Committee&gt;,
     <span class="kw">pub </span>ownership: ChainOwnership,
     <span class="kw">pub </span>balance: Balance,
@@ -1067,9 +1073,15 @@
         committees: BTreeMap&lt;Epoch, Committee&gt;,
     },
     <span class="doccomment">/// Subscribes to a channel.
-    </span>Subscribe { id: ChainId, channel_id: ChannelId },
+    </span>Subscribe {
+        id: ChainId,
+        subscription: ChannelSubscription,
+    },
     <span class="doccomment">/// Unsubscribes to a channel.
-    </span>Unsubscribe { id: ChainId, channel_id: ChannelId },
+    </span>Unsubscribe {
+        id: ChainId,
+        subscription: ChannelSubscription,
+    },
     <span class="doccomment">/// Notifies that a new application bytecode was published.
     </span>BytecodePublished { operation_index: usize },
     <span class="doccomment">/// Shares the locations of published bytecodes.
@@ -1354,7 +1366,7 @@
                         epoch: <span class="kw-2">*</span>epoch,
                     },
                 );
-                <span class="kw">let </span>channel_id = ChannelId {
+                <span class="kw">let </span>subscription = ChannelSubscription {
                     chain_id: <span class="kw-2">*</span>admin_id,
                     name: SystemChannel::Admin.name(),
                 };
@@ -1363,7 +1375,7 @@
                     <span class="bool-val">false</span>,
                     SystemEffect::Subscribe {
                         id: <span class="kw-2">*</span>id,
-                        channel_id,
+                        subscription,
                     },
                 );
                 result.effects.extend([e1, e2]);
@@ -1379,13 +1391,13 @@
                 <span class="self">self</span>.ownership.set(ChainOwnership::default());
                 <span class="comment">// Unsubscribe to all channels.
                 </span><span class="self">self</span>.subscriptions
-                    .for_each_index(|channel_id| {
+                    .for_each_index(|subscription| {
                         result.effects.push((
-                            Destination::Recipient(channel_id.chain_id),
+                            Destination::Recipient(subscription.chain_id),
                             <span class="bool-val">false</span>,
                             SystemEffect::Unsubscribe {
                                 id: context.chain_id,
-                                channel_id,
+                                subscription,
                             },
                         ));
                         <span class="prelude-val">Ok</span>(())
@@ -1525,40 +1537,40 @@
                         SystemExecutionError::InvalidAdminSubscription(context.chain_id, <span class="kw-2">*</span>channel)
                     );
                 }
-                <span class="kw">let </span>channel_id = ChannelId {
+                <span class="kw">let </span>subscription = ChannelSubscription {
                     chain_id: <span class="kw-2">*</span>chain_id,
                     name: channel.name(),
                 };
                 <span class="macro">ensure!</span>(
-                    !<span class="self">self</span>.subscriptions.contains(<span class="kw-2">&amp;</span>channel_id).<span class="kw">await</span><span class="question-mark">?</span>,
+                    !<span class="self">self</span>.subscriptions.contains(<span class="kw-2">&amp;</span>subscription).<span class="kw">await</span><span class="question-mark">?</span>,
                     SystemExecutionError::NoSuchChannel(context.chain_id, <span class="kw-2">*</span>channel)
                 );
-                <span class="self">self</span>.subscriptions.insert(<span class="kw-2">&amp;</span>channel_id)<span class="question-mark">?</span>;
+                <span class="self">self</span>.subscriptions.insert(<span class="kw-2">&amp;</span>subscription)<span class="question-mark">?</span>;
                 result.effects.push((
                     Destination::Recipient(<span class="kw-2">*</span>chain_id),
                     <span class="bool-val">false</span>,
                     SystemEffect::Subscribe {
                         id: context.chain_id,
-                        channel_id,
+                        subscription,
                     },
                 ));
             }
             Unsubscribe { chain_id, channel } =&gt; {
-                <span class="kw">let </span>channel_id = ChannelId {
+                <span class="kw">let </span>subscription = ChannelSubscription {
                     chain_id: <span class="kw-2">*</span>chain_id,
                     name: channel.name(),
                 };
                 <span class="macro">ensure!</span>(
-                    <span class="self">self</span>.subscriptions.contains(<span class="kw-2">&amp;</span>channel_id).<span class="kw">await</span><span class="question-mark">?</span>,
+                    <span class="self">self</span>.subscriptions.contains(<span class="kw-2">&amp;</span>subscription).<span class="kw">await</span><span class="question-mark">?</span>,
                     SystemExecutionError::InvalidUnsubscription(context.chain_id, <span class="kw-2">*</span>channel)
                 );
-                <span class="self">self</span>.subscriptions.remove(<span class="kw-2">&amp;</span>channel_id)<span class="question-mark">?</span>;
+                <span class="self">self</span>.subscriptions.remove(<span class="kw-2">&amp;</span>subscription)<span class="question-mark">?</span>;
                 result.effects.push((
                     Destination::Recipient(<span class="kw-2">*</span>chain_id),
                     <span class="bool-val">false</span>,
                     SystemEffect::Unsubscribe {
                         id: context.chain_id,
-                        channel_id,
+                        subscription,
                     },
                 ));
             }
@@ -1662,7 +1674,7 @@
                 <span class="self">self</span>.epoch.set(<span class="prelude-val">Some</span>(<span class="kw-2">*</span>epoch));
                 <span class="self">self</span>.committees.set(committees.clone());
             }
-            Subscribe { id, channel_id } <span class="kw">if </span>channel_id.chain_id == context.chain_id =&gt; {
+            Subscribe { id, subscription } <span class="kw">if </span>subscription.chain_id == context.chain_id =&gt; {
                 <span class="comment">// Notify the subscriber about this block, so that it is included in the
                 // receive_log of the subscriber and correctly synchronized.
                 </span>result.effects.push((
@@ -1670,15 +1682,15 @@
                     <span class="bool-val">false</span>,
                     SystemEffect::Notify { id: <span class="kw-2">*</span>id },
                 ));
-                result.subscribe.push((channel_id.name.clone(), <span class="kw-2">*</span>id));
+                result.subscribe.push((subscription.name.clone(), <span class="kw-2">*</span>id));
             }
-            Unsubscribe { id, channel_id } <span class="kw">if </span>channel_id.chain_id == context.chain_id =&gt; {
+            Unsubscribe { id, subscription } <span class="kw">if </span>subscription.chain_id == context.chain_id =&gt; {
                 result.effects.push((
                     Destination::Recipient(<span class="kw-2">*</span>id),
                     <span class="bool-val">false</span>,
                     SystemEffect::Notify { id: <span class="kw-2">*</span>id },
                 ));
-                result.unsubscribe.push((channel_id.name.clone(), <span class="kw-2">*</span>id));
+                result.unsubscribe.push((subscription.name.clone(), <span class="kw-2">*</span>id));
             }
             BytecodePublished { operation_index } =&gt; {
                 <span class="kw">let </span>bytecode_id = BytecodeId(context.effect_id);
@@ -1743,7 +1755,7 @@
         <span class="self">self</span>.committees.set(committees);
         <span class="self">self</span>.admin_id.set(<span class="prelude-val">Some</span>(admin_id));
         <span class="self">self</span>.subscriptions
-            .insert(<span class="kw-2">&amp;</span>ChannelId {
+            .insert(<span class="kw-2">&amp;</span>ChannelSubscription {
                 chain_id: admin_id,
                 name: SystemChannel::Admin.name(),
             })

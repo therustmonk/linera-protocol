@@ -1577,6 +1577,19 @@
 <span id="1577">1577</span>
 <span id="1578">1578</span>
 <span id="1579">1579</span>
+<span id="1580">1580</span>
+<span id="1581">1581</span>
+<span id="1582">1582</span>
+<span id="1583">1583</span>
+<span id="1584">1584</span>
+<span id="1585">1585</span>
+<span id="1586">1586</span>
+<span id="1587">1587</span>
+<span id="1588">1588</span>
+<span id="1589">1589</span>
+<span id="1590">1590</span>
+<span id="1591">1591</span>
+<span id="1592">1592</span>
 </pre><pre class="rust"><code><span class="doccomment">/// A request for client to subscribe to notifications for a given `ChainId`
 </span><span class="attribute">#[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>SubscriptionRequest {
@@ -1615,10 +1628,8 @@
 <span class="attribute">#[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>NewMessage {
     <span class="attribute">#[prost(message, optional, tag = <span class="string">&quot;1&quot;</span>)]
-    </span><span class="kw">pub </span>application_id: ::core::option::Option&lt;ApplicationId&gt;,
-    <span class="attribute">#[prost(message, optional, tag = <span class="string">&quot;2&quot;</span>)]
     </span><span class="kw">pub </span>origin: ::core::option::Option&lt;Origin&gt;,
-    <span class="attribute">#[prost(message, optional, tag = <span class="string">&quot;3&quot;</span>)]
+    <span class="attribute">#[prost(message, optional, tag = <span class="string">&quot;2&quot;</span>)]
     </span><span class="kw">pub </span>height: ::core::option::Option&lt;BlockHeight&gt;,
 }
 <span class="doccomment">/// A wrapper around ChainInfoResponse which contains a serialized error variant
@@ -1672,22 +1683,18 @@
 </span><span class="attribute">#[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>UpdateRecipientEntry {
     <span class="attribute">#[prost(message, optional, tag = <span class="string">&quot;1&quot;</span>)]
-    </span><span class="kw">pub </span>application_id: ::core::option::Option&lt;ApplicationId&gt;,
-    <span class="attribute">#[prost(message, optional, tag = <span class="string">&quot;2&quot;</span>)]
     </span><span class="kw">pub </span>medium: ::core::option::Option&lt;Medium&gt;,
-    <span class="attribute">#[prost(message, repeated, tag = <span class="string">&quot;3&quot;</span>)]
+    <span class="attribute">#[prost(message, repeated, tag = <span class="string">&quot;2&quot;</span>)]
     </span><span class="kw">pub </span>heights: ::prost::alloc::vec::Vec&lt;BlockHeight&gt;,
 }
 <span class="doccomment">/// Acknowledge the height of the highest confirmed block communicated with `UpdateRecipient`.
 </span><span class="attribute">#[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>ConfirmUpdatedRecipient {
     <span class="attribute">#[prost(message, optional, tag = <span class="string">&quot;1&quot;</span>)]
-    </span><span class="kw">pub </span>application_id: ::core::option::Option&lt;ApplicationId&gt;,
-    <span class="attribute">#[prost(message, optional, tag = <span class="string">&quot;2&quot;</span>)]
     </span><span class="kw">pub </span>origin: ::core::option::Option&lt;Origin&gt;,
-    <span class="attribute">#[prost(message, optional, tag = <span class="string">&quot;3&quot;</span>)]
+    <span class="attribute">#[prost(message, optional, tag = <span class="string">&quot;2&quot;</span>)]
     </span><span class="kw">pub </span>recipient: ::core::option::Option&lt;ChainId&gt;,
-    <span class="attribute">#[prost(message, optional, tag = <span class="string">&quot;4&quot;</span>)]
+    <span class="attribute">#[prost(message, optional, tag = <span class="string">&quot;3&quot;</span>)]
     </span><span class="kw">pub </span>height: ::core::option::Option&lt;BlockHeight&gt;,
 }
 <span class="doccomment">/// Message to obtain information on a chain.
@@ -1731,8 +1738,27 @@
 <span class="doccomment">/// The origin of a message coming from a particular chain. Used to identify each inbox.
 </span><span class="attribute">#[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>Medium {
-    <span class="attribute">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, optional, tag = <span class="string">&quot;1&quot;</span>)]
-    </span><span class="kw">pub </span>channel: ::core::option::Option&lt;::prost::alloc::vec::Vec&lt;u8&gt;&gt;,
+    <span class="attribute">#[prost(oneof = <span class="string">&quot;medium::Inner&quot;</span>, tags = <span class="string">&quot;1, 2&quot;</span>)]
+    </span><span class="kw">pub </span>inner: ::core::option::Option&lt;medium::Inner&gt;,
+}
+<span class="doccomment">/// Nested message and enum types in `Medium`.
+</span><span class="kw">pub mod </span>medium {
+    <span class="attribute">#[derive(Clone, PartialEq, ::prost::Oneof)]
+    </span><span class="kw">pub enum </span>Inner {
+        <span class="doccomment">/// A direct message.
+        </span><span class="attribute">#[prost(message, tag = <span class="string">&quot;1&quot;</span>)]
+        </span>Direct(()),
+        <span class="doccomment">/// A channel message.
+        </span><span class="attribute">#[prost(message, tag = <span class="string">&quot;2&quot;</span>)]
+        </span>Channel(<span class="kw">super</span>::ChannelFullName),
+    }
+}
+<span class="attribute">#[derive(Clone, PartialEq, ::prost::Message)]
+</span><span class="kw">pub struct </span>ChannelFullName {
+    <span class="attribute">#[prost(message, optional, tag = <span class="string">&quot;1&quot;</span>)]
+    </span><span class="kw">pub </span>application_id: ::core::option::Option&lt;ApplicationId&gt;,
+    <span class="attribute">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;2&quot;</span>)]
+    </span><span class="kw">pub </span>name: ::prost::alloc::vec::Vec&lt;u8&gt;,
 }
 <span class="doccomment">/// An authenticated proposal for a new block.
 </span><span class="attribute">#[derive(Clone, PartialEq, ::prost::Message)]

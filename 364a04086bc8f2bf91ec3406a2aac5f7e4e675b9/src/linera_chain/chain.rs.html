@@ -524,67 +524,13 @@
 <span id="524">524</span>
 <span id="525">525</span>
 <span id="526">526</span>
-<span id="527">527</span>
-<span id="528">528</span>
-<span id="529">529</span>
-<span id="530">530</span>
-<span id="531">531</span>
-<span id="532">532</span>
-<span id="533">533</span>
-<span id="534">534</span>
-<span id="535">535</span>
-<span id="536">536</span>
-<span id="537">537</span>
-<span id="538">538</span>
-<span id="539">539</span>
-<span id="540">540</span>
-<span id="541">541</span>
-<span id="542">542</span>
-<span id="543">543</span>
-<span id="544">544</span>
-<span id="545">545</span>
-<span id="546">546</span>
-<span id="547">547</span>
-<span id="548">548</span>
-<span id="549">549</span>
-<span id="550">550</span>
-<span id="551">551</span>
-<span id="552">552</span>
-<span id="553">553</span>
-<span id="554">554</span>
-<span id="555">555</span>
-<span id="556">556</span>
-<span id="557">557</span>
-<span id="558">558</span>
-<span id="559">559</span>
-<span id="560">560</span>
-<span id="561">561</span>
-<span id="562">562</span>
-<span id="563">563</span>
-<span id="564">564</span>
-<span id="565">565</span>
-<span id="566">566</span>
-<span id="567">567</span>
-<span id="568">568</span>
-<span id="569">569</span>
-<span id="570">570</span>
-<span id="571">571</span>
-<span id="572">572</span>
-<span id="573">573</span>
-<span id="574">574</span>
-<span id="575">575</span>
-<span id="576">576</span>
-<span id="577">577</span>
-<span id="578">578</span>
-<span id="579">579</span>
-<span id="580">580</span>
-<span id="581">581</span>
-<span id="582">582</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use crate</span>::{
-    data_types::{Block, ChainAndHeight, Event, Medium, Origin, OutgoingEffect, Target},
+    data_types::{
+        Block, ChainAndHeight, ChannelFullName, Event, Medium, Origin, OutgoingEffect, Target,
+    },
     inbox::{InboxError, InboxStateView},
     outbox::OutboxStateView,
     ChainError, ChainManager,
@@ -594,7 +540,7 @@
     crypto::CryptoHash,
     data_types::{BlockHeight, Timestamp},
     ensure,
-    identifiers::{ChainId, ChannelName, Destination, EffectId},
+    identifiers::{ChainId, Destination, EffectId},
 };
 <span class="kw">use </span>linera_execution::{
     system::SystemEffect, ApplicationId, Effect, EffectContext, ExecutionResult,
@@ -610,7 +556,7 @@
     views::{CryptoHashView, GraphQLView, RootView, View, ViewError},
 };
 <span class="kw">use </span>serde::{Deserialize, Serialize};
-<span class="kw">use </span>std::collections::{BTreeMap, HashSet};
+<span class="kw">use </span>std::collections::HashSet;
 
 <span class="doccomment">/// A view accessing the state of a chain.
 </span><span class="attribute">#[derive(Debug, RootView, GraphQLView)]
@@ -632,8 +578,12 @@
     <span class="doccomment">/// Sender chain and height of all certified blocks known as a receiver (local ordering).
     </span><span class="kw">pub </span>received_log: LogView&lt;C, ChainAndHeight&gt;,
 
-    <span class="doccomment">/// Communication state of applications.
-    </span><span class="kw">pub </span>communication_states: CollectionView&lt;C, ApplicationId, CommunicationStateView&lt;C&gt;&gt;,
+    <span class="doccomment">/// Mailboxes used to receive messages indexed by their origin.
+    </span><span class="kw">pub </span>inboxes: CollectionView&lt;C, Origin, InboxStateView&lt;C&gt;&gt;,
+    <span class="doccomment">/// Mailboxes used to send messages, indexed by their target.
+    </span><span class="kw">pub </span>outboxes: CollectionView&lt;C, Target, OutboxStateView&lt;C&gt;&gt;,
+    <span class="doccomment">/// Channels able to multicast messages to subscribers.
+    </span><span class="kw">pub </span>channels: CollectionView&lt;C, ChannelFullName, ChannelStateView&lt;C&gt;&gt;,
 }
 
 <span class="doccomment">/// Block-chaining state.
@@ -643,17 +593,6 @@
     </span><span class="kw">pub </span>block_hash: <span class="prelude-ty">Option</span>&lt;CryptoHash&gt;,
     <span class="doccomment">/// Sequence number tracking blocks.
     </span><span class="kw">pub </span>next_block_height: BlockHeight,
-}
-
-<span class="doccomment">/// A view accessing the communication state of an application.
-</span><span class="attribute">#[derive(Debug, View)]
-</span><span class="kw">pub struct </span>CommunicationStateView&lt;C&gt; {
-    <span class="doccomment">/// Mailboxes used to receive messages indexed by their origin.
-    </span><span class="kw">pub </span>inboxes: CollectionView&lt;C, Origin, InboxStateView&lt;C&gt;&gt;,
-    <span class="doccomment">/// Mailboxes used to send messages, indexed by their target.
-    </span><span class="kw">pub </span>outboxes: CollectionView&lt;C, Target, OutboxStateView&lt;C&gt;&gt;,
-    <span class="doccomment">/// Channels able to multicast messages to subscribers.
-    </span><span class="kw">pub </span>channels: CollectionView&lt;C, ChannelName, ChannelStateView&lt;C&gt;&gt;,
 }
 
 <span class="doccomment">/// The state of a channel followed by subscribers.
@@ -675,17 +614,13 @@
         <span class="self">self</span>.context().extra().chain_id()
     }
 
-    <span class="kw">pub async fn </span>query_application(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        application_id: ApplicationId,
-        query: <span class="kw-2">&amp;</span>Query,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Response, ChainError&gt; {
+    <span class="kw">pub async fn </span>query_application(<span class="kw-2">&amp;mut </span><span class="self">self</span>, query: <span class="kw-2">&amp;</span>Query) -&gt; <span class="prelude-ty">Result</span>&lt;Response, ChainError&gt; {
         <span class="kw">let </span>context = QueryContext {
             chain_id: <span class="self">self</span>.chain_id(),
         };
         <span class="kw">let </span>response = <span class="self">self
             </span>.execution_state
-            .query_application(application_id, <span class="kw-2">&amp;</span>context, query)
+            .query_application(<span class="kw-2">&amp;</span>context, query)
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(response)
     }
@@ -704,18 +639,13 @@
 
     <span class="kw">pub async fn </span>mark_messages_as_received(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        application_id: ApplicationId,
         target: Target,
         height: BlockHeight,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;bool, ChainError&gt; {
-        <span class="kw">let </span>communication_state = <span class="self">self
-            </span>.communication_states
-            .load_entry_mut(<span class="kw-2">&amp;</span>application_id)
-            .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>outbox = communication_state.outboxes.load_entry_mut(<span class="kw-2">&amp;</span>target).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>outbox = <span class="self">self</span>.outboxes.load_entry_mut(<span class="kw-2">&amp;</span>target).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>updated = outbox.mark_messages_as_received(height).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">if </span>updated &amp;&amp; outbox.queue.count() == <span class="number">0 </span>{
-            communication_state.outboxes.remove_entry(<span class="kw-2">&amp;</span>target)<span class="question-mark">?</span>;
+            <span class="self">self</span>.outboxes.remove_entry(<span class="kw-2">&amp;</span>target)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(updated)
     }
@@ -738,48 +668,34 @@
     /// have been properly received by now.
     </span><span class="kw">pub async fn </span>validate_incoming_messages(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt; {
         <span class="kw">let </span>chain_id = <span class="self">self</span>.chain_id();
-        <span class="kw">for </span>id <span class="kw">in </span><span class="self">self</span>.communication_states.indices().<span class="kw">await</span><span class="question-mark">? </span>{
-            <span class="kw">let </span>state = <span class="self">self</span>.communication_states.load_entry(<span class="kw-2">&amp;</span>id).<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="kw">for </span>origin <span class="kw">in </span>state.inboxes.indices().<span class="kw">await</span><span class="question-mark">? </span>{
-                <span class="kw">let </span>inbox = state.inboxes.try_load_entry(<span class="kw-2">&amp;</span>origin).<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>event = inbox.removed_events.front().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="macro">ensure!</span>(
-                    event.is_none(),
-                    ChainError::MissingCrossChainUpdate {
-                        chain_id,
-                        application_id: id,
-                        origin,
-                        height: event.unwrap().height,
-                    }
-                );
-            }
+        <span class="kw">for </span>origin <span class="kw">in </span><span class="self">self</span>.inboxes.indices().<span class="kw">await</span><span class="question-mark">? </span>{
+            <span class="kw">let </span>inbox = <span class="self">self</span>.inboxes.load_entry(<span class="kw-2">&amp;</span>origin).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>event = inbox.removed_events.front().<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="macro">ensure!</span>(
+                event.is_none(),
+                ChainError::MissingCrossChainUpdate {
+                    chain_id,
+                    origin,
+                    height: event.unwrap().height,
+                }
+            );
         }
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">pub async fn </span>next_block_height_to_receive(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        application_id: ApplicationId,
         origin: Origin,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;BlockHeight, ChainError&gt; {
-        <span class="kw">let </span>communication_state = <span class="self">self
-            </span>.communication_states
-            .load_entry(<span class="kw-2">&amp;</span>application_id)
-            .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>inbox = communication_state.inboxes.try_load_entry(<span class="kw-2">&amp;</span>origin).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>inbox = <span class="self">self</span>.inboxes.load_entry(<span class="kw-2">&amp;</span>origin).<span class="kw">await</span><span class="question-mark">?</span>;
         inbox.next_block_height_to_receive()
     }
 
     <span class="kw">pub async fn </span>last_anticipated_block_height(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        application_id: ApplicationId,
         origin: Origin,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;BlockHeight&gt;, ChainError&gt; {
-        <span class="kw">let </span>communication_state = <span class="self">self
-            </span>.communication_states
-            .load_entry(<span class="kw-2">&amp;</span>application_id)
-            .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>inbox = communication_state.inboxes.try_load_entry(<span class="kw-2">&amp;</span>origin).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>inbox = <span class="self">self</span>.inboxes.load_entry(<span class="kw-2">&amp;</span>origin).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">match </span>inbox.removed_events.back().<span class="kw">await</span><span class="question-mark">? </span>{
             <span class="prelude-val">Some</span>(event) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(event.height)),
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
@@ -791,7 +707,6 @@
     /// received by order of heights and indices.
     </span><span class="kw">pub async fn </span>receive_block(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        application_id: ApplicationId,
         origin: <span class="kw-2">&amp;</span>Origin,
         height: BlockHeight,
         timestamp: Timestamp,
@@ -800,16 +715,12 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt; {
         <span class="kw">let </span>chain_id = <span class="self">self</span>.chain_id();
         <span class="macro">ensure!</span>(
-            height
-                &gt;= <span class="self">self
-                    </span>.next_block_height_to_receive(application_id, origin.clone())
-                    .<span class="kw">await</span><span class="question-mark">?</span>,
+            height &gt;= <span class="self">self</span>.next_block_height_to_receive(origin.clone()).<span class="kw">await</span><span class="question-mark">?</span>,
             ChainError::InternalError(<span class="string">&quot;Trying to receive blocks in the wrong order&quot;</span>.to_string())
         );
         <span class="macro">tracing::trace!</span>(
-            <span class="string">&quot;Processing new messages to {:?} from {:?}::{:?} at height {}&quot;</span>,
+            <span class="string">&quot;Processing new messages to {:?} from {:?} at height {}&quot;</span>,
             chain_id,
-            application_id,
             origin,
             height
         );
@@ -817,15 +728,10 @@
         </span><span class="kw">let </span><span class="kw-2">mut </span>events = Vec::new();
         <span class="kw">for </span>(index, outgoing_effect) <span class="kw">in </span>effects.into_iter().enumerate() {
             <span class="kw">let </span>OutgoingEffect {
-                application_id: app_id,
                 destination,
                 authenticated_signer,
                 effect,
             } = outgoing_effect;
-            <span class="comment">// Skip events that do not belong to this application.
-            </span><span class="kw">if </span>app_id != application_id {
-                <span class="kw">continue</span>;
-            }
             <span class="comment">// Skip events that do not belong to this origin OR have no effect on this
             // recipient.
             </span><span class="kw">match </span>destination {
@@ -835,12 +741,16 @@
                     }
                 }
                 Destination::Subscribers(name) =&gt; {
-                    <span class="kw">if </span>!<span class="macro">matches!</span>(<span class="kw-2">&amp;</span>origin.medium, Medium::Channel(n) <span class="kw">if </span>n == <span class="kw-2">&amp;</span>name) {
+                    <span class="kw">let </span>expected_medium = Medium::Channel(ChannelFullName {
+                        application_id: effect.application_id(),
+                        name,
+                    });
+                    <span class="kw">if </span>origin.medium != expected_medium {
                         <span class="kw">continue</span>;
                     }
                 }
             }
-            <span class="kw">if let </span>ApplicationId::System = app_id {
+            <span class="kw">if let </span>Effect::System(<span class="kw">_</span>) = effect {
                 <span class="comment">// Handle special effects to be executed immediately.
                 </span><span class="kw">let </span>effect_id = EffectId {
                     chain_id: origin.sender,
@@ -869,11 +779,7 @@
                 chain_id, origin, height))
         );
         <span class="comment">// Process the inbox events and update the inbox state.
-        </span><span class="kw">let </span>communication_state = <span class="self">self
-            </span>.communication_states
-            .load_entry_mut(<span class="kw-2">&amp;</span>application_id)
-            .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>inbox = communication_state.inboxes.load_entry_mut(origin).<span class="kw">await</span><span class="question-mark">?</span>;
+        </span><span class="kw">let </span>inbox = <span class="self">self</span>.inboxes.load_entry_mut(origin).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">for </span>event <span class="kw">in </span>events {
             inbox.add_event(event).<span class="kw">await</span>.map_err(|error| <span class="kw">match </span>error {
                 InboxError::ViewError(error) =&gt; ChainError::ViewError(error),
@@ -933,8 +839,7 @@
         <span class="kw">let </span>chain_id = <span class="self">self</span>.chain_id();
         <span class="kw">for </span>message <span class="kw">in </span><span class="kw-2">&amp;</span>block.incoming_messages {
             <span class="macro">tracing::trace!</span>(
-                <span class="string">&quot;Updating inbox {:?}::{:?} in chain {:?}&quot;</span>,
-                message.application_id,
+                <span class="string">&quot;Updating inbox {:?} in chain {:?}&quot;</span>,
                 message.origin,
                 chain_id
             );
@@ -946,22 +851,11 @@
                 });
             }
             <span class="comment">// Mark the message as processed in the inbox.
-            </span><span class="kw">let </span>communication_state = <span class="self">self
-                </span>.communication_states
-                .load_entry_mut(<span class="kw-2">&amp;</span>message.application_id)
-                .<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="kw">let </span>inbox = communication_state
-                .inboxes
-                .load_entry_mut(<span class="kw-2">&amp;</span>message.origin)
-                .<span class="kw">await</span><span class="question-mark">?</span>;
-            inbox.remove_event(<span class="kw-2">&amp;</span>message.event).<span class="kw">await</span>.map_err(|error| {
-                ChainError::from((
-                    chain_id,
-                    message.application_id,
-                    message.origin.clone(),
-                    error,
-                ))
-            })<span class="question-mark">?</span>;
+            </span><span class="kw">let </span>inbox = <span class="self">self</span>.inboxes.load_entry_mut(<span class="kw-2">&amp;</span>message.origin).<span class="kw">await</span><span class="question-mark">?</span>;
+            inbox
+                .remove_event(<span class="kw-2">&amp;</span>message.event)
+                .<span class="kw">await
+                </span>.map_err(|error| ChainError::from((chain_id, message.origin.clone(), error)))<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -998,18 +892,13 @@
             };
             <span class="kw">let </span>results = <span class="self">self
                 </span>.execution_state
-                .execute_effect(message.application_id, <span class="kw-2">&amp;</span>context, <span class="kw-2">&amp;</span>message.event.effect)
+                .execute_effect(<span class="kw-2">&amp;</span>context, <span class="kw-2">&amp;</span>message.event.effect)
                 .<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="self">Self</span>::process_execution_results(
-                <span class="kw-2">&amp;mut </span><span class="self">self</span>.communication_states,
-                <span class="kw-2">&amp;mut </span>effects,
-                context.height,
-                results,
-            )
-            .<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="self">self</span>.process_execution_results(<span class="kw-2">&amp;mut </span>effects, context.height, results)
+                .<span class="kw">await</span><span class="question-mark">?</span>;
         }
         <span class="comment">// Second, execute the operations in the block and remember the recipients to notify.
-        </span><span class="kw">for </span>(index, (application_id, operation)) <span class="kw">in </span>block.operations.iter().enumerate() {
+        </span><span class="kw">for </span>(index, operation) <span class="kw">in </span>block.operations.iter().enumerate() {
             <span class="kw">let </span>context = OperationContext {
                 chain_id,
                 height: block.height,
@@ -1018,15 +907,10 @@
             };
             <span class="kw">let </span>results = <span class="self">self
                 </span>.execution_state
-                .execute_operation(<span class="kw-2">*</span>application_id, <span class="kw-2">&amp;</span>context, operation)
+                .execute_operation(<span class="kw-2">&amp;</span>context, operation)
                 .<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="self">Self</span>::process_execution_results(
-                <span class="kw-2">&amp;mut </span><span class="self">self</span>.communication_states,
-                <span class="kw-2">&amp;mut </span>effects,
-                context.height,
-                results,
-            )
-            .<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="self">self</span>.process_execution_results(<span class="kw-2">&amp;mut </span>effects, context.height, results)
+                .<span class="kw">await</span><span class="question-mark">?</span>;
         }
         <span class="comment">// Recompute the state hash.
         </span><span class="kw">let </span>hash = <span class="self">self</span>.execution_state.crypto_hash().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1039,66 +923,57 @@
     }
 
     <span class="kw">async fn </span>process_execution_results(
-        communication_states: <span class="kw-2">&amp;mut </span>CollectionView&lt;C, ApplicationId, CommunicationStateView&lt;C&gt;&gt;,
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         effects: <span class="kw-2">&amp;mut </span>Vec&lt;OutgoingEffect&gt;,
         height: BlockHeight,
         results: Vec&lt;ExecutionResult&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>sys_results = Vec::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>result_map: BTreeMap&lt;<span class="kw">_</span>, Vec&lt;<span class="kw">_</span>&gt;&gt; = Default::default();
         <span class="kw">for </span>result <span class="kw">in </span>results {
             <span class="kw">match </span>result {
                 ExecutionResult::System(result) =&gt; {
-                    sys_results.push(result);
+                    <span class="self">Self</span>::process_raw_execution_result(
+                        ApplicationId::System,
+                        Effect::System,
+                        <span class="kw-2">&amp;mut </span><span class="self">self</span>.outboxes,
+                        <span class="kw-2">&amp;mut </span><span class="self">self</span>.channels,
+                        effects,
+                        height,
+                        result,
+                    )
+                    .<span class="kw">await</span><span class="question-mark">?</span>;
                 }
                 ExecutionResult::User(application_id, result) =&gt; {
-                    result_map.entry(application_id).or_default().push(result);
+                    <span class="self">Self</span>::process_raw_execution_result(
+                        ApplicationId::User(application_id),
+                        |bytes| Effect::User {
+                            application_id,
+                            bytes,
+                        },
+                        <span class="kw-2">&amp;mut </span><span class="self">self</span>.outboxes,
+                        <span class="kw-2">&amp;mut </span><span class="self">self</span>.channels,
+                        effects,
+                        height,
+                        result,
+                    )
+                    .<span class="kw">await</span><span class="question-mark">?</span>;
                 }
-            }
-        }
-        <span class="kw">if </span>!sys_results.is_empty() {
-            <span class="kw">let </span>communication_state = communication_states
-                .load_entry_mut(<span class="kw-2">&amp;</span>ApplicationId::System)
-                .<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="kw">for </span>result <span class="kw">in </span>sys_results {
-                <span class="self">Self</span>::process_raw_execution_result(
-                    ApplicationId::System,
-                    <span class="kw-2">&amp;mut </span>communication_state.outboxes,
-                    <span class="kw-2">&amp;mut </span>communication_state.channels,
-                    effects,
-                    height,
-                    result,
-                )
-                .<span class="kw">await</span><span class="question-mark">?</span>;
-            }
-        }
-        <span class="kw">for </span>(application_id, results) <span class="kw">in </span>result_map {
-            <span class="kw">let </span>communication_state = communication_states
-                .load_entry_mut(<span class="kw-2">&amp;</span>ApplicationId::User(application_id))
-                .<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="kw">for </span>result <span class="kw">in </span>results {
-                <span class="self">Self</span>::process_raw_execution_result(
-                    ApplicationId::User(application_id),
-                    <span class="kw-2">&amp;mut </span>communication_state.outboxes,
-                    <span class="kw-2">&amp;mut </span>communication_state.channels,
-                    effects,
-                    height,
-                    result,
-                )
-                .<span class="kw">await</span><span class="question-mark">?</span>;
             }
         }
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">async fn </span>process_raw_execution_result&lt;E: Into&lt;Effect&gt;&gt;(
+    <span class="kw">async fn </span>process_raw_execution_result&lt;E, F&gt;(
         application_id: ApplicationId,
+        lift: F,
         outboxes: <span class="kw-2">&amp;mut </span>CollectionView&lt;C, Target, OutboxStateView&lt;C&gt;&gt;,
-        channels: <span class="kw-2">&amp;mut </span>CollectionView&lt;C, ChannelName, ChannelStateView&lt;C&gt;&gt;,
+        channels: <span class="kw-2">&amp;mut </span>CollectionView&lt;C, ChannelFullName, ChannelStateView&lt;C&gt;&gt;,
         effects: <span class="kw-2">&amp;mut </span>Vec&lt;OutgoingEffect&gt;,
         height: BlockHeight,
         raw_result: RawExecutionResult&lt;E&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt;
+    <span class="kw">where
+        </span>F: Fn(E) -&gt; Effect,
+    {
         <span class="comment">// Record the effects of the execution. Effects are understood within an
         // application.
         </span><span class="kw">let </span><span class="kw-2">mut </span>recipients = HashSet::new();
@@ -1118,10 +993,9 @@
                 <span class="prelude-val">None
             </span>};
             effects.push(OutgoingEffect {
-                application_id,
                 destination,
                 authenticated_signer,
-                effect: effect.into(),
+                effect: lift(effect),
             });
         }
 
@@ -1133,27 +1007,41 @@
 
         <span class="comment">// Update the channels.
         </span><span class="kw">for </span>(name, id) <span class="kw">in </span>raw_result.unsubscribe {
-            <span class="kw">let </span>channel = channels.load_entry_mut(<span class="kw-2">&amp;</span>name).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>full_name = ChannelFullName {
+                application_id,
+                name,
+            };
+            <span class="kw">let </span>channel = channels.load_entry_mut(<span class="kw-2">&amp;</span>full_name).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="comment">// Remove subscriber. Do not remove the channel outbox yet.
             </span>channel.subscribers.remove(<span class="kw-2">&amp;</span>id)<span class="question-mark">?</span>;
         }
         <span class="kw">for </span>name <span class="kw">in </span>channel_broadcasts {
-            <span class="kw">let </span>channel = channels.load_entry_mut(<span class="kw-2">&amp;</span>name).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>full_name = ChannelFullName {
+                application_id,
+                name,
+            };
+            <span class="kw">let </span>channel = channels.load_entry_mut(<span class="kw-2">&amp;</span>full_name).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">for </span>recipient <span class="kw">in </span>channel.subscribers.indices().<span class="kw">await</span><span class="question-mark">? </span>{
                 <span class="kw">let </span>outbox = outboxes
-                    .load_entry_mut(<span class="kw-2">&amp;</span>Target::channel(recipient, name.clone()))
+                    .load_entry_mut(<span class="kw-2">&amp;</span>Target::channel(recipient, full_name.clone()))
                     .<span class="kw">await</span><span class="question-mark">?</span>;
                 outbox.schedule_message(height)<span class="question-mark">?</span>;
             }
             channel.block_height.set(<span class="prelude-val">Some</span>(height));
         }
         <span class="kw">for </span>(name, id) <span class="kw">in </span>raw_result.subscribe {
-            <span class="kw">let </span>channel = channels.load_entry_mut(<span class="kw-2">&amp;</span>name).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>full_name = ChannelFullName {
+                application_id,
+                name,
+            };
+            <span class="kw">let </span>channel = channels.load_entry_mut(<span class="kw-2">&amp;</span>full_name).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="comment">// Add subscriber.
             </span><span class="kw">if </span>!channel.subscribers.contains(<span class="kw-2">&amp;</span>id).<span class="kw">await</span><span class="question-mark">? </span>{
                 <span class="comment">// Send the latest message if any.
                 </span><span class="kw">if let </span><span class="prelude-val">Some</span>(latest_height) = channel.block_height.get() {
-                    <span class="kw">let </span>outbox = outboxes.load_entry_mut(<span class="kw-2">&amp;</span>Target::channel(id, name)).<span class="kw">await</span><span class="question-mark">?</span>;
+                    <span class="kw">let </span>outbox = outboxes
+                        .load_entry_mut(<span class="kw-2">&amp;</span>Target::channel(id, full_name.clone()))
+                        .<span class="kw">await</span><span class="question-mark">?</span>;
                     outbox.schedule_message(<span class="kw-2">*</span>latest_height)<span class="question-mark">?</span>;
                 }
                 channel.subscribers.insert(<span class="kw-2">&amp;</span>id)<span class="question-mark">?</span>;

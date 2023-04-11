@@ -646,6 +646,20 @@
 <span id="646">646</span>
 <span id="647">647</span>
 <span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -659,8 +673,8 @@
 <span class="kw">mod </span>wasm;
 
 <span class="kw">pub use </span>applications::{
-    ApplicationDescription, ApplicationId, ApplicationRegistryView, BytecodeLocation,
-    UserApplicationDescription, UserApplicationId,
+    ApplicationId, ApplicationRegistryView, BytecodeLocation, UserApplicationDescription,
+    UserApplicationId,
 };
 <span class="kw">pub use </span>execution::ExecutionStateView;
 <span class="kw">pub use </span>ownership::ChainOwnership;
@@ -1004,11 +1018,12 @@
     <span class="doccomment">/// A system operation.
     </span>System(SystemOperation),
     <span class="doccomment">/// A user operation (in serialized form).
-    </span>User(
+    </span>User {
+        application_id: UserApplicationId,
         <span class="attribute">#[serde(with = <span class="string">&quot;serde_bytes&quot;</span>)]
         #[debug(with = <span class="string">&quot;hex_debug&quot;</span>)]
-        </span>Vec&lt;u8&gt;,
-    ),
+        </span>bytes: Vec&lt;u8&gt;,
+    },
 }
 
 <span class="doccomment">/// An effect to be sent and possibly executed in the receiver&#39;s block.
@@ -1017,11 +1032,12 @@
     <span class="doccomment">/// A system effect.
     </span>System(SystemEffect),
     <span class="doccomment">/// A user effect (in serialized form).
-    </span>User(
+    </span>User {
+        application_id: UserApplicationId,
         <span class="attribute">#[serde(with = <span class="string">&quot;serde_bytes&quot;</span>)]
         #[debug(with = <span class="string">&quot;hex_debug&quot;</span>)]
-        </span>Vec&lt;u8&gt;,
-    ),
+        </span>bytes: Vec&lt;u8&gt;,
+    },
 }
 
 <span class="doccomment">/// An query to be sent and possibly executed in the receiver&#39;s block.
@@ -1030,11 +1046,12 @@
     <span class="doccomment">/// A system query.
     </span>System(SystemQuery),
     <span class="doccomment">/// A user query (in serialized form).
-    </span>User(
+    </span>User {
+        application_id: UserApplicationId,
         <span class="attribute">#[serde(with = <span class="string">&quot;serde_bytes&quot;</span>)]
         #[debug(with = <span class="string">&quot;hex_debug&quot;</span>)]
-        </span>Vec&lt;u8&gt;,
-    ),
+        </span>bytes: Vec&lt;u8&gt;,
+    },
 }
 
 <span class="doccomment">/// The response to a query.
@@ -1070,9 +1087,11 @@
 </span><span class="attribute">#[derive(
     Eq, PartialEq, Ord, PartialOrd, Debug, Clone, Hash, Serialize, Deserialize, SimpleObject,
 )]
-</span><span class="kw">pub struct </span>ChannelId {
-    <span class="kw">pub </span>chain_id: ChainId,
-    <span class="kw">pub </span>name: ChannelName,
+</span><span class="kw">pub struct </span>ChannelSubscription {
+    <span class="doccomment">/// The chain id broadcasting on this channel.
+    </span><span class="kw">pub </span>chain_id: ChainId,
+    <span class="doccomment">/// The name of the channel.
+    </span><span class="kw">pub </span>name: ChannelName,
 }
 
 <span class="doccomment">/// Externally visible results of an execution, tagged by their application.
@@ -1170,9 +1189,12 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;Vec&lt;u8&gt;&gt; <span class="kw">for </span>Operation {
-    <span class="kw">fn </span>from(operation: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
-        Operation::User(operation)
+<span class="kw">impl </span>Operation {
+    <span class="kw">pub fn </span>application_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ApplicationId {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::System(<span class="kw">_</span>) =&gt; ApplicationId::System,
+            <span class="self">Self</span>::User { application_id, .. } =&gt; ApplicationId::User(<span class="kw-2">*</span>application_id),
+        }
     }
 }
 
@@ -1182,9 +1204,12 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;Vec&lt;u8&gt;&gt; <span class="kw">for </span>Effect {
-    <span class="kw">fn </span>from(effect: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
-        Effect::User(effect)
+<span class="kw">impl </span>Effect {
+    <span class="kw">pub fn </span>application_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ApplicationId {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::System(<span class="kw">_</span>) =&gt; ApplicationId::System,
+            <span class="self">Self</span>::User { application_id, .. } =&gt; ApplicationId::User(<span class="kw-2">*</span>application_id),
+        }
     }
 }
 
@@ -1194,9 +1219,12 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;Vec&lt;u8&gt;&gt; <span class="kw">for </span>Query {
-    <span class="kw">fn </span>from(query: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
-        Query::User(query)
+<span class="kw">impl </span>Query {
+    <span class="kw">pub fn </span>application_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ApplicationId {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::System(<span class="kw">_</span>) =&gt; ApplicationId::System,
+            <span class="self">Self</span>::User { application_id, .. } =&gt; ApplicationId::User(<span class="kw-2">*</span>application_id),
+        }
     }
 }
 
