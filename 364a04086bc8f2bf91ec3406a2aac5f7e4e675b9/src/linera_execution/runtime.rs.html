@@ -624,9 +624,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use crate</span>::{
-    execution::ExecutionStateView, CallResult, ExecutionError, ExecutionResult,
-    ExecutionRuntimeContext, NewSession, QueryableStorage, ReadableStorage, SessionId,
-    UserApplicationCode, UserApplicationDescription, UserApplicationId, WritableStorage,
+    execution::ExecutionStateView, BaseRuntime, CallResult, ContractRuntime, ExecutionError,
+    ExecutionResult, ExecutionRuntimeContext, NewSession, ServiceRuntime, SessionId,
+    UserApplicationCode, UserApplicationDescription, UserApplicationId,
 };
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>custom_debug_derive::Debug;
@@ -918,7 +918,7 @@
 }
 
 <span class="attribute">#[async_trait]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, C, <span class="kw">const </span>W: bool&gt; ReadableStorage <span class="kw">for </span>ExecutionRuntime&lt;<span class="lifetime">&#39;a</span>, C, W&gt;
+</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, C, <span class="kw">const </span>W: bool&gt; BaseRuntime <span class="kw">for </span>ExecutionRuntime&lt;<span class="lifetime">&#39;a</span>, C, W&gt;
 <span class="kw">where
     </span>C: Context + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
     ViewError: From&lt;C::Error&gt;,
@@ -1025,7 +1025,7 @@
 }
 
 <span class="attribute">#[async_trait]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, C&gt; QueryableStorage <span class="kw">for </span>ExecutionRuntime&lt;<span class="lifetime">&#39;a</span>, C, <span class="bool-val">false</span>&gt;
+</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, C&gt; ServiceRuntime <span class="kw">for </span>ExecutionRuntime&lt;<span class="lifetime">&#39;a</span>, C, <span class="bool-val">false</span>&gt;
 <span class="kw">where
     </span>C: Context + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
     ViewError: From&lt;C::Error&gt;,
@@ -1057,7 +1057,7 @@
 }
 
 <span class="attribute">#[async_trait]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, C&gt; WritableStorage <span class="kw">for </span>ExecutionRuntime&lt;<span class="lifetime">&#39;a</span>, C, <span class="bool-val">true</span>&gt;
+</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, C&gt; ContractRuntime <span class="kw">for </span>ExecutionRuntime&lt;<span class="lifetime">&#39;a</span>, C, <span class="bool-val">true</span>&gt;
 <span class="kw">where
     </span>C: Context + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
     ViewError: From&lt;C::Error&gt;,

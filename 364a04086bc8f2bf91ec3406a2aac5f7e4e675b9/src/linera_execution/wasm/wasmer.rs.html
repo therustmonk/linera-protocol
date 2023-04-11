@@ -541,7 +541,7 @@
     WasmApplication, WasmExecutionError,
 };
 
-<span class="kw">use crate</span>::{ExecutionError, QueryableStorage, SessionId, WritableStorage};
+<span class="kw">use crate</span>::{ContractRuntime, ExecutionError, ServiceRuntime, SessionId};
 <span class="kw">use </span>linera_views::{batch::Batch, views::ViewError};
 <span class="kw">use </span>std::{marker::PhantomData, mem, sync::Arc, task::Poll};
 <span class="kw">use </span>tokio::sync::Mutex;
@@ -556,26 +556,26 @@
 ///
 /// The runtime has a lifetime so that it does not outlive the trait object used to export the
 /// system API.
-</span><span class="kw">pub struct </span>Contract&lt;<span class="lifetime">&#39;storage</span>&gt; {
+</span><span class="kw">pub struct </span>Contract&lt;<span class="lifetime">&#39;runtime</span>&gt; {
     contract: contract::Contract,
-    _lifetime: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span>()&gt;,
+    _lifetime: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span>()&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;storage</span>&gt; ApplicationRuntimeContext <span class="kw">for </span>Contract&lt;<span class="lifetime">&#39;storage</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;runtime</span>&gt; ApplicationRuntimeContext <span class="kw">for </span>Contract&lt;<span class="lifetime">&#39;runtime</span>&gt; {
     <span class="kw">type </span>Store = Store;
     <span class="kw">type </span>Error = RuntimeError;
-    <span class="kw">type </span>Extra = WasmerContractExtra&lt;<span class="lifetime">&#39;storage</span>&gt;;
+    <span class="kw">type </span>Extra = WasmerContractExtra&lt;<span class="lifetime">&#39;runtime</span>&gt;;
 
     <span class="kw">fn </span>finalize(context: <span class="kw-2">&amp;mut </span>WasmRuntimeContext&lt;<span class="self">Self</span>&gt;) {
-        <span class="kw">let </span>storage_guard = context
+        <span class="kw">let </span>runtime_guard = context
             .extra
-            .storage_guard
-            .storage
+            .runtime_guard
+            .runtime
             .try_lock()
-            .expect(<span class="string">&quot;Unexpected concurrent access to WritableStorage&quot;</span>);
-        <span class="kw">let </span>storage = storage_guard
+            .expect(<span class="string">&quot;Unexpected concurrent access to ContractRuntime&quot;</span>);
+        <span class="kw">let </span>runtime = runtime_guard
             .as_ref()
-            .expect(<span class="string">&quot;Storage guard dropped prematurely&quot;</span>);
+            .expect(<span class="string">&quot;Runtime guard dropped prematurely&quot;</span>);
 
         <span class="kw">let </span>remaining_fuel =
             <span class="kw">match </span>metering::get_remaining_points(<span class="kw-2">&amp;mut </span>context.store, <span class="kw-2">&amp;</span>context.extra.instance) {
@@ -583,30 +583,30 @@
                 MeteringPoints::Remaining(fuel) =&gt; fuel,
             };
 
-        storage.set_remaining_fuel(remaining_fuel);
+        runtime.set_remaining_fuel(remaining_fuel);
     }
 }
 
 <span class="doccomment">/// Type representing the [Wasmer](https://wasmer.io/) service runtime.
-</span><span class="kw">pub struct </span>Service&lt;<span class="lifetime">&#39;storage</span>&gt; {
+</span><span class="kw">pub struct </span>Service&lt;<span class="lifetime">&#39;runtime</span>&gt; {
     service: service::Service,
-    _lifetime: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span>()&gt;,
+    _lifetime: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span>()&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;storage</span>&gt; ApplicationRuntimeContext <span class="kw">for </span>Service&lt;<span class="lifetime">&#39;storage</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;runtime</span>&gt; ApplicationRuntimeContext <span class="kw">for </span>Service&lt;<span class="lifetime">&#39;runtime</span>&gt; {
     <span class="kw">type </span>Store = Store;
     <span class="kw">type </span>Error = RuntimeError;
-    <span class="kw">type </span>Extra = StorageGuard&lt;<span class="lifetime">&#39;storage</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>QueryableStorage&gt;;
+    <span class="kw">type </span>Extra = RuntimeGuard&lt;<span class="lifetime">&#39;runtime</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>ServiceRuntime&gt;;
 }
 
 <span class="kw">impl </span>WasmApplication {
     <span class="doccomment">/// Prepare a runtime instance to call into the WASM contract.
-    </span><span class="kw">pub fn </span>prepare_contract_runtime_with_wasmer&lt;<span class="lifetime">&#39;storage</span>&gt;(
+    </span><span class="kw">pub fn </span>prepare_contract_runtime_with_wasmer&lt;<span class="lifetime">&#39;runtime</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>WritableStorage,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;WasmRuntimeContext&lt;<span class="lifetime">&#39;static</span>, Contract&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;, WasmExecutionError&gt; {
+        runtime: <span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ContractRuntime,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;WasmRuntimeContext&lt;<span class="lifetime">&#39;static</span>, Contract&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;, WasmExecutionError&gt; {
         <span class="kw">let </span>metering = Arc::new(Metering::new(
-            storage.remaining_fuel(),
+            runtime.remaining_fuel(),
             <span class="self">Self</span>::operation_cost,
         ));
         <span class="kw">let </span><span class="kw-2">mut </span>compiler_config = Singlepass::default();
@@ -619,8 +619,8 @@
         <span class="kw">let </span><span class="kw-2">mut </span>imports = <span class="macro">imports! </span>{};
         <span class="kw">let </span>waker_forwarder = WakerForwarder::default();
         <span class="kw">let </span>(future_queue, queued_future_factory) = HostFutureQueue::new();
-        <span class="kw">let </span>(system_api, storage_guard) =
-            ContractSystemApi::new(waker_forwarder.clone(), storage, queued_future_factory);
+        <span class="kw">let </span>(system_api, runtime_guard) =
+            ContractSystemApi::new(waker_forwarder.clone(), runtime, queued_future_factory);
         <span class="kw">let </span>system_api_setup =
             writable_system::add_to_imports(<span class="kw-2">&amp;mut </span>store, <span class="kw-2">&amp;mut </span>imports, system_api);
         <span class="kw">let </span>(contract, instance) =
@@ -639,23 +639,23 @@
             store,
             extra: WasmerContractExtra {
                 instance,
-                storage_guard,
+                runtime_guard,
             },
         })
     }
 
     <span class="doccomment">/// Prepare a runtime instance to call into the WASM service.
-    </span><span class="kw">pub fn </span>prepare_service_runtime_with_wasmer&lt;<span class="lifetime">&#39;storage</span>&gt;(
+    </span><span class="kw">pub fn </span>prepare_service_runtime_with_wasmer&lt;<span class="lifetime">&#39;runtime</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>QueryableStorage,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;WasmRuntimeContext&lt;<span class="lifetime">&#39;static</span>, Service&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;, WasmExecutionError&gt; {
+        runtime: <span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ServiceRuntime,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;WasmRuntimeContext&lt;<span class="lifetime">&#39;static</span>, Service&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;, WasmExecutionError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>store = Store::default();
         <span class="kw">let </span>module = Module::new(<span class="kw-2">&amp;</span>store, <span class="kw-2">&amp;</span><span class="self">self</span>.service_bytecode)
             .map_err(wit_bindgen_host_wasmer_rust::anyhow::Error::from)<span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>imports = <span class="macro">imports! </span>{};
         <span class="kw">let </span>waker_forwarder = WakerForwarder::default();
         <span class="kw">let </span>(future_queue, _queued_future_factory) = HostFutureQueue::new();
-        <span class="kw">let </span>(system_api, storage_guard) = ServiceSystemApi::new(waker_forwarder.clone(), storage);
+        <span class="kw">let </span>(system_api, runtime_guard) = ServiceSystemApi::new(waker_forwarder.clone(), runtime);
         <span class="kw">let </span>system_api_setup =
             queryable_system::add_to_imports(<span class="kw-2">&amp;mut </span>store, <span class="kw-2">&amp;mut </span>imports, system_api);
         <span class="kw">let </span>(service, instance) = service::Service::instantiate(<span class="kw-2">&amp;mut </span>store, <span class="kw-2">&amp;</span>module, <span class="kw-2">&amp;mut </span>imports)<span class="question-mark">?</span>;
@@ -671,7 +671,7 @@
             application,
             future_queue,
             store,
-            extra: storage_guard,
+            extra: runtime_guard,
         })
     }
 
@@ -693,7 +693,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;storage</span>&gt; common::Contract <span class="kw">for </span>Contract&lt;<span class="lifetime">&#39;storage</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;runtime</span>&gt; common::Contract <span class="kw">for </span>Contract&lt;<span class="lifetime">&#39;runtime</span>&gt; {
     <span class="kw">type </span>Initialize = contract::Initialize;
     <span class="kw">type </span>ExecuteOperation = contract::ExecuteOperation;
     <span class="kw">type </span>ExecuteEffect = contract::ExecuteEffect;
@@ -810,7 +810,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;storage</span>&gt; common::Service <span class="kw">for </span>Service&lt;<span class="lifetime">&#39;storage</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;runtime</span>&gt; common::Service <span class="kw">for </span>Service&lt;<span class="lifetime">&#39;runtime</span>&gt; {
     <span class="kw">type </span>QueryApplication = service::QueryApplication;
     <span class="kw">type </span>QueryContext = service::QueryContext;
     <span class="kw">type </span>PollQuery = service::PollQuery;
@@ -837,67 +837,67 @@
 /// implementations.
 </span><span class="kw">struct </span>SystemApi&lt;S&gt; {
     waker: WakerForwarder,
-    storage: Arc&lt;Mutex&lt;<span class="prelude-ty">Option</span>&lt;S&gt;&gt;&gt;,
+    runtime: Arc&lt;Mutex&lt;<span class="prelude-ty">Option</span>&lt;S&gt;&gt;&gt;,
 }
 
 <span class="doccomment">/// Implementation to forward contract system calls from the guest WASM module to the host
 /// implementation.
 </span><span class="kw">pub struct </span>ContractSystemApi {
-    shared: SystemApi&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>WritableStorage&gt;,
+    shared: SystemApi&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>ContractRuntime&gt;,
     queued_future_factory: QueuedHostFutureFactory&lt;<span class="lifetime">&#39;static</span>&gt;,
 }
 
 <span class="kw">impl </span>ContractSystemApi {
     <span class="doccomment">/// Creates a new [`ContractSystemApi`] instance, ensuring that the lifetime of the
-    /// [`WritableStorage`] trait object is respected.
+    /// [`ContractRuntime`] trait object is respected.
     ///
     /// # Safety
     ///
-    /// This method uses a [`mem::transmute`] call to erase the lifetime of the `storage` trait
+    /// This method uses a [`mem::transmute`] call to erase the lifetime of the `runtime` trait
     /// object reference. However, this is safe because the lifetime is transfered to the returned
-    /// [`StorageGuard`], which removes the unsafe reference from memory when it is dropped,
+    /// [`RuntimeGuard`], which removes the unsafe reference from memory when it is dropped,
     /// ensuring the lifetime is respected.
     ///
-    /// The [`StorageGuard`] instance must be kept alive while the trait object is still expected to
+    /// The [`RuntimeGuard`] instance must be kept alive while the trait object is still expected to
     /// be alive and usable by the WASM application.
-    </span><span class="kw">pub fn </span>new&lt;<span class="lifetime">&#39;storage</span>&gt;(
+    </span><span class="kw">pub fn </span>new&lt;<span class="lifetime">&#39;runtime</span>&gt;(
         waker: WakerForwarder,
-        storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>WritableStorage,
+        runtime: <span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ContractRuntime,
         queued_future_factory: QueuedHostFutureFactory&lt;<span class="lifetime">&#39;static</span>&gt;,
-    ) -&gt; (<span class="self">Self</span>, StorageGuard&lt;<span class="lifetime">&#39;storage</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>WritableStorage&gt;) {
-        <span class="kw">let </span>storage_without_lifetime = <span class="kw">unsafe </span>{ mem::transmute(storage) };
-        <span class="kw">let </span>storage = Arc::new(Mutex::new(<span class="prelude-val">Some</span>(storage_without_lifetime)));
+    ) -&gt; (<span class="self">Self</span>, RuntimeGuard&lt;<span class="lifetime">&#39;runtime</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>ContractRuntime&gt;) {
+        <span class="kw">let </span>runtime_without_lifetime = <span class="kw">unsafe </span>{ mem::transmute(runtime) };
+        <span class="kw">let </span>runtime = Arc::new(Mutex::new(<span class="prelude-val">Some</span>(runtime_without_lifetime)));
 
-        <span class="kw">let </span>guard = StorageGuard {
-            storage: storage.clone(),
+        <span class="kw">let </span>guard = RuntimeGuard {
+            runtime: runtime.clone(),
             _lifetime: PhantomData,
         };
 
         (
             ContractSystemApi {
-                shared: SystemApi { waker, storage },
+                shared: SystemApi { waker, runtime },
                 queued_future_factory,
             },
             guard,
         )
     }
 
-    <span class="doccomment">/// Safely obtains the [`WritableStorage`] trait object instance to handle a system call.
+    <span class="doccomment">/// Safely obtains the [`ContractRuntime`] trait object instance to handle a system call.
     ///
     /// # Panics
     ///
     /// If there is a concurrent call from the WASM application (which is impossible as long as it
     /// is executed in a single thread) or if the trait object is no longer alive (or more
-    /// accurately, if the [`StorageGuard`] returned by [`Self::new`] was dropped to indicate it&#39;s
+    /// accurately, if the [`RuntimeGuard`] returned by [`Self::new`] was dropped to indicate it&#39;s
     /// no longer alive).
-    </span><span class="kw">fn </span>storage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>WritableStorage {
+    </span><span class="kw">fn </span>runtime(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>ContractRuntime {
         <span class="kw-2">*</span><span class="self">self
             </span>.shared
-            .storage
+            .runtime
             .try_lock()
-            .expect(<span class="string">&quot;Unexpected concurrent storage access by application&quot;</span>)
+            .expect(<span class="string">&quot;Unexpected concurrent runtime access by application&quot;</span>)
             .as_ref()
-            .expect(<span class="string">&quot;Application called storage after it should have stopped&quot;</span>)
+            .expect(<span class="string">&quot;Application called runtime after it should have stopped&quot;</span>)
     }
 
     <span class="doccomment">/// Returns the [`WakerForwarder`] to be used for asynchronous system calls.
@@ -911,58 +911,58 @@
 <span class="doccomment">/// Implementation to forward service system calls from the guest WASM module to the host
 /// implementation.
 </span><span class="kw">pub struct </span>ServiceSystemApi {
-    shared: SystemApi&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>QueryableStorage&gt;,
+    shared: SystemApi&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>ServiceRuntime&gt;,
 }
 
 <span class="kw">impl </span>ServiceSystemApi {
     <span class="doccomment">/// Creates a new [`ServiceSystemApi`] instance, ensuring that the lifetime of the
-    /// [`QueryableStorage`] trait object is respected.
+    /// [`ServiceRuntime`] trait object is respected.
     ///
     /// # Safety
     ///
-    /// This method uses a [`mem::transmute`] call to erase the lifetime of the `storage` trait
+    /// This method uses a [`mem::transmute`] call to erase the lifetime of the `runtime` trait
     /// object reference. However, this is safe because the lifetime is transfered to the returned
-    /// [`StorageGuard`], which removes the unsafe reference from memory when it is dropped,
+    /// [`RuntimeGuard`], which removes the unsafe reference from memory when it is dropped,
     /// ensuring the lifetime is respected.
     ///
-    /// The [`StorageGuard`] instance must be kept alive while the trait object is still expected to
+    /// The [`RuntimeGuard`] instance must be kept alive while the trait object is still expected to
     /// be alive and usable by the WASM application.
-    </span><span class="kw">pub fn </span>new&lt;<span class="lifetime">&#39;storage</span>&gt;(
+    </span><span class="kw">pub fn </span>new&lt;<span class="lifetime">&#39;runtime</span>&gt;(
         waker: WakerForwarder,
-        storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>QueryableStorage,
-    ) -&gt; (<span class="self">Self</span>, StorageGuard&lt;<span class="lifetime">&#39;storage</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>QueryableStorage&gt;) {
-        <span class="kw">let </span>storage_without_lifetime = <span class="kw">unsafe </span>{ mem::transmute(storage) };
-        <span class="kw">let </span>storage = Arc::new(Mutex::new(<span class="prelude-val">Some</span>(storage_without_lifetime)));
+        runtime: <span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ServiceRuntime,
+    ) -&gt; (<span class="self">Self</span>, RuntimeGuard&lt;<span class="lifetime">&#39;runtime</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>ServiceRuntime&gt;) {
+        <span class="kw">let </span>runtime_without_lifetime = <span class="kw">unsafe </span>{ mem::transmute(runtime) };
+        <span class="kw">let </span>runtime = Arc::new(Mutex::new(<span class="prelude-val">Some</span>(runtime_without_lifetime)));
 
-        <span class="kw">let </span>guard = StorageGuard {
-            storage: storage.clone(),
+        <span class="kw">let </span>guard = RuntimeGuard {
+            runtime: runtime.clone(),
             _lifetime: PhantomData,
         };
 
         (
             ServiceSystemApi {
-                shared: SystemApi { waker, storage },
+                shared: SystemApi { waker, runtime },
             },
             guard,
         )
     }
 
-    <span class="doccomment">/// Safely obtains the [`QueryableStorage`] trait object instance to handle a system call.
+    <span class="doccomment">/// Safely obtains the [`ServiceRuntime`] trait object instance to handle a system call.
     ///
     /// # Panics
     ///
     /// If there is a concurrent call from the WASM application (which is impossible as long as it
     /// is executed in a single thread) or if the trait object is no longer alive (or more
-    /// accurately, if the [`StorageGuard`] returned by [`Self::new`] was dropped to indicate it&#39;s
+    /// accurately, if the [`RuntimeGuard`] returned by [`Self::new`] was dropped to indicate it&#39;s
     /// no longer alive).
-    </span><span class="kw">fn </span>storage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>QueryableStorage {
+    </span><span class="kw">fn </span>runtime(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>ServiceRuntime {
         <span class="kw-2">*</span><span class="self">self
             </span>.shared
-            .storage
+            .runtime
             .try_lock()
-            .expect(<span class="string">&quot;Unexpected concurrent storage access by application&quot;</span>)
+            .expect(<span class="string">&quot;Unexpected concurrent runtime access by application&quot;</span>)
             .as_ref()
-            .expect(<span class="string">&quot;Application called storage after it should have stopped&quot;</span>)
+            .expect(<span class="string">&quot;Application called runtime after it should have stopped&quot;</span>)
     }
 
     <span class="doccomment">/// Returns the [`WakerForwarder`] to be used for asynchronous system calls.
@@ -974,23 +974,23 @@
 <span class="macro">impl_queryable_system!</span>(ServiceSystemApi);
 
 <span class="doccomment">/// Extra parameters necessary when cleaning up after contract execution.
-</span><span class="kw">pub struct </span>WasmerContractExtra&lt;<span class="lifetime">&#39;storage</span>&gt; {
-    storage_guard: StorageGuard&lt;<span class="lifetime">&#39;storage</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>WritableStorage&gt;,
+</span><span class="kw">pub struct </span>WasmerContractExtra&lt;<span class="lifetime">&#39;runtime</span>&gt; {
+    runtime_guard: RuntimeGuard&lt;<span class="lifetime">&#39;runtime</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>ContractRuntime&gt;,
     instance: Instance,
 }
 
-<span class="doccomment">/// A guard to unsure that the [`WritableStorage`] trait object isn&#39;t called after it&#39;s no longer
+<span class="doccomment">/// A guard to unsure that the [`ContractRuntime`] trait object isn&#39;t called after it&#39;s no longer
 /// borrowed.
-</span><span class="kw">pub struct </span>StorageGuard&lt;<span class="lifetime">&#39;storage</span>, S&gt; {
-    storage: Arc&lt;Mutex&lt;<span class="prelude-ty">Option</span>&lt;S&gt;&gt;&gt;,
-    _lifetime: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span>()&gt;,
+</span><span class="kw">pub struct </span>RuntimeGuard&lt;<span class="lifetime">&#39;runtime</span>, S&gt; {
+    runtime: Arc&lt;Mutex&lt;<span class="prelude-ty">Option</span>&lt;S&gt;&gt;&gt;,
+    _lifetime: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span>()&gt;,
 }
 
-<span class="kw">impl</span>&lt;S&gt; Drop <span class="kw">for </span>StorageGuard&lt;<span class="lifetime">&#39;_</span>, S&gt; {
+<span class="kw">impl</span>&lt;S&gt; Drop <span class="kw">for </span>RuntimeGuard&lt;<span class="lifetime">&#39;_</span>, S&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="self">self</span>.storage
+        <span class="self">self</span>.runtime
             .try_lock()
-            .expect(<span class="string">&quot;Guard dropped while storage is still in use&quot;</span>)
+            .expect(<span class="string">&quot;Guard dropped while runtime is still in use&quot;</span>)
             .take();
     }
 }

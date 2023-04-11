@@ -488,7 +488,7 @@
     common::{<span class="self">self</span>, ApplicationRuntimeContext, WasmRuntimeContext},
     WasmApplication, WasmExecutionError,
 };
-<span class="kw">use crate</span>::{ExecutionError, QueryableStorage, SessionId, WritableStorage};
+<span class="kw">use crate</span>::{ContractRuntime, ExecutionError, ServiceRuntime, SessionId};
 <span class="kw">use </span>linera_views::{batch::Batch, views::ViewError};
 <span class="kw">use </span>std::{error::Error, task::Poll};
 <span class="kw">use </span>wasmtime::{Config, Engine, Linker, Module, Store, Trap};
@@ -498,41 +498,41 @@
 ///
 /// The runtime has a lifetime so that it does not outlive the trait object used to export the
 /// system API.
-</span><span class="kw">pub struct </span>Contract&lt;<span class="lifetime">&#39;storage</span>&gt; {
-    contract: contract::Contract&lt;ContractState&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;,
+</span><span class="kw">pub struct </span>Contract&lt;<span class="lifetime">&#39;runtime</span>&gt; {
+    contract: contract::Contract&lt;ContractState&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;storage</span>&gt; ApplicationRuntimeContext <span class="kw">for </span>Contract&lt;<span class="lifetime">&#39;storage</span>&gt; {
-    <span class="kw">type </span>Store = Store&lt;ContractState&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;runtime</span>&gt; ApplicationRuntimeContext <span class="kw">for </span>Contract&lt;<span class="lifetime">&#39;runtime</span>&gt; {
+    <span class="kw">type </span>Store = Store&lt;ContractState&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;;
     <span class="kw">type </span>Error = Trap;
     <span class="kw">type </span>Extra = ();
 
     <span class="kw">fn </span>finalize(context: <span class="kw-2">&amp;mut </span>WasmRuntimeContext&lt;<span class="self">Self</span>&gt;) {
-        <span class="kw">let </span>storage = context.store.data().system_api.storage();
-        <span class="kw">let </span>initial_fuel = storage.remaining_fuel();
+        <span class="kw">let </span>runtime = context.store.data().system_api.runtime();
+        <span class="kw">let </span>initial_fuel = runtime.remaining_fuel();
         <span class="kw">let </span>remaining_fuel = initial_fuel - context.store.fuel_consumed().unwrap_or(<span class="number">0</span>);
 
-        storage.set_remaining_fuel(remaining_fuel);
+        runtime.set_remaining_fuel(remaining_fuel);
     }
 }
 
 <span class="doccomment">/// Type representing the [Wasmtime](https://wasmtime.dev/) runtime for services.
-</span><span class="kw">pub struct </span>Service&lt;<span class="lifetime">&#39;storage</span>&gt; {
-    service: service::Service&lt;ServiceState&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;,
+</span><span class="kw">pub struct </span>Service&lt;<span class="lifetime">&#39;runtime</span>&gt; {
+    service: service::Service&lt;ServiceState&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;storage</span>&gt; ApplicationRuntimeContext <span class="kw">for </span>Service&lt;<span class="lifetime">&#39;storage</span>&gt; {
-    <span class="kw">type </span>Store = Store&lt;ServiceState&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;runtime</span>&gt; ApplicationRuntimeContext <span class="kw">for </span>Service&lt;<span class="lifetime">&#39;runtime</span>&gt; {
+    <span class="kw">type </span>Store = Store&lt;ServiceState&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;;
     <span class="kw">type </span>Error = Trap;
     <span class="kw">type </span>Extra = ();
 }
 
 <span class="kw">impl </span>WasmApplication {
     <span class="doccomment">/// Prepare a runtime instance to call into the WASM contract.
-    </span><span class="kw">pub fn </span>prepare_contract_runtime_with_wasmtime&lt;<span class="lifetime">&#39;storage</span>&gt;(
+    </span><span class="kw">pub fn </span>prepare_contract_runtime_with_wasmtime&lt;<span class="lifetime">&#39;runtime</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>WritableStorage,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;WasmRuntimeContext&lt;<span class="lifetime">&#39;storage</span>, Contract&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;, WasmExecutionError&gt; {
+        runtime: <span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ContractRuntime,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;WasmRuntimeContext&lt;<span class="lifetime">&#39;runtime</span>, Contract&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;, WasmExecutionError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>config = Config::default();
         config
             .consume_fuel(<span class="bool-val">true</span>)
@@ -546,14 +546,14 @@
         <span class="kw">let </span>module = Module::new(<span class="kw-2">&amp;</span>engine, <span class="kw-2">&amp;</span><span class="self">self</span>.contract_bytecode)<span class="question-mark">?</span>;
         <span class="kw">let </span>waker_forwarder = WakerForwarder::default();
         <span class="kw">let </span>(future_queue, queued_future_factory) = HostFutureQueue::new();
-        <span class="kw">let </span>state = ContractState::new(storage, waker_forwarder.clone(), queued_future_factory);
+        <span class="kw">let </span>state = ContractState::new(runtime, waker_forwarder.clone(), queued_future_factory);
         <span class="kw">let </span><span class="kw-2">mut </span>store = Store::new(<span class="kw-2">&amp;</span>engine, state);
         <span class="kw">let </span>(contract, _instance) =
             contract::Contract::instantiate(<span class="kw-2">&amp;mut </span>store, <span class="kw-2">&amp;</span>module, <span class="kw-2">&amp;mut </span>linker, ContractState::data)<span class="question-mark">?</span>;
         <span class="kw">let </span>application = Contract { contract };
 
         store
-            .add_fuel(storage.remaining_fuel())
+            .add_fuel(runtime.remaining_fuel())
             .expect(<span class="string">&quot;Fuel consumption wasn&#39;t properly enabled&quot;</span>);
 
         <span class="prelude-val">Ok</span>(WasmRuntimeContext {
@@ -566,10 +566,10 @@
     }
 
     <span class="doccomment">/// Prepare a runtime instance to call into the WASM service.
-    </span><span class="kw">pub fn </span>prepare_service_runtime_with_wasmtime&lt;<span class="lifetime">&#39;storage</span>&gt;(
+    </span><span class="kw">pub fn </span>prepare_service_runtime_with_wasmtime&lt;<span class="lifetime">&#39;runtime</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>QueryableStorage,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;WasmRuntimeContext&lt;<span class="lifetime">&#39;storage</span>, Service&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;, WasmExecutionError&gt; {
+        runtime: <span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ServiceRuntime,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;WasmRuntimeContext&lt;<span class="lifetime">&#39;runtime</span>, Service&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;, WasmExecutionError&gt; {
         <span class="kw">let </span>engine = Engine::default();
         <span class="kw">let </span><span class="kw-2">mut </span>linker = Linker::new(<span class="kw-2">&amp;</span>engine);
 
@@ -578,7 +578,7 @@
         <span class="kw">let </span>module = Module::new(<span class="kw-2">&amp;</span>engine, <span class="kw-2">&amp;</span><span class="self">self</span>.service_bytecode)<span class="question-mark">?</span>;
         <span class="kw">let </span>waker_forwarder = WakerForwarder::default();
         <span class="kw">let </span>(future_queue, _queued_future_factory) = HostFutureQueue::new();
-        <span class="kw">let </span>state = ServiceState::new(storage, waker_forwarder.clone());
+        <span class="kw">let </span>state = ServiceState::new(runtime, waker_forwarder.clone());
         <span class="kw">let </span><span class="kw-2">mut </span>store = Store::new(<span class="kw-2">&amp;</span>engine, state);
         <span class="kw">let </span>(service, _instance) =
             service::Service::instantiate(<span class="kw-2">&amp;mut </span>store, <span class="kw-2">&amp;</span>module, <span class="kw-2">&amp;mut </span>linker, ServiceState::data)<span class="question-mark">?</span>;
@@ -595,32 +595,32 @@
 }
 
 <span class="doccomment">/// Data stored by the runtime that&#39;s necessary for handling calls to and from the WASM module.
-</span><span class="kw">pub struct </span>ContractState&lt;<span class="lifetime">&#39;storage</span>&gt; {
+</span><span class="kw">pub struct </span>ContractState&lt;<span class="lifetime">&#39;runtime</span>&gt; {
     data: ContractData,
-    system_api: ContractSystemApi&lt;<span class="lifetime">&#39;storage</span>&gt;,
-    system_tables: WritableSystemTables&lt;ContractSystemApi&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;,
+    system_api: ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;,
+    system_tables: WritableSystemTables&lt;ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
 }
 
 <span class="doccomment">/// Data stored by the runtime that&#39;s necessary for handling queries to and from the WASM module.
-</span><span class="kw">pub struct </span>ServiceState&lt;<span class="lifetime">&#39;storage</span>&gt; {
+</span><span class="kw">pub struct </span>ServiceState&lt;<span class="lifetime">&#39;runtime</span>&gt; {
     data: ServiceData,
-    system_api: ServiceSystemApi&lt;<span class="lifetime">&#39;storage</span>&gt;,
-    system_tables: QueryableSystemTables&lt;ServiceSystemApi&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;,
+    system_api: ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;,
+    system_tables: QueryableSystemTables&lt;ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;storage</span>&gt; ContractState&lt;<span class="lifetime">&#39;storage</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;runtime</span>&gt; ContractState&lt;<span class="lifetime">&#39;runtime</span>&gt; {
     <span class="doccomment">/// Create a new instance of [`ContractState`].
     ///
-    /// Uses `storage` to export the system API, and the `waker` to be able to correctly handle
+    /// Uses `runtime` to export the system API, and the `waker` to be able to correctly handle
     /// asynchronous calls from the guest WASM module.
     </span><span class="kw">pub fn </span>new(
-        storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>WritableStorage,
+        runtime: <span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ContractRuntime,
         waker: WakerForwarder,
-        queued_future_factory: QueuedHostFutureFactory&lt;<span class="lifetime">&#39;storage</span>&gt;,
+        queued_future_factory: QueuedHostFutureFactory&lt;<span class="lifetime">&#39;runtime</span>&gt;,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             data: ContractData::default(),
-            system_api: ContractSystemApi::new(waker, storage, queued_future_factory),
+            system_api: ContractSystemApi::new(waker, runtime, queued_future_factory),
             system_tables: WritableSystemTables::default(),
         }
     }
@@ -634,22 +634,22 @@
     </span><span class="kw">pub fn </span>system_api(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
     ) -&gt; (
-        <span class="kw-2">&amp;mut </span>ContractSystemApi&lt;<span class="lifetime">&#39;storage</span>&gt;,
-        <span class="kw-2">&amp;mut </span>WritableSystemTables&lt;ContractSystemApi&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;,
+        <span class="kw-2">&amp;mut </span>ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;,
+        <span class="kw-2">&amp;mut </span>WritableSystemTables&lt;ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
     ) {
         (<span class="kw-2">&amp;mut </span><span class="self">self</span>.system_api, <span class="kw-2">&amp;mut </span><span class="self">self</span>.system_tables)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;storage</span>&gt; ServiceState&lt;<span class="lifetime">&#39;storage</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;runtime</span>&gt; ServiceState&lt;<span class="lifetime">&#39;runtime</span>&gt; {
     <span class="doccomment">/// Create a new instance of [`ServiceState`].
     ///
-    /// Uses `storage` to export the system API, and the `waker` to be able to correctly handle
+    /// Uses `runtime` to export the system API, and the `waker` to be able to correctly handle
     /// asynchronous calls from the guest WASM module.
-    </span><span class="kw">pub fn </span>new(storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>QueryableStorage, waker: WakerForwarder) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(runtime: <span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ServiceRuntime, waker: WakerForwarder) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             data: ServiceData::default(),
-            system_api: ServiceSystemApi::new(waker, storage),
+            system_api: ServiceSystemApi::new(waker, runtime),
             system_tables: QueryableSystemTables::default(),
         }
     }
@@ -663,14 +663,14 @@
     </span><span class="kw">pub fn </span>system_api(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
     ) -&gt; (
-        <span class="kw-2">&amp;mut </span>ServiceSystemApi&lt;<span class="lifetime">&#39;storage</span>&gt;,
-        <span class="kw-2">&amp;mut </span>QueryableSystemTables&lt;ServiceSystemApi&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;,
+        <span class="kw-2">&amp;mut </span>ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;,
+        <span class="kw-2">&amp;mut </span>QueryableSystemTables&lt;ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
     ) {
         (<span class="kw-2">&amp;mut </span><span class="self">self</span>.system_api, <span class="kw-2">&amp;mut </span><span class="self">self</span>.system_tables)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;storage</span>&gt; common::Contract <span class="kw">for </span>Contract&lt;<span class="lifetime">&#39;storage</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;runtime</span>&gt; common::Contract <span class="kw">for </span>Contract&lt;<span class="lifetime">&#39;runtime</span>&gt; {
     <span class="kw">type </span>Initialize = contract::Initialize;
     <span class="kw">type </span>ExecuteOperation = contract::ExecuteOperation;
     <span class="kw">type </span>ExecuteEffect = contract::ExecuteEffect;
@@ -687,7 +687,7 @@
 
     <span class="kw">fn </span>initialize_new(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;,
+        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
         context: contract::OperationContext,
         argument: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;contract::Initialize, Trap&gt; {
@@ -696,7 +696,7 @@
 
     <span class="kw">fn </span>initialize_poll(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;,
+        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
         future: <span class="kw-2">&amp;</span>contract::Initialize,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;contract::PollExecutionResult, Trap&gt; {
         contract::Contract::initialize_poll(<span class="kw-2">&amp;</span><span class="self">self</span>.contract, store, future)
@@ -704,7 +704,7 @@
 
     <span class="kw">fn </span>execute_operation_new(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;,
+        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
         context: contract::OperationContext,
         operation: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;contract::ExecuteOperation, Trap&gt; {
@@ -713,7 +713,7 @@
 
     <span class="kw">fn </span>execute_operation_poll(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;,
+        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
         future: <span class="kw-2">&amp;</span>contract::ExecuteOperation,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;contract::PollExecutionResult, Trap&gt; {
         contract::Contract::execute_operation_poll(<span class="kw-2">&amp;</span><span class="self">self</span>.contract, store, future)
@@ -721,7 +721,7 @@
 
     <span class="kw">fn </span>execute_effect_new(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;,
+        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
         context: contract::EffectContext,
         effect: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;contract::ExecuteEffect, Trap&gt; {
@@ -730,7 +730,7 @@
 
     <span class="kw">fn </span>execute_effect_poll(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;,
+        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
         future: <span class="kw-2">&amp;</span>contract::ExecuteEffect,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;contract::PollExecutionResult, Trap&gt; {
         contract::Contract::execute_effect_poll(<span class="kw-2">&amp;</span><span class="self">self</span>.contract, store, future)
@@ -738,7 +738,7 @@
 
     <span class="kw">fn </span>handle_application_call_new(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;,
+        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
         context: contract::CalleeContext,
         argument: <span class="kw-2">&amp;</span>[u8],
         forwarded_sessions: <span class="kw-2">&amp;</span>[contract::SessionId],
@@ -754,7 +754,7 @@
 
     <span class="kw">fn </span>handle_application_call_poll(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;,
+        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
         future: <span class="kw-2">&amp;</span>contract::HandleApplicationCall,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;contract::PollCallApplication, Trap&gt; {
         contract::Contract::handle_application_call_poll(<span class="kw-2">&amp;</span><span class="self">self</span>.contract, store, future)
@@ -762,7 +762,7 @@
 
     <span class="kw">fn </span>handle_session_call_new(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;,
+        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
         context: contract::CalleeContext,
         session: contract::SessionParam,
         argument: <span class="kw-2">&amp;</span>[u8],
@@ -780,21 +780,21 @@
 
     <span class="kw">fn </span>handle_session_call_poll(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;,
+        store: <span class="kw-2">&amp;mut </span>Store&lt;ContractState&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
         future: <span class="kw-2">&amp;</span>contract::HandleSessionCall,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;contract::PollCallSession, Trap&gt; {
         contract::Contract::handle_session_call_poll(<span class="kw-2">&amp;</span><span class="self">self</span>.contract, store, future)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;storage</span>&gt; common::Service <span class="kw">for </span>Service&lt;<span class="lifetime">&#39;storage</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;runtime</span>&gt; common::Service <span class="kw">for </span>Service&lt;<span class="lifetime">&#39;runtime</span>&gt; {
     <span class="kw">type </span>QueryApplication = service::QueryApplication;
     <span class="kw">type </span>QueryContext = service::QueryContext;
     <span class="kw">type </span>PollQuery = service::PollQuery;
 
     <span class="kw">fn </span>query_application_new(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        store: <span class="kw-2">&amp;mut </span>Store&lt;ServiceState&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;,
+        store: <span class="kw-2">&amp;mut </span>Store&lt;ServiceState&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
         context: service::QueryContext,
         argument: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;service::QueryApplication, Trap&gt; {
@@ -803,7 +803,7 @@
 
     <span class="kw">fn </span>query_application_poll(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        store: <span class="kw-2">&amp;mut </span>Store&lt;ServiceState&lt;<span class="lifetime">&#39;storage</span>&gt;&gt;,
+        store: <span class="kw-2">&amp;mut </span>Store&lt;ServiceState&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
         future: <span class="kw-2">&amp;</span>service::QueryApplication,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;service::PollQuery, Trap&gt; {
         service::Service::query_application_poll(<span class="kw-2">&amp;</span><span class="self">self</span>.service, store, future)
@@ -814,33 +814,33 @@
 /// implementations.
 </span><span class="kw">struct </span>SystemApi&lt;S&gt; {
     waker: WakerForwarder,
-    storage: S,
+    runtime: S,
 }
 
 <span class="doccomment">/// Implementation to forward contract system calls from the guest WASM module to the host
 /// implementation.
-</span><span class="kw">pub struct </span>ContractSystemApi&lt;<span class="lifetime">&#39;storage</span>&gt; {
-    shared: SystemApi&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>WritableStorage&gt;,
-    queued_future_factory: QueuedHostFutureFactory&lt;<span class="lifetime">&#39;storage</span>&gt;,
+</span><span class="kw">pub struct </span>ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt; {
+    shared: SystemApi&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ContractRuntime&gt;,
+    queued_future_factory: QueuedHostFutureFactory&lt;<span class="lifetime">&#39;runtime</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;storage</span>&gt; ContractSystemApi&lt;<span class="lifetime">&#39;storage</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;runtime</span>&gt; ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt; {
     <span class="doccomment">/// Creates a new [`ContractSystemApi`] instance using the provided asynchronous `waker` and
-    /// exporting the API from `storage`.
+    /// exporting the API from `runtime`.
     </span><span class="kw">pub fn </span>new(
         waker: WakerForwarder,
-        storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>WritableStorage,
-        queued_future_factory: QueuedHostFutureFactory&lt;<span class="lifetime">&#39;storage</span>&gt;,
+        runtime: <span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ContractRuntime,
+        queued_future_factory: QueuedHostFutureFactory&lt;<span class="lifetime">&#39;runtime</span>&gt;,
     ) -&gt; <span class="self">Self </span>{
         ContractSystemApi {
-            shared: SystemApi { waker, storage },
+            shared: SystemApi { waker, runtime },
             queued_future_factory,
         }
     }
 
-    <span class="doccomment">/// Returns the [`WritableStorage`] trait object instance to handle a system call.
-    </span><span class="kw">fn </span>storage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>WritableStorage {
-        <span class="self">self</span>.shared.storage
+    <span class="doccomment">/// Returns the [`ContractRuntime`] trait object instance to handle a system call.
+    </span><span class="kw">fn </span>runtime(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ContractRuntime {
+        <span class="self">self</span>.shared.runtime
     }
 
     <span class="doccomment">/// Returns the [`WakerForwarder`] to be used for asynchronous system calls.
@@ -849,26 +849,26 @@
     }
 }
 
-<span class="macro">impl_writable_system!</span>(ContractSystemApi&lt;<span class="lifetime">&#39;storage</span>&gt;);
+<span class="macro">impl_writable_system!</span>(ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;);
 
 <span class="doccomment">/// Implementation to forward service system calls from the guest WASM module to the host
 /// implementation.
-</span><span class="kw">pub struct </span>ServiceSystemApi&lt;<span class="lifetime">&#39;storage</span>&gt; {
-    shared: SystemApi&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>QueryableStorage&gt;,
+</span><span class="kw">pub struct </span>ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt; {
+    shared: SystemApi&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ServiceRuntime&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;storage</span>&gt; ServiceSystemApi&lt;<span class="lifetime">&#39;storage</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;runtime</span>&gt; ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt; {
     <span class="doccomment">/// Creates a new [`ServiceSystemApi`] instance using the provided asynchronous `waker` and
-    /// exporting the API from `storage`.
-    </span><span class="kw">pub fn </span>new(waker: WakerForwarder, storage: <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>QueryableStorage) -&gt; <span class="self">Self </span>{
+    /// exporting the API from `runtime`.
+    </span><span class="kw">pub fn </span>new(waker: WakerForwarder, runtime: <span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ServiceRuntime) -&gt; <span class="self">Self </span>{
         ServiceSystemApi {
-            shared: SystemApi { waker, storage },
+            shared: SystemApi { waker, runtime },
         }
     }
 
-    <span class="doccomment">/// Returns the [`QueryableStorage`] trait object instance to handle a system call.
-    </span><span class="kw">fn </span>storage(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;storage </span><span class="kw">dyn </span>QueryableStorage {
-        <span class="self">self</span>.shared.storage
+    <span class="doccomment">/// Returns the [`ServiceRuntime`] trait object instance to handle a system call.
+    </span><span class="kw">fn </span>runtime(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ServiceRuntime {
+        <span class="self">self</span>.shared.runtime
     }
 
     <span class="doccomment">/// Returns the [`WakerForwarder`] to be used for asynchronous system calls.
@@ -877,7 +877,7 @@
     }
 }
 
-<span class="macro">impl_queryable_system!</span>(ServiceSystemApi&lt;<span class="lifetime">&#39;storage</span>&gt;);
+<span class="macro">impl_queryable_system!</span>(ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;);
 
 <span class="kw">impl </span>From&lt;ExecutionError&gt; <span class="kw">for </span>wasmtime::Trap {
     <span class="kw">fn </span>from(error: ExecutionError) -&gt; <span class="self">Self </span>{

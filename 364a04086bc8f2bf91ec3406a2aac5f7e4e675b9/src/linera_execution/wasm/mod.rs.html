@@ -323,9 +323,9 @@
 
 <span class="kw">use </span><span class="self">self</span>::sanitizer::sanitize;
 <span class="kw">use crate</span>::{
-    ApplicationCallResult, Bytecode, CalleeContext, EffectContext, ExecutionError,
-    OperationContext, QueryContext, QueryableStorage, RawExecutionResult, SessionCallResult,
-    SessionId, UserApplication, WasmRuntime, WritableStorage,
+    ApplicationCallResult, Bytecode, CalleeContext, ContractRuntime, EffectContext, ExecutionError,
+    OperationContext, QueryContext, RawExecutionResult, ServiceRuntime, SessionCallResult,
+    SessionId, UserApplication, WasmRuntime,
 };
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>std::path::Path;
@@ -393,19 +393,19 @@
     <span class="kw">async fn </span>initialize(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         context: <span class="kw-2">&amp;</span>OperationContext,
-        storage: <span class="kw-2">&amp;</span><span class="kw">dyn </span>WritableStorage,
+        runtime: <span class="kw-2">&amp;</span><span class="kw">dyn </span>ContractRuntime,
         argument: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;RawExecutionResult&lt;Vec&lt;u8&gt;&gt;, ExecutionError&gt; {
         <span class="kw">let </span>result = <span class="kw">match </span><span class="self">self</span>.runtime {
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
             </span>WasmRuntime::Wasmtime =&gt; {
-                <span class="self">self</span>.prepare_contract_runtime_with_wasmtime(storage)<span class="question-mark">?
+                <span class="self">self</span>.prepare_contract_runtime_with_wasmtime(runtime)<span class="question-mark">?
                     </span>.initialize(context, argument)
                     .<span class="kw">await</span><span class="question-mark">?
             </span>}
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmer&quot;</span>)]
             </span>WasmRuntime::Wasmer =&gt; {
-                <span class="self">self</span>.prepare_contract_runtime_with_wasmer(storage)<span class="question-mark">?
+                <span class="self">self</span>.prepare_contract_runtime_with_wasmer(runtime)<span class="question-mark">?
                     </span>.initialize(context, argument)
                     .<span class="kw">await</span><span class="question-mark">?
             </span>}
@@ -416,19 +416,19 @@
     <span class="kw">async fn </span>execute_operation(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         context: <span class="kw-2">&amp;</span>OperationContext,
-        storage: <span class="kw-2">&amp;</span><span class="kw">dyn </span>WritableStorage,
+        runtime: <span class="kw-2">&amp;</span><span class="kw">dyn </span>ContractRuntime,
         operation: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;RawExecutionResult&lt;Vec&lt;u8&gt;&gt;, ExecutionError&gt; {
         <span class="kw">let </span>result = <span class="kw">match </span><span class="self">self</span>.runtime {
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
             </span>WasmRuntime::Wasmtime =&gt; {
-                <span class="self">self</span>.prepare_contract_runtime_with_wasmtime(storage)<span class="question-mark">?
+                <span class="self">self</span>.prepare_contract_runtime_with_wasmtime(runtime)<span class="question-mark">?
                     </span>.execute_operation(context, operation)
                     .<span class="kw">await</span><span class="question-mark">?
             </span>}
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmer&quot;</span>)]
             </span>WasmRuntime::Wasmer =&gt; {
-                <span class="self">self</span>.prepare_contract_runtime_with_wasmer(storage)<span class="question-mark">?
+                <span class="self">self</span>.prepare_contract_runtime_with_wasmer(runtime)<span class="question-mark">?
                     </span>.execute_operation(context, operation)
                     .<span class="kw">await</span><span class="question-mark">?
             </span>}
@@ -439,19 +439,19 @@
     <span class="kw">async fn </span>execute_effect(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         context: <span class="kw-2">&amp;</span>EffectContext,
-        storage: <span class="kw-2">&amp;</span><span class="kw">dyn </span>WritableStorage,
+        runtime: <span class="kw-2">&amp;</span><span class="kw">dyn </span>ContractRuntime,
         effect: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;RawExecutionResult&lt;Vec&lt;u8&gt;&gt;, ExecutionError&gt; {
         <span class="kw">let </span>result = <span class="kw">match </span><span class="self">self</span>.runtime {
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
             </span>WasmRuntime::Wasmtime =&gt; {
-                <span class="self">self</span>.prepare_contract_runtime_with_wasmtime(storage)<span class="question-mark">?
+                <span class="self">self</span>.prepare_contract_runtime_with_wasmtime(runtime)<span class="question-mark">?
                     </span>.execute_effect(context, effect)
                     .<span class="kw">await</span><span class="question-mark">?
             </span>}
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmer&quot;</span>)]
             </span>WasmRuntime::Wasmer =&gt; {
-                <span class="self">self</span>.prepare_contract_runtime_with_wasmer(storage)<span class="question-mark">?
+                <span class="self">self</span>.prepare_contract_runtime_with_wasmer(runtime)<span class="question-mark">?
                     </span>.execute_effect(context, effect)
                     .<span class="kw">await</span><span class="question-mark">?
             </span>}
@@ -462,20 +462,20 @@
     <span class="kw">async fn </span>handle_application_call(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         context: <span class="kw-2">&amp;</span>CalleeContext,
-        storage: <span class="kw-2">&amp;</span><span class="kw">dyn </span>WritableStorage,
+        runtime: <span class="kw-2">&amp;</span><span class="kw">dyn </span>ContractRuntime,
         argument: <span class="kw-2">&amp;</span>[u8],
         forwarded_sessions: Vec&lt;SessionId&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ApplicationCallResult, ExecutionError&gt; {
         <span class="kw">let </span>result = <span class="kw">match </span><span class="self">self</span>.runtime {
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
             </span>WasmRuntime::Wasmtime =&gt; {
-                <span class="self">self</span>.prepare_contract_runtime_with_wasmtime(storage)<span class="question-mark">?
+                <span class="self">self</span>.prepare_contract_runtime_with_wasmtime(runtime)<span class="question-mark">?
                     </span>.handle_application_call(context, argument, forwarded_sessions)
                     .<span class="kw">await</span><span class="question-mark">?
             </span>}
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmer&quot;</span>)]
             </span>WasmRuntime::Wasmer =&gt; {
-                <span class="self">self</span>.prepare_contract_runtime_with_wasmer(storage)<span class="question-mark">?
+                <span class="self">self</span>.prepare_contract_runtime_with_wasmer(runtime)<span class="question-mark">?
                     </span>.handle_application_call(context, argument, forwarded_sessions)
                     .<span class="kw">await</span><span class="question-mark">?
             </span>}
@@ -486,7 +486,7 @@
     <span class="kw">async fn </span>handle_session_call(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         context: <span class="kw-2">&amp;</span>CalleeContext,
-        storage: <span class="kw-2">&amp;</span><span class="kw">dyn </span>WritableStorage,
+        runtime: <span class="kw-2">&amp;</span><span class="kw">dyn </span>ContractRuntime,
         session_kind: u64,
         session_data: <span class="kw-2">&amp;mut </span>Vec&lt;u8&gt;,
         argument: <span class="kw-2">&amp;</span>[u8],
@@ -495,7 +495,7 @@
         <span class="kw">let </span>result = <span class="kw">match </span><span class="self">self</span>.runtime {
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
             </span>WasmRuntime::Wasmtime =&gt; {
-                <span class="self">self</span>.prepare_contract_runtime_with_wasmtime(storage)<span class="question-mark">?
+                <span class="self">self</span>.prepare_contract_runtime_with_wasmtime(runtime)<span class="question-mark">?
                     </span>.handle_session_call(
                         context,
                         session_kind,
@@ -507,7 +507,7 @@
             </span>}
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmer&quot;</span>)]
             </span>WasmRuntime::Wasmer =&gt; {
-                <span class="self">self</span>.prepare_contract_runtime_with_wasmer(storage)<span class="question-mark">?
+                <span class="self">self</span>.prepare_contract_runtime_with_wasmer(runtime)<span class="question-mark">?
                     </span>.handle_session_call(
                         context,
                         session_kind,
@@ -524,19 +524,19 @@
     <span class="kw">async fn </span>query_application(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         context: <span class="kw-2">&amp;</span>QueryContext,
-        storage: <span class="kw-2">&amp;</span><span class="kw">dyn </span>QueryableStorage,
+        runtime: <span class="kw-2">&amp;</span><span class="kw">dyn </span>ServiceRuntime,
         argument: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, ExecutionError&gt; {
         <span class="kw">let </span>result = <span class="kw">match </span><span class="self">self</span>.runtime {
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
             </span>WasmRuntime::Wasmtime =&gt; {
-                <span class="self">self</span>.prepare_service_runtime_with_wasmtime(storage)<span class="question-mark">?
+                <span class="self">self</span>.prepare_service_runtime_with_wasmtime(runtime)<span class="question-mark">?
                     </span>.query_application(context, argument)
                     .<span class="kw">await</span><span class="question-mark">?
             </span>}
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmer&quot;</span>)]
             </span>WasmRuntime::Wasmer =&gt; {
-                <span class="self">self</span>.prepare_service_runtime_with_wasmer(storage)<span class="question-mark">?
+                <span class="self">self</span>.prepare_service_runtime_with_wasmer(runtime)<span class="question-mark">?
                     </span>.query_application(context, argument)
                     .<span class="kw">await</span><span class="question-mark">?
             </span>}
