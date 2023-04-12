@@ -1145,6 +1145,12 @@
 <span id="1145">1145</span>
 <span id="1146">1146</span>
 <span id="1147">1147</span>
+<span id="1148">1148</span>
+<span id="1149">1149</span>
+<span id="1150">1150</span>
+<span id="1151">1151</span>
+<span id="1152">1152</span>
+<span id="1153">1153</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1781,6 +1787,7 @@
 <span class="attribute">#[derive(StructOpt)]
 </span><span class="kw">enum </span>WalletCommand {
     Show { chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt; },
+    SetDefault { chain_id: ChainId },
 }
 
 <span class="kw">struct </span>Job(ClientContext, ClientCommand);
@@ -2276,6 +2283,11 @@
         ClientCommand::Wallet(wallet_command) =&gt; <span class="kw">match </span>wallet_command {
             WalletCommand::Show { chain_id } =&gt; {
                 context.wallet_state.pretty_print(chain_id);
+                <span class="prelude-val">Ok</span>(())
+            }
+            WalletCommand::SetDefault { chain_id } =&gt; {
+                context.wallet_state.set_default_chain(chain_id)<span class="question-mark">?</span>;
+                context.save_wallet();
                 <span class="prelude-val">Ok</span>(())
             }
         },

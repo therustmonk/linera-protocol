@@ -92,9 +92,6 @@
 <span id="92">92</span>
 <span id="93">93</span>
 <span id="94">94</span>
-<span id="95">95</span>
-<span id="96">96</span>
-<span id="97">97</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -168,10 +165,7 @@
 
 <span class="doccomment">/// Macros used for the library.
 </span><span class="attribute">#[doc(hidden)]
-</span><span class="kw">pub use </span>{async_trait::async_trait, generic_array, serde, sha3};
-
-<span class="attribute">#[doc(hidden)]
-</span><span class="kw">pub use </span>linera_base::crypto;
+</span><span class="kw">pub use </span>{async_trait::async_trait, futures, generic_array, linera_base::crypto, serde, sha3};
 
 <span class="doccomment">/// Does nothing. Use the metrics feature to enable.
 </span><span class="attribute">#[cfg(not(feature = <span class="string">&quot;metrics&quot;</span>))]

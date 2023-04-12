@@ -840,6 +840,61 @@
 <span id="840">840</span>
 <span id="841">841</span>
 <span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
+<span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
+<span id="867">867</span>
+<span id="868">868</span>
+<span id="869">869</span>
+<span id="870">870</span>
+<span id="871">871</span>
+<span id="872">872</span>
+<span id="873">873</span>
+<span id="874">874</span>
+<span id="875">875</span>
+<span id="876">876</span>
+<span id="877">877</span>
+<span id="878">878</span>
+<span id="879">879</span>
+<span id="880">880</span>
+<span id="881">881</span>
+<span id="882">882</span>
+<span id="883">883</span>
+<span id="884">884</span>
+<span id="885">885</span>
+<span id="886">886</span>
+<span id="887">887</span>
+<span id="888">888</span>
+<span id="889">889</span>
+<span id="890">890</span>
+<span id="891">891</span>
+<span id="892">892</span>
+<span id="893">893</span>
+<span id="894">894</span>
+<span id="895">895</span>
+<span id="896">896</span>
+<span id="897">897</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -850,7 +905,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::util::{create_entry_name, snakify};
 <span class="kw">use </span>proc_macro::TokenStream;
 <span class="kw">use </span>proc_macro2::{Span, TokenStream <span class="kw">as </span>TokenStream2};
-<span class="kw">use </span>quote::quote;
+<span class="kw">use </span>quote::{format_ident, quote};
 <span class="kw">use </span>syn::{parse_macro_input, Field, GenericArgument, ItemStruct, PathArguments, Type, TypePath};
 
 <span class="kw">fn </span>get_seq_parameter(generics: syn::Generics) -&gt; Vec&lt;syn::Ident&gt; {
@@ -883,28 +938,45 @@
         .get(<span class="number">0</span>)
         .expect(<span class="string">&quot;failed to find the first generic parameter&quot;</span>);
 
-    <span class="kw">let </span><span class="kw-2">mut </span>names = Vec::new();
-    <span class="kw">let </span><span class="kw-2">mut </span>loades = Vec::new();
-    <span class="kw">let </span><span class="kw-2">mut </span>rollbackes = Vec::new();
-    <span class="kw">let </span><span class="kw-2">mut </span>flushes = Vec::new();
-    <span class="kw">let </span><span class="kw-2">mut </span>deletes = Vec::new();
-    <span class="kw">let </span><span class="kw-2">mut </span>cleares = Vec::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>name_quotes = Vec::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>load_future_quotes = Vec::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>load_ident_quotes = Vec::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>load_result_quotes = Vec::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>load_wasm_quotes = Vec::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>rollback_quotes = Vec::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>flush_quotes = Vec::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>delete_quotes = Vec::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>clear_quotes = Vec::new();
     <span class="kw">for </span>(idx, e) <span class="kw">in </span>input.fields.into_iter().enumerate() {
         <span class="kw">let </span>name = e.clone().ident.unwrap();
+        <span class="kw">let </span>fut = <span class="macro">format_ident!</span>(<span class="string">&quot;{}_fut&quot;</span>, name.to_string());
         <span class="kw">let </span>idx_lit = syn::LitInt::new(<span class="kw-2">&amp;</span>idx.to_string(), Span::call_site());
         <span class="kw">let </span>type_ident = get_type_field(e).expect(<span class="string">&quot;Failed to find the type&quot;</span>);
-        loades.push(<span class="macro">quote! </span>{
+        load_future_quotes.push(<span class="macro">quote! </span>{
+            <span class="kw">let </span>index = #idx_lit;
+            <span class="kw">let </span>base_key = context.derive_key(<span class="kw-2">&amp;</span>index)<span class="question-mark">?</span>;
+            <span class="kw">let </span>#fut = #type_ident::load(context.clone_with_base_key(base_key));
+        });
+        load_ident_quotes.push(<span class="macro">quote! </span>{
+            #fut
+        });
+        load_result_quotes.push(<span class="macro">quote! </span>{
+            <span class="kw">let </span>#name = result.#idx_lit<span class="question-mark">?</span>;
+        });
+        load_wasm_quotes.push(<span class="macro">quote! </span>{
             <span class="kw">let </span>index = #idx_lit;
             <span class="kw">let </span>base_key = context.derive_key(<span class="kw-2">&amp;</span>index)<span class="question-mark">?</span>;
             <span class="kw">let </span>#name = #type_ident::load(context.clone_with_base_key(base_key)).<span class="kw">await</span><span class="question-mark">?</span>;
         });
-        names.push(<span class="macro">quote! </span>{ #name });
-        rollbackes.push(<span class="macro">quote! </span>{ <span class="self">self</span>.#name.rollback(); });
-        flushes.push(<span class="macro">quote! </span>{ <span class="self">self</span>.#name.flush(batch)<span class="question-mark">?</span>; });
-        deletes.push(<span class="macro">quote! </span>{ <span class="self">self</span>.#name.delete(batch); });
-        cleares.push(<span class="macro">quote! </span>{ <span class="self">self</span>.#name.clear(); });
+        name_quotes.push(<span class="macro">quote! </span>{ #name });
+        rollback_quotes.push(<span class="macro">quote! </span>{ <span class="self">self</span>.#name.rollback(); });
+        flush_quotes.push(<span class="macro">quote! </span>{ <span class="self">self</span>.#name.flush(batch)<span class="question-mark">?</span>; });
+        delete_quotes.push(<span class="macro">quote! </span>{ <span class="self">self</span>.#name.delete(batch); });
+        clear_quotes.push(<span class="macro">quote! </span>{ <span class="self">self</span>.#name.clear(); });
     }
-    <span class="kw">let </span>first_name = names.get(<span class="number">0</span>).expect(<span class="string">&quot;list of names should be non-empty&quot;</span>);
+    <span class="kw">let </span>first_name_quote = name_quotes
+        .get(<span class="number">0</span>)
+        .expect(<span class="string">&quot;list of names should be non-empty&quot;</span>);
 
     <span class="kw">let </span>increment_counter = <span class="kw">if </span>root {
         <span class="macro">quote! </span>{
@@ -918,7 +990,9 @@
         <span class="macro">quote! </span>{}
     };
 
-    <span class="macro">quote! </span>{
+    <span class="comment">// See TODO(#599) for the problem that we have with respect to the use of
+    // true async code for loading.
+    </span><span class="macro">quote! </span>{
         <span class="attribute">#[async_trait::async_trait]
         </span><span class="kw">impl </span>#generics linera_views::views::View&lt;#first_generic&gt; <span class="kw">for </span>#struct_name #generics
         <span class="kw">where
@@ -926,30 +1000,41 @@
             linera_views::views::ViewError: From&lt;#first_generic::Error&gt;,
         {
             <span class="kw">fn </span>context(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>#first_generic {
-                <span class="self">self</span>.#first_name.context()
+                <span class="self">self</span>.#first_name_quote.context()
             }
 
-            <span class="kw">async fn </span>load(context: #first_generic) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, linera_views::views::ViewError&gt; {
+            <span class="attribute">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
+            </span><span class="kw">async fn </span>load(context: #first_generic) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, linera_views::views::ViewError&gt; {
                 #increment_counter
-                #(#loades)*
-                <span class="prelude-val">Ok</span>(<span class="self">Self </span>{#(#names),<span class="kw-2">*</span>})
+                <span class="kw">use </span>linera_views::futures::join;
+                #(#load_future_quotes)*
+                <span class="kw">let </span>result = <span class="macro">join!</span>(#(#load_ident_quotes),<span class="kw-2">*</span>);
+                #(#load_result_quotes)*
+                <span class="prelude-val">Ok</span>(<span class="self">Self </span>{#(#name_quotes),<span class="kw-2">*</span>})
+            }
+
+            <span class="attribute">#[cfg(target_arch = <span class="string">&quot;wasm32&quot;</span>)]
+            </span><span class="kw">async fn </span>load(context: #first_generic) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, linera_views::views::ViewError&gt; {
+                #increment_counter
+                #(#load_wasm_quotes)*
+                <span class="prelude-val">Ok</span>(<span class="self">Self </span>{#(#name_quotes),<span class="kw-2">*</span>})
             }
 
             <span class="kw">fn </span>rollback(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-                #(#rollbackes)*
+                #(#rollback_quotes)*
             }
 
             <span class="kw">fn </span>flush(<span class="kw-2">&amp;mut </span><span class="self">self</span>, batch: <span class="kw-2">&amp;mut </span>linera_views::batch::Batch) -&gt; <span class="prelude-ty">Result</span>&lt;(), linera_views::views::ViewError&gt; {
-                #(#flushes)*
+                #(#flush_quotes)*
                 <span class="prelude-val">Ok</span>(())
             }
 
             <span class="kw">fn </span>delete(<span class="self">self</span>, batch: <span class="kw-2">&amp;mut </span>linera_views::batch::Batch) {
-                #(#deletes)*
+                #(#delete_quotes)*
             }
 
             <span class="kw">fn </span>clear(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-                #(#cleares)*
+                #(#clear_quotes)*
             }
         }
     }
@@ -1408,7 +1493,32 @@
                 <span class="kw">fn </span>context(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>C {
                     <span class="self">self</span>.register.context()
                 }
-                <span class="kw">async fn </span>load(context: C) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, linera_views::views::ViewError&gt; {
+                <span class="attribute">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
+                </span><span class="kw">async fn </span>load(context: C) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, linera_views::views::ViewError&gt; {
+                    linera_views::increment_counter(
+                        linera_views::LOAD_VIEW_COUNTER,
+                        <span class="macro">stringify!</span>(TestView),
+                        <span class="kw-2">&amp;</span>context.base_key(),
+                    );
+                    <span class="kw">use </span>linera_views::futures::join;
+                    <span class="kw">let </span>index = <span class="number">0</span>;
+                    <span class="kw">let </span>base_key = context.derive_key(<span class="kw-2">&amp;</span>index)<span class="question-mark">?</span>;
+                    <span class="kw">let </span>register_fut =
+                        RegisterView::load(context.clone_with_base_key(base_key));
+                    <span class="kw">let </span>index = <span class="number">1</span>;
+                    <span class="kw">let </span>base_key = context.derive_key(<span class="kw-2">&amp;</span>index)<span class="question-mark">?</span>;
+                    <span class="kw">let </span>collection_fut =
+                        CollectionView::load(context.clone_with_base_key(base_key));
+                    <span class="kw">let </span>result = <span class="macro">join!</span>(register_fut, collection_fut);
+                    <span class="kw">let </span>register = result.<span class="number">0</span><span class="question-mark">?</span>;
+                    <span class="kw">let </span>collection = result.<span class="number">1</span><span class="question-mark">?</span>;
+                    <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+                        register,
+                        collection
+                    })
+                }
+                <span class="attribute">#[cfg(target_arch = <span class="string">&quot;wasm32&quot;</span>)]
+                </span><span class="kw">async fn </span>load(context: C) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, linera_views::views::ViewError&gt; {
                     linera_views::increment_counter(
                         linera_views::LOAD_VIEW_COUNTER,
                         <span class="macro">stringify!</span>(TestView),
