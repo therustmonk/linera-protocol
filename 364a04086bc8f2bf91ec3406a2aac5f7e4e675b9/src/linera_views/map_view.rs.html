@@ -1320,14 +1320,6 @@
 <span id="1320">1320</span>
 <span id="1321">1321</span>
 <span id="1322">1322</span>
-<span id="1323">1323</span>
-<span id="1324">1324</span>
-<span id="1325">1325</span>
-<span id="1326">1326</span>
-<span id="1327">1327</span>
-<span id="1328">1328</span>
-<span id="1329">1329</span>
-<span id="1330">1330</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -2630,32 +2622,24 @@
     <span class="kw">use </span>std::borrow::Borrow;
 
     <span class="kw">fn </span>check_str&lt;T: Borrow&lt;str&gt;&gt;(s: T) {
-        <span class="kw">let </span><span class="kw-2">mut </span>ser1 = Vec::new();
-        bcs::serialize_into(<span class="kw-2">&amp;mut </span>ser1, <span class="string">&quot;Hello&quot;</span>).unwrap();
-        <span class="kw">let </span><span class="kw-2">mut </span>ser2 = Vec::new();
-        bcs::serialize_into(<span class="kw-2">&amp;mut </span>ser2, s.borrow()).unwrap();
+        <span class="kw">let </span>ser1 = bcs::to_bytes(<span class="string">&quot;Hello&quot;</span>).unwrap();
+        <span class="kw">let </span>ser2 = bcs::to_bytes(s.borrow()).unwrap();
         <span class="macro">assert_eq!</span>(ser1, ser2);
     }
 
     <span class="kw">fn </span>check_array_u8&lt;T: Borrow&lt;[u8]&gt;&gt;(v: T) {
-        <span class="kw">let </span><span class="kw-2">mut </span>ser1 = Vec::new();
-        bcs::serialize_into(<span class="kw-2">&amp;mut </span>ser1, <span class="kw-2">&amp;</span><span class="macro">vec!</span>[<span class="number">23_u8</span>, <span class="number">67_u8</span>, <span class="number">123_u8</span>]).unwrap();
-        <span class="kw">let </span><span class="kw-2">mut </span>ser2 = Vec::new();
-        bcs::serialize_into(<span class="kw-2">&amp;mut </span>ser2, <span class="kw-2">&amp;</span>v.borrow()).unwrap();
+        <span class="kw">let </span>ser1 = bcs::to_bytes(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[<span class="number">23_u8</span>, <span class="number">67_u8</span>, <span class="number">123_u8</span>]).unwrap();
+        <span class="kw">let </span>ser2 = bcs::to_bytes(<span class="kw-2">&amp;</span>v.borrow()).unwrap();
         <span class="macro">assert_eq!</span>(ser1, ser2);
     }
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>test_serialization_borrow() {
-        <span class="kw">let </span>s = <span class="string">&quot;Hello&quot;</span>.to_string();
-        check_str(s);
-        <span class="kw">let </span>s = <span class="string">&quot;Hello&quot;</span>;
-        check_str(s);
+        check_str(<span class="string">&quot;Hello&quot;</span>.to_string());
+        check_str(<span class="string">&quot;Hello&quot;</span>);
         <span class="comment">//
-        </span><span class="kw">let </span>v = <span class="macro">vec!</span>[<span class="number">23</span>, <span class="number">67</span>, <span class="number">123</span>];
-        check_array_u8(v);
-        <span class="kw">let </span>v = [<span class="number">23</span>, <span class="number">67</span>, <span class="number">123</span>];
-        check_array_u8(v);
+        </span>check_array_u8(<span class="macro">vec!</span>[<span class="number">23</span>, <span class="number">67</span>, <span class="number">123</span>]);
+        check_array_u8([<span class="number">23</span>, <span class="number">67</span>, <span class="number">123</span>]);
     }
 }
 </code></pre></div>

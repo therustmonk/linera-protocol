@@ -488,8 +488,6 @@
 <span id="488">488</span>
 <span id="489">489</span>
 <span id="490">490</span>
-<span id="491">491</span>
-<span id="492">492</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -865,9 +863,7 @@
     }
 
     <span class="kw">fn </span>derive_short_key&lt;I: Serialize + <span class="question-mark">?</span>Sized&gt;(index: <span class="kw-2">&amp;</span>I) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, <span class="self">Self</span>::Error&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>key = Vec::new();
-        bcs::serialize_into(<span class="kw-2">&amp;mut </span>key, index)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(key)
+        <span class="prelude-val">Ok</span>(bcs::to_bytes(index)<span class="question-mark">?</span>)
     }
 
     <span class="kw">fn </span>deserialize_value&lt;Item: DeserializeOwned&gt;(bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Item, <span class="self">Self</span>::Error&gt; {
