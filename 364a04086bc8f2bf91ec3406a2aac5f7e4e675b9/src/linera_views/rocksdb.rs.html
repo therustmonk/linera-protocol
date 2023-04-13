@@ -174,16 +174,97 @@
 <span id="174">174</span>
 <span id="175">175</span>
 <span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="kw">use crate</span>::{
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;lru_caching&quot;</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::lru_caching::LruCachingKeyValueClient;
+<span class="kw">use crate</span>::{
     batch::{Batch, WriteOperation},
     common::{get_upper_bound, ContextFromDb, KeyValueStoreClient},
 };
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>std::{
     ops::{Bound, Bound::Excluded},
+    path::Path,
     sync::Arc,
 };
 <span class="kw">use </span>thiserror::Error;
@@ -191,14 +272,56 @@
 <span class="doccomment">/// The RocksDb client in use.
 </span><span class="kw">pub type </span>DB = rocksdb::DBWithThreadMode&lt;rocksdb::MultiThreaded&gt;;
 
+<span class="doccomment">/// The internal client
+</span><span class="kw">pub type </span>DbInternal = Arc&lt;DB&gt;;
+
 <span class="doccomment">/// A shared DB client for RocksDB.
-</span><span class="kw">pub type </span>RocksdbClient = Arc&lt;DB&gt;;
+</span><span class="attribute">#[cfg(not(feature = <span class="string">&quot;lru_caching&quot;</span>))]
+#[derive(Clone)]
+</span><span class="kw">pub struct </span>RocksdbClient {
+    client: DbInternal,
+}
+
+<span class="doccomment">/// A shared DB client for RocksDB implementing LruCaching
+</span><span class="attribute">#[cfg(feature = <span class="string">&quot;lru_caching&quot;</span>)]
+#[derive(Clone)]
+</span><span class="kw">pub struct </span>RocksdbClient {
+    client: LruCachingKeyValueClient&lt;DbInternal&gt;,
+}
+
+<span class="attribute">#[cfg(not(feature = <span class="string">&quot;lru_caching&quot;</span>))]
+</span><span class="kw">impl </span>RocksdbClient {
+    <span class="doccomment">/// Creates a rocksdb database from a specified path
+    </span><span class="kw">pub fn </span>new&lt;P: AsRef&lt;Path&gt;&gt;(path: P) -&gt; RocksdbClient {
+        <span class="kw">let </span><span class="kw-2">mut </span>options = rocksdb::Options::default();
+        options.create_if_missing(<span class="bool-val">true</span>);
+        <span class="kw">let </span>db = DB::open(<span class="kw-2">&amp;</span>options, path).unwrap();
+        <span class="self">Self </span>{
+            client: Arc::new(db),
+        }
+    }
+}
+
+<span class="attribute">#[cfg(feature = <span class="string">&quot;lru_caching&quot;</span>)]
+</span><span class="kw">impl </span>RocksdbClient {
+    <span class="doccomment">/// Creates a rocksdb database from a specified path
+    </span><span class="kw">pub fn </span>new&lt;P: AsRef&lt;Path&gt;&gt;(path: P) -&gt; RocksdbClient {
+        <span class="kw">let </span><span class="kw-2">mut </span>options = rocksdb::Options::default();
+        options.create_if_missing(<span class="bool-val">true</span>);
+        <span class="kw">let </span>db = DB::open(<span class="kw-2">&amp;</span>options, path).unwrap();
+        <span class="kw">let </span>client = Arc::new(db);
+        <span class="kw">let </span>cache_size = <span class="number">1000</span>;
+        <span class="self">Self </span>{
+            client: LruCachingKeyValueClient::new(client, cache_size),
+        }
+    }
+}
 
 <span class="doccomment">/// An implementation of [`crate::common::Context`] based on Rocksdb
 </span><span class="kw">pub type </span>RocksdbContext&lt;E&gt; = ContextFromDb&lt;E, RocksdbClient&gt;;
 
 <span class="attribute">#[async_trait]
-</span><span class="kw">impl </span>KeyValueStoreClient <span class="kw">for </span>RocksdbClient {
+</span><span class="kw">impl </span>KeyValueStoreClient <span class="kw">for </span>DbInternal {
     <span class="kw">type </span>Error = RocksdbContextError;
     <span class="kw">type </span>Keys = Vec&lt;Vec&lt;u8&gt;&gt;;
     <span class="kw">type </span>KeyValues = Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt;;
@@ -313,6 +436,39 @@
     <span class="kw">async fn </span>clear_journal(<span class="kw-2">&amp;</span><span class="self">self</span>, _base_key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt; {
         <span class="prelude-val">Ok</span>(())
     }
+}
+
+<span class="attribute">#[async_trait]
+</span><span class="kw">impl </span>KeyValueStoreClient <span class="kw">for </span>RocksdbClient {
+    <span class="kw">type </span>Error = RocksdbContextError;
+    <span class="kw">type </span>Keys = Vec&lt;Vec&lt;u8&gt;&gt;;
+    <span class="kw">type </span>KeyValues = Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt;;
+
+    <span class="kw">async fn </span>read_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, RocksdbContextError&gt; {
+        <span class="self">self</span>.client.read_key_bytes(key).<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>find_keys_by_prefix(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        key_prefix: <span class="kw-2">&amp;</span>[u8],
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Keys, RocksdbContextError&gt; {
+        <span class="self">self</span>.client.find_keys_by_prefix(key_prefix).<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>find_key_values_by_prefix(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        key_prefix: <span class="kw-2">&amp;</span>[u8],
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::KeyValues, RocksdbContextError&gt; {
+        <span class="self">self</span>.client.find_key_values_by_prefix(key_prefix).<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>write_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, batch: Batch, base_key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), RocksdbContextError&gt; {
+        <span class="self">self</span>.client.write_batch(batch, base_key).<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>clear_journal(<span class="kw-2">&amp;</span><span class="self">self</span>, base_key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt; {
+        <span class="self">self</span>.client.clear_journal(base_key).<span class="kw">await
+    </span>}
 }
 
 <span class="kw">impl</span>&lt;E: Clone + Send + Sync&gt; RocksdbContext&lt;E&gt; {

@@ -1491,7 +1491,7 @@
 
 <span class="kw">impl</span>&lt;C, V&gt; ByteMapView&lt;C, V&gt;
 <span class="kw">where
-    </span>C: Context,
+    </span>C: Context + Sync,
     ViewError: From&lt;C::Error&gt;,
     V: Clone + DeserializeOwned + <span class="lifetime">&#39;static</span>,
 {
@@ -1804,7 +1804,7 @@
 
 <span class="kw">impl</span>&lt;C, V&gt; ByteMapView&lt;C, V&gt;
 <span class="kw">where
-    </span>C: Context,
+    </span>C: Context + Sync,
     ViewError: From&lt;C::Error&gt;,
     V: Default + DeserializeOwned + <span class="lifetime">&#39;static</span>,
 {
@@ -1933,7 +1933,7 @@
 
 <span class="kw">impl</span>&lt;C, I, V&gt; MapView&lt;C, I, V&gt;
 <span class="kw">where
-    </span>C: Context,
+    </span>C: Context + Sync,
     ViewError: From&lt;C::Error&gt;,
     I: Serialize,
 {
@@ -1989,7 +1989,7 @@
 
 <span class="kw">impl</span>&lt;C, I, V&gt; MapView&lt;C, I, V&gt;
 <span class="kw">where
-    </span>C: Context,
+    </span>C: Context + Sync,
     ViewError: From&lt;C::Error&gt;,
     I: Serialize,
     V: Clone + DeserializeOwned + <span class="lifetime">&#39;static</span>,
@@ -2043,7 +2043,7 @@
 
 <span class="kw">impl</span>&lt;C, I, V&gt; MapView&lt;C, I, V&gt;
 <span class="kw">where
-    </span>C: Context,
+    </span>C: Context + Sync,
     ViewError: From&lt;C::Error&gt;,
     I: Sync + Send + Serialize + DeserializeOwned,
     V: Sync + Serialize + DeserializeOwned + <span class="lifetime">&#39;static</span>,
@@ -2205,7 +2205,7 @@
 
 <span class="kw">impl</span>&lt;C, I, V&gt; MapView&lt;C, I, V&gt;
 <span class="kw">where
-    </span>C: Context,
+    </span>C: Context + Sync,
     ViewError: From&lt;C::Error&gt;,
     I: Serialize,
     V: Default + DeserializeOwned + <span class="lifetime">&#39;static</span>,
@@ -2298,7 +2298,7 @@
 
 <span class="kw">impl</span>&lt;C, I, V&gt; CustomMapView&lt;C, I, V&gt;
 <span class="kw">where
-    </span>C: Context,
+    </span>C: Context + Sync,
     ViewError: From&lt;C::Error&gt;,
     I: CustomSerialize,
 {
@@ -2354,7 +2354,7 @@
 
 <span class="kw">impl</span>&lt;C, I, V&gt; CustomMapView&lt;C, I, V&gt;
 <span class="kw">where
-    </span>C: Context,
+    </span>C: Context + Sync,
     ViewError: From&lt;C::Error&gt;,
     I: CustomSerialize,
     V: Clone + DeserializeOwned + <span class="lifetime">&#39;static</span>,
@@ -2407,7 +2407,7 @@
 
 <span class="kw">impl</span>&lt;C, I, V&gt; CustomMapView&lt;C, I, V&gt;
 <span class="kw">where
-    </span>C: Context,
+    </span>C: Context + Sync,
     ViewError: From&lt;C::Error&gt;,
     I: Sync + Send + CustomSerialize,
     V: Sync + Serialize + DeserializeOwned + <span class="lifetime">&#39;static</span>,
@@ -2571,7 +2571,7 @@
 
 <span class="kw">impl</span>&lt;C, I, V&gt; CustomMapView&lt;C, I, V&gt;
 <span class="kw">where
-    </span>C: Context,
+    </span>C: Context + Sync,
     ViewError: From&lt;C::Error&gt;,
     I: CustomSerialize,
     V: Default + DeserializeOwned + <span class="lifetime">&#39;static</span>,

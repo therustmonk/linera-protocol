@@ -488,6 +488,29 @@
 <span id="488">488</span>
 <span id="489">489</span>
 <span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -504,11 +527,13 @@
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>serde::{de::DeserializeOwned, Serialize};
 <span class="kw">use </span>std::{
-    fmt::Debug,
+    fmt::{Debug, Display},
+    future::Future,
     ops::{
         Bound,
         Bound::{Excluded, Included, Unbounded},
     },
+    time::{Duration, Instant},
 };
 
 <span class="attribute">#[cfg(test)]
@@ -722,38 +747,6 @@
     <span class="doccomment">/// Return type for key-value search operations.
     </span><span class="kw">type </span>KeyValues: KeyValueIterable&lt;<span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Getter for the user provided data.
-    </span><span class="kw">fn </span>extra(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Extra;
-
-    <span class="doccomment">/// Getter for the address of the current entry (aka the base_key).
-    </span><span class="kw">fn </span>base_key(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;u8&gt;;
-
-    <span class="doccomment">/// Concatenates the base_key and tag.
-    </span><span class="kw">fn </span>base_tag(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: u8) -&gt; Vec&lt;u8&gt;;
-
-    <span class="doccomment">/// Concatenates the base_key, tag and index.
-    </span><span class="kw">fn </span>base_tag_index(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: u8, index: <span class="kw-2">&amp;</span>[u8]) -&gt; Vec&lt;u8&gt;;
-
-    <span class="doccomment">/// Obtains the `Vec&lt;u8&gt;` key from the key by serialization and using the base_key.
-    </span><span class="kw">fn </span>derive_key&lt;I: Serialize&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, index: <span class="kw-2">&amp;</span>I) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, <span class="self">Self</span>::Error&gt;;
-
-    <span class="doccomment">/// Obtains the `Vec&lt;u8&gt;` key from the key by serialization and using the `base_key`.
-    </span><span class="kw">fn </span>derive_tag_key&lt;I: Serialize&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: u8, index: <span class="kw-2">&amp;</span>I) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, <span class="self">Self</span>::Error&gt;;
-
-    <span class="doccomment">/// Obtains the short `Vec&lt;u8&gt;` key from the key by serialization.
-    </span><span class="kw">fn </span>derive_short_key&lt;I: Serialize + <span class="question-mark">?</span>Sized&gt;(index: <span class="kw-2">&amp;</span>I) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, <span class="self">Self</span>::Error&gt;;
-
-    <span class="doccomment">/// Deserialize `bytes` into type `Item`.
-    </span><span class="kw">fn </span>deserialize_value&lt;Item: DeserializeOwned&gt;(bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Item, <span class="self">Self</span>::Error&gt;;
-
-    <span class="doccomment">/// Retrieves a generic `Item` from the database using the provided `key` prefixed by the current
-    /// context.
-    /// The `Item` is deserialized using [`bcs`].
-    </span><span class="kw">async fn </span>read_key&lt;Item: DeserializeOwned&gt;(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        key: <span class="kw-2">&amp;</span>[u8],
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Item&gt;, <span class="self">Self</span>::Error&gt;;
-
     <span class="doccomment">/// Retrieves a `Vec&lt;u8&gt;` from the database using the provided `key` prefixed by the current
     /// context.
     </span><span class="kw">async fn </span>read_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, <span class="self">Self</span>::Error&gt;;
@@ -770,8 +763,78 @@
     <span class="doccomment">/// Applies the operations from the `batch`, persisting the changes.
     </span><span class="kw">async fn </span>write_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, batch: Batch) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;;
 
+    <span class="doccomment">/// Getter for the user provided data.
+    </span><span class="kw">fn </span>extra(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Extra;
+
     <span class="doccomment">/// Obtains a similar [`Context`] implementation with a different base key.
     </span><span class="kw">fn </span>clone_with_base_key(<span class="kw-2">&amp;</span><span class="self">self</span>, base_key: Vec&lt;u8&gt;) -&gt; <span class="self">Self</span>;
+
+    <span class="doccomment">/// Getter for the address of the current entry (aka the base_key).
+    </span><span class="kw">fn </span>base_key(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;u8&gt;;
+
+    <span class="doccomment">/// Concatenates the base_key and tag.
+    </span><span class="kw">fn </span>base_tag(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: u8) -&gt; Vec&lt;u8&gt; {
+        <span class="macro">assert!</span>(tag &gt;= MIN_VIEW_TAG, <span class="string">&quot;tag should be at least MIN_VIEW_TAG&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>key = <span class="self">self</span>.base_key();
+        key.extend([tag]);
+        key
+    }
+
+    <span class="doccomment">/// Concatenates the base_key, tag and index.
+    </span><span class="kw">fn </span>base_tag_index(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: u8, index: <span class="kw-2">&amp;</span>[u8]) -&gt; Vec&lt;u8&gt; {
+        <span class="macro">assert!</span>(tag &gt;= MIN_VIEW_TAG, <span class="string">&quot;tag should be at least MIN_VIEW_TAG&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>key = <span class="self">self</span>.base_key();
+        key.extend([tag]);
+        key.extend_from_slice(index);
+        key
+    }
+
+    <span class="doccomment">/// Obtains the `Vec&lt;u8&gt;` key from the key by serialization and using the base_key.
+    </span><span class="kw">fn </span>derive_key&lt;I: Serialize&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, index: <span class="kw-2">&amp;</span>I) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, <span class="self">Self</span>::Error&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>key = <span class="self">self</span>.base_key();
+        bcs::serialize_into(<span class="kw-2">&amp;mut </span>key, index)<span class="question-mark">?</span>;
+        <span class="macro">assert!</span>(
+            key.len() &gt; <span class="self">self</span>.base_key().len(),
+            <span class="string">&quot;Empty indices are not allowed&quot;
+        </span>);
+        <span class="prelude-val">Ok</span>(key)
+    }
+
+    <span class="doccomment">/// Obtains the `Vec&lt;u8&gt;` key from the key by serialization and using the `base_key`.
+    </span><span class="kw">fn </span>derive_tag_key&lt;I: Serialize&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: u8, index: <span class="kw-2">&amp;</span>I) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, <span class="self">Self</span>::Error&gt; {
+        <span class="macro">assert!</span>(tag &gt;= MIN_VIEW_TAG, <span class="string">&quot;tag should be at least MIN_VIEW_TAG&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>key = <span class="self">self</span>.base_key();
+        key.extend([tag]);
+        bcs::serialize_into(<span class="kw-2">&amp;mut </span>key, index)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(key)
+    }
+
+    <span class="doccomment">/// Obtains the short `Vec&lt;u8&gt;` key from the key by serialization.
+    </span><span class="kw">fn </span>derive_short_key&lt;I: Serialize + <span class="question-mark">?</span>Sized&gt;(index: <span class="kw-2">&amp;</span>I) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, <span class="self">Self</span>::Error&gt; {
+        <span class="prelude-val">Ok</span>(bcs::to_bytes(index)<span class="question-mark">?</span>)
+    }
+
+    <span class="doccomment">/// Deserialize `bytes` into type `Item`.
+    </span><span class="kw">fn </span>deserialize_value&lt;Item: DeserializeOwned&gt;(bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Item, <span class="self">Self</span>::Error&gt; {
+        <span class="kw">let </span>value = bcs::from_bytes(bytes)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(value)
+    }
+
+    <span class="doccomment">/// Retrieves a generic `Item` from the database using the provided `key` prefixed by the current
+    /// context.
+    /// The `Item` is deserialized using [`bcs`].
+    </span><span class="kw">async fn </span>read_key&lt;Item&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Item&gt;, <span class="self">Self</span>::Error&gt;
+    <span class="kw">where
+        </span>Item: DeserializeOwned,
+    {
+        <span class="kw">match </span><span class="self">self</span>.read_key_bytes(key).<span class="kw">await</span><span class="question-mark">? </span>{
+            <span class="prelude-val">Some</span>(bytes) =&gt; {
+                <span class="kw">let </span>value = bcs::from_bytes(<span class="kw-2">&amp;</span>bytes)<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(value))
+            }
+            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+        }
+    }
 }
 
 <span class="doccomment">/// Implementation of the [`Context`] trait on top of a DB client implementing
@@ -808,6 +871,31 @@
     }
 }
 
+<span class="kw">async fn </span>time_async&lt;F, O&gt;(f: F) -&gt; (O, Duration)
+<span class="kw">where
+    </span>F: Future&lt;Output = O&gt;,
+{
+    <span class="kw">let </span>start = Instant::now();
+    <span class="kw">let </span>out = f.<span class="kw">await</span>;
+    <span class="kw">let </span>duration = start.elapsed();
+    (out, duration)
+}
+
+<span class="kw">async fn </span>log_time_async&lt;F, D, O&gt;(f: F, name: D) -&gt; O
+<span class="kw">where
+    </span>F: Future&lt;Output = O&gt;,
+    D: Display,
+{
+    <span class="kw">if </span><span class="macro">cfg!</span>(feature = <span class="string">&quot;db_timings&quot;</span>) {
+        <span class="kw">let </span>(out, duration) = time_async(f).<span class="kw">await</span>;
+        <span class="kw">let </span>duration = duration.as_nanos();
+        <span class="macro">println!</span>(<span class="string">&quot;|{name}|={duration:?}&quot;</span>);
+        out
+    } <span class="kw">else </span>{
+        f.<span class="kw">await
+    </span>}
+}
+
 <span class="attribute">#[async_trait]
 </span><span class="kw">impl</span>&lt;E, DB&gt; Context <span class="kw">for </span>ContextFromDb&lt;E, DB&gt;
 <span class="kw">where
@@ -829,74 +917,32 @@
         <span class="self">self</span>.base_key.clone()
     }
 
-    <span class="kw">fn </span>base_tag(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: u8) -&gt; Vec&lt;u8&gt; {
-        <span class="macro">assert!</span>(tag &gt;= MIN_VIEW_TAG, <span class="string">&quot;tag should be at least MIN_VIEW_TAG&quot;</span>);
-        <span class="kw">let </span><span class="kw-2">mut </span>key = <span class="self">self</span>.base_key.clone();
-        key.extend([tag]);
-        key
-    }
-
-    <span class="kw">fn </span>base_tag_index(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: u8, index: <span class="kw-2">&amp;</span>[u8]) -&gt; Vec&lt;u8&gt; {
-        <span class="macro">assert!</span>(tag &gt;= MIN_VIEW_TAG, <span class="string">&quot;tag should be at least MIN_VIEW_TAG&quot;</span>);
-        <span class="kw">let </span><span class="kw-2">mut </span>key = <span class="self">self</span>.base_key.clone();
-        key.extend([tag]);
-        key.extend_from_slice(index);
-        key
-    }
-
-    <span class="kw">fn </span>derive_key&lt;I: Serialize&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, index: <span class="kw-2">&amp;</span>I) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, <span class="self">Self</span>::Error&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>key = <span class="self">self</span>.base_key.clone();
-        bcs::serialize_into(<span class="kw-2">&amp;mut </span>key, index)<span class="question-mark">?</span>;
-        <span class="macro">assert!</span>(
-            key.len() &gt; <span class="self">self</span>.base_key.len(),
-            <span class="string">&quot;Empty indices are not allowed&quot;
-        </span>);
-        <span class="prelude-val">Ok</span>(key)
-    }
-
-    <span class="kw">fn </span>derive_tag_key&lt;I: Serialize&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, tag: u8, index: <span class="kw-2">&amp;</span>I) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, <span class="self">Self</span>::Error&gt; {
-        <span class="macro">assert!</span>(tag &gt;= MIN_VIEW_TAG, <span class="string">&quot;tag should be at least MIN_VIEW_TAG&quot;</span>);
-        <span class="kw">let </span><span class="kw-2">mut </span>key = <span class="self">self</span>.base_key.clone();
-        key.extend([tag]);
-        bcs::serialize_into(<span class="kw-2">&amp;mut </span>key, index)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(key)
-    }
-
-    <span class="kw">fn </span>derive_short_key&lt;I: Serialize + <span class="question-mark">?</span>Sized&gt;(index: <span class="kw-2">&amp;</span>I) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, <span class="self">Self</span>::Error&gt; {
-        <span class="prelude-val">Ok</span>(bcs::to_bytes(index)<span class="question-mark">?</span>)
-    }
-
-    <span class="kw">fn </span>deserialize_value&lt;Item: DeserializeOwned&gt;(bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Item, <span class="self">Self</span>::Error&gt; {
-        <span class="kw">let </span>value = bcs::from_bytes(bytes)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(value)
-    }
-
-    <span class="kw">async fn </span>read_key&lt;Item&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Item&gt;, <span class="self">Self</span>::Error&gt;
-    <span class="kw">where
-        </span>Item: DeserializeOwned,
-    {
-        <span class="self">self</span>.db.read_key(key).<span class="kw">await
-    </span>}
-
     <span class="kw">async fn </span>read_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, <span class="self">Self</span>::Error&gt; {
-        <span class="self">self</span>.db.read_key_bytes(key).<span class="kw">await
+        log_time_async(<span class="self">self</span>.db.read_key_bytes(key), <span class="string">&quot;read_key_bytes&quot;</span>).<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>find_keys_by_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Keys, <span class="self">Self</span>::Error&gt; {
-        <span class="self">self</span>.db.find_keys_by_prefix(key_prefix).<span class="kw">await
+        log_time_async(
+            <span class="self">self</span>.db.find_keys_by_prefix(key_prefix),
+            <span class="string">&quot;find_keys_by_prefix&quot;</span>,
+        )
+        .<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>find_key_values_by_prefix(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         key_prefix: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::KeyValues, <span class="self">Self</span>::Error&gt; {
-        <span class="self">self</span>.db.find_key_values_by_prefix(key_prefix).<span class="kw">await
+        log_time_async(
+            <span class="self">self</span>.db.find_key_values_by_prefix(key_prefix),
+            <span class="string">&quot;find_key_values_by_prefix&quot;</span>,
+        )
+        .<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>write_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, batch: Batch) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt; {
-        <span class="self">self</span>.db.write_batch(batch, <span class="kw-2">&amp;</span><span class="self">self</span>.base_key).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(())
-    }
+        log_time_async(<span class="self">self</span>.db.write_batch(batch, <span class="kw-2">&amp;</span><span class="self">self</span>.base_key), <span class="string">&quot;write_batch&quot;</span>).<span class="kw">await
+    </span>}
 
     <span class="kw">fn </span>clone_with_base_key(<span class="kw-2">&amp;</span><span class="self">self</span>, base_key: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
