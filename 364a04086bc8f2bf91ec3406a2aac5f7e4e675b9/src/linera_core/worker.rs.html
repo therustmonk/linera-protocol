@@ -2254,7 +2254,7 @@
         }
         <span class="kw">if </span>skipped_len &gt; <span class="number">0 </span>{
             <span class="kw">let </span>sample_block = certificates[skipped_len - <span class="number">1</span>].value.block();
-            <span class="macro">tracing::warn!</span>(
+            <span class="macro">tracing::info!</span>(
                 <span class="string">&quot;[{}] Ignoring repeated messages to {recipient:?} from {origin:?} at height {}&quot;</span>,
                 <span class="self">self</span>.nickname,
                 sample_block.height,

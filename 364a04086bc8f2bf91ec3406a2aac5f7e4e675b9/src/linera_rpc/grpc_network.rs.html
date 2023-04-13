@@ -622,13 +622,6 @@
 <span id="622">622</span>
 <span id="623">623</span>
 <span id="624">624</span>
-<span id="625">625</span>
-<span id="626">626</span>
-<span id="627">627</span>
-<span id="628">628</span>
-<span id="629">629</span>
-<span id="630">630</span>
-<span id="631">631</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -926,14 +919,10 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         request: Request&lt;BlockProposal&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;ChainInfoResult&gt;, Status&gt; {
-        <span class="macro">debug!</span>(request = <span class="question-mark">?</span>request, <span class="string">&quot;Handling block proposal&quot;</span>);
+        <span class="kw">let </span>proposal = request.into_inner().try_into()<span class="question-mark">?</span>;
+        <span class="macro">debug!</span>(<span class="question-mark">?</span>proposal, <span class="string">&quot;Handling block proposal&quot;</span>);
         <span class="prelude-val">Ok</span>(Response::new(
-            <span class="kw">match </span><span class="self">self
-                </span>.state
-                .clone()
-                .handle_block_proposal(request.into_inner().try_into()<span class="question-mark">?</span>)
-                .<span class="kw">await
-            </span>{
+            <span class="kw">match </span><span class="self">self</span>.state.clone().handle_block_proposal(proposal).<span class="kw">await </span>{
                 <span class="prelude-val">Ok</span>((info, actions)) =&gt; {
                     <span class="self">self</span>.handle_network_actions(actions);
                     info.try_into()<span class="question-mark">?
@@ -951,11 +940,12 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         request: Request&lt;LiteCertificate&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;ChainInfoResult&gt;, Status&gt; {
-        <span class="macro">debug!</span>(request = <span class="question-mark">?</span>request, <span class="string">&quot;Handling lite certificate&quot;</span>);
+        <span class="kw">let </span>certificate = request.into_inner().try_into()<span class="question-mark">?</span>;
+        <span class="macro">debug!</span>(<span class="question-mark">?</span>certificate, <span class="string">&quot;Handling lite certificate&quot;</span>);
         <span class="kw">match </span><span class="self">self
             </span>.state
             .clone()
-            .handle_lite_certificate(request.into_inner().try_into()<span class="question-mark">?</span>)
+            .handle_lite_certificate(certificate)
             .<span class="kw">await
         </span>{
             <span class="prelude-val">Ok</span>((info, actions)) =&gt; {
@@ -978,9 +968,9 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         request: Request&lt;CertificateWithDependencies&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;ChainInfoResult&gt;, Status&gt; {
-        <span class="macro">debug!</span>(request = <span class="question-mark">?</span>request, <span class="string">&quot;Handling certificate&quot;</span>);
         <span class="kw">let </span>cert_with_deps: data_types::CertificateWithDependencies =
             request.into_inner().try_into()<span class="question-mark">?</span>;
+        <span class="macro">debug!</span>(certificate = <span class="question-mark">?</span>cert_with_deps.certificate, <span class="string">&quot;Handling certificate&quot;</span>);
         <span class="kw">match </span><span class="self">self
             </span>.state
             .clone()
@@ -1003,9 +993,9 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         request: Request&lt;ChainInfoQuery&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;ChainInfoResult&gt;, Status&gt; {
-        <span class="kw">let </span>request = request.into_inner().try_into()<span class="question-mark">?</span>;
-        <span class="macro">debug!</span>(request = <span class="question-mark">?</span>request, <span class="string">&quot;Handling chain info query&quot;</span>);
-        <span class="kw">match </span><span class="self">self</span>.state.clone().handle_chain_info_query(request).<span class="kw">await </span>{
+        <span class="kw">let </span>query = request.into_inner().try_into()<span class="question-mark">?</span>;
+        <span class="macro">debug!</span>(<span class="question-mark">?</span>query, <span class="string">&quot;Handling chain info query&quot;</span>);
+        <span class="kw">match </span><span class="self">self</span>.state.clone().handle_chain_info_query(query).<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>((info, actions)) =&gt; {
                 <span class="self">self</span>.handle_network_actions(actions);
                 <span class="prelude-val">Ok</span>(Response::new(info.try_into()<span class="question-mark">?</span>))
@@ -1022,13 +1012,9 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         request: Request&lt;CrossChainRequest&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;()&gt;, Status&gt; {
-        <span class="macro">debug!</span>(request = <span class="question-mark">?</span>request, <span class="string">&quot;Handling cross-chain request&quot;</span>);
-        <span class="kw">match </span><span class="self">self
-            </span>.state
-            .clone()
-            .handle_cross_chain_request(request.into_inner().try_into()<span class="question-mark">?</span>)
-            .<span class="kw">await
-        </span>{
+        <span class="kw">let </span>request = request.into_inner().try_into()<span class="question-mark">?</span>;
+        <span class="macro">debug!</span>(<span class="question-mark">?</span>request, <span class="string">&quot;Handling cross-chain request&quot;</span>);
+        <span class="kw">match </span><span class="self">self</span>.state.clone().handle_cross_chain_request(request).<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(actions) =&gt; <span class="self">self</span>.handle_network_actions(actions),
             <span class="prelude-val">Err</span>(error) =&gt; {
                 <span class="macro">error!</span>(nickname = <span class="self">self</span>.state.nickname(), %error, <span class="string">&quot;Failed to handle cross-chain request&quot;</span>);

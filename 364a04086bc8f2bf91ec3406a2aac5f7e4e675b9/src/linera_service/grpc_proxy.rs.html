@@ -197,10 +197,6 @@
 <span id="197">197</span>
 <span id="198">198</span>
 <span id="199">199</span>
-<span id="200">200</span>
-<span id="201">201</span>
-<span id="202">202</span>
-<span id="203">203</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -318,11 +314,7 @@
     <span class="kw">where
         </span>R: Debug + Proxyable,
     {
-        <span class="macro">debug!</span>(
-            <span class="string">&quot;handler [ValidatorWorker] proxying request [{:?}] from {:?}&quot;</span>,
-            request,
-            request.remote_addr()
-        );
+        <span class="macro">debug!</span>(<span class="string">&quot;proxying request from {:?}&quot;</span>, request.remote_addr());
         <span class="kw">let </span>inner = request.into_inner();
         <span class="kw">let </span>shard = <span class="self">self
             </span>.shard_for(<span class="kw-2">&amp;</span>inner)
