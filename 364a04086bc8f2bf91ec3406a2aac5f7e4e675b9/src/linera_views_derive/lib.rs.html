@@ -861,40 +861,6 @@
 <span id="861">861</span>
 <span id="862">862</span>
 <span id="863">863</span>
-<span id="864">864</span>
-<span id="865">865</span>
-<span id="866">866</span>
-<span id="867">867</span>
-<span id="868">868</span>
-<span id="869">869</span>
-<span id="870">870</span>
-<span id="871">871</span>
-<span id="872">872</span>
-<span id="873">873</span>
-<span id="874">874</span>
-<span id="875">875</span>
-<span id="876">876</span>
-<span id="877">877</span>
-<span id="878">878</span>
-<span id="879">879</span>
-<span id="880">880</span>
-<span id="881">881</span>
-<span id="882">882</span>
-<span id="883">883</span>
-<span id="884">884</span>
-<span id="885">885</span>
-<span id="886">886</span>
-<span id="887">887</span>
-<span id="888">888</span>
-<span id="889">889</span>
-<span id="890">890</span>
-<span id="891">891</span>
-<span id="892">892</span>
-<span id="893">893</span>
-<span id="894">894</span>
-<span id="895">895</span>
-<span id="896">896</span>
-<span id="897">897</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -942,7 +908,6 @@
     <span class="kw">let </span><span class="kw-2">mut </span>load_future_quotes = Vec::new();
     <span class="kw">let </span><span class="kw-2">mut </span>load_ident_quotes = Vec::new();
     <span class="kw">let </span><span class="kw-2">mut </span>load_result_quotes = Vec::new();
-    <span class="kw">let </span><span class="kw-2">mut </span>load_wasm_quotes = Vec::new();
     <span class="kw">let </span><span class="kw-2">mut </span>rollback_quotes = Vec::new();
     <span class="kw">let </span><span class="kw-2">mut </span>flush_quotes = Vec::new();
     <span class="kw">let </span><span class="kw-2">mut </span>delete_quotes = Vec::new();
@@ -962,11 +927,6 @@
         });
         load_result_quotes.push(<span class="macro">quote! </span>{
             <span class="kw">let </span>#name = result.#idx_lit<span class="question-mark">?</span>;
-        });
-        load_wasm_quotes.push(<span class="macro">quote! </span>{
-            <span class="kw">let </span>index = #idx_lit;
-            <span class="kw">let </span>base_key = context.derive_key(<span class="kw-2">&amp;</span>index)<span class="question-mark">?</span>;
-            <span class="kw">let </span>#name = #type_ident::load(context.clone_with_base_key(base_key)).<span class="kw">await</span><span class="question-mark">?</span>;
         });
         name_quotes.push(<span class="macro">quote! </span>{ #name });
         rollback_quotes.push(<span class="macro">quote! </span>{ <span class="self">self</span>.#name.rollback(); });
@@ -1003,8 +963,7 @@
                 <span class="self">self</span>.#first_name_quote.context()
             }
 
-            <span class="attribute">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
-            </span><span class="kw">async fn </span>load(context: #first_generic) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, linera_views::views::ViewError&gt; {
+            <span class="kw">async fn </span>load(context: #first_generic) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, linera_views::views::ViewError&gt; {
                 #increment_counter
                 <span class="kw">use </span>linera_views::futures::join;
                 #(#load_future_quotes)*
@@ -1013,12 +972,6 @@
                 <span class="prelude-val">Ok</span>(<span class="self">Self </span>{#(#name_quotes),<span class="kw-2">*</span>})
             }
 
-            <span class="attribute">#[cfg(target_arch = <span class="string">&quot;wasm32&quot;</span>)]
-            </span><span class="kw">async fn </span>load(context: #first_generic) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, linera_views::views::ViewError&gt; {
-                #increment_counter
-                #(#load_wasm_quotes)*
-                <span class="prelude-val">Ok</span>(<span class="self">Self </span>{#(#name_quotes),<span class="kw-2">*</span>})
-            }
 
             <span class="kw">fn </span>rollback(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
                 #(#rollback_quotes)*
@@ -1493,8 +1446,7 @@
                 <span class="kw">fn </span>context(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>C {
                     <span class="self">self</span>.register.context()
                 }
-                <span class="attribute">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
-                </span><span class="kw">async fn </span>load(context: C) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, linera_views::views::ViewError&gt; {
+                <span class="kw">async fn </span>load(context: C) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, linera_views::views::ViewError&gt; {
                     linera_views::increment_counter(
                         linera_views::LOAD_VIEW_COUNTER,
                         <span class="macro">stringify!</span>(TestView),
@@ -1512,26 +1464,6 @@
                     <span class="kw">let </span>result = <span class="macro">join!</span>(register_fut, collection_fut);
                     <span class="kw">let </span>register = result.<span class="number">0</span><span class="question-mark">?</span>;
                     <span class="kw">let </span>collection = result.<span class="number">1</span><span class="question-mark">?</span>;
-                    <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
-                        register,
-                        collection
-                    })
-                }
-                <span class="attribute">#[cfg(target_arch = <span class="string">&quot;wasm32&quot;</span>)]
-                </span><span class="kw">async fn </span>load(context: C) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, linera_views::views::ViewError&gt; {
-                    linera_views::increment_counter(
-                        linera_views::LOAD_VIEW_COUNTER,
-                        <span class="macro">stringify!</span>(TestView),
-                        <span class="kw-2">&amp;</span>context.base_key(),
-                    );
-                    <span class="kw">let </span>index = <span class="number">0</span>;
-                    <span class="kw">let </span>base_key = context.derive_key(<span class="kw-2">&amp;</span>index)<span class="question-mark">?</span>;
-                    <span class="kw">let </span>register =
-                        RegisterView::load(context.clone_with_base_key(base_key)).<span class="kw">await</span><span class="question-mark">?</span>;
-                    <span class="kw">let </span>index = <span class="number">1</span>;
-                    <span class="kw">let </span>base_key = context.derive_key(<span class="kw-2">&amp;</span>index)<span class="question-mark">?</span>;
-                    <span class="kw">let </span>collection =
-                        CollectionView::load(context.clone_with_base_key(base_key)).<span class="kw">await</span><span class="question-mark">?</span>;
                     <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
                         register,
                         collection

@@ -620,6 +620,10 @@
 <span id="620">620</span>
 <span id="621">621</span>
 <span id="622">622</span>
+<span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
+<span id="626">626</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -761,11 +765,9 @@
             .expect(<span class="string">&quot;single-threaded execution should not lock `active_simple_user_states`&quot;</span>)
     }
 
-    <span class="kw">fn </span>active_view_user_states_mut(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MutexGuard&lt;<span class="lifetime">&#39;_</span>, ActiveViewUserStates&lt;C&gt;&gt; {
-        <span class="self">self</span>.active_view_user_states
-            .try_lock()
-            .expect(<span class="string">&quot;single-threaded execution should not lock `active_view_user_states`&quot;</span>)
-    }
+    <span class="kw">async fn </span>active_view_user_states_mut(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MutexGuard&lt;<span class="lifetime">&#39;_</span>, ActiveViewUserStates&lt;C&gt;&gt; {
+        <span class="self">self</span>.active_view_user_states.lock().<span class="kw">await
+    </span>}
 
     <span class="kw">fn </span>active_sessions_mut(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MutexGuard&lt;<span class="lifetime">&#39;_</span>, ActiveSessions&gt; {
         <span class="self">self</span>.active_sessions
@@ -969,7 +971,8 @@
             .try_load_entry_mut(<span class="kw-2">&amp;</span><span class="self">self</span>.application_id())
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.active_view_user_states_mut()
-            .insert(<span class="self">self</span>.application_id(), view);
+            .<span class="kw">await
+            </span>.insert(<span class="self">self</span>.application_id(), view);
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -977,7 +980,8 @@
         <span class="comment">// Make the view available again.
         </span><span class="kw">match </span><span class="self">self
             </span>.active_view_user_states_mut()
-            .remove(<span class="kw-2">&amp;</span><span class="self">self</span>.application_id())
+            .<span class="kw">await
+            </span>.remove(<span class="kw-2">&amp;</span><span class="self">self</span>.application_id())
         {
             <span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(()),
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(ExecutionError::ApplicationStateNotLocked),
@@ -988,7 +992,8 @@
         <span class="comment">// read a key from the KV store
         </span><span class="kw">match </span><span class="self">self
             </span>.active_view_user_states_mut()
-            .get(<span class="kw-2">&amp;</span><span class="self">self</span>.application_id())
+            .<span class="kw">await
+            </span>.get(<span class="kw-2">&amp;</span><span class="self">self</span>.application_id())
         {
             <span class="prelude-val">Some</span>(view) =&gt; <span class="prelude-val">Ok</span>(view.get(<span class="kw-2">&amp;</span>key).<span class="kw">await</span><span class="question-mark">?</span>),
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(ExecutionError::ApplicationStateNotLocked),
@@ -1002,7 +1007,8 @@
         <span class="comment">// Read keys matching a prefix. We have to collect since iterators do not pass the wit barrier
         </span><span class="kw">match </span><span class="self">self
             </span>.active_view_user_states_mut()
-            .get(<span class="kw-2">&amp;</span><span class="self">self</span>.application_id())
+            .<span class="kw">await
+            </span>.get(<span class="kw-2">&amp;</span><span class="self">self</span>.application_id())
         {
             <span class="prelude-val">Some</span>(view) =&gt; <span class="prelude-val">Ok</span>(view.find_keys_by_prefix(<span class="kw-2">&amp;</span>key_prefix).<span class="kw">await</span><span class="question-mark">?</span>),
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(ExecutionError::ApplicationStateNotLocked),
@@ -1016,7 +1022,8 @@
         <span class="comment">// Read key/values matching a prefix. We have to collect since iterators do not pass the wit barrier
         </span><span class="kw">match </span><span class="self">self
             </span>.active_view_user_states_mut()
-            .get(<span class="kw-2">&amp;</span><span class="self">self</span>.application_id())
+            .<span class="kw">await
+            </span>.get(<span class="kw-2">&amp;</span><span class="self">self</span>.application_id())
         {
             <span class="prelude-val">Some</span>(view) =&gt; <span class="prelude-val">Ok</span>(view.find_key_values_by_prefix(<span class="kw-2">&amp;</span>key_prefix).<span class="kw">await</span><span class="question-mark">?</span>),
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(ExecutionError::ApplicationStateNotLocked),
@@ -1108,7 +1115,8 @@
         <span class="comment">// Write the batch and make the view available again.
         </span><span class="kw">match </span><span class="self">self
             </span>.active_view_user_states_mut()
-            .remove(<span class="kw-2">&amp;</span><span class="self">self</span>.application_id())
+            .<span class="kw">await
+            </span>.remove(<span class="kw-2">&amp;</span><span class="self">self</span>.application_id())
         {
             <span class="prelude-val">Some</span>(<span class="kw-2">mut </span>view) =&gt; <span class="prelude-val">Ok</span>(view.write_batch(batch).<span class="kw">await</span><span class="question-mark">?</span>),
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(ExecutionError::ApplicationStateNotLocked),
