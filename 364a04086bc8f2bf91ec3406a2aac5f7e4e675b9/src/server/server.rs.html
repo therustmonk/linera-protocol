@@ -449,6 +449,7 @@
 <span id="449">449</span>
 <span id="450">450</span>
 <span id="451">451</span>
+<span id="452">452</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -532,6 +533,23 @@
             <span class="kw">let </span>internal_network = internal_network.clone();
             <span class="kw">let </span>cross_chain_config = <span class="self">self</span>.cross_chain_config.clone();
             handles.push(<span class="kw">async move </span>{
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(port) = shard.metrics_port {
+                    <span class="kw">let </span>host = <span class="kw-2">&amp;</span>shard.metrics_host;
+                    <span class="kw">match </span><span class="macro">format!</span>(<span class="string">&quot;{}:{}&quot;</span>, host, port).parse::&lt;SocketAddr&gt;() {
+                        <span class="prelude-val">Err</span>(err) =&gt; <span class="macro">error!</span>(<span class="string">&quot;Invalid metrics address: {err}&quot;</span>),
+                        <span class="prelude-val">Ok</span>(address) =&gt; {
+                            <span class="kw">if let </span><span class="prelude-val">Err</span>(error) = metrics_exporter_tcp::TcpBuilder::new()
+                                .listen_address(address)
+                                .install()
+                            {
+                                <span class="macro">tracing::warn!</span>(
+                                    <span class="question-mark">?</span>error, %address,
+                                    <span class="string">&quot;Could not install TCP metrics exporter.&quot;
+                                </span>);
+                            }
+                        }
+                    }
+                }
                 <span class="kw">let </span>server = simple_network::Server::new(
                     internal_network,
                     listen_address.to_string(),
@@ -665,12 +683,6 @@
     <span class="doccomment">/// The port of the proxy on the internal network.
     </span>internal_port: u16,
 
-    <span class="doccomment">/// The host on which metrics are served.
-    </span>metrics_host: String,
-
-    <span class="doccomment">/// The port on which metrics are served.
-    </span>metrics_port: <span class="prelude-ty">Option</span>&lt;u16&gt;,
-
     <span class="doccomment">/// The network protocol for the frontend.
     </span>external_protocol: NetworkProtocol,
 
@@ -692,8 +704,6 @@
         shards: options.shards,
         host: options.internal_host,
         port: options.internal_port,
-        metrics_host: options.metrics_host,
-        metrics_port: options.metrics_port,
     };
     <span class="kw">let </span>key = KeyPair::generate();
     <span class="kw">let </span>name = ValidatorName(key.public());
@@ -788,18 +798,6 @@
                 .expect(<span class="string">&quot;Fail to read initial chain config&quot;</span>);
             <span class="kw">let </span>server_config = ValidatorServerConfig::read(<span class="kw-2">&amp;</span>server_config_path)
                 .expect(<span class="string">&quot;Fail to read server config&quot;</span>);
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(port) = server_config.internal_network.metrics_port {
-                <span class="kw">let </span>host = <span class="kw-2">&amp;</span>server_config.internal_network.metrics_host;
-                <span class="kw">let </span>address: SocketAddr = <span class="macro">format!</span>(<span class="string">&quot;{}:{}&quot;</span>, host, port)
-                    .parse()
-                    .expect(<span class="string">&quot;Invalid metrics address&quot;</span>);
-                <span class="kw">if let </span><span class="prelude-val">Err</span>(error) = metrics_exporter_tcp::TcpBuilder::new()
-                    .listen_address(address)
-                    .install()
-                {
-                    <span class="macro">tracing::warn!</span>(<span class="question-mark">?</span>error, %address, <span class="string">&quot;Could not install TCP metrics exporter.&quot;</span>);
-                }
-            }
             <span class="kw">let </span>job = ServerContext {
                 server_config,
                 cross_chain_config,
@@ -860,18 +858,20 @@
             port = 9000
             internal_host = &quot;internal_host&quot;
             internal_port = 10000
-            metrics_host = &quot;metrics_host&quot;
-            metrics_port = 5000
             external_protocol = { Simple = &quot;Tcp&quot; }
             internal_protocol = { Simple = &quot;Udp&quot; }
 
             [[shards]]
             host = &quot;host1&quot;
             port = 9001
+            metrics_host = &quot;metrics_host1&quot;
+            metrics_port = 5001
 
             [[shards]]
             host = &quot;host2&quot;
             port = 9002
+            metrics_host = &quot;metrics_host2&quot;
+            metrics_port = 5002
         &quot;#</span>;
         <span class="kw">let </span>options: ValidatorOptions = toml::from_str(toml_str).unwrap();
         <span class="macro">assert_eq!</span>(
@@ -888,14 +888,16 @@
                     ShardConfig {
                         host: <span class="string">&quot;host1&quot;</span>.into(),
                         port: <span class="number">9001</span>,
+                        metrics_host: <span class="string">&quot;metrics_host1&quot;</span>.into(),
+                        metrics_port: <span class="prelude-val">Some</span>(<span class="number">5001</span>),
                     },
                     ShardConfig {
                         host: <span class="string">&quot;host2&quot;</span>.into(),
                         port: <span class="number">9002</span>,
+                        metrics_host: <span class="string">&quot;metrics_host2&quot;</span>.into(),
+                        metrics_port: <span class="prelude-val">Some</span>(<span class="number">5002</span>),
                     },
                 ],
-                metrics_host: <span class="string">&quot;metrics_host&quot;</span>.into(),
-                metrics_port: <span class="prelude-val">Some</span>(<span class="number">5000</span>),
             }
         );
     }

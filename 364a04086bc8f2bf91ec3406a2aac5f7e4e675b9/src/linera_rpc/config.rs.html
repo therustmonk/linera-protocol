@@ -201,8 +201,6 @@
 <span id="201">201</span>
 <span id="202">202</span>
 <span id="203">203</span>
-<span id="204">204</span>
-<span id="205">205</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -240,6 +238,10 @@
     </span><span class="kw">pub </span>host: String,
     <span class="doccomment">/// The port.
     </span><span class="kw">pub </span>port: u16,
+    <span class="doccomment">/// The host on which metrics are served.
+    </span><span class="kw">pub </span>metrics_host: String,
+    <span class="doccomment">/// The port on which metrics are served.
+    </span><span class="kw">pub </span>metrics_port: <span class="prelude-ty">Option</span>&lt;u16&gt;,
 }
 
 <span class="kw">impl </span>ShardConfig {
@@ -286,10 +288,6 @@
     </span><span class="kw">pub </span>host: String,
     <span class="doccomment">/// The port the proxy listens on on the internal network.
     </span><span class="kw">pub </span>port: u16,
-    <span class="doccomment">/// The host on which metrics are served.
-    </span><span class="kw">pub </span>metrics_host: String,
-    <span class="doccomment">/// The port on which metrics are served.
-    </span><span class="kw">pub </span>metrics_port: <span class="prelude-ty">Option</span>&lt;u16&gt;,
 }
 
 <span class="kw">impl</span>&lt;P&gt; ValidatorInternalNetworkPreConfig&lt;P&gt; {
@@ -299,8 +297,6 @@
             shards: <span class="self">self</span>.shards.clone(),
             host: <span class="self">self</span>.host.clone(),
             port: <span class="self">self</span>.port,
-            metrics_host: <span class="self">self</span>.metrics_host.clone(),
-            metrics_port: <span class="self">self</span>.metrics_port,
         }
     }
 }
