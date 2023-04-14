@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/pest-2.5.4/src/iterators/pairs.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>pairs.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/pest-parser/pest/master/pest-logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../pest/index.html">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/pest-2.5.6/src/iterators/pairs.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>pairs.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/pest-parser/pest/master/pest-logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../pest/index.html">
                         <img src="https://raw.githubusercontent.com/pest-parser/pest/master/pest-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
@@ -481,42 +481,6 @@
 <span id="480">480</span>
 <span id="481">481</span>
 <span id="482">482</span>
-<span id="483">483</span>
-<span id="484">484</span>
-<span id="485">485</span>
-<span id="486">486</span>
-<span id="487">487</span>
-<span id="488">488</span>
-<span id="489">489</span>
-<span id="490">490</span>
-<span id="491">491</span>
-<span id="492">492</span>
-<span id="493">493</span>
-<span id="494">494</span>
-<span id="495">495</span>
-<span id="496">496</span>
-<span id="497">497</span>
-<span id="498">498</span>
-<span id="499">499</span>
-<span id="500">500</span>
-<span id="501">501</span>
-<span id="502">502</span>
-<span id="503">503</span>
-<span id="504">504</span>
-<span id="505">505</span>
-<span id="506">506</span>
-<span id="507">507</span>
-<span id="508">508</span>
-<span id="509">509</span>
-<span id="510">510</span>
-<span id="511">511</span>
-<span id="512">512</span>
-<span id="513">513</span>
-<span id="514">514</span>
-<span id="515">515</span>
-<span id="516">516</span>
-<span id="517">517</span>
-<span id="518">518</span>
 </pre><pre class="rust"><code><span class="comment">// pest. The Elegant Parser
 // Copyright (c) 2018 Dragoș Tiselice
 //
@@ -539,27 +503,12 @@
 </span><span class="kw">use </span>serde::ser::SerializeStruct;
 
 <span class="kw">use </span><span class="kw">super</span>::flat_pairs::{<span class="self">self</span>, FlatPairs};
+<span class="kw">use </span><span class="kw">super</span>::line_index::LineIndex;
 <span class="kw">use </span><span class="kw">super</span>::pair::{<span class="self">self</span>, Pair};
 <span class="kw">use </span><span class="kw">super</span>::queueable_token::QueueableToken;
 <span class="kw">use </span><span class="kw">super</span>::tokens::{<span class="self">self</span>, Tokens};
-<span class="kw">use crate</span>::{position, RuleType};
+<span class="kw">use </span><span class="kw">crate</span>::RuleType;
 
-<span class="attribute">#[derive(Clone)]
-</span><span class="kw">pub struct </span>Cursor {
-    <span class="kw">pub </span>line: usize,
-    <span class="kw">pub </span>col: usize,
-    <span class="kw">pub </span>end: usize,
-}
-
-<span class="kw">impl </span>Default <span class="kw">for </span>Cursor {
-    <span class="kw">fn </span>default() -&gt; Cursor {
-        Cursor {
-            line: <span class="number">1</span>,
-            col: <span class="number">1</span>,
-            end: <span class="number">0</span>,
-        }
-    }
-}
 <span class="doccomment">/// An iterator over [`Pair`]s. It is created by [`pest::state`] and [`Pair::into_inner`].
 ///
 /// [`Pair`]: struct.Pair.html
@@ -571,21 +520,27 @@
     input: <span class="kw-2">&amp;</span><span class="lifetime">&#39;i </span>str,
     start: usize,
     end: usize,
-    cursor: Cursor,
+    line_index: Rc&lt;LineIndex&gt;,
 }
 
 <span class="kw">pub fn </span>new&lt;R: RuleType&gt;(
     queue: Rc&lt;Vec&lt;QueueableToken&lt;R&gt;&gt;&gt;,
     input: <span class="kw-2">&amp;</span>str,
+    line_index: <span class="prelude-ty">Option</span>&lt;Rc&lt;LineIndex&gt;&gt;,
     start: usize,
     end: usize,
 ) -&gt; Pairs&lt;<span class="lifetime">&#39;_</span>, R&gt; {
+    <span class="kw">let </span>line_index = <span class="kw">match </span>line_index {
+        <span class="prelude-val">Some</span>(line_index) =&gt; line_index,
+        <span class="prelude-val">None </span>=&gt; Rc::new(LineIndex::new(input)),
+    };
+
     Pairs {
         queue,
         input,
         start,
         end,
-        cursor: Cursor::default(),
+        line_index,
     }
 }
 
@@ -718,7 +673,14 @@
     </span><span class="attribute">#[inline]
     </span><span class="kw">pub fn </span>peek(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Pair&lt;<span class="lifetime">&#39;i</span>, R&gt;&gt; {
         <span class="kw">if </span><span class="self">self</span>.start &lt; <span class="self">self</span>.end {
-            <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{ pair::new(Rc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.queue), <span class="self">self</span>.input, <span class="self">self</span>.start) })
+            <span class="prelude-val">Some</span>(<span class="kw">unsafe </span>{
+                pair::new(
+                    Rc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.queue),
+                    <span class="self">self</span>.input,
+                    Rc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.line_index),
+                    <span class="self">self</span>.start,
+                )
+            })
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>}
@@ -756,42 +718,13 @@
             }
         }
     }
-
-    <span class="doccomment">/// Move the cursor (line, col) by a part of the input.
-    </span><span class="kw">fn </span>move_cursor(<span class="kw-2">&amp;mut </span><span class="self">self</span>, input: <span class="kw-2">&amp;</span>str, start: usize, end: usize) -&gt; (usize, usize) {
-        <span class="comment">// Move cursor for some skiped characters (by skip(n))
-        </span><span class="kw">let </span>prev_end = <span class="self">self</span>.cursor.end;
-        <span class="kw">if </span>prev_end != start {
-            <span class="self">self</span>.move_cursor(input, prev_end, start);
-        }
-
-        <span class="kw">let </span>(prev_line, prev_col) = (<span class="self">self</span>.cursor.line, <span class="self">self</span>.cursor.col);
-
-        <span class="kw">let </span>part = <span class="kw-2">&amp;</span>input[<span class="self">self</span>.cursor.end..end];
-        <span class="kw">let </span>(l, c) = position::line_col(part, part.len(), (<span class="number">0</span>, <span class="number">0</span>));
-
-        <span class="self">self</span>.cursor.line += l;
-        <span class="comment">// Has new line
-        </span><span class="kw">if </span>l &gt; <span class="number">0 </span>{
-            <span class="self">self</span>.cursor.col = c;
-        } <span class="kw">else </span>{
-            <span class="self">self</span>.cursor.col += c;
-        }
-        <span class="self">self</span>.cursor.end = end;
-
-        (prev_line, prev_col)
-    }
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;i</span>, R: RuleType&gt; Iterator <span class="kw">for </span>Pairs&lt;<span class="lifetime">&#39;i</span>, R&gt; {
     <span class="kw">type </span>Item = Pair&lt;<span class="lifetime">&#39;i</span>, R&gt;;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>pair = <span class="self">self</span>.peek()<span class="question-mark">?</span>;
-        <span class="kw">let </span>span = pair.as_span();
-
-        <span class="kw">let </span>(l, c) = <span class="self">self</span>.move_cursor(<span class="self">self</span>.input, span.start(), span.end());
-        pair.line_col = <span class="prelude-val">Some</span>((l, c));
+        <span class="kw">let </span>pair = <span class="self">self</span>.peek()<span class="question-mark">?</span>;
 
         <span class="self">self</span>.start = <span class="self">self</span>.pair() + <span class="number">1</span>;
         <span class="prelude-val">Some</span>(pair)
@@ -806,7 +739,14 @@
 
         <span class="self">self</span>.end = <span class="self">self</span>.pair_from_end();
 
-        <span class="kw">let </span>pair = <span class="kw">unsafe </span>{ pair::new(Rc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.queue), <span class="self">self</span>.input, <span class="self">self</span>.end) };
+        <span class="kw">let </span>pair = <span class="kw">unsafe </span>{
+            pair::new(
+                Rc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.queue),
+                <span class="self">self</span>.input,
+                Rc::clone(<span class="kw-2">&amp;</span><span class="self">self</span>.line_index),
+                <span class="self">self</span>.end,
+            )
+        };
 
         <span class="prelude-val">Some</span>(pair)
     }
@@ -997,26 +937,14 @@
         <span class="kw">let </span>pair = pairs.next().unwrap();
         <span class="macro">assert_eq!</span>(pair.as_str(), <span class="string">&quot;abc&quot;</span>);
         <span class="macro">assert_eq!</span>(pair.line_col(), (<span class="number">1</span>, <span class="number">1</span>));
-        <span class="macro">assert_eq!</span>(
-            (pairs.cursor.line, pairs.cursor.col, pairs.cursor.end),
-            (<span class="number">1</span>, <span class="number">4</span>, <span class="number">3</span>)
-        );
 
         <span class="kw">let </span>pair = pairs.next().unwrap();
         <span class="macro">assert_eq!</span>(pair.as_str(), <span class="string">&quot;e&quot;</span>);
         <span class="macro">assert_eq!</span>(pair.line_col(), (<span class="number">2</span>, <span class="number">1</span>));
-        <span class="macro">assert_eq!</span>(
-            (pairs.cursor.line, pairs.cursor.col, pairs.cursor.end),
-            (<span class="number">2</span>, <span class="number">2</span>, <span class="number">5</span>)
-        );
 
         <span class="kw">let </span>pair = pairs.next().unwrap();
         <span class="macro">assert_eq!</span>(pair.as_str(), <span class="string">&quot;fgh&quot;</span>);
         <span class="macro">assert_eq!</span>(pair.line_col(), (<span class="number">2</span>, <span class="number">2</span>));
-        <span class="macro">assert_eq!</span>(
-            (pairs.cursor.line, pairs.cursor.col, pairs.cursor.end),
-            (<span class="number">2</span>, <span class="number">5</span>, <span class="number">8</span>)
-        );
     }
 
     <span class="attribute">#[test]

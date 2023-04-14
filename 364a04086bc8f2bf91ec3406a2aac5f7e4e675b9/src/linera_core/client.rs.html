@@ -1263,6 +1263,11 @@
 <span id="1263">1263</span>
 <span id="1264">1264</span>
 <span id="1265">1265</span>
+<span id="1266">1266</span>
+<span id="1267">1267</span>
+<span id="1268">1268</span>
+<span id="1269">1269</span>
+<span id="1270">1270</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -2147,11 +2152,16 @@
         <span class="prelude-val">Ok</span>(final_certificate)
     }
 
-    <span class="doccomment">/// Execute an operation.
-    </span><span class="kw">pub async fn </span>execute_operation(<span class="kw-2">&amp;mut </span><span class="self">self</span>, operation: Operation) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    <span class="doccomment">/// Execute a list of operations.
+    </span><span class="kw">pub async fn </span>execute_operations(<span class="kw-2">&amp;mut </span><span class="self">self</span>, operations: Vec&lt;Operation&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="self">self</span>.execute_block(messages, <span class="macro">vec!</span>[operation]).<span class="kw">await
+        <span class="self">self</span>.execute_block(messages, operations).<span class="kw">await
+    </span>}
+
+    <span class="doccomment">/// Execute an operation.
+    </span><span class="kw">pub async fn </span>execute_operation(<span class="kw-2">&amp;mut </span><span class="self">self</span>, operation: Operation) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+        <span class="self">self</span>.execute_operations(<span class="macro">vec!</span>[operation]).<span class="kw">await
     </span>}
 
     <span class="doccomment">/// Execute a new block

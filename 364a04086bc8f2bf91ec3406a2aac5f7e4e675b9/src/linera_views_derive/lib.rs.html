@@ -861,6 +861,35 @@
 <span id="861">861</span>
 <span id="862">862</span>
 <span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
+<span id="867">867</span>
+<span id="868">868</span>
+<span id="869">869</span>
+<span id="870">870</span>
+<span id="871">871</span>
+<span id="872">872</span>
+<span id="873">873</span>
+<span id="874">874</span>
+<span id="875">875</span>
+<span id="876">876</span>
+<span id="877">877</span>
+<span id="878">878</span>
+<span id="879">879</span>
+<span id="880">880</span>
+<span id="881">881</span>
+<span id="882">882</span>
+<span id="883">883</span>
+<span id="884">884</span>
+<span id="885">885</span>
+<span id="886">886</span>
+<span id="887">887</span>
+<span id="888">888</span>
+<span id="889">889</span>
+<span id="890">890</span>
+<span id="891">891</span>
+<span id="892">892</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -868,7 +897,7 @@
 
 <span class="kw">extern crate </span>proc_macro;
 <span class="kw">extern crate </span>syn;
-<span class="kw">use </span><span class="kw">crate</span>::util::{create_entry_name, snakify};
+<span class="kw">use </span><span class="kw">crate</span>::util::{concat, create_entry_name, snakify};
 <span class="kw">use </span>proc_macro::TokenStream;
 <span class="kw">use </span>proc_macro2::{Span, TokenStream <span class="kw">as </span>TokenStream2};
 <span class="kw">use </span>quote::{format_ident, quote};
@@ -1285,20 +1314,35 @@
             };
             (r#impl, <span class="prelude-val">None</span>)
         }
-        <span class="string">&quot;MapView&quot; </span>=&gt; {
+        <span class="string">&quot;MapView&quot; </span>| <span class="string">&quot;CustomMapView&quot; </span>=&gt; {
             <span class="kw">let </span>generic_arguments = generic_argument_from_type_path(<span class="kw-2">&amp;</span>type_path);
             <span class="kw">let </span>index_ident = generic_arguments
                 .get(<span class="number">1</span>)
-                .expect(<span class="string">&quot;no index specified for &#39;MapView&#39;&quot;</span>);
+                .expect(<span class="string">&quot;no index specified for &#39;CustomMapView&#39;&quot;</span>);
             <span class="kw">let </span>generic_ident = generic_arguments
                 .get(<span class="number">2</span>)
-                .expect(<span class="string">&quot;no generic type specified for &#39;MapView&#39;&quot;</span>);
+                .expect(<span class="string">&quot;no generic type specified for &#39;CustomMapView&#39;&quot;</span>);
 
             <span class="kw">let </span>index_name = snakify(index_ident);
+            <span class="kw">let </span>field_keys = concat(<span class="kw-2">&amp;</span>field_name, <span class="string">&quot;_keys&quot;</span>);
 
             <span class="kw">let </span>r#impl = <span class="macro">quote! </span>{
                 <span class="kw">async fn </span>#field_name(<span class="kw-2">&amp;</span><span class="self">self</span>, #index_name: #index_ident) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;#generic_ident&gt;, async_graphql::Error&gt; {
                     <span class="prelude-val">Ok</span>(<span class="self">self</span>.#field_name.get(<span class="kw-2">&amp;</span>#index_name).<span class="kw">await</span><span class="question-mark">?</span>)
+                }
+                <span class="kw">async fn </span>#field_keys(<span class="kw-2">&amp;</span><span class="self">self</span>, count: <span class="prelude-ty">Option</span>&lt;u64&gt;)
+                    -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;#index_ident&gt;, async_graphql::Error&gt;
+                {
+                    <span class="kw">let </span>count = count.unwrap_or(u64::MAX).try_into().unwrap_or(usize::MAX);
+                    <span class="kw">let </span><span class="kw-2">mut </span>keys = <span class="macro">vec!</span>[];
+                    <span class="kw">if </span>count == <span class="number">0 </span>{
+                        <span class="kw">return </span><span class="prelude-val">Ok</span>(keys);
+                    }
+                    <span class="self">self</span>.#field_name.for_each_index_while(|key| {
+                        keys.push(key);
+                        <span class="prelude-val">Ok</span>(keys.len() &lt; count)
+                    }).<span class="kw">await</span><span class="question-mark">?</span>;
+                    <span class="prelude-val">Ok</span>(keys)
                 }
             };
             (r#impl, <span class="prelude-val">None</span>)
@@ -1716,6 +1760,20 @@
                 }
                 <span class="kw">async fn </span>map(<span class="kw-2">&amp;</span><span class="self">self</span>, string: String) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;usize&gt;, async_graphql::Error&gt; {
                     <span class="prelude-val">Ok</span>(<span class="self">self</span>.map.get(<span class="kw-2">&amp;</span>string).<span class="kw">await</span><span class="question-mark">?</span>)
+                }
+                <span class="kw">async fn </span>map_keys(<span class="kw-2">&amp;</span><span class="self">self</span>, count: <span class="prelude-ty">Option</span>&lt;u64&gt;)
+                    -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;String&gt;, async_graphql::Error&gt;
+                {
+                    <span class="kw">let </span>count = count.unwrap_or(u64::MAX).try_into().unwrap_or(usize::MAX);
+                    <span class="kw">let </span><span class="kw-2">mut </span>keys = <span class="macro">vec!</span>[];
+                    <span class="kw">if </span>count == <span class="number">0 </span>{
+                        <span class="kw">return </span><span class="prelude-val">Ok</span>(keys);
+                    }
+                    <span class="self">self</span>.map.for_each_index_while(|key| {
+                        keys.push(key);
+                        <span class="prelude-val">Ok</span>(keys.len() &lt; count)
+                    }).<span class="kw">await</span><span class="question-mark">?</span>;
+                    <span class="prelude-val">Ok</span>(keys)
                 }
             }
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/async-graphql-5.0.5/src/types/connection/connection_type.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>connection_type.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../../async_graphql/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/async-graphql-5.0.7/src/types/connection/connection_type.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>connection_type.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../../async_graphql/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -144,8 +144,52 @@
 <span id="144">144</span>
 <span id="145">145</span>
 <span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
 </pre><pre class="rust"><code><span class="kw">use </span>std::{borrow::Cow, marker::PhantomData};
 
+<span class="kw">use super</span>::{DisableNodesField, EnableNodesField, NodesFieldSwitcherSealed};
 <span class="kw">use crate</span>::{
     connection::{
         edge::Edge, ConnectionNameType, DefaultConnectionName, DefaultEdgeName, EdgeNameType,
@@ -165,6 +209,7 @@
     EdgeFields = EmptyFields,
     Name = DefaultConnectionName,
     EdgeName = DefaultEdgeName,
+    NodesField = EnableNodesField,
 &gt; <span class="kw">where
     </span>Cursor: CursorType + Send + Sync,
     Node: OutputType,
@@ -172,9 +217,11 @@
     EdgeFields: ObjectType,
     Name: ConnectionNameType,
     EdgeName: EdgeNameType,
+    NodesField: NodesFieldSwitcherSealed,
 {
     _mark1: PhantomData&lt;Name&gt;,
     _mark2: PhantomData&lt;EdgeName&gt;,
+    _mark3: PhantomData&lt;NodesField&gt;,
     <span class="doccomment">/// All edges of the current page.
     </span><span class="kw">pub </span>edges: Vec&lt;Edge&lt;Cursor, Node, EdgeFields, EdgeName&gt;&gt;,
     <span class="doccomment">/// Additional fields for connection object.
@@ -185,14 +232,15 @@
     </span><span class="kw">pub </span>has_next_page: bool,
 }
 
-<span class="kw">impl</span>&lt;Cursor, Node, EdgeFields, Name, EdgeName&gt;
-    Connection&lt;Cursor, Node, EmptyFields, EdgeFields, Name, EdgeName&gt;
+<span class="kw">impl</span>&lt;Cursor, Node, NodesField, EdgeFields, Name, EdgeName&gt;
+    Connection&lt;Cursor, Node, EmptyFields, EdgeFields, Name, EdgeName, NodesField&gt;
 <span class="kw">where
     </span>Cursor: CursorType + Send + Sync,
     Node: OutputType,
     EdgeFields: ObjectType,
     Name: ConnectionNameType,
     EdgeName: EdgeNameType,
+    NodesField: NodesFieldSwitcherSealed,
 {
     <span class="doccomment">/// Create a new connection.
     </span><span class="attribute">#[inline]
@@ -200,6 +248,7 @@
         Connection {
             _mark1: PhantomData,
             _mark2: PhantomData,
+            _mark3: PhantomData,
             additional_fields: EmptyFields,
             has_previous_page,
             has_next_page,
@@ -208,8 +257,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;Cursor, Node, ConnectionFields, EdgeFields, Name, EdgeName&gt;
-    Connection&lt;Cursor, Node, ConnectionFields, EdgeFields, Name, EdgeName&gt;
+<span class="kw">impl</span>&lt;Cursor, Node, NodesField, ConnectionFields, EdgeFields, Name, EdgeName&gt;
+    Connection&lt;Cursor, Node, ConnectionFields, EdgeFields, Name, EdgeName, NodesField&gt;
 <span class="kw">where
     </span>Cursor: CursorType + Send + Sync,
     Node: OutputType,
@@ -217,6 +266,7 @@
     EdgeFields: ObjectType,
     Name: ConnectionNameType,
     EdgeName: EdgeNameType,
+    NodesField: NodesFieldSwitcherSealed,
 {
     <span class="doccomment">/// Create a new connection, it can have some additional fields.
     </span><span class="attribute">#[inline]
@@ -228,6 +278,7 @@
         Connection {
             _mark1: PhantomData,
             _mark2: PhantomData,
+            _mark3: PhantomData,
             additional_fields,
             has_previous_page,
             has_next_page,
@@ -236,9 +287,43 @@
     }
 }
 
-<span class="attribute">#[Object(internal, name_type)]
+<span class="attribute">#[Object(internal, name_type, shareable)]
 </span><span class="kw">impl</span>&lt;Cursor, Node, ConnectionFields, EdgeFields, Name, EdgeName&gt;
-    Connection&lt;Cursor, Node, ConnectionFields, EdgeFields, Name, EdgeName&gt;
+    Connection&lt;Cursor, Node, ConnectionFields, EdgeFields, Name, EdgeName, DisableNodesField&gt;
+<span class="kw">where
+    </span>Cursor: CursorType + Send + Sync,
+    Node: OutputType,
+    ConnectionFields: ObjectType,
+    EdgeFields: ObjectType,
+    Name: ConnectionNameType,
+    EdgeName: EdgeNameType,
+{
+    <span class="doccomment">/// Information to aid in pagination.
+    </span><span class="kw">async fn </span>page_info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; PageInfo {
+        PageInfo {
+            has_previous_page: <span class="self">self</span>.has_previous_page,
+            has_next_page: <span class="self">self</span>.has_next_page,
+            start_cursor: <span class="self">self</span>.edges.first().map(|edge| edge.cursor.<span class="number">0</span>.encode_cursor()),
+            end_cursor: <span class="self">self</span>.edges.last().map(|edge| edge.cursor.<span class="number">0</span>.encode_cursor()),
+        }
+    }
+
+    <span class="doccomment">/// A list of edges.
+    </span><span class="attribute">#[inline]
+    </span><span class="kw">async fn </span>edges(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[Edge&lt;Cursor, Node, EdgeFields, EdgeName&gt;] {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.edges
+    }
+
+    <span class="attribute">#[graphql(flatten)]
+    #[inline]
+    </span><span class="kw">async fn </span>additional_fields(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>ConnectionFields {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.additional_fields
+    }
+}
+
+<span class="attribute">#[Object(internal, name_type, shareable)]
+</span><span class="kw">impl</span>&lt;Cursor, Node, ConnectionFields, EdgeFields, Name, EdgeName&gt;
+    Connection&lt;Cursor, Node, ConnectionFields, EdgeFields, Name, EdgeName, EnableNodesField&gt;
 <span class="kw">where
     </span>Cursor: CursorType + Send + Sync,
     Node: OutputType,
@@ -275,8 +360,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;Cursor, Node, ConnectionFields, EdgeFields, Name, EdgeName&gt; TypeName
-    <span class="kw">for </span>Connection&lt;Cursor, Node, ConnectionFields, EdgeFields, Name, EdgeName&gt;
+<span class="kw">impl</span>&lt;Cursor, Node, ConnectionFields, EdgeFields, Name, EdgeName, NodesField&gt; TypeName
+    <span class="kw">for </span>Connection&lt;Cursor, Node, ConnectionFields, EdgeFields, Name, EdgeName, NodesField&gt;
 <span class="kw">where
     </span>Cursor: CursorType + Send + Sync,
     Node: OutputType,
@@ -284,6 +369,7 @@
     EdgeFields: ObjectType,
     Name: ConnectionNameType,
     EdgeName: EdgeNameType,
+    NodesField: NodesFieldSwitcherSealed,
 {
     <span class="attribute">#[inline]
     </span><span class="kw">fn </span>type_name() -&gt; Cow&lt;<span class="lifetime">&#39;static</span>, str&gt; {

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["ServingStatus","An enumeration of values representing gRPC service health."]],"mod":[["proto","Generated protobuf types from the `grpc.health.v1` package."],["server","Contains all healthcheck based server utilities."]]};

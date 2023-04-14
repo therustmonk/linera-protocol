@@ -47,6 +47,11 @@
 <span id="47">47</span>
 <span id="48">48</span>
 <span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -54,17 +59,22 @@
 <span class="kw">use </span>proc_macro2::{Ident, Span};
 <span class="kw">use </span>syn::Type;
 
-<span class="doccomment">/// Extract the first `Ident` in a type and convert to snake case.
+<span class="doccomment">/// Extracts the first `Ident` in a type and convert to snake case.
 </span><span class="kw">pub fn </span>snakify(r#type: <span class="kw-2">&amp;</span>Type) -&gt; Ident {
     transform_type_to_ident(r#type, |s: String| s.to_case(Case::Snake))
 }
 
-<span class="doccomment">/// Extract the first `Ident` in a type and append the string &#39;Element&#39; to the end.
+<span class="doccomment">/// Extracts the first `Ident` in a type and append the string &#39;Element&#39; to the end.
 </span><span class="kw">pub fn </span>create_entry_name(r#type: <span class="kw-2">&amp;</span>Type) -&gt; Ident {
     transform_type_to_ident(r#type, |s: String| <span class="macro">format!</span>(<span class="string">&quot;{}{}&quot;</span>, s, <span class="string">&quot;Entry&quot;</span>))
 }
 
-<span class="doccomment">/// Apply a string transformation (`transform`) to the input `Type`
+<span class="doccomment">/// Extends an identifier with a suffix.
+</span><span class="kw">pub fn </span>concat(ident: <span class="kw-2">&amp;</span>Ident, suffix: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str) -&gt; Ident {
+    transform_non_keyword_ident(ident, |s: String| <span class="macro">format!</span>(<span class="string">&quot;{}{}&quot;</span>, s, suffix))
+}
+
+<span class="doccomment">/// Applies a string transformation (`transform`) to the input `Type`
 /// and transform it to an `Ident` corresponding to the first segment
 /// of the `TypePath`.
 </span><span class="kw">fn </span>transform_type_to_ident&lt;Transform&gt;(r#type: <span class="kw-2">&amp;</span>Type, transform: Transform) -&gt; Ident
@@ -83,7 +93,7 @@
     transform_non_keyword_ident(<span class="kw-2">&amp;</span>type_ident, transform)
 }
 
-<span class="doccomment">/// Apply a string transformation (`transform`) to the input `Ident`-
+<span class="doccomment">/// Applies a string transformation (`transform`) to the input `Ident`-
 /// However, it will not apply the transform to rust keywords.
 </span><span class="kw">fn </span>transform_non_keyword_ident&lt;Transform&gt;(ident: <span class="kw-2">&amp;</span>Ident, transform: Transform) -&gt; Ident
 <span class="kw">where
