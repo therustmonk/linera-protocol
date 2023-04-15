@@ -1278,11 +1278,11 @@
 #[cfg_attr(any(feature = <span class="string">&quot;wasmtime&quot;</span>, feature = <span class="string">&quot;wasmer&quot;</span>), derive(Debug, Default))]
 </span><span class="kw">pub enum </span>WasmRuntime {
     <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmer&quot;</span>)]
-    #[cfg_attr(not(feature = <span class="string">&quot;wasmtime&quot;</span>), default)]
+    #[default]
     #[display(fmt = <span class="string">&quot;wasmer&quot;</span>)]
     </span>Wasmer,
     <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
-    #[default]
+    #[cfg_attr(not(feature = <span class="string">&quot;wasmer&quot;</span>), default)]
     #[display(fmt = <span class="string">&quot;wasmtime&quot;</span>)]
     </span>Wasmtime,
 }
