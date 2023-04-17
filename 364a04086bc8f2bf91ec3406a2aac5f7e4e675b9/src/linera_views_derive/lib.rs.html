@@ -890,6 +890,20 @@
 <span id="890">890</span>
 <span id="891">891</span>
 <span id="892">892</span>
+<span id="893">893</span>
+<span id="894">894</span>
+<span id="895">895</span>
+<span id="896">896</span>
+<span id="897">897</span>
+<span id="898">898</span>
+<span id="899">899</span>
+<span id="900">900</span>
+<span id="901">901</span>
+<span id="902">902</span>
+<span id="903">903</span>
+<span id="904">904</span>
+<span id="905">905</span>
+<span id="906">906</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -1189,6 +1203,7 @@
         <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(),
     };
 
+    <span class="kw">let </span>view_name = view_type.to_string();
     <span class="kw">match </span>view_type.to_string().as_str() {
         <span class="string">&quot;RegisterView&quot; </span>=&gt; {
             <span class="kw">let </span>generic_arguments = generic_argument_from_type_path(<span class="kw-2">&amp;</span>type_path);
@@ -1202,14 +1217,14 @@
             };
             (r#impl, <span class="prelude-val">None</span>)
         }
-        <span class="string">&quot;CollectionView&quot; </span>=&gt; {
+        <span class="string">&quot;CollectionView&quot; </span>| <span class="string">&quot;CustomCollectionView&quot; </span>=&gt; {
             <span class="kw">let </span>generic_arguments = generic_argument_from_type_path(<span class="kw-2">&amp;</span>type_path);
             <span class="kw">let </span>index_ident = generic_arguments
                 .get(<span class="number">1</span>)
-                .expect(<span class="string">&quot;no index specified for &#39;CollectionView&#39;&quot;</span>);
+                .unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">&quot;no index specified for &#39;{}&#39;&quot;</span>, view_name));
             <span class="kw">let </span>generic_ident = generic_arguments
                 .get(<span class="number">2</span>)
-                .expect(<span class="string">&quot;no generic type specified for &#39;CollectionView&#39;&quot;</span>);
+                .unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">&quot;no generic type specified for &#39;{}&#39;&quot;</span>, view_name));
 
             <span class="kw">let </span>index_name = snakify(index_ident);
             <span class="kw">let </span>entry_name = create_entry_name(generic_ident);
@@ -1254,11 +1269,11 @@
 
             (r#impl, <span class="prelude-val">Some</span>(r#struct))
         }
-        <span class="string">&quot;SetView&quot; </span>=&gt; {
+        <span class="string">&quot;SetView&quot; </span>| <span class="string">&quot;CustomSetView&quot; </span>=&gt; {
             <span class="kw">let </span>generic_arguments = generic_argument_from_type_path(<span class="kw-2">&amp;</span>type_path);
             <span class="kw">let </span>generic_ident = generic_arguments
                 .get(<span class="number">1</span>)
-                .expect(<span class="string">&quot;no generic type specified for &#39;SetView&#39;&quot;</span>);
+                .unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">&quot;no generic type specified for &#39;{}&#39;&quot;</span>, view_name));
 
             <span class="kw">let </span>r#impl = <span class="macro">quote! </span>{
                 <span class="kw">async fn </span>#field_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;#generic_ident&gt;, async_graphql::Error&gt; {
@@ -1314,14 +1329,27 @@
             };
             (r#impl, <span class="prelude-val">None</span>)
         }
+        <span class="string">&quot;ByteMapView&quot; </span>=&gt; {
+            <span class="kw">let </span>generic_arguments = generic_argument_from_type_path(<span class="kw-2">&amp;</span>type_path);
+            <span class="kw">let </span>generic_ident = generic_arguments
+                .get(<span class="number">1</span>)
+                .expect(<span class="string">&quot;no generic type specified for &#39;ByteMapView&#39;&quot;</span>);
+
+            <span class="kw">let </span>r#impl = <span class="macro">quote! </span>{
+                <span class="kw">async fn </span>#field_name(<span class="kw-2">&amp;</span><span class="self">self</span>, short_key: Vec&lt;u8&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;#generic_ident&gt;, async_graphql::Error&gt; {
+                    <span class="prelude-val">Ok</span>(<span class="self">self</span>.#field_name.get(<span class="kw-2">&amp;</span>short_key).<span class="kw">await</span><span class="question-mark">?</span>)
+                }
+            };
+            (r#impl, <span class="prelude-val">None</span>)
+        }
         <span class="string">&quot;MapView&quot; </span>| <span class="string">&quot;CustomMapView&quot; </span>=&gt; {
             <span class="kw">let </span>generic_arguments = generic_argument_from_type_path(<span class="kw-2">&amp;</span>type_path);
             <span class="kw">let </span>index_ident = generic_arguments
                 .get(<span class="number">1</span>)
-                .expect(<span class="string">&quot;no index specified for &#39;CustomMapView&#39;&quot;</span>);
+                .unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">&quot;no index specified for &#39;{}&#39;&quot;</span>, view_name));
             <span class="kw">let </span>generic_ident = generic_arguments
                 .get(<span class="number">2</span>)
-                .expect(<span class="string">&quot;no generic type specified for &#39;CustomMapView&#39;&quot;</span>);
+                .unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">&quot;no generic type specified for &#39;{}&#39;&quot;</span>, view_name));
 
             <span class="kw">let </span>index_name = snakify(index_ident);
             <span class="kw">let </span>field_keys = concat(<span class="kw-2">&amp;</span>field_name, <span class="string">&quot;_keys&quot;</span>);
