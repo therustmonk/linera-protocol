@@ -296,6 +296,13 @@
 <span id="296">296</span>
 <span id="297">297</span>
 <span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -345,8 +352,15 @@
         service_bytecode: Bytecode,
         runtime: WasmRuntime,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, WasmExecutionError&gt; {
+        <span class="kw">let </span>contract_bytecode = <span class="kw">if </span>runtime.needs_sanitizer() {
+            <span class="comment">// Ensure bytecode normalization whenever wasmer and wasmtime are possibly
+            // compared.
+            </span>sanitize(contract_bytecode)<span class="question-mark">?
+        </span>} <span class="kw">else </span>{
+            contract_bytecode
+        };
         <span class="prelude-val">Ok</span>(WasmApplication {
-            contract_bytecode: sanitize(contract_bytecode)<span class="question-mark">?</span>,
+            contract_bytecode,
             service_bytecode,
             runtime,
         })
@@ -398,13 +412,13 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;RawExecutionResult&lt;Vec&lt;u8&gt;&gt;, ExecutionError&gt; {
         <span class="kw">let </span>result = <span class="kw">match </span><span class="self">self</span>.runtime {
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
-            </span>WasmRuntime::Wasmtime =&gt; {
+            </span>WasmRuntime::Wasmtime | WasmRuntime::WasmtimeWithSanitizer =&gt; {
                 <span class="self">self</span>.prepare_contract_runtime_with_wasmtime(runtime)<span class="question-mark">?
                     </span>.initialize(context, argument)
                     .<span class="kw">await</span><span class="question-mark">?
             </span>}
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmer&quot;</span>)]
-            </span>WasmRuntime::Wasmer =&gt; {
+            </span>WasmRuntime::Wasmer | WasmRuntime::WasmerWithSanitizer =&gt; {
                 <span class="self">self</span>.prepare_contract_runtime_with_wasmer(runtime)<span class="question-mark">?
                     </span>.initialize(context, argument)
                     .<span class="kw">await</span><span class="question-mark">?
@@ -421,13 +435,13 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;RawExecutionResult&lt;Vec&lt;u8&gt;&gt;, ExecutionError&gt; {
         <span class="kw">let </span>result = <span class="kw">match </span><span class="self">self</span>.runtime {
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
-            </span>WasmRuntime::Wasmtime =&gt; {
+            </span>WasmRuntime::Wasmtime | WasmRuntime::WasmtimeWithSanitizer =&gt; {
                 <span class="self">self</span>.prepare_contract_runtime_with_wasmtime(runtime)<span class="question-mark">?
                     </span>.execute_operation(context, operation)
                     .<span class="kw">await</span><span class="question-mark">?
             </span>}
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmer&quot;</span>)]
-            </span>WasmRuntime::Wasmer =&gt; {
+            </span>WasmRuntime::Wasmer | WasmRuntime::WasmerWithSanitizer =&gt; {
                 <span class="self">self</span>.prepare_contract_runtime_with_wasmer(runtime)<span class="question-mark">?
                     </span>.execute_operation(context, operation)
                     .<span class="kw">await</span><span class="question-mark">?
@@ -444,13 +458,13 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;RawExecutionResult&lt;Vec&lt;u8&gt;&gt;, ExecutionError&gt; {
         <span class="kw">let </span>result = <span class="kw">match </span><span class="self">self</span>.runtime {
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
-            </span>WasmRuntime::Wasmtime =&gt; {
+            </span>WasmRuntime::Wasmtime | WasmRuntime::WasmtimeWithSanitizer =&gt; {
                 <span class="self">self</span>.prepare_contract_runtime_with_wasmtime(runtime)<span class="question-mark">?
                     </span>.execute_effect(context, effect)
                     .<span class="kw">await</span><span class="question-mark">?
             </span>}
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmer&quot;</span>)]
-            </span>WasmRuntime::Wasmer =&gt; {
+            </span>WasmRuntime::Wasmer | WasmRuntime::WasmerWithSanitizer =&gt; {
                 <span class="self">self</span>.prepare_contract_runtime_with_wasmer(runtime)<span class="question-mark">?
                     </span>.execute_effect(context, effect)
                     .<span class="kw">await</span><span class="question-mark">?
@@ -468,13 +482,13 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ApplicationCallResult, ExecutionError&gt; {
         <span class="kw">let </span>result = <span class="kw">match </span><span class="self">self</span>.runtime {
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
-            </span>WasmRuntime::Wasmtime =&gt; {
+            </span>WasmRuntime::Wasmtime | WasmRuntime::WasmtimeWithSanitizer =&gt; {
                 <span class="self">self</span>.prepare_contract_runtime_with_wasmtime(runtime)<span class="question-mark">?
                     </span>.handle_application_call(context, argument, forwarded_sessions)
                     .<span class="kw">await</span><span class="question-mark">?
             </span>}
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmer&quot;</span>)]
-            </span>WasmRuntime::Wasmer =&gt; {
+            </span>WasmRuntime::Wasmer | WasmRuntime::WasmerWithSanitizer =&gt; {
                 <span class="self">self</span>.prepare_contract_runtime_with_wasmer(runtime)<span class="question-mark">?
                     </span>.handle_application_call(context, argument, forwarded_sessions)
                     .<span class="kw">await</span><span class="question-mark">?
@@ -494,7 +508,7 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;SessionCallResult, ExecutionError&gt; {
         <span class="kw">let </span>result = <span class="kw">match </span><span class="self">self</span>.runtime {
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
-            </span>WasmRuntime::Wasmtime =&gt; {
+            </span>WasmRuntime::Wasmtime | WasmRuntime::WasmtimeWithSanitizer =&gt; {
                 <span class="self">self</span>.prepare_contract_runtime_with_wasmtime(runtime)<span class="question-mark">?
                     </span>.handle_session_call(
                         context,
@@ -506,7 +520,7 @@
                     .<span class="kw">await</span><span class="question-mark">?
             </span>}
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmer&quot;</span>)]
-            </span>WasmRuntime::Wasmer =&gt; {
+            </span>WasmRuntime::Wasmer | WasmRuntime::WasmerWithSanitizer =&gt; {
                 <span class="self">self</span>.prepare_contract_runtime_with_wasmer(runtime)<span class="question-mark">?
                     </span>.handle_session_call(
                         context,
@@ -529,13 +543,13 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, ExecutionError&gt; {
         <span class="kw">let </span>result = <span class="kw">match </span><span class="self">self</span>.runtime {
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
-            </span>WasmRuntime::Wasmtime =&gt; {
+            </span>WasmRuntime::Wasmtime | WasmRuntime::WasmtimeWithSanitizer =&gt; {
                 <span class="self">self</span>.prepare_service_runtime_with_wasmtime(runtime)<span class="question-mark">?
                     </span>.query_application(context, argument)
                     .<span class="kw">await</span><span class="question-mark">?
             </span>}
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmer&quot;</span>)]
-            </span>WasmRuntime::Wasmer =&gt; {
+            </span>WasmRuntime::Wasmer | WasmRuntime::WasmerWithSanitizer =&gt; {
                 <span class="self">self</span>.prepare_service_runtime_with_wasmer(runtime)<span class="question-mark">?
                     </span>.query_application(context, argument)
                     .<span class="kw">await</span><span class="question-mark">?
