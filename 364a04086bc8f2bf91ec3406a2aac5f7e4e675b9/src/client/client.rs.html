@@ -1147,10 +1147,6 @@
 <span id="1147">1147</span>
 <span id="1148">1148</span>
 <span id="1149">1149</span>
-<span id="1150">1150</span>
-<span id="1151">1151</span>
-<span id="1152">1152</span>
-<span id="1153">1153</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -2183,7 +2179,6 @@
                     </span>.context(<span class="string">&quot;failed to publish bytecode&quot;</span>)<span class="question-mark">?</span>;
 
                 <span class="macro">info!</span>(<span class="string">&quot;{}&quot;</span>, <span class="string">&quot;Bytecode published successfully!&quot;</span>.green().bold());
-                <span class="macro">info!</span>(<span class="string">&quot;Bytecode Id: {}&quot;</span>, <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, bytecode_id).bold());
 
                 <span class="macro">info!</span>(<span class="string">&quot;Synchronizing...&quot;</span>);
                 chain_client.synchronize_and_recompute_balance().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -2200,10 +2195,7 @@
                     </span>.context(<span class="string">&quot;failed to create application&quot;</span>)<span class="question-mark">?</span>;
 
                 <span class="macro">info!</span>(<span class="string">&quot;{}&quot;</span>, <span class="string">&quot;Application published successfully!&quot;</span>.green().bold());
-                <span class="macro">info!</span>(
-                    <span class="string">&quot;Application Id: {}\n&quot;</span>,
-                    <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, application_id).bold()
-                );
+                <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, serde_json::to_string(<span class="kw-2">&amp;</span>application_id).unwrap());
                 <span class="macro">info!</span>(<span class="string">&quot;Time elapsed: {}s&quot;</span>, start_time.elapsed().as_secs())
             }
 
