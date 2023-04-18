@@ -94,6 +94,13 @@
 <span id="94">94</span>
 <span id="95">95</span>
 <span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -103,22 +110,29 @@
     ApplicationId, Bytecode, ChainOwnership, ChannelSubscription, ExecutionStateView,
     SystemExecutionStateView, UserApplicationDescription,
 };
-<span class="kw">use </span>async_graphql::{scalar, Error, Object};
+<span class="kw">use </span>async_graphql::{Error, Object};
 <span class="kw">use </span>linera_base::{
     data_types::{Balance, Timestamp},
+    doc_scalar,
     identifiers::{ChainDescription, ChainId},
 };
 <span class="kw">use </span>linera_views::{common::Context, views::ViewError};
 <span class="kw">use </span>std::collections::BTreeMap;
 
-<span class="macro">scalar!</span>(ApplicationId);
-<span class="macro">scalar!</span>(Bytecode);
-<span class="macro">scalar!</span>(ChainOwnership);
-<span class="macro">scalar!</span>(Epoch);
-<span class="macro">scalar!</span>(Recipient);
-<span class="macro">scalar!</span>(UserApplicationDescription);
-<span class="macro">scalar!</span>(UserData);
-<span class="macro">scalar!</span>(ValidatorName);
+<span class="macro">doc_scalar!</span>(ApplicationId, <span class="string">&quot;A unique identifier for an application&quot;</span>);
+<span class="macro">doc_scalar!</span>(Bytecode, <span class="string">&quot;A WebAssembly module&#39;s bytecode&quot;</span>);
+<span class="macro">doc_scalar!</span>(ChainOwnership, <span class="string">&quot;Represents the owner(s) of a chain&quot;</span>);
+<span class="macro">doc_scalar!</span>(
+    Epoch,
+    <span class="string">&quot;A number identifying the configuration of the chain (aka the committee)&quot;
+</span>);
+<span class="macro">doc_scalar!</span>(Recipient, <span class="string">&quot;The recipient of a transfer&quot;</span>);
+<span class="macro">doc_scalar!</span>(
+    UserApplicationDescription,
+    <span class="string">&quot;Description of the necessary information to run a user application&quot;
+</span>);
+<span class="macro">doc_scalar!</span>(UserData, <span class="string">&quot;Optional user message attached to a transfer&quot;</span>);
+<span class="macro">doc_scalar!</span>(ValidatorName, <span class="string">&quot;The identity of a validator&quot;</span>);
 
 <span class="attribute">#[Object]
 </span><span class="kw">impl </span>Committee {

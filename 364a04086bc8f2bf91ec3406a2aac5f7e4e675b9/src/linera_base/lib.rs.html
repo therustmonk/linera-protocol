@@ -81,6 +81,10 @@
 <span id="81">81</span>
 <span id="82">82</span>
 <span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -92,6 +96,10 @@
 <span class="kw">pub mod </span>data_types;
 <span class="kw">mod </span>graphql;
 <span class="kw">pub mod </span>identifiers;
+
+<span class="kw">pub use </span>graphql::BcsHexParseError;
+<span class="attribute">#[doc(hidden)]
+</span><span class="kw">pub use </span>{async_graphql, bcs, hex};
 
 <span class="doccomment">/// A macro for asserting that a condition is true, returning an error if it is not.
 ///

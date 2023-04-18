@@ -153,8 +153,8 @@ var sourcesIndex = JSON.parse('{\
 "librocksdb_sys":["",[],["lib.rs"]],\
 "libz_sys":["",[],["lib.rs"]],\
 "linera_base":["",[],["crypto.rs","data_types.rs","graphql.rs","identifiers.rs","lib.rs"]],\
-"linera_chain":["",[],["chain.rs","data_types.rs","graphql.rs","inbox.rs","lib.rs","manager.rs","outbox.rs"]],\
-"linera_core":["",[["unit_tests",[],["client_test_utils.rs"]]],["client.rs","data_types.rs","graphql.rs","lib.rs","node.rs","notifier.rs","updater.rs","worker.rs"]],\
+"linera_chain":["",[],["chain.rs","data_types.rs","inbox.rs","lib.rs","manager.rs","outbox.rs"]],\
+"linera_core":["",[["unit_tests",[],["client_test_utils.rs"]]],["client.rs","data_types.rs","lib.rs","node.rs","notifier.rs","updater.rs","worker.rs"]],\
 "linera_execution":["",[["wasm",[],["async_boundary.rs","async_determinism.rs","common.rs","conversions_from_wit.rs","conversions_to_wit.rs","guest_futures.rs","mod.rs","sanitizer.rs","system_api.rs","wasmer.rs","wasmtime.rs"]]],["applications.rs","committee.rs","execution.rs","graphql.rs","lib.rs","ownership.rs","runtime.rs","system.rs"]],\
 "linera_rpc":["",[],["client.rs","codec.rs","config.rs","conversions.rs","grpc_network.rs","grpc_pool.rs","lib.rs","mass.rs","node_provider.rs","rpc.rs","simple_network.rs","transport.rs"]],\
 "linera_sdk":["",[["contract",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs","wit_types.rs"]],["service",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs","wit_types.rs"]],["test",[],["block.rs","chain.rs","mod.rs","validator.rs"]]],["base.rs","exported_future.rs","extensions.rs","lib.rs","log.rs"]],\

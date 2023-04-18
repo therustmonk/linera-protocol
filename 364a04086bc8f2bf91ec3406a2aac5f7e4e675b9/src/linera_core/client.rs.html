@@ -2462,7 +2462,7 @@
 
     <span class="doccomment">/// Stop listening to the admin chain for new committees. (This is only useful for
     /// testing.)
-    </span><span class="kw">pub async fn </span>unsubscribe_to_new_committees(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    </span><span class="kw">pub async fn </span>unsubscribe_from_new_committees(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::Unsubscribe {
             chain_id: <span class="self">self</span>.admin_id,
             channel: SystemChannel::Admin,
@@ -2483,7 +2483,7 @@
     </span>}
 
     <span class="doccomment">/// Stop listening to the given chain for published bytecodes.
-    </span><span class="kw">pub async fn </span>unsubscribe_to_published_bytecodes(
+    </span><span class="kw">pub async fn </span>unsubscribe_from_published_bytecodes(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         chain_id: ChainId,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {

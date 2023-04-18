@@ -1138,6 +1138,11 @@
 <span id="1138">1138</span>
 <span id="1139">1139</span>
 <span id="1140">1140</span>
+<span id="1141">1141</span>
+<span id="1142">1142</span>
+<span id="1143">1143</span>
+<span id="1144">1144</span>
+<span id="1145">1145</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1148,7 +1153,7 @@
 <span class="kw">use </span>linera_base::{
     crypto::{CryptoHash, KeyPair},
     data_types::{ArithmeticError, BlockHeight, Timestamp},
-    ensure,
+    doc_scalar, ensure,
     identifiers::{ChainId, Owner},
 };
 <span class="kw">use </span>linera_chain::{
@@ -1250,6 +1255,11 @@
     <span class="kw">pub </span>chain_id: ChainId,
     <span class="kw">pub </span>reason: Reason,
 }
+
+<span class="macro">doc_scalar!</span>(
+    Notification,
+    <span class="string">&quot;Notify that a chain has a new certified block or a new message&quot;
+</span>);
 
 <span class="attribute">#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[allow(clippy::large_enum_variant)]

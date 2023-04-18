@@ -250,6 +250,16 @@
 <span id="250">250</span>
 <span id="251">251</span>
 <span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -265,6 +275,8 @@
 
 <span class="attribute">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">use </span>chrono::NaiveDateTime;
+
+<span class="kw">use </span><span class="kw">crate</span>::doc_scalar;
 
 <span class="doccomment">/// A non-negative amount of money to be transferred.
 </span><span class="attribute">#[derive(
@@ -502,5 +514,13 @@
         <span class="prelude-val">Ok</span>(Amount(val.<span class="number">0</span>.try_into()<span class="question-mark">?</span>))
     }
 }
+
+<span class="macro">doc_scalar!</span>(Amount, <span class="string">&quot;A non-negative amount of money to be transferred&quot;</span>);
+<span class="macro">doc_scalar!</span>(Balance, <span class="string">&quot;The balance of a chain&quot;</span>);
+<span class="macro">doc_scalar!</span>(BlockHeight, <span class="string">&quot;A block height to identify blocks in a chain&quot;</span>);
+<span class="macro">doc_scalar!</span>(
+    Timestamp,
+    <span class="string">&quot;A timestamp, in microseconds since the Unix epoch&quot;
+</span>);
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="linera_base" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

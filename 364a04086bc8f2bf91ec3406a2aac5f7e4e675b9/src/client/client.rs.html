@@ -1147,6 +1147,43 @@
 <span id="1147">1147</span>
 <span id="1148">1148</span>
 <span id="1149">1149</span>
+<span id="1150">1150</span>
+<span id="1151">1151</span>
+<span id="1152">1152</span>
+<span id="1153">1153</span>
+<span id="1154">1154</span>
+<span id="1155">1155</span>
+<span id="1156">1156</span>
+<span id="1157">1157</span>
+<span id="1158">1158</span>
+<span id="1159">1159</span>
+<span id="1160">1160</span>
+<span id="1161">1161</span>
+<span id="1162">1162</span>
+<span id="1163">1163</span>
+<span id="1164">1164</span>
+<span id="1165">1165</span>
+<span id="1166">1166</span>
+<span id="1167">1167</span>
+<span id="1168">1168</span>
+<span id="1169">1169</span>
+<span id="1170">1170</span>
+<span id="1171">1171</span>
+<span id="1172">1172</span>
+<span id="1173">1173</span>
+<span id="1174">1174</span>
+<span id="1175">1175</span>
+<span id="1176">1176</span>
+<span id="1177">1177</span>
+<span id="1178">1178</span>
+<span id="1179">1179</span>
+<span id="1180">1180</span>
+<span id="1181">1181</span>
+<span id="1182">1182</span>
+<span id="1183">1183</span>
+<span id="1184">1184</span>
+<span id="1185">1185</span>
+<span id="1186">1186</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1159,7 +1196,7 @@
 <span class="kw">use </span>linera_base::{
     crypto::{KeyPair, PublicKey},
     data_types::{Amount, Balance, BlockHeight, Timestamp},
-    identifiers::{ChainDescription, ChainId},
+    identifiers::{BytecodeId, ChainDescription, ChainId},
 };
 <span class="kw">use </span>linera_chain::data_types::Certificate;
 <span class="kw">use </span>linera_core::{
@@ -1279,8 +1316,13 @@
     <span class="kw">fn </span>make_chain_client&lt;S&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         storage: S,
-        chain_id: ChainId,
+        chain_id: <span class="kw">impl </span>Into&lt;<span class="prelude-ty">Option</span>&lt;ChainId&gt;&gt;,
     ) -&gt; ChainClient&lt;<span class="kw">impl </span>ValidatorNodeProvider, S&gt; {
+        <span class="kw">let </span>chain_id = chain_id.into().unwrap_or_else(|| {
+            <span class="self">self</span>.wallet_state
+                .default_chain()
+                .expect(<span class="string">&quot;No chain specified in wallet with no default chain&quot;</span>)
+        });
         <span class="kw">let </span>chain = <span class="self">self
             </span>.wallet_state
             .get(chain_id)
@@ -1538,6 +1580,40 @@
             <span class="self">self</span>.update_wallet_from_client(<span class="kw-2">&amp;mut </span>chain_client).<span class="kw">await</span>;
         }
     }
+
+    <span class="kw">async fn </span>publish_bytecode&lt;S&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        chain_client: <span class="kw-2">&amp;mut </span>ChainClient&lt;<span class="kw">impl </span>ValidatorNodeProvider, S&gt;,
+        contract: PathBuf,
+        service: PathBuf,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;BytecodeId, anyhow::Error&gt;
+    <span class="kw">where
+        </span>S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
+        ViewError: From&lt;S::ContextError&gt;,
+    {
+        <span class="macro">info!</span>(<span class="string">&quot;Loading bytecode files...&quot;</span>);
+        <span class="kw">let </span>contract_bytecode = Bytecode::load_from_file(<span class="kw-2">&amp;</span>contract).<span class="kw">await</span>.context(<span class="macro">format!</span>(
+            <span class="string">&quot;failed to load contract bytecode from {:?}&quot;</span>,
+            <span class="kw-2">&amp;</span>contract
+        ))<span class="question-mark">?</span>;
+        <span class="kw">let </span>service_bytecode = Bytecode::load_from_file(<span class="kw-2">&amp;</span>service).<span class="kw">await</span>.context(<span class="macro">format!</span>(
+            <span class="string">&quot;failed to load service bytecode from {:?}&quot;</span>,
+            <span class="kw-2">&amp;</span>service
+        ))<span class="question-mark">?</span>;
+
+        <span class="macro">info!</span>(<span class="string">&quot;Publishing bytecode...&quot;</span>);
+        <span class="kw">let </span>(bytecode_id, _cert) = chain_client
+            .publish_bytecode(contract_bytecode, service_bytecode)
+            .<span class="kw">await
+            </span>.context(<span class="string">&quot;failed to publish bytecode&quot;</span>)<span class="question-mark">?</span>;
+
+        <span class="macro">info!</span>(<span class="string">&quot;{}&quot;</span>, <span class="string">&quot;Bytecode published successfully!&quot;</span>.green().bold());
+
+        <span class="macro">info!</span>(<span class="string">&quot;Synchronizing...&quot;</span>);
+        chain_client.synchronize_and_recompute_balance().<span class="kw">await</span><span class="question-mark">?</span>;
+        chain_client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(bytecode_id)
+    }
 }
 
 <span class="attribute">#[cfg(feature = <span class="string">&quot;benchmark&quot;</span>)]
@@ -1749,9 +1825,25 @@
         </span>port: NonZeroU16,
     },
 
+    <span class="doccomment">/// Publish bytecode.
+    </span><span class="attribute">#[structopt(name = <span class="string">&quot;publish_bytecode&quot;</span>)]
+    </span>PublishBytecode {
+        contract: PathBuf,
+        service: PathBuf,
+        publisher: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
+    },
+
     <span class="doccomment">/// Create an application.
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;publish&quot;</span>)]
-    </span>Publish {
+    </span><span class="attribute">#[structopt(name = <span class="string">&quot;create_application&quot;</span>)]
+    </span>CreateApplication {
+        bytecode_id: BytecodeId,
+        arguments: String,
+        creator: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
+    },
+
+    <span class="doccomment">/// Create an application, and publish the required bytecode.
+    </span><span class="attribute">#[structopt(name = <span class="string">&quot;publish_and_create&quot;</span>)]
+    </span>PublishAndCreate {
         contract: PathBuf,
         service: PathBuf,
         arguments: String,
@@ -1820,12 +1912,6 @@
             }
 
             OpenChain { sender, public_key } =&gt; {
-                <span class="kw">let </span>sender = sender.unwrap_or_else(|| {
-                    context
-                        .wallet_state
-                        .default_chain()
-                        .expect(<span class="string">&quot;No chain specified in wallet with no default chain&quot;</span>)
-                });
                 <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, sender);
                 <span class="kw">let </span>(new_public_key, key_pair) = <span class="kw">match </span>public_key {
                     <span class="prelude-val">Some</span>(key) =&gt; (key, <span class="prelude-val">None</span>),
@@ -1843,9 +1929,9 @@
                 context.update_wallet_from_client(<span class="kw-2">&amp;mut </span>chain_client).<span class="kw">await</span>;
                 <span class="kw">let </span>timestamp = certificate.value.block().timestamp;
                 context.update_wallet_for_new_chain(id, key_pair, timestamp);
-                <span class="comment">// Print the new chain id(s) on stdout for the scripting purposes.
+                <span class="comment">// Print the new chain id and certificate on stdout for the scripting purposes.
                 </span><span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, id);
-                <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, hex::encode(bcs::to_bytes(<span class="kw-2">&amp;</span>certificate).unwrap()));
+                <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, certificate);
                 context.save_wallet();
             }
 
@@ -1862,12 +1948,6 @@
             }
 
             QueryBalance { chain_id } =&gt; {
-                <span class="kw">let </span>chain_id = chain_id.unwrap_or_else(|| {
-                    context
-                        .wallet_state
-                        .default_chain()
-                        .expect(<span class="string">&quot;No chain specified in wallet with no default chain&quot;</span>)
-                });
                 <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, chain_id);
                 <span class="macro">info!</span>(<span class="string">&quot;Starting query for the local balance&quot;</span>);
                 <span class="kw">let </span>time_start = Instant::now();
@@ -1883,12 +1963,6 @@
             }
 
             SynchronizeBalance { chain_id } =&gt; {
-                <span class="kw">let </span>chain_id = chain_id.unwrap_or_else(|| {
-                    context
-                        .wallet_state
-                        .default_chain()
-                        .expect(<span class="string">&quot;No chain specified in wallet with no default chain&quot;</span>)
-                });
                 <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, chain_id);
                 <span class="macro">info!</span>(<span class="string">&quot;Synchronize chain information&quot;</span>);
                 <span class="kw">let </span>time_start = Instant::now();
@@ -1904,15 +1978,7 @@
             }
 
             QueryValidators { chain_id } =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(
-                    storage,
-                    chain_id.unwrap_or_else(|| {
-                        context
-                            .wallet_state
-                            .default_chain()
-                            .expect(<span class="string">&quot;No chain specified in wallet with no default chain&quot;</span>)
-                    }),
-                );
+                <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, chain_id);
                 <span class="macro">info!</span>(<span class="string">&quot;Starting operation to query validators&quot;</span>);
                 <span class="kw">let </span>time_start = Instant::now();
                 <span class="kw">let </span>committee = chain_client.local_committee().<span class="kw">await</span>.unwrap();
@@ -2134,58 +2200,39 @@
             }
 
             Service { chain_id, port } =&gt; {
-                <span class="kw">let </span>chain_id = chain_id.unwrap_or_else(|| {
-                    context
-                        .wallet_state
-                        .default_chain()
-                        .expect(<span class="string">&quot;No chain specified in wallet with no default chain&quot;</span>)
-                });
                 <span class="kw">let </span>chain_client = context.make_chain_client(storage, chain_id);
                 <span class="kw">let </span>service = linera_service::node_service::NodeService::new(chain_client, port);
 
                 service.run().<span class="kw">await</span><span class="question-mark">?</span>;
             }
 
-            Publish {
+            PublishBytecode {
                 contract,
                 service,
-                arguments,
                 publisher,
             } =&gt; {
                 <span class="kw">let </span>start_time = Instant::now();
-                <span class="kw">let </span>chain_id = publisher.unwrap_or_else(|| {
-                    context
-                        .wallet_state
-                        .default_chain()
-                        .expect(<span class="string">&quot;No chain specified in wallet with no default chain&quot;</span>)
-                });
-                <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, chain_id);
+                <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, publisher);
+                <span class="kw">let </span>bytecode_id = context
+                    .publish_bytecode(<span class="kw-2">&amp;mut </span>chain_client, contract, service)
+                    .<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, bytecode_id);
+                <span class="macro">info!</span>(<span class="string">&quot;Time elapsed: {}s&quot;</span>, start_time.elapsed().as_secs());
+            }
+
+            CreateApplication {
+                bytecode_id,
+                arguments,
+                creator,
+            } =&gt; {
+                <span class="kw">let </span>start_time = Instant::now();
+                <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, creator);
 
                 <span class="macro">info!</span>(<span class="string">&quot;Processing arguments...&quot;</span>);
                 <span class="kw">let </span>arguments = hex::decode(<span class="kw-2">&amp;</span>arguments)<span class="question-mark">?</span>;
 
-                <span class="macro">info!</span>(<span class="string">&quot;Loading bytecode files...&quot;</span>);
-                <span class="kw">let </span>contract_bytecode = Bytecode::load_from_file(<span class="kw-2">&amp;</span>contract).<span class="kw">await</span>.context(
-                    <span class="macro">format!</span>(<span class="string">&quot;failed to load contract bytecode from {:?}&quot;</span>, <span class="kw-2">&amp;</span>contract),
-                )<span class="question-mark">?</span>;
-                <span class="kw">let </span>service_bytecode = Bytecode::load_from_file(<span class="kw-2">&amp;</span>service).<span class="kw">await</span>.context(
-                    <span class="macro">format!</span>(<span class="string">&quot;failed to load service bytecode from {:?}&quot;</span>, <span class="kw-2">&amp;</span>service),
-                )<span class="question-mark">?</span>;
-
-                <span class="macro">info!</span>(<span class="string">&quot;Publishing bytecode...&quot;</span>);
-                <span class="kw">let </span>(bytecode_id, cert) = chain_client
-                    .publish_bytecode(contract_bytecode, service_bytecode)
-                    .<span class="kw">await
-                    </span>.context(<span class="string">&quot;failed to publish bytecode&quot;</span>)<span class="question-mark">?</span>;
-
-                <span class="macro">info!</span>(<span class="string">&quot;{}&quot;</span>, <span class="string">&quot;Bytecode published successfully!&quot;</span>.green().bold());
-
                 <span class="macro">info!</span>(<span class="string">&quot;Synchronizing...&quot;</span>);
                 chain_client.synchronize_and_recompute_balance().<span class="kw">await</span><span class="question-mark">?</span>;
-                chain_client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
-
-                <span class="macro">info!</span>(<span class="string">&quot;Processing inbox...&quot;</span>);
-                chain_client.receive_certificate(cert).<span class="kw">await</span><span class="question-mark">?</span>;
                 chain_client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
 
                 <span class="macro">info!</span>(<span class="string">&quot;Creating application...&quot;</span>);
@@ -2195,8 +2242,35 @@
                     </span>.context(<span class="string">&quot;failed to create application&quot;</span>)<span class="question-mark">?</span>;
 
                 <span class="macro">info!</span>(<span class="string">&quot;{}&quot;</span>, <span class="string">&quot;Application published successfully!&quot;</span>.green().bold());
-                <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, serde_json::to_string(<span class="kw-2">&amp;</span>application_id).unwrap());
-                <span class="macro">info!</span>(<span class="string">&quot;Time elapsed: {}s&quot;</span>, start_time.elapsed().as_secs())
+                <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, application_id);
+                <span class="macro">info!</span>(<span class="string">&quot;Time elapsed: {}s&quot;</span>, start_time.elapsed().as_secs());
+            }
+
+            PublishAndCreate {
+                contract,
+                service,
+                arguments,
+                publisher,
+            } =&gt; {
+                <span class="kw">let </span>start_time = Instant::now();
+                <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, publisher);
+
+                <span class="macro">info!</span>(<span class="string">&quot;Processing arguments...&quot;</span>);
+                <span class="kw">let </span>arguments = hex::decode(<span class="kw-2">&amp;</span>arguments)<span class="question-mark">?</span>;
+
+                <span class="kw">let </span>bytecode_id = context
+                    .publish_bytecode(<span class="kw-2">&amp;mut </span>chain_client, contract, service)
+                    .<span class="kw">await</span><span class="question-mark">?</span>;
+
+                <span class="macro">info!</span>(<span class="string">&quot;Creating application...&quot;</span>);
+                <span class="kw">let </span>(application_id, <span class="kw">_</span>) = chain_client
+                    .create_application(bytecode_id, <span class="macro">vec!</span>[], arguments, <span class="macro">vec!</span>[])
+                    .<span class="kw">await
+                    </span>.context(<span class="string">&quot;failed to create application&quot;</span>)<span class="question-mark">?</span>;
+
+                <span class="macro">info!</span>(<span class="string">&quot;{}&quot;</span>, <span class="string">&quot;Application published successfully!&quot;</span>.green().bold());
+                <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, application_id);
+                <span class="macro">info!</span>(<span class="string">&quot;Time elapsed: {}s&quot;</span>, start_time.elapsed().as_secs());
             }
 
             Assign {
@@ -2204,7 +2278,7 @@
                 certificate,
                 chain,
             } =&gt; {
-                <span class="kw">let </span>certificate: Certificate = bcs::from_bytes(<span class="kw-2">&amp;</span>hex::decode(certificate)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
+                <span class="kw">let </span>certificate: Certificate = certificate.parse()<span class="question-mark">?</span>;
                 <span class="kw">let </span>timestamp = certificate.value.block().timestamp;
                 context
                     .wallet_state

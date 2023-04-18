@@ -506,6 +506,12 @@
 <span id="506">506</span>
 <span id="507">507</span>
 <span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -518,6 +524,8 @@
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>std::{num::ParseIntError, str::FromStr};
 <span class="kw">use </span>thiserror::Error;
+
+<span class="kw">use </span><span class="kw">crate</span>::doc_scalar;
 
 <span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
 </span><span class="kw">use </span>{
@@ -985,6 +993,10 @@
 }
 
 <span class="kw">impl </span>BcsHashable <span class="kw">for </span>PublicKey {}
+
+<span class="macro">doc_scalar!</span>(CryptoHash, <span class="string">&quot;A Sha3-256 value&quot;</span>);
+<span class="macro">doc_scalar!</span>(PublicKey, <span class="string">&quot;A signature public key&quot;</span>);
+<span class="macro">doc_scalar!</span>(Signature, <span class="string">&quot;A signature value&quot;</span>);
 
 <span class="attribute">#[test]
 #[allow(clippy::disallowed_names)]

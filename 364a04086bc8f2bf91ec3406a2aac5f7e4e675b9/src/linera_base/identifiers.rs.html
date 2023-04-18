@@ -182,12 +182,34 @@
 <span id="182">182</span>
 <span id="183">183</span>
 <span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use crate</span>::{
+    bcs_scalar,
     crypto::{BcsHashable, CryptoError, CryptoHash, PublicKey},
     data_types::BlockHeight,
+    doc_scalar,
 };
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>std::str::FromStr;
@@ -366,5 +388,23 @@
 }
 
 <span class="kw">impl </span>BcsHashable <span class="kw">for </span>ChainDescription {}
+
+<span class="macro">bcs_scalar!</span>(ApplicationId, <span class="string">&quot;A unique identifier for a user application&quot;</span>);
+<span class="macro">bcs_scalar!</span>(
+    BytecodeId,
+    <span class="string">&quot;A unique identifier for an application bytecode&quot;
+</span>);
+<span class="macro">doc_scalar!</span>(ChainDescription, <span class="string">&quot;How to create a chain&quot;</span>);
+<span class="macro">doc_scalar!</span>(
+    ChainId,
+    <span class="string">&quot;The unique identifier (UID) of a chain. This is currently computed as the hash value of a \
+    ChainDescription.&quot;
+</span>);
+<span class="macro">doc_scalar!</span>(ChannelName, <span class="string">&quot;The name of a subscription channel&quot;</span>);
+<span class="macro">doc_scalar!</span>(
+    Owner,
+    <span class="string">&quot;The owner of a chain. This is currently the hash of the owner&#39;s public key used to verify \
+    signatures.&quot;
+</span>);
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="linera_base" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

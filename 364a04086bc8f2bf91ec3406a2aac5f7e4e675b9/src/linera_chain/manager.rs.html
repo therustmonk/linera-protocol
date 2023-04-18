@@ -432,6 +432,8 @@
 <span id="432">432</span>
 <span id="433">433</span>
 <span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -445,7 +447,7 @@
 <span class="kw">use </span>linera_base::{
     crypto::{CryptoHash, KeyPair, PublicKey},
     data_types::{BlockHeight, RoundNumber},
-    ensure,
+    doc_scalar, ensure,
     identifiers::Owner,
 };
 <span class="kw">use </span>linera_execution::ChainOwnership;
@@ -463,6 +465,8 @@
     <span class="doccomment">/// The chain is managed by multiple owners.
     </span>Multi(Box&lt;MultiOwnerManager&gt;),
 }
+
+<span class="macro">doc_scalar!</span>(ChainManager, <span class="string">&quot;How to produce new blocks&quot;</span>);
 
 <span class="doccomment">/// The specific state of a chain managed by one owner.
 </span><span class="attribute">#[derive(Clone, Debug, Serialize, Deserialize)]
