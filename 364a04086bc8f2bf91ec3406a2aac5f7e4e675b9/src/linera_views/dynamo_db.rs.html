@@ -977,6 +977,21 @@
 <span id="977">977</span>
 <span id="978">978</span>
 <span id="979">979</span>
+<span id="980">980</span>
+<span id="981">981</span>
+<span id="982">982</span>
+<span id="983">983</span>
+<span id="984">984</span>
+<span id="985">985</span>
+<span id="986">986</span>
+<span id="987">987</span>
+<span id="988">988</span>
+<span id="989">989</span>
+<span id="990">990</span>
+<span id="991">991</span>
+<span id="992">992</span>
+<span id="993">993</span>
+<span id="994">994</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -995,6 +1010,7 @@
     types::{Blob, SdkError},
     Client,
 };
+<span class="kw">use </span>futures::future::join_all;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>std::{collections::HashMap, mem, str::FromStr};
 <span class="kw">use </span>thiserror::Error;
@@ -1642,6 +1658,20 @@
         <span class="kw">let </span>key_db = build_key(key.to_vec());
         <span class="self">self</span>.read_key_bytes_general(key_db).<span class="kw">await
     </span>}
+
+    <span class="kw">async fn </span>read_multi_key_bytes(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        keys: Vec&lt;Vec&lt;u8&gt;&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt;, DynamoDbContextError&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>handles = Vec::new();
+        <span class="kw">for </span>key <span class="kw">in </span>keys {
+            <span class="kw">let </span>key_db = build_key(key);
+            <span class="kw">let </span>handle = <span class="self">self</span>.read_key_bytes_general(key_db);
+            handles.push(handle);
+        }
+        <span class="kw">let </span>result = join_all(handles).<span class="kw">await</span>;
+        <span class="prelude-val">Ok</span>(result.into_iter().collect::&lt;<span class="prelude-ty">Result</span>&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;()<span class="question-mark">?</span>)
+    }
 
     <span class="kw">async fn </span>find_keys_by_prefix(
         <span class="kw-2">&amp;</span><span class="self">self</span>,

@@ -852,6 +852,56 @@
 <span id="852">852</span>
 <span id="853">853</span>
 <span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
+<span id="867">867</span>
+<span id="868">868</span>
+<span id="869">869</span>
+<span id="870">870</span>
+<span id="871">871</span>
+<span id="872">872</span>
+<span id="873">873</span>
+<span id="874">874</span>
+<span id="875">875</span>
+<span id="876">876</span>
+<span id="877">877</span>
+<span id="878">878</span>
+<span id="879">879</span>
+<span id="880">880</span>
+<span id="881">881</span>
+<span id="882">882</span>
+<span id="883">883</span>
+<span id="884">884</span>
+<span id="885">885</span>
+<span id="886">886</span>
+<span id="887">887</span>
+<span id="888">888</span>
+<span id="889">889</span>
+<span id="890">890</span>
+<span id="891">891</span>
+<span id="892">892</span>
+<span id="893">893</span>
+<span id="894">894</span>
+<span id="895">895</span>
+<span id="896">896</span>
+<span id="897">897</span>
+<span id="898">898</span>
+<span id="899">899</span>
+<span id="900">900</span>
+<span id="901">901</span>
+<span id="902">902</span>
+<span id="903">903</span>
+<span id="904">904</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -1258,6 +1308,48 @@
         <span class="prelude-val">Ok</span>(value)
     }
 
+    <span class="doccomment">/// Obtains the values of a range of indices
+    /// ```rust
+    /// # tokio_test::block_on(async {
+    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::key_value_store_view::KeyValueStoreView;
+    /// # use crate::linera_views::views::View;
+    /// # let context = create_test_context();
+    ///   let mut view = KeyValueStoreView::load(context).await.unwrap();
+    ///   view.insert(vec![0,1], vec![42]);
+    ///   assert_eq!(view.multi_get(vec![vec![0,1], vec![0,2]]).await.unwrap(), vec![Some(vec![42]), None]);
+    /// # })
+    /// ```
+    </span><span class="kw">pub async fn </span>multi_get(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        indices: Vec&lt;Vec&lt;u8&gt;&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt;, ViewError&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>result = Vec::with_capacity(indices.len());
+        <span class="kw">let </span><span class="kw-2">mut </span>missed_indices = Vec::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>vector_query = Vec::new();
+        <span class="kw">for </span>(i, index) <span class="kw">in </span>indices.into_iter().enumerate() {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(update) = <span class="self">self</span>.updates.get(<span class="kw-2">&amp;</span>index) {
+                <span class="kw">let </span>value = <span class="kw">match </span>update {
+                    Update::Removed =&gt; <span class="prelude-val">None</span>,
+                    Update::Set(value) =&gt; <span class="prelude-val">Some</span>(value.clone()),
+                };
+                result.push(value);
+            } <span class="kw">else </span>{
+                result.push(<span class="prelude-val">None</span>);
+                missed_indices.push(i);
+                <span class="kw">let </span>key = <span class="self">self</span>.context.base_tag_index(KeyTag::Index <span class="kw">as </span>u8, <span class="kw-2">&amp;</span>index);
+                vector_query.push(key);
+            }
+        }
+        <span class="kw">if </span>!<span class="self">self</span>.was_cleared {
+            <span class="kw">let </span>values = <span class="self">self</span>.context.read_multi_key_bytes(vector_query).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">for </span>(i, value) <span class="kw">in </span>missed_indices.into_iter().zip(values) {
+                result[i] = value;
+            }
+        }
+        <span class="prelude-val">Ok</span>(result)
+    }
+
     <span class="doccomment">/// Sets or inserts a value.
     /// ```rust
     /// # tokio_test::block_on(async {
@@ -1549,7 +1641,7 @@
 </span><span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
 #[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>ViewContainer&lt;C&gt; {
-    kvsv: Arc&lt;RwLock&lt;KeyValueStoreView&lt;C&gt;&gt;&gt;,
+    view: Arc&lt;RwLock&lt;KeyValueStoreView&lt;C&gt;&gt;&gt;,
 }
 
 <span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
@@ -1564,29 +1656,37 @@
     <span class="kw">type </span>KeyValues = Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt;;
 
     <span class="kw">async fn </span>read_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, ViewError&gt; {
-        <span class="kw">let </span>kvsv = <span class="self">self</span>.kvsv.read().<span class="kw">await</span>;
-        kvsv.get(key).<span class="kw">await
+        <span class="kw">let </span>view = <span class="self">self</span>.view.read().<span class="kw">await</span>;
+        view.get(key).<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>read_multi_key_bytes(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        keys: Vec&lt;Vec&lt;u8&gt;&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt;, ViewError&gt; {
+        <span class="kw">let </span>view = <span class="self">self</span>.view.read().<span class="kw">await</span>;
+        view.multi_get(keys).<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>find_keys_by_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Keys, ViewError&gt; {
-        <span class="kw">let </span>kvsv = <span class="self">self</span>.kvsv.read().<span class="kw">await</span>;
-        kvsv.find_keys_by_prefix(key_prefix).<span class="kw">await
+        <span class="kw">let </span>view = <span class="self">self</span>.view.read().<span class="kw">await</span>;
+        view.find_keys_by_prefix(key_prefix).<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>find_key_values_by_prefix(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         key_prefix: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::KeyValues, ViewError&gt; {
-        <span class="kw">let </span>kvsv = <span class="self">self</span>.kvsv.read().<span class="kw">await</span>;
-        kvsv.find_key_values_by_prefix(key_prefix).<span class="kw">await
+        <span class="kw">let </span>view = <span class="self">self</span>.view.read().<span class="kw">await</span>;
+        view.find_key_values_by_prefix(key_prefix).<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>write_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, batch: Batch, _base_key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>kvsv = <span class="self">self</span>.kvsv.write().<span class="kw">await</span>;
-        kvsv.write_batch(batch).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>view = <span class="self">self</span>.view.write().<span class="kw">await</span>;
+        view.write_batch(batch).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>batch = Batch::new();
-        kvsv.flush(<span class="kw-2">&amp;mut </span>batch)<span class="question-mark">?</span>;
-        kvsv.context().write_batch(batch).<span class="kw">await</span><span class="question-mark">?</span>;
+        view.flush(<span class="kw-2">&amp;mut </span>batch)<span class="question-mark">?</span>;
+        view.context().write_batch(batch).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -1678,9 +1778,9 @@
 {
     <span class="doccomment">/// Create a [`ViewContainer`].
     </span><span class="kw">pub async fn </span>new(context: C) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ViewError&gt; {
-        <span class="kw">let </span>kvsv = KeyValueStoreView::load(context).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>view = KeyValueStoreView::load(context).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
-            kvsv: Arc::new(RwLock::new(kvsv)),
+            view: Arc::new(RwLock::new(view)),
         })
     }
 }

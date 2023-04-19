@@ -511,6 +511,25 @@
 <span id="511">511</span>
 <span id="512">512</span>
 <span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -620,6 +639,12 @@
 
     <span class="doccomment">/// Retrieves a `Vec&lt;u8&gt;` from the database using the provided `key`.
     </span><span class="kw">async fn </span>read_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, <span class="self">Self</span>::Error&gt;;
+
+    <span class="doccomment">/// Retrieves a `Vec&lt;u8&gt;` from the database using the provided `key`.
+    </span><span class="kw">async fn </span>read_multi_key_bytes(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        key: Vec&lt;Vec&lt;u8&gt;&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt;, <span class="self">Self</span>::Error&gt;;
 
     <span class="doccomment">/// Finds the `key` matching the prefix. The prefix is not included in the returned keys.
     </span><span class="kw">async fn </span>find_keys_by_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Keys, <span class="self">Self</span>::Error&gt;;
@@ -750,6 +775,12 @@
     <span class="doccomment">/// Retrieves a `Vec&lt;u8&gt;` from the database using the provided `key` prefixed by the current
     /// context.
     </span><span class="kw">async fn </span>read_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, <span class="self">Self</span>::Error&gt;;
+
+    <span class="doccomment">/// Retrieves a `Vec&lt;u8&gt;` from the database using the provided `key`.
+    </span><span class="kw">async fn </span>read_multi_key_bytes(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        key: Vec&lt;Vec&lt;u8&gt;&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt;, <span class="self">Self</span>::Error&gt;;
 
     <span class="doccomment">/// Find keys matching the `key_prefix`. The `key_prefix` is not included in the returned keys.
     </span><span class="kw">async fn </span>find_keys_by_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Keys, <span class="self">Self</span>::Error&gt;;
@@ -919,6 +950,13 @@
 
     <span class="kw">async fn </span>read_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, <span class="self">Self</span>::Error&gt; {
         log_time_async(<span class="self">self</span>.db.read_key_bytes(key), <span class="string">&quot;read_key_bytes&quot;</span>).<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>read_multi_key_bytes(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        keys: Vec&lt;Vec&lt;u8&gt;&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt;, <span class="self">Self</span>::Error&gt; {
+        log_time_async(<span class="self">self</span>.db.read_multi_key_bytes(keys), <span class="string">&quot;read_multi_key_bytes&quot;</span>).<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>find_keys_by_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Keys, <span class="self">Self</span>::Error&gt; {

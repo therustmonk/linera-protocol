@@ -160,6 +160,18 @@
 <span id="160">160</span>
 <span id="161">161</span>
 <span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -231,6 +243,18 @@
         <span class="kw">let </span>future = system::ReadKeyBytes::new(key);
         future::poll_fn(|_context| future.poll().into()).<span class="kw">await
     </span>}
+
+    <span class="kw">async fn </span>read_multi_key_bytes(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        keys: Vec&lt;Vec&lt;u8&gt;&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt;, <span class="self">Self</span>::Error&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>results = Vec::new();
+        <span class="kw">for </span>key <span class="kw">in </span>keys {
+            <span class="kw">let </span>value = <span class="self">self</span>.read_key_bytes(<span class="kw-2">&amp;</span>key).<span class="kw">await</span><span class="question-mark">?</span>;
+            results.push(value);
+        }
+        <span class="prelude-val">Ok</span>(results)
+    }
 
     <span class="kw">async fn </span>find_keys_by_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Keys, ViewError&gt; {
         <span class="kw">let </span>keys = <span class="self">self</span>.find_keys_by_prefix_load(key_prefix).<span class="kw">await</span><span class="question-mark">?</span>;
