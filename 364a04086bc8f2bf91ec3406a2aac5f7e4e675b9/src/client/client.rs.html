@@ -1243,11 +1243,29 @@
 <span id="1243">1243</span>
 <span id="1244">1244</span>
 <span id="1245">1245</span>
+<span id="1246">1246</span>
+<span id="1247">1247</span>
+<span id="1248">1248</span>
+<span id="1249">1249</span>
+<span id="1250">1250</span>
+<span id="1251">1251</span>
+<span id="1252">1252</span>
+<span id="1253">1253</span>
+<span id="1254">1254</span>
+<span id="1255">1255</span>
+<span id="1256">1256</span>
+<span id="1257">1257</span>
+<span id="1258">1258</span>
+<span id="1259">1259</span>
+<span id="1260">1260</span>
+<span id="1261">1261</span>
+<span id="1262">1262</span>
+<span id="1263">1263</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="kw">use </span>anyhow::Context;
+</span><span class="kw">use </span>anyhow::{anyhow, bail, Context};
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>chrono::{DateTime, Utc};
 <span class="kw">use </span>colored::Colorize;
@@ -1276,6 +1294,7 @@
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;
 <span class="kw">use </span>std::{
+    fs,
     num::NonZeroU16,
     path::PathBuf,
     time::{Duration, Instant},
@@ -1323,30 +1342,33 @@
         options: <span class="kw-2">&amp;</span>ClientOptions,
         genesis_config: GenesisConfig,
         chains: Vec&lt;UserChain&gt;,
-    ) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>wallet_state_path = options.wallet_state_path.clone();
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, anyhow::Error&gt; {
+        <span class="kw">let </span>wallet_state_path = <span class="kw">match </span><span class="kw-2">&amp;</span>options.wallet_state_path {
+            <span class="prelude-val">Some</span>(path) =&gt; path.clone(),
+            <span class="prelude-val">None </span>=&gt; <span class="self">Self</span>::create_default_wallet_path()<span class="question-mark">?</span>,
+        };
+        <span class="kw">if </span>wallet_state_path.exists() {
+            <span class="macro">bail!</span>(
+                <span class="string">&quot;Wallet already exists at {}. Aborting...&quot;</span>,
+                wallet_state_path.display()
+            )
+        }
         <span class="kw">let </span><span class="kw-2">mut </span>wallet_state = WalletState::create(<span class="kw-2">&amp;</span>wallet_state_path, genesis_config)
-            .unwrap_or_else(|e| {
-                <span class="macro">panic!</span>(
-                    <span class="string">&quot;Unable to create user chains at {:?}: {:?}&quot;</span>,
-                    <span class="kw-2">&amp;</span>wallet_state_path, e
-                )
-            });
+            .with_context(|| <span class="macro">format!</span>(<span class="string">&quot;Unable to create wallet at {:?}&quot;</span>, <span class="kw-2">&amp;</span>wallet_state_path))<span class="question-mark">?</span>;
         chains
             .into_iter()
             .for_each(|chain| wallet_state.insert(chain));
-        <span class="self">Self</span>::configure(options, wallet_state_path, wallet_state)
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span>::configure(options, wallet_state_path, wallet_state))
     }
 
-    <span class="kw">fn </span>from_options(options: <span class="kw-2">&amp;</span>ClientOptions) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>wallet_state_path = options.wallet_state_path.clone();
-        <span class="kw">let </span>wallet_state = WalletState::read(<span class="kw-2">&amp;</span>wallet_state_path).unwrap_or_else(|e| {
-            <span class="macro">panic!</span>(
-                <span class="string">&quot;Unable to read user chains at {:?}: {:?}&quot;</span>,
-                <span class="kw-2">&amp;</span>wallet_state_path, e
-            )
-        });
-        <span class="self">Self</span>::configure(options, wallet_state_path, wallet_state)
+    <span class="kw">fn </span>from_options(options: <span class="kw-2">&amp;</span>ClientOptions) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, anyhow::Error&gt; {
+        <span class="kw">let </span>wallet_state_path = <span class="kw">match </span><span class="kw-2">&amp;</span>options.wallet_state_path {
+            <span class="prelude-val">Some</span>(path) =&gt; path.clone(),
+            <span class="prelude-val">None </span>=&gt; <span class="self">Self</span>::create_default_wallet_path()<span class="question-mark">?</span>,
+        };
+        <span class="kw">let </span>wallet_state = WalletState::read(<span class="kw-2">&amp;</span>wallet_state_path)
+            .with_context(|| <span class="macro">format!</span>(<span class="string">&quot;Unable to read wallet at {:?}:&quot;</span>, <span class="kw-2">&amp;</span>wallet_state_path))<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span>::configure(options, wallet_state_path, wallet_state))
     }
 
     <span class="kw">fn </span>configure(
@@ -1367,6 +1389,20 @@
             cross_chain_delay,
             cross_chain_retries: options.cross_chain_retries,
         }
+    }
+
+    <span class="kw">fn </span>create_default_wallet_path() -&gt; <span class="prelude-ty">Result</span>&lt;PathBuf, anyhow::Error&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>config_dir = dirs::config_dir().ok_or_else(|| {
+            <span class="macro">anyhow!</span>(<span class="string">&quot;Default configuration directory not supported. Please specify a path.&quot;</span>)
+        })<span class="question-mark">?</span>;
+        config_dir.push(<span class="string">&quot;linera&quot;</span>);
+        <span class="kw">if </span>!config_dir.exists() {
+            <span class="macro">info!</span>(<span class="string">&quot;{} does not exist, creating...&quot;</span>, config_dir.display());
+            fs::create_dir(<span class="kw-2">&amp;</span>config_dir)<span class="question-mark">?</span>;
+            <span class="macro">info!</span>(<span class="string">&quot;{} created.&quot;</span>, config_dir.display());
+        }
+        config_dir.push(<span class="string">&quot;wallet.json&quot;</span>);
+        <span class="prelude-val">Ok</span>(config_dir)
     }
 
     <span class="attribute">#[cfg(feature = <span class="string">&quot;benchmark&quot;</span>)]
@@ -1723,7 +1759,7 @@
 </span><span class="kw">struct </span>ClientOptions {
     <span class="doccomment">/// Sets the file storing the private state of user chains (an empty one will be created if missing)
     </span><span class="attribute">#[structopt(long = <span class="string">&quot;wallet&quot;</span>)]
-    </span>wallet_state_path: PathBuf,
+    </span>wallet_state_path: <span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
 
     <span class="doccomment">/// Storage configuration for the blockchain history.
     </span><span class="attribute">#[structopt(long = <span class="string">&quot;storage&quot;</span>, default_value = <span class="string">&quot;memory&quot;</span>)]
@@ -2434,7 +2470,7 @@
                 <span class="comment">// Private keys.
                 </span>chains.push(chain);
             }
-            <span class="kw">let </span>context = ClientContext::create(<span class="kw-2">&amp;</span>options, genesis_config.clone(), chains);
+            <span class="kw">let </span>context = ClientContext::create(<span class="kw-2">&amp;</span>options, genesis_config.clone(), chains)<span class="question-mark">?</span>;
             genesis_config.write(genesis_config_path)<span class="question-mark">?</span>;
             context.save_wallet();
             <span class="prelude-val">Ok</span>(())
@@ -2442,7 +2478,7 @@
 
         command =&gt; <span class="kw">match </span>command {
             ClientCommand::KeyGen =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>context = ClientContext::from_options(<span class="kw-2">&amp;</span>options);
+                <span class="kw">let </span><span class="kw-2">mut </span>context = ClientContext::from_options(<span class="kw-2">&amp;</span>options)<span class="question-mark">?</span>;
                 <span class="kw">let </span>key_pair = KeyPair::generate();
                 <span class="kw">let </span>public = key_pair.public();
                 context.wallet_state.add_unassigned_key_pair(key_pair);
@@ -2453,12 +2489,12 @@
 
             ClientCommand::Wallet(wallet_command) =&gt; <span class="kw">match </span>wallet_command {
                 WalletCommand::Show { chain_id } =&gt; {
-                    <span class="kw">let </span>context = ClientContext::from_options(<span class="kw-2">&amp;</span>options);
+                    <span class="kw">let </span>context = ClientContext::from_options(<span class="kw-2">&amp;</span>options)<span class="question-mark">?</span>;
                     context.wallet_state.pretty_print(<span class="kw-2">*</span>chain_id);
                     <span class="prelude-val">Ok</span>(())
                 }
                 WalletCommand::SetDefault { chain_id } =&gt; {
-                    <span class="kw">let </span><span class="kw-2">mut </span>context = ClientContext::from_options(<span class="kw-2">&amp;</span>options);
+                    <span class="kw">let </span><span class="kw-2">mut </span>context = ClientContext::from_options(<span class="kw-2">&amp;</span>options)<span class="question-mark">?</span>;
                     context.wallet_state.set_default_chain(<span class="kw-2">*</span>chain_id)<span class="question-mark">?</span>;
                     context.save_wallet();
                     <span class="prelude-val">Ok</span>(())
@@ -2468,14 +2504,14 @@
                     genesis_config_path,
                 } =&gt; {
                     <span class="kw">let </span>genesis_config = GenesisConfig::read(genesis_config_path)<span class="question-mark">?</span>;
-                    <span class="kw">let </span>context = ClientContext::create(<span class="kw-2">&amp;</span>options, genesis_config, <span class="macro">vec!</span>[]);
+                    <span class="kw">let </span>context = ClientContext::create(<span class="kw-2">&amp;</span>options, genesis_config, <span class="macro">vec!</span>[])<span class="question-mark">?</span>;
                     context.save_wallet();
                     <span class="prelude-val">Ok</span>(())
                 }
             },
 
             <span class="kw">_ </span>=&gt; {
-                <span class="kw">let </span>context = ClientContext::from_options(<span class="kw-2">&amp;</span>options);
+                <span class="kw">let </span>context = ClientContext::from_options(<span class="kw-2">&amp;</span>options)<span class="question-mark">?</span>;
                 <span class="kw">let </span>genesis_config = context.wallet_state.genesis_config().clone();
                 <span class="kw">let </span>wasm_runtime = options.wasm_runtime.with_wasm_default();
 

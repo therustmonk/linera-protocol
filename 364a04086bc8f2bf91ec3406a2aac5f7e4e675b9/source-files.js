@@ -87,6 +87,8 @@ var sourcesIndex = JSON.parse('{\
 "derive_more":["",[],["add_assign_like.rs","add_helpers.rs","add_like.rs","as_mut.rs","as_ref.rs","constructor.rs","deref.rs","deref_mut.rs","display.rs","error.rs","from.rs","from_str.rs","index.rs","index_mut.rs","into.rs","into_iterator.rs","is_variant.rs","lib.rs","mul_assign_like.rs","mul_helpers.rs","mul_like.rs","not_like.rs","parsing.rs","sum_like.rs","try_into.rs","unwrap.rs","utils.rs"]],\
 "digest":["",[["core_api",[],["ct_variable.rs","rt_variable.rs","wrapper.rs","xof_reader.rs"]]],["core_api.rs","digest.rs","lib.rs"]],\
 "directories_next":["",[],["lib.rs","lin.rs"]],\
+"dirs":["",[],["lib.rs","lin.rs"]],\
+"dirs_sys":["",[],["lib.rs","xdg_user_dirs.rs"]],\
 "dirs_sys_next":["",[],["lib.rs","xdg_user_dirs.rs"]],\
 "dynasm":["",[["arch",[["aarch64",[],["aarch64data.rs","ast.rs","compiler.rs","debug.rs","encoding_helpers.rs","matching.rs","mod.rs","parser.rs"]],["x64",[],["ast.rs","compiler.rs","debug.rs","mod.rs","parser.rs","x64data.rs"]]],["mod.rs"]]],["common.rs","directive.rs","lib.rs","parse_helpers.rs","serialize.rs"]],\
 "dynasmrt":["",[],["aarch64.rs","components.rs","lib.rs","mmap.rs","relocations.rs","x64.rs","x86.rs"]],\
