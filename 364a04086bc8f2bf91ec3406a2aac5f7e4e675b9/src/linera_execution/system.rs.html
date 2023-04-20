@@ -1078,7 +1078,7 @@
         subscription: ChannelSubscription,
     },
     <span class="doccomment">/// Notifies that a new application bytecode was published.
-    </span>BytecodePublished { operation_index: usize },
+    </span>BytecodePublished { operation_index: u32 },
     <span class="doccomment">/// Shares the locations of published bytecodes.
     </span>BytecodeLocations {
         locations: Vec&lt;(BytecodeId, BytecodeLocation)&gt;,

@@ -1584,7 +1584,7 @@
     <span class="kw">fn </span>try_from(block_height_range: grpc::BlockHeightRange) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             start: <span class="macro">proto_convert!</span>(block_height_range.start),
-            limit: <span class="macro">map_as!</span>(block_height_range.limit, usize),
+            limit: block_height_range.limit,
         })
     }
 }

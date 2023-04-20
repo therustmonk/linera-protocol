@@ -176,7 +176,7 @@
 };
 <span class="kw">use </span>linera_storage::{MemoryStoreClient, Store};
 <span class="kw">use </span>std::sync::{
-    atomic::{AtomicUsize, Ordering},
+    atomic::{AtomicU32, Ordering},
     Arc,
 };
 <span class="kw">use </span>tokio::sync::{Mutex, MutexGuard};
@@ -186,7 +186,7 @@
     key_pair: KeyPair,
     committee: Committee,
     worker: Arc&lt;Mutex&lt;WorkerState&lt;MemoryStoreClient&gt;&gt;&gt;,
-    root_chain_counter: Arc&lt;AtomicUsize&gt;,
+    root_chain_counter: Arc&lt;AtomicU32&gt;,
     chains: Arc&lt;DashMap&lt;ChainId, ActiveChain&gt;&gt;,
 }
 

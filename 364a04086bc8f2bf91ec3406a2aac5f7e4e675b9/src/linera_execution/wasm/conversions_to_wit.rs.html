@@ -246,9 +246,6 @@
 <span id="246">246</span>
 <span id="247">247</span>
 <span id="248">248</span>
-<span id="249">249</span>
-<span id="250">250</span>
-<span id="251">251</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -272,10 +269,7 @@
             chain_id: host.chain_id.into(),
             authenticated_signer: host.authenticated_signer.map(|owner| owner.<span class="number">0</span>.into()),
             height: host.height.<span class="number">0</span>,
-            index: host
-                .index
-                .try_into()
-                .expect(<span class="string">&quot;Operation index should fit in a `u64`&quot;</span>),
+            index: host.index,
         }
     }
 }

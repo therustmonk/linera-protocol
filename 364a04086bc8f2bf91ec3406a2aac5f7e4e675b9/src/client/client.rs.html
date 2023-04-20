@@ -1239,6 +1239,10 @@
 <span id="1239">1239</span>
 <span id="1240">1240</span>
 <span id="1241">1241</span>
+<span id="1242">1242</span>
+<span id="1243">1243</span>
+<span id="1244">1244</span>
+<span id="1245">1245</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1864,7 +1868,7 @@
 
         <span class="doccomment">/// Index of the admin chain in the genesis config
         </span><span class="attribute">#[structopt(long, default_value = <span class="string">&quot;0&quot;</span>)]
-        </span>admin_root: usize,
+        </span>admin_root: u32,
 
         <span class="doccomment">/// Known initial balance of the chain
         </span><span class="attribute">#[structopt(long, default_value = <span class="string">&quot;0&quot;</span>)]
@@ -2409,11 +2413,15 @@
             <span class="kw">let </span><span class="kw-2">mut </span>genesis_config =
                 GenesisConfig::new(committee_config, ChainId::root(<span class="kw-2">*</span>admin_root));
             <span class="kw">let </span>timestamp = start_timestamp
-                .map(|st| Timestamp::from(st.timestamp() <span class="kw">as </span>u64))
+                .map(|st| {
+                    Timestamp::from(
+                        u64::try_from(st.timestamp()).expect(<span class="string">&quot;Start timestamp before 1970&quot;</span>),
+                    )
+                })
                 .unwrap_or_else(Timestamp::now);
             <span class="kw">let </span><span class="kw-2">mut </span>chains = <span class="macro">vec!</span>[];
             <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="kw-2">*</span>num {
-                <span class="kw">let </span>description = ChainDescription::Root(i <span class="kw">as </span>usize);
+                <span class="kw">let </span>description = ChainDescription::Root(i);
                 <span class="comment">// Create keys.
                 </span><span class="kw">let </span>chain = UserChain::make_initial(description, timestamp);
                 <span class="comment">// Public &quot;genesis&quot; state.

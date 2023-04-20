@@ -260,6 +260,24 @@
 <span id="260">260</span>
 <span id="261">261</span>
 <span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -473,6 +491,24 @@
         </span><span class="kw">impl </span>From&lt;<span class="macro-nonterminal">$wrapped</span>&gt; <span class="kw">for </span><span class="macro-nonterminal">$name </span>{
             <span class="kw">fn </span>from(value: <span class="macro-nonterminal">$wrapped</span>) -&gt; <span class="self">Self </span>{
                 <span class="self">Self</span>(value)
+            }
+        }
+
+        <span class="kw">impl </span>TryInto&lt;usize&gt; <span class="kw">for </span><span class="macro-nonterminal">$name </span>{
+            <span class="kw">type </span>Error = ArithmeticError;
+
+            <span class="kw">fn </span>try_into(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;usize, ArithmeticError&gt; {
+                usize::try_from(<span class="self">self</span>.<span class="number">0</span>).map_err(|<span class="kw">_</span>| ArithmeticError::Overflow)
+            }
+        }
+
+        <span class="kw">impl </span>TryFrom&lt;usize&gt; <span class="kw">for </span><span class="macro-nonterminal">$name </span>{
+            <span class="kw">type </span>Error = ArithmeticError;
+
+            <span class="kw">fn </span>try_from(value: usize) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="macro-nonterminal">$name</span>, ArithmeticError&gt; {
+                <span class="macro-nonterminal">$wrapped::try_from</span>(value)
+                    .map_err(|<span class="kw">_</span>| ArithmeticError::Overflow)
+                    .map(<span class="self">Self</span>)
             }
         }
     };

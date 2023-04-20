@@ -202,6 +202,29 @@
 <span id="202">202</span>
 <span id="203">203</span>
 <span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -227,7 +250,7 @@
 </span><span class="attribute">#[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Debug, Serialize, Deserialize)]
 </span><span class="kw">pub enum </span>ChainDescription {
     <span class="doccomment">/// The chain was created by the genesis configuration.
-    </span>Root(usize),
+    </span>Root(u32),
     <span class="doccomment">/// The chain was created by an effect from another chain.
     </span>Child(EffectId),
 }
@@ -244,7 +267,7 @@
 </span><span class="kw">pub struct </span>EffectId {
     <span class="kw">pub </span>chain_id: ChainId,
     <span class="kw">pub </span>height: BlockHeight,
-    <span class="kw">pub </span>index: u64,
+    <span class="kw">pub </span>index: u32,
 }
 
 <span class="doccomment">/// A unique identifier for a user application.
@@ -378,7 +401,7 @@
 }
 
 <span class="kw">impl </span>ChainId {
-    <span class="kw">pub fn </span>root(index: usize) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>root(index: u32) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>(CryptoHash::new(<span class="kw-2">&amp;</span>ChainDescription::Root(index)))
     }
 
@@ -406,5 +429,28 @@
     <span class="string">&quot;The owner of a chain. This is currently the hash of the owner&#39;s public key used to verify \
     signatures.&quot;
 </span>);
+
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use </span><span class="kw">super</span>::ChainId;
+
+    <span class="doccomment">/// Verifies that chain IDs that are explicitly used in some example and test scripts don&#39;t
+    /// change.
+    </span><span class="attribute">#[test]
+    </span><span class="kw">fn </span>chain_ids() {
+        <span class="macro">assert_eq!</span>(
+            <span class="kw-2">&amp;</span>ChainId::root(<span class="number">0</span>).to_string(),
+            <span class="string">&quot;e476187f6ddfeb9d588c7b45d3df334d5501d6499b3f9ad5595cae86cce16a65&quot;
+        </span>);
+        <span class="macro">assert_eq!</span>(
+            <span class="kw-2">&amp;</span>ChainId::root(<span class="number">9</span>).to_string(),
+            <span class="string">&quot;256e1dbc00482ddd619c293cc0df94d366afe7980022bb22d99e33036fd465dd&quot;
+        </span>);
+        <span class="macro">assert_eq!</span>(
+            <span class="kw-2">&amp;</span>ChainId::root(<span class="number">999</span>).to_string(),
+            <span class="string">&quot;9c8a838e8f7b63194f6c7585455667a8379d2b5db19a3300e9961f0b1e9091ea&quot;
+        </span>);
+    }
+}
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="linera_base" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

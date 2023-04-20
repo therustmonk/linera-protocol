@@ -1142,6 +1142,9 @@
 <span id="1142">1142</span>
 <span id="1143">1143</span>
 <span id="1144">1144</span>
+<span id="1145">1145</span>
+<span id="1146">1146</span>
+<span id="1147">1147</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1510,7 +1513,7 @@
             BTreeSet::from_iter(height_map.iter().flat_map(|(<span class="kw">_</span>, heights)| heights).copied());
         <span class="kw">let </span><span class="kw-2">mut </span>keys = Vec::new();
         <span class="kw">for </span>height <span class="kw">in </span>heights {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(key) = confirmed_log.get(u64::from(height) <span class="kw">as </span>usize).<span class="kw">await</span><span class="question-mark">? </span>{
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(key) = confirmed_log.get(height.try_into()<span class="question-mark">?</span>).<span class="kw">await</span><span class="question-mark">? </span>{
                 keys.push(key);
             }
         }
@@ -1858,7 +1861,7 @@
         height: BlockHeight,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Certificate&gt;, WorkerError&gt; {
         <span class="kw">let </span>chain = <span class="self">self</span>.storage.load_active_chain(chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>certificate_hash = <span class="kw">match </span>chain.confirmed_log.get(height.<span class="number">0 </span><span class="kw">as </span>usize).<span class="kw">await</span><span class="question-mark">? </span>{
+        <span class="kw">let </span>certificate_hash = <span class="kw">match </span>chain.confirmed_log.get(height.try_into()<span class="question-mark">?</span>).<span class="kw">await</span><span class="question-mark">? </span>{
             <span class="prelude-val">Some</span>(hash) =&gt; hash,
             <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
         };
@@ -1891,8 +1894,8 @@
         <span class="kw">let </span><span class="prelude-val">Some</span>(certificate) = <span class="self">self</span>.read_certificate(effect_id.chain_id, effect_id.height).<span class="kw">await</span><span class="question-mark">?
             </span><span class="kw">else </span>{ <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) };
 
-        <span class="kw">let </span><span class="prelude-val">Some</span>(outgoing_effect) =
-            certificate.value.effects().get(effect_id.index <span class="kw">as </span>usize).cloned()
+        <span class="kw">let </span>index = usize::try_from(effect_id.index).map_err(|<span class="kw">_</span>| ArithmeticError::Overflow)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="prelude-val">Some</span>(outgoing_effect) = certificate.value.effects().get(index).cloned()
             <span class="kw">else </span>{ <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) };
 
         <span class="kw">let </span>application_id = outgoing_effect.effect.application_id();
@@ -1919,7 +1922,7 @@
                 </span>.find(|event| {
                     event.certificate_hash == certificate_hash
                         &amp;&amp; event.height == effect_id.height
-                        &amp;&amp; event.index == effect_id.index <span class="kw">as </span>usize
+                        &amp;&amp; event.index == effect_id.index
                 })
                 .cloned()
             <span class="kw">else </span>{ <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) };
@@ -2126,10 +2129,13 @@
             info.requested_pending_messages = messages;
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(range) = query.request_sent_certificates_in_range {
-            <span class="kw">let </span>start = u64::from(range.start) <span class="kw">as </span>usize;
+            <span class="kw">let </span>start: usize = range.start.try_into()<span class="question-mark">?</span>;
             <span class="kw">let </span>end = <span class="kw">match </span>range.limit {
                 <span class="prelude-val">None </span>=&gt; chain.confirmed_log.count(),
-                <span class="prelude-val">Some</span>(limit) =&gt; std::cmp::min(start + limit, chain.confirmed_log.count()),
+                <span class="prelude-val">Some</span>(limit) =&gt; start
+                    .checked_add(usize::try_from(limit).map_err(|<span class="kw">_</span>| ArithmeticError::Overflow)<span class="question-mark">?</span>)
+                    .ok_or(ArithmeticError::Overflow)<span class="question-mark">?
+                    </span>.min(chain.confirmed_log.count()),
             };
             <span class="kw">let </span>keys = chain.confirmed_log.read(start..end).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">let </span>certs = <span class="self">self</span>.storage.read_certificates(keys).<span class="kw">await</span><span class="question-mark">?</span>;

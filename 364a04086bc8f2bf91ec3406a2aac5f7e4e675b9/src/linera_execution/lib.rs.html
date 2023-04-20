@@ -677,6 +677,8 @@
 <span id="677">677</span>
 <span id="678">678</span>
 <span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -716,7 +718,7 @@
 <span class="kw">use </span>derive_more::Display;
 <span class="kw">use </span>linera_base::{
     crypto::CryptoHash,
-    data_types::{Balance, BlockHeight, Timestamp},
+    data_types::{ArithmeticError, Balance, BlockHeight, Timestamp},
     hex_debug,
     identifiers::{BytecodeId, ChainId, ChannelName, Destination, EffectId, Owner, SessionId},
 };
@@ -732,6 +734,8 @@
 </span><span class="kw">pub enum </span>ExecutionError {
     <span class="attribute">#[error(transparent)]
     </span>ViewError(ViewError),
+    <span class="attribute">#[error(transparent)]
+    </span>ArithmeticError(<span class="attribute">#[from] </span>ArithmeticError),
     <span class="attribute">#[error(transparent)]
     </span>SystemError(<span class="attribute">#[from] </span>SystemExecutionError),
     <span class="attribute">#[error(<span class="string">&quot;User application reported an error: {0}&quot;</span>)]
@@ -893,7 +897,7 @@
     <span class="doccomment">/// The current block height.
     </span><span class="kw">pub </span>height: BlockHeight,
     <span class="doccomment">/// The current index of the operation.
-    </span><span class="kw">pub </span>index: usize,
+    </span><span class="kw">pub </span>index: u32,
 }
 
 <span class="attribute">#[derive(Clone, Copy, Debug)]
@@ -1152,7 +1156,7 @@
         <span class="self">Self </span>{
             chain_id: context.chain_id,
             height: context.height,
-            index: context.index <span class="kw">as </span>u64,
+            index: context.index,
         }
     }
 }

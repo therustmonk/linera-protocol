@@ -519,6 +519,8 @@
 <span id="519">519</span>
 <span id="520">520</span>
 <span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -533,7 +535,7 @@
 <span class="kw">use </span>async_graphql::SimpleObject;
 <span class="kw">use </span>linera_base::{
     crypto::CryptoHash,
-    data_types::{BlockHeight, Timestamp},
+    data_types::{ArithmeticError, BlockHeight, Timestamp},
     ensure,
     identifiers::{ChainId, Destination, EffectId},
 };
@@ -722,6 +724,7 @@
         <span class="comment">// Process immediate effects and create inbox events.
         </span><span class="kw">let </span><span class="kw-2">mut </span>events = Vec::new();
         <span class="kw">for </span>(index, outgoing_effect) <span class="kw">in </span>effects.into_iter().enumerate() {
+            <span class="kw">let </span>index = u32::try_from(index).map_err(|<span class="kw">_</span>| ArithmeticError::Overflow)<span class="question-mark">?</span>;
             <span class="kw">let </span>OutgoingEffect {
                 destination,
                 authenticated_signer,
@@ -750,7 +753,7 @@
                 </span><span class="kw">let </span>effect_id = EffectId {
                     chain_id: origin.sender,
                     height,
-                    index: index <span class="kw">as </span>u64,
+                    index,
                 };
                 <span class="self">self</span>.execute_immediate_effect(effect_id, <span class="kw-2">&amp;</span>effect, timestamp)
                     .<span class="kw">await</span><span class="question-mark">?</span>;
@@ -876,7 +879,7 @@
                 effect_id: EffectId {
                     chain_id: message.origin.sender,
                     height: message.event.height,
-                    index: message.event.index <span class="kw">as </span>u64,
+                    index: message.event.index,
                 },
                 authenticated_signer: message.event.authenticated_signer,
             };
@@ -889,6 +892,7 @@
         }
         <span class="comment">// Second, execute the operations in the block and remember the recipients to notify.
         </span><span class="kw">for </span>(index, operation) <span class="kw">in </span>block.operations.iter().enumerate() {
+            <span class="kw">let </span>index = u32::try_from(index).map_err(|<span class="kw">_</span>| ArithmeticError::Overflow)<span class="question-mark">?</span>;
             <span class="kw">let </span>context = OperationContext {
                 chain_id,
                 height: block.height,

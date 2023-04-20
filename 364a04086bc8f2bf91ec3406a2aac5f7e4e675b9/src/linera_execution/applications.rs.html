@@ -383,7 +383,7 @@
     <span class="doccomment">/// The certificate that published the bytecode.
     </span><span class="kw">pub </span>certificate_hash: CryptoHash,
     <span class="doccomment">/// The index in the certificate of the operation that published the bytecode (not the effect!).
-    </span><span class="kw">pub </span>operation_index: usize,
+    </span><span class="kw">pub </span>operation_index: u32,
 }
 
 <span class="attribute">#[derive(Debug, HashableView)]
