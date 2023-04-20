@@ -883,10 +883,6 @@
 <span id="883">883</span>
 <span id="884">884</span>
 <span id="885">885</span>
-<span id="886">886</span>
-<span id="887">887</span>
-<span id="888">888</span>
-<span id="889">889</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1058,9 +1054,8 @@
         recipient: Recipient,
         user_data: UserData,
     },
-    <span class="doccomment">/// Creates (or activate) a new chain by installing the given authentication key.
+    <span class="doccomment">/// Creates (or activates) a new chain by installing the given authentication key.
     </span>OpenChain {
-        id: ChainId,
         public_key: PublicKey,
         admin_id: ChainId,
         epoch: Epoch,
@@ -1359,7 +1354,6 @@
                     Destination::Recipient(<span class="kw-2">*</span>id),
                     <span class="bool-val">false</span>,
                     SystemEffect::OpenChain {
-                        id: <span class="kw-2">*</span>id,
                         public_key: <span class="kw-2">*</span>public_key,
                         committees: committees.clone(),
                         admin_id: <span class="kw-2">*</span>admin_id,
@@ -1737,7 +1731,6 @@
     </span><span class="kw">pub fn </span>open_chain(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         effect_id: EffectId,
-        chain_id: ChainId,
         public_key: PublicKey,
         epoch: Epoch,
         committees: BTreeMap&lt;Epoch, Committee&gt;,
@@ -1749,7 +1742,6 @@
         <span class="macro">assert!</span>(!<span class="self">self</span>.ownership.get().is_active());
         <span class="macro">assert!</span>(<span class="self">self</span>.committees.get().is_empty());
         <span class="kw">let </span>description = ChainDescription::Child(effect_id);
-        <span class="macro">assert_eq!</span>(chain_id, description.into());
         <span class="self">self</span>.description.set(<span class="prelude-val">Some</span>(description));
         <span class="self">self</span>.epoch.set(<span class="prelude-val">Some</span>(epoch));
         <span class="self">self</span>.committees.set(committees);

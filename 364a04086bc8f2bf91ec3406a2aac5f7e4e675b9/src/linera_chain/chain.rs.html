@@ -519,11 +519,6 @@
 <span id="519">519</span>
 <span id="520">520</span>
 <span id="521">521</span>
-<span id="522">522</span>
-<span id="523">523</span>
-<span id="524">524</span>
-<span id="525">525</span>
-<span id="526">526</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -757,7 +752,7 @@
                     height,
                     index: index <span class="kw">as </span>u64,
                 };
-                <span class="self">self</span>.execute_immediate_effect(effect_id, <span class="kw-2">&amp;</span>effect, chain_id, timestamp)
+                <span class="self">self</span>.execute_immediate_effect(effect_id, <span class="kw-2">&amp;</span>effect, timestamp)
                     .<span class="kw">await</span><span class="question-mark">?</span>;
             }
             <span class="comment">// Record the inbox event to process it below.
@@ -800,36 +795,31 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         effect_id: EffectId,
         effect: <span class="kw-2">&amp;</span>Effect,
-        chain_id: ChainId,
         timestamp: Timestamp,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt; {
-        <span class="kw">match </span><span class="kw-2">&amp;</span>effect {
-            Effect::System(SystemEffect::OpenChain {
-                id,
-                public_key,
-                epoch,
-                committees,
-                admin_id,
-            }) <span class="kw">if </span>id == <span class="kw-2">&amp;</span>chain_id =&gt; {
-                <span class="comment">// Initialize ourself.
-                </span><span class="self">self</span>.execution_state.system.open_chain(
-                    effect_id,
-                    <span class="kw-2">*</span>id,
-                    <span class="kw-2">*</span>public_key,
-                    <span class="kw-2">*</span>epoch,
-                    committees.clone(),
-                    <span class="kw-2">*</span>admin_id,
-                    timestamp,
-                );
-                <span class="comment">// Recompute the state hash.
-                </span><span class="kw">let </span>hash = <span class="self">self</span>.execution_state.crypto_hash().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="self">self</span>.execution_state_hash.set(<span class="prelude-val">Some</span>(hash));
-                <span class="comment">// Last, reset the consensus state based on the current ownership.
-                </span><span class="self">self</span>.manager
-                    .get_mut()
-                    .reset(<span class="self">self</span>.execution_state.system.ownership.get());
-            }
-            <span class="kw">_ </span>=&gt; (),
+        <span class="kw">if let </span>Effect::System(SystemEffect::OpenChain {
+            public_key,
+            epoch,
+            committees,
+            admin_id,
+        }) = effect
+        {
+            <span class="comment">// Initialize ourself.
+            </span><span class="self">self</span>.execution_state.system.open_chain(
+                effect_id,
+                <span class="kw-2">*</span>public_key,
+                <span class="kw-2">*</span>epoch,
+                committees.clone(),
+                <span class="kw-2">*</span>admin_id,
+                timestamp,
+            );
+            <span class="comment">// Recompute the state hash.
+            </span><span class="kw">let </span>hash = <span class="self">self</span>.execution_state.crypto_hash().<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="self">self</span>.execution_state_hash.set(<span class="prelude-val">Some</span>(hash));
+            <span class="comment">// Last, reset the consensus state based on the current ownership.
+            </span><span class="self">self</span>.manager
+                .get_mut()
+                .reset(<span class="self">self</span>.execution_state.system.ownership.get());
         }
         <span class="prelude-val">Ok</span>(())
     }
