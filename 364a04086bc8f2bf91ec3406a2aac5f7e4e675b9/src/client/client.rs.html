@@ -1184,6 +1184,61 @@
 <span id="1184">1184</span>
 <span id="1185">1185</span>
 <span id="1186">1186</span>
+<span id="1187">1187</span>
+<span id="1188">1188</span>
+<span id="1189">1189</span>
+<span id="1190">1190</span>
+<span id="1191">1191</span>
+<span id="1192">1192</span>
+<span id="1193">1193</span>
+<span id="1194">1194</span>
+<span id="1195">1195</span>
+<span id="1196">1196</span>
+<span id="1197">1197</span>
+<span id="1198">1198</span>
+<span id="1199">1199</span>
+<span id="1200">1200</span>
+<span id="1201">1201</span>
+<span id="1202">1202</span>
+<span id="1203">1203</span>
+<span id="1204">1204</span>
+<span id="1205">1205</span>
+<span id="1206">1206</span>
+<span id="1207">1207</span>
+<span id="1208">1208</span>
+<span id="1209">1209</span>
+<span id="1210">1210</span>
+<span id="1211">1211</span>
+<span id="1212">1212</span>
+<span id="1213">1213</span>
+<span id="1214">1214</span>
+<span id="1215">1215</span>
+<span id="1216">1216</span>
+<span id="1217">1217</span>
+<span id="1218">1218</span>
+<span id="1219">1219</span>
+<span id="1220">1220</span>
+<span id="1221">1221</span>
+<span id="1222">1222</span>
+<span id="1223">1223</span>
+<span id="1224">1224</span>
+<span id="1225">1225</span>
+<span id="1226">1226</span>
+<span id="1227">1227</span>
+<span id="1228">1228</span>
+<span id="1229">1229</span>
+<span id="1230">1230</span>
+<span id="1231">1231</span>
+<span id="1232">1232</span>
+<span id="1233">1233</span>
+<span id="1234">1234</span>
+<span id="1235">1235</span>
+<span id="1236">1236</span>
+<span id="1237">1237</span>
+<span id="1238">1238</span>
+<span id="1239">1239</span>
+<span id="1240">1240</span>
+<span id="1241">1241</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1210,7 +1265,7 @@
 };
 <span class="kw">use </span>linera_rpc::node_provider::NodeProvider;
 <span class="kw">use </span>linera_service::{
-    config::{CommitteeConfig, Export, GenesisConfig, Import, UserChain, WalletState},
+    config::{CommitteeConfig, GenesisConfig, Import, UserChain, WalletState},
     storage::{Runnable, StorageConfig},
     tracker::NotificationTracker,
 };
@@ -1224,6 +1279,7 @@
 <span class="kw">use </span>structopt::StructOpt;
 <span class="kw">use </span>tracing::{debug, info, warn};
 
+<span class="kw">use </span>linera_service::config::Export;
 <span class="attribute">#[cfg(feature = <span class="string">&quot;benchmark&quot;</span>)]
 </span><span class="kw">use </span>{
     linera_base::data_types::RoundNumber,
@@ -1249,7 +1305,6 @@
 };
 
 <span class="kw">struct </span>ClientContext {
-    genesis_config: GenesisConfig,
     wallet_state_path: PathBuf,
     wallet_state: WalletState,
     max_pending_messages: usize,
@@ -1260,27 +1315,46 @@
 }
 
 <span class="kw">impl </span>ClientContext {
+    <span class="kw">fn </span>create(
+        options: <span class="kw-2">&amp;</span>ClientOptions,
+        genesis_config: GenesisConfig,
+        chains: Vec&lt;UserChain&gt;,
+    ) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>wallet_state_path = options.wallet_state_path.clone();
+        <span class="kw">let </span><span class="kw-2">mut </span>wallet_state = WalletState::create(<span class="kw-2">&amp;</span>wallet_state_path, genesis_config)
+            .unwrap_or_else(|e| {
+                <span class="macro">panic!</span>(
+                    <span class="string">&quot;Unable to create user chains at {:?}: {:?}&quot;</span>,
+                    <span class="kw-2">&amp;</span>wallet_state_path, e
+                )
+            });
+        chains
+            .into_iter()
+            .for_each(|chain| wallet_state.insert(chain));
+        <span class="self">Self</span>::configure(options, wallet_state_path, wallet_state)
+    }
+
     <span class="kw">fn </span>from_options(options: <span class="kw-2">&amp;</span>ClientOptions) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>wallet_state_path = options.wallet_state_path.clone();
-        <span class="kw">let </span>wallet_state = WalletState::read_or_create(<span class="kw-2">&amp;</span>wallet_state_path).unwrap_or_else(|e| {
+        <span class="kw">let </span>wallet_state = WalletState::read(<span class="kw-2">&amp;</span>wallet_state_path).unwrap_or_else(|e| {
             <span class="macro">panic!</span>(
                 <span class="string">&quot;Unable to read user chains at {:?}: {:?}&quot;</span>,
                 <span class="kw-2">&amp;</span>wallet_state_path, e
             )
         });
-        <span class="kw">let </span>genesis_config = <span class="kw">match </span>options.command {
-            ClientCommand::CreateGenesisConfig { admin_root, .. } =&gt; {
-                GenesisConfig::new(CommitteeConfig::default(), ChainId::root(admin_root))
-            }
-            <span class="kw">_ </span>=&gt; GenesisConfig::read(<span class="kw-2">&amp;</span>options.genesis_config_path)
-                .expect(<span class="string">&quot;Fail to read initial chain config&quot;</span>),
-        };
+        <span class="self">Self</span>::configure(options, wallet_state_path, wallet_state)
+    }
+
+    <span class="kw">fn </span>configure(
+        options: <span class="kw-2">&amp;</span>ClientOptions,
+        wallet_state_path: PathBuf,
+        wallet_state: WalletState,
+    ) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>send_timeout = Duration::from_micros(options.send_timeout_us);
         <span class="kw">let </span>recv_timeout = Duration::from_micros(options.recv_timeout_us);
         <span class="kw">let </span>cross_chain_delay = Duration::from_micros(options.cross_chain_delay_ms);
 
         ClientContext {
-            genesis_config,
             wallet_state_path,
             wallet_state,
             max_pending_messages: options.max_pending_messages,
@@ -1294,7 +1368,7 @@
     <span class="attribute">#[cfg(feature = <span class="string">&quot;benchmark&quot;</span>)]
     </span><span class="kw">fn </span>make_validator_mass_clients(<span class="kw-2">&amp;</span><span class="self">self</span>, max_in_flight: u64) -&gt; Vec&lt;Box&lt;<span class="kw">dyn </span>MassClient&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>validator_clients = Vec::new();
-        <span class="kw">for </span>config <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.genesis_config.committee.validators {
+        <span class="kw">for </span>config <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.wallet_state.genesis_config().committee.validators {
             <span class="kw">let </span>client: Box&lt;<span class="kw">dyn </span>MassClient&gt; = <span class="kw">match </span>config.network.protocol {
                 NetworkProtocol::Simple(protocol) =&gt; {
                     <span class="kw">let </span>network = config.network.clone_with_protocol(protocol);
@@ -1338,7 +1412,7 @@
                 .collect(),
             node_provider,
             storage,
-            <span class="self">self</span>.genesis_config.admin_id,
+            <span class="self">self</span>.wallet_state.genesis_admin_chain(),
             <span class="self">self</span>.max_pending_messages,
             chain.block_hash,
             chain.timestamp,
@@ -1408,7 +1482,12 @@
     <span class="doccomment">/// Try to aggregate votes into certificates.
     </span><span class="attribute">#[cfg(feature = <span class="string">&quot;benchmark&quot;</span>)]
     </span><span class="kw">fn </span>make_benchmark_certificates_from_votes(<span class="kw-2">&amp;</span><span class="self">self</span>, votes: Vec&lt;Vote&gt;) -&gt; Vec&lt;Certificate&gt; {
-        <span class="kw">let </span>committee = <span class="self">self</span>.genesis_config.committee.clone().into_committee();
+        <span class="kw">let </span>committee = <span class="self">self
+            </span>.wallet_state
+            .genesis_config()
+            .committee
+            .clone()
+            .into_committee();
         <span class="kw">let </span><span class="kw-2">mut </span>aggregators = HashMap::new();
         <span class="kw">let </span><span class="kw-2">mut </span>certificates = Vec::new();
         <span class="kw">let </span><span class="kw-2">mut </span>done_senders = HashSet::new();
@@ -1554,7 +1633,8 @@
             <span class="kw">if let </span><span class="prelude-val">Ok</span>(cert) = chain_client.subscribe_to_new_committees().<span class="kw">await </span>{
                 <span class="macro">info!</span>(
                     <span class="string">&quot;Subscribed {:?} to the admin chain {:?}&quot;</span>,
-                    chain_id, <span class="self">self</span>.genesis_config.admin_id,
+                    chain_id,
+                    <span class="self">self</span>.wallet_state.genesis_admin_chain(),
                 );
                 certificates.push(cert);
                 <span class="self">self</span>.update_wallet_from_client(<span class="kw-2">&amp;mut </span>chain_client).<span class="kw">await</span>;
@@ -1644,10 +1724,6 @@
     <span class="doccomment">/// Storage configuration for the blockchain history.
     </span><span class="attribute">#[structopt(long = <span class="string">&quot;storage&quot;</span>, default_value = <span class="string">&quot;memory&quot;</span>)]
     </span>storage_config: StorageConfig,
-
-    <span class="doccomment">/// Optional path to the file describing the initial user chains (aka genesis state)
-    </span><span class="attribute">#[structopt(long = <span class="string">&quot;genesis&quot;</span>)]
-    </span>genesis_config_path: PathBuf,
 
     <span class="doccomment">/// Timeout for sending queries (us)
     </span><span class="attribute">#[structopt(long, default_value = <span class="string">&quot;4000000&quot;</span>)]
@@ -1773,12 +1849,18 @@
         </span>max_proposals: <span class="prelude-ty">Option</span>&lt;usize&gt;,
     },
 
-    <span class="doccomment">/// Create initial user chains and print information to be used for initialization of validator setup.
+    <span class="doccomment">/// Create genesis configuration for a Linera deployment.
+    /// Create initial user chains and print information to be used for initialization of validator setup.
+    /// This will also create an initial wallet for the owner of the initial &quot;root&quot; chains.
     </span><span class="attribute">#[structopt(name = <span class="string">&quot;create_genesis_config&quot;</span>)]
     </span>CreateGenesisConfig {
         <span class="doccomment">/// Sets the file describing the public configurations of all validators
         </span><span class="attribute">#[structopt(long = <span class="string">&quot;committee&quot;</span>)]
         </span>committee_config_path: PathBuf,
+
+        <span class="doccomment">/// The output config path to be consumed by the server
+        </span><span class="attribute">#[structopt(long = <span class="string">&quot;genesis&quot;</span>)]
+        </span>genesis_config_path: PathBuf,
 
         <span class="doccomment">/// Index of the admin chain in the genesis config
         </span><span class="attribute">#[structopt(long, default_value = <span class="string">&quot;0&quot;</span>)]
@@ -1872,10 +1954,20 @@
     </span>Wallet(WalletCommand),
 }
 
-<span class="attribute">#[derive(StructOpt)]
+<span class="attribute">#[derive(StructOpt, Clone)]
 </span><span class="kw">enum </span>WalletCommand {
-    Show { chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt; },
-    SetDefault { chain_id: ChainId },
+    <span class="doccomment">/// Show the contents of the wallet.
+    </span>Show { chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt; },
+
+    <span class="doccomment">/// Change the wallet default chain.
+    </span>SetDefault { chain_id: ChainId },
+
+    <span class="doccomment">/// Initialize a wallet from the genesis configuration.
+    </span>Init {
+        <span class="doccomment">/// The path to the genesis configuration for a Linera deployment.
+        </span><span class="attribute">#[structopt(long = <span class="string">&quot;genesis&quot;</span>)]
+        </span>genesis_config_path: PathBuf,
+    },
 }
 
 <span class="kw">struct </span>Job(ClientContext, ClientCommand);
@@ -1995,8 +2087,8 @@
 
                 <span class="comment">// Make sure genesis chains are subscribed to the admin chain.
                 </span><span class="kw">let </span>certificates = context.ensure_admin_subscription(<span class="kw-2">&amp;</span>storage).<span class="kw">await</span>;
-                <span class="kw">let </span><span class="kw-2">mut </span>admin_state =
-                    context.make_chain_client(storage.clone(), context.genesis_config.admin_id);
+                <span class="kw">let </span><span class="kw-2">mut </span>admin_state = context
+                    .make_chain_client(storage.clone(), context.wallet_state.genesis_admin_chain());
                 <span class="kw">for </span>cert <span class="kw">in </span>certificates {
                     admin_state.receive_certificate(cert).<span class="kw">await</span>.unwrap();
                 }
@@ -2007,7 +2099,7 @@
                     .into_iter()
                     .map(|c| c.value.effects().len())
                     .sum::&lt;usize&gt;();
-                <span class="macro">tracing::info!</span>(<span class="string">&quot;Subscribed {} chains to new committees&quot;</span>, n);
+                <span class="macro">info!</span>(<span class="string">&quot;Subscribed {} chains to new committees&quot;</span>, n);
 
                 <span class="comment">// Create the new committee.
                 </span><span class="kw">let </span>committee = admin_state.local_committee().<span class="kw">await</span>.unwrap();
@@ -2302,23 +2394,25 @@
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
     <span class="kw">let </span>options = ClientOptions::from_args();
-    <span class="kw">let </span><span class="kw-2">mut </span>context = ClientContext::from_options(<span class="kw-2">&amp;</span>options);
-    <span class="kw">match </span>options.command {
+
+    <span class="kw">match </span><span class="kw-2">&amp;</span>options.command {
         ClientCommand::CreateGenesisConfig {
             committee_config_path,
+            genesis_config_path,
             admin_root,
             initial_funding,
             start_timestamp,
             num,
         } =&gt; {
-            <span class="kw">let </span>committee_config = CommitteeConfig::read(<span class="kw-2">&amp;</span>committee_config_path)
+            <span class="kw">let </span>committee_config = CommitteeConfig::read(committee_config_path)
                 .expect(<span class="string">&quot;Unable to read committee config file&quot;</span>);
             <span class="kw">let </span><span class="kw-2">mut </span>genesis_config =
-                GenesisConfig::new(committee_config, ChainId::root(admin_root));
+                GenesisConfig::new(committee_config, ChainId::root(<span class="kw-2">*</span>admin_root));
             <span class="kw">let </span>timestamp = start_timestamp
                 .map(|st| Timestamp::from(st.timestamp() <span class="kw">as </span>u64))
                 .unwrap_or_else(Timestamp::now);
-            <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..num {
+            <span class="kw">let </span><span class="kw-2">mut </span>chains = <span class="macro">vec!</span>[];
+            <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="kw-2">*</span>num {
                 <span class="kw">let </span>description = ChainDescription::Root(i <span class="kw">as </span>usize);
                 <span class="comment">// Create keys.
                 </span><span class="kw">let </span>chain = UserChain::make_initial(description, timestamp);
@@ -2326,48 +2420,64 @@
                 </span>genesis_config.chains.push((
                     description,
                     chain.key_pair.as_ref().unwrap().public(),
-                    initial_funding,
+                    <span class="kw-2">*</span>initial_funding,
                     timestamp,
                 ));
                 <span class="comment">// Private keys.
-                </span>context.wallet_state.insert(chain);
+                </span>chains.push(chain);
             }
+            <span class="kw">let </span>context = ClientContext::create(<span class="kw-2">&amp;</span>options, genesis_config.clone(), chains);
+            genesis_config.write(genesis_config_path)<span class="question-mark">?</span>;
             context.save_wallet();
-            genesis_config.write(<span class="kw-2">&amp;</span>options.genesis_config_path)<span class="question-mark">?</span>;
             <span class="prelude-val">Ok</span>(())
         }
 
-        ClientCommand::KeyGen =&gt; {
-            <span class="kw">let </span>key_pair = KeyPair::generate();
-            <span class="kw">let </span>public = key_pair.public();
-            context.wallet_state.add_unassigned_key_pair(key_pair);
-            context.save_wallet();
-            <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, public);
-            <span class="prelude-val">Ok</span>(())
-        }
-
-        ClientCommand::Wallet(wallet_command) =&gt; <span class="kw">match </span>wallet_command {
-            WalletCommand::Show { chain_id } =&gt; {
-                context.wallet_state.pretty_print(chain_id);
+        command =&gt; <span class="kw">match </span>command {
+            ClientCommand::KeyGen =&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>context = ClientContext::from_options(<span class="kw-2">&amp;</span>options);
+                <span class="kw">let </span>key_pair = KeyPair::generate();
+                <span class="kw">let </span>public = key_pair.public();
+                context.wallet_state.add_unassigned_key_pair(key_pair);
+                context.save_wallet();
+                <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, public);
                 <span class="prelude-val">Ok</span>(())
             }
-            WalletCommand::SetDefault { chain_id } =&gt; {
-                context.wallet_state.set_default_chain(chain_id)<span class="question-mark">?</span>;
-                context.save_wallet();
+
+            ClientCommand::Wallet(wallet_command) =&gt; <span class="kw">match </span>wallet_command {
+                WalletCommand::Show { chain_id } =&gt; {
+                    <span class="kw">let </span>context = ClientContext::from_options(<span class="kw-2">&amp;</span>options);
+                    context.wallet_state.pretty_print(<span class="kw-2">*</span>chain_id);
+                    <span class="prelude-val">Ok</span>(())
+                }
+                WalletCommand::SetDefault { chain_id } =&gt; {
+                    <span class="kw">let </span><span class="kw-2">mut </span>context = ClientContext::from_options(<span class="kw-2">&amp;</span>options);
+                    context.wallet_state.set_default_chain(<span class="kw-2">*</span>chain_id)<span class="question-mark">?</span>;
+                    context.save_wallet();
+                    <span class="prelude-val">Ok</span>(())
+                }
+
+                WalletCommand::Init {
+                    genesis_config_path,
+                } =&gt; {
+                    <span class="kw">let </span>genesis_config = GenesisConfig::read(genesis_config_path)<span class="question-mark">?</span>;
+                    <span class="kw">let </span>context = ClientContext::create(<span class="kw-2">&amp;</span>options, genesis_config, <span class="macro">vec!</span>[]);
+                    context.save_wallet();
+                    <span class="prelude-val">Ok</span>(())
+                }
+            },
+
+            <span class="kw">_ </span>=&gt; {
+                <span class="kw">let </span>context = ClientContext::from_options(<span class="kw-2">&amp;</span>options);
+                <span class="kw">let </span>genesis_config = context.wallet_state.genesis_config().clone();
+                <span class="kw">let </span>wasm_runtime = options.wasm_runtime.with_wasm_default();
+
+                options
+                    .storage_config
+                    .run_with_storage(<span class="kw-2">&amp;</span>genesis_config, wasm_runtime, Job(context, options.command))
+                    .<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(())
             }
         },
-
-        command =&gt; {
-            <span class="kw">let </span>genesis_config = context.genesis_config.clone();
-            <span class="kw">let </span>wasm_runtime = options.wasm_runtime.with_wasm_default();
-
-            options
-                .storage_config
-                .run_with_storage(<span class="kw-2">&amp;</span>genesis_config, wasm_runtime, Job(context, command))
-                .<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="prelude-val">Ok</span>(())
-        }
     }
 }
 </code></pre></div>
