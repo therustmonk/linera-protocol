@@ -50,16 +50,16 @@
 <span class="kw">pub type </span>RocksdbStoreClient = DbStoreClient&lt;RocksdbClient&gt;;
 
 <span class="kw">impl </span>RocksdbStoreClient {
-    <span class="kw">pub fn </span>new(path: PathBuf, wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(path: PathBuf, wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;, cache_size: usize) -&gt; <span class="self">Self </span>{
         RocksdbStoreClient {
-            client: Arc::new(RocksdbStore::new(path, wasm_runtime)),
+            client: Arc::new(RocksdbStore::new(path, wasm_runtime, cache_size)),
         }
     }
 }
 
 <span class="kw">impl </span>RocksdbStore {
-    <span class="kw">pub fn </span>new(dir: PathBuf, wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>client = RocksdbClient::new(dir);
+    <span class="kw">pub fn </span>new(dir: PathBuf, wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;, cache_size: usize) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>client = RocksdbClient::new(dir, cache_size);
         <span class="self">Self </span>{
             client,
             guards: ChainGuards::default(),

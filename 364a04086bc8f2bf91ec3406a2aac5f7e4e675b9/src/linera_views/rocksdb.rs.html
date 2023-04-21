@@ -244,38 +244,13 @@
 <span id="244">244</span>
 <span id="245">245</span>
 <span id="246">246</span>
-<span id="247">247</span>
-<span id="248">248</span>
-<span id="249">249</span>
-<span id="250">250</span>
-<span id="251">251</span>
-<span id="252">252</span>
-<span id="253">253</span>
-<span id="254">254</span>
-<span id="255">255</span>
-<span id="256">256</span>
-<span id="257">257</span>
-<span id="258">258</span>
-<span id="259">259</span>
-<span id="260">260</span>
-<span id="261">261</span>
-<span id="262">262</span>
-<span id="263">263</span>
-<span id="264">264</span>
-<span id="265">265</span>
-<span id="266">266</span>
-<span id="267">267</span>
-<span id="268">268</span>
-<span id="269">269</span>
-<span id="270">270</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="attribute">#[cfg(feature = <span class="string">&quot;lru_caching&quot;</span>)]
-</span><span class="kw">use </span><span class="kw">crate</span>::lru_caching::LruCachingKeyValueClient;
-<span class="kw">use crate</span>::{
+</span><span class="kw">use crate</span>::{
     batch::{Batch, WriteOperation},
     common::{get_upper_bound, ContextFromDb, KeyValueStoreClient},
+    lru_caching::LruCachingKeyValueClient,
 };
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>std::{
@@ -291,42 +266,19 @@
 <span class="doccomment">/// The internal client
 </span><span class="kw">pub type </span>DbInternal = Arc&lt;DB&gt;;
 
-<span class="doccomment">/// A shared DB client for RocksDB.
-</span><span class="attribute">#[cfg(not(feature = <span class="string">&quot;lru_caching&quot;</span>))]
-#[derive(Clone)]
-</span><span class="kw">pub struct </span>RocksdbClient {
-    client: DbInternal,
-}
-
 <span class="doccomment">/// A shared DB client for RocksDB implementing LruCaching
-</span><span class="attribute">#[cfg(feature = <span class="string">&quot;lru_caching&quot;</span>)]
-#[derive(Clone)]
+</span><span class="attribute">#[derive(Clone)]
 </span><span class="kw">pub struct </span>RocksdbClient {
     client: LruCachingKeyValueClient&lt;DbInternal&gt;,
 }
 
-<span class="attribute">#[cfg(not(feature = <span class="string">&quot;lru_caching&quot;</span>))]
-</span><span class="kw">impl </span>RocksdbClient {
+<span class="kw">impl </span>RocksdbClient {
     <span class="doccomment">/// Creates a rocksdb database from a specified path
-    </span><span class="kw">pub fn </span>new&lt;P: AsRef&lt;Path&gt;&gt;(path: P) -&gt; RocksdbClient {
-        <span class="kw">let </span><span class="kw-2">mut </span>options = rocksdb::Options::default();
-        options.create_if_missing(<span class="bool-val">true</span>);
-        <span class="kw">let </span>db = DB::open(<span class="kw-2">&amp;</span>options, path).unwrap();
-        <span class="self">Self </span>{
-            client: Arc::new(db),
-        }
-    }
-}
-
-<span class="attribute">#[cfg(feature = <span class="string">&quot;lru_caching&quot;</span>)]
-</span><span class="kw">impl </span>RocksdbClient {
-    <span class="doccomment">/// Creates a rocksdb database from a specified path
-    </span><span class="kw">pub fn </span>new&lt;P: AsRef&lt;Path&gt;&gt;(path: P) -&gt; RocksdbClient {
+    </span><span class="kw">pub fn </span>new&lt;P: AsRef&lt;Path&gt;&gt;(path: P, cache_size: usize) -&gt; RocksdbClient {
         <span class="kw">let </span><span class="kw-2">mut </span>options = rocksdb::Options::default();
         options.create_if_missing(<span class="bool-val">true</span>);
         <span class="kw">let </span>db = DB::open(<span class="kw-2">&amp;</span>options, path).unwrap();
         <span class="kw">let </span>client = Arc::new(db);
-        <span class="kw">let </span>cache_size = <span class="number">1000</span>;
         <span class="self">Self </span>{
             client: LruCachingKeyValueClient::new(client, cache_size),
         }

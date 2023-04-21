@@ -209,10 +209,44 @@
 <span id="209">209</span>
 <span id="210">210</span>
 <span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="kw">use crate</span>::{
+</span><span class="doccomment">/// The standard cache size used for tests.
+</span><span class="kw">pub const </span>TEST_CACHE_SIZE: usize = <span class="number">1000</span>;
+
+<span class="kw">use crate</span>::{
     batch::{Batch, WriteOperation},
     common::{get_interval, KeyValueStoreClient},
 };
@@ -294,7 +328,7 @@
 </span><span class="attribute">#[derive(Clone)]
 </span><span class="kw">pub struct </span>LruCachingKeyValueClient&lt;K&gt; {
     client: K,
-    lru_read_keys: Arc&lt;Mutex&lt;LruPrefixCache&gt;&gt;,
+    lru_read_keys: <span class="prelude-ty">Option</span>&lt;Arc&lt;Mutex&lt;LruPrefixCache&gt;&gt;&gt;,
 }
 
 <span class="attribute">#[async_trait]
@@ -307,46 +341,60 @@
     <span class="kw">type </span>KeyValues = K::KeyValues;
 
     <span class="kw">async fn </span>read_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, <span class="self">Self</span>::Error&gt; {
-        <span class="comment">// First inquiring in the read_key_bytes LRU
-        </span><span class="kw">let </span>lru_read_keys = <span class="self">self</span>.lru_read_keys.lock().<span class="kw">await</span>;
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(value) = lru_read_keys.query(key) {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(value.clone());
+        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.lru_read_keys {
+            <span class="prelude-val">None </span>=&gt; {
+                <span class="kw">return </span><span class="self">self</span>.client.read_key_bytes(key).<span class="kw">await</span>;
+            }
+            <span class="prelude-val">Some</span>(lru_read_keys) =&gt; {
+                <span class="comment">// First inquiring in the read_key_bytes LRU
+                </span><span class="kw">let </span>lru_read_keys_container = lru_read_keys.lock().<span class="kw">await</span>;
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(value) = lru_read_keys_container.query(key) {
+                    <span class="kw">return </span><span class="prelude-val">Ok</span>(value.clone());
+                }
+                drop(lru_read_keys_container);
+                <span class="kw">let </span>value = <span class="self">self</span>.client.read_key_bytes(key).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span><span class="kw-2">mut </span>lru_read_keys = lru_read_keys.lock().<span class="kw">await</span>;
+                lru_read_keys.insert(key.to_vec(), value.clone());
+                <span class="prelude-val">Ok</span>(value)
+            }
         }
-        drop(lru_read_keys);
-        <span class="kw">let </span>value = <span class="self">self</span>.client.read_key_bytes(key).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>lru_read_keys = <span class="self">self</span>.lru_read_keys.lock().<span class="kw">await</span>;
-        lru_read_keys.insert(key.to_vec(), value.clone());
-        <span class="prelude-val">Ok</span>(value)
     }
 
     <span class="kw">async fn </span>read_multi_key_bytes(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         keys: Vec&lt;Vec&lt;u8&gt;&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt;, <span class="self">Self</span>::Error&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>result = Vec::with_capacity(keys.len());
-        <span class="kw">let </span><span class="kw-2">mut </span>cache_miss_indices = Vec::new();
-        <span class="kw">let </span><span class="kw-2">mut </span>miss_keys = Vec::new();
-        <span class="kw">let </span>lru_read_keys = <span class="self">self</span>.lru_read_keys.lock().<span class="kw">await</span>;
-        <span class="kw">for </span>(i, key) <span class="kw">in </span>keys.into_iter().enumerate() {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(value) = lru_read_keys.query(<span class="kw-2">&amp;</span>key) {
-                result.push(value.clone());
-            } <span class="kw">else </span>{
-                result.push(<span class="prelude-val">None</span>);
-                cache_miss_indices.push(i);
-                miss_keys.push(key);
+        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.lru_read_keys {
+            <span class="prelude-val">None </span>=&gt; {
+                <span class="kw">return </span><span class="self">self</span>.client.read_multi_key_bytes(keys).<span class="kw">await</span>;
+            }
+            <span class="prelude-val">Some</span>(lru_read_keys) =&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>result = Vec::with_capacity(keys.len());
+                <span class="kw">let </span><span class="kw-2">mut </span>cache_miss_indices = Vec::new();
+                <span class="kw">let </span><span class="kw-2">mut </span>miss_keys = Vec::new();
+                <span class="kw">let </span>lru_read_keys_container = lru_read_keys.lock().<span class="kw">await</span>;
+                <span class="kw">for </span>(i, key) <span class="kw">in </span>keys.into_iter().enumerate() {
+                    <span class="kw">if let </span><span class="prelude-val">Some</span>(value) = lru_read_keys_container.query(<span class="kw-2">&amp;</span>key) {
+                        result.push(value.clone());
+                    } <span class="kw">else </span>{
+                        result.push(<span class="prelude-val">None</span>);
+                        cache_miss_indices.push(i);
+                        miss_keys.push(key);
+                    }
+                }
+                drop(lru_read_keys_container);
+                <span class="kw">let </span>values = <span class="self">self</span>.client.read_multi_key_bytes(miss_keys.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span><span class="kw-2">mut </span>lru_read_keys = lru_read_keys.lock().<span class="kw">await</span>;
+                <span class="kw">for </span>(i, (key, value)) <span class="kw">in </span>cache_miss_indices
+                    .into_iter()
+                    .zip(miss_keys.into_iter().zip(values))
+                {
+                    lru_read_keys.insert(key, value.clone());
+                    result[i] = value;
+                }
+                <span class="prelude-val">Ok</span>(result)
             }
         }
-        drop(lru_read_keys);
-        <span class="kw">let </span>values = <span class="self">self</span>.client.read_multi_key_bytes(miss_keys.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>lru_read_keys = <span class="self">self</span>.lru_read_keys.lock().<span class="kw">await</span>;
-        <span class="kw">for </span>(i, (key, value)) <span class="kw">in </span>cache_miss_indices
-            .into_iter()
-            .zip(miss_keys.into_iter().zip(values))
-        {
-            lru_read_keys.insert(key, value.clone());
-            result[i] = value;
-        }
-        <span class="prelude-val">Ok</span>(result)
     }
 
     <span class="kw">async fn </span>find_keys_by_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Keys, <span class="self">Self</span>::Error&gt; {
@@ -361,23 +409,30 @@
     </span>}
 
     <span class="kw">async fn </span>write_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, batch: Batch, base_key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>lru_read_keys = <span class="self">self</span>.lru_read_keys.lock().<span class="kw">await</span>;
-        <span class="kw">for </span>operation <span class="kw">in </span><span class="kw-2">&amp;</span>batch.operations {
-            <span class="kw">match </span>operation {
-                WriteOperation::Put { key, value } =&gt; {
-                    lru_read_keys.insert(key.to_vec(), <span class="prelude-val">Some</span>(value.to_vec()));
-                }
-                WriteOperation::Delete { key } =&gt; {
-                    lru_read_keys.insert(key.to_vec(), <span class="prelude-val">None</span>);
-                }
-                WriteOperation::DeletePrefix { key_prefix } =&gt; {
-                    lru_read_keys.delete_prefix(key_prefix);
-                }
+        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.lru_read_keys {
+            <span class="prelude-val">None </span>=&gt; {
+                <span class="kw">return </span><span class="self">self</span>.client.write_batch(batch, base_key).<span class="kw">await</span>;
             }
+            <span class="prelude-val">Some</span>(lru_read_keys) =&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>lru_read_keys = lru_read_keys.lock().<span class="kw">await</span>;
+                <span class="kw">for </span>operation <span class="kw">in </span><span class="kw-2">&amp;</span>batch.operations {
+                    <span class="kw">match </span>operation {
+                        WriteOperation::Put { key, value } =&gt; {
+                            lru_read_keys.insert(key.to_vec(), <span class="prelude-val">Some</span>(value.to_vec()));
+                        }
+                        WriteOperation::Delete { key } =&gt; {
+                            lru_read_keys.insert(key.to_vec(), <span class="prelude-val">None</span>);
+                        }
+                        WriteOperation::DeletePrefix { key_prefix } =&gt; {
+                            lru_read_keys.delete_prefix(key_prefix);
+                        }
+                    }
+                }
+                drop(lru_read_keys);
+                <span class="self">self</span>.client.write_batch(batch, base_key).<span class="kw">await
+            </span>}
         }
-        drop(lru_read_keys);
-        <span class="self">self</span>.client.write_batch(batch, base_key).<span class="kw">await
-    </span>}
+    }
 
     <span class="kw">async fn </span>clear_journal(<span class="kw-2">&amp;</span><span class="self">self</span>, base_key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt; {
         <span class="self">self</span>.client.clear_journal(base_key).<span class="kw">await
@@ -390,10 +445,17 @@
 {
     <span class="doccomment">/// Creates a new Key Value Store Client that implements LRU caching.
     </span><span class="kw">pub fn </span>new(client: K, max_size: usize) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>lru_read_keys = Arc::new(Mutex::new(LruPrefixCache::new(max_size)));
-        <span class="self">Self </span>{
-            client,
-            lru_read_keys,
+        <span class="kw">if </span>max_size == <span class="number">0 </span>{
+            <span class="self">Self </span>{
+                client,
+                lru_read_keys: <span class="prelude-val">None</span>,
+            }
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>lru_read_keys = <span class="prelude-val">Some</span>(Arc::new(Mutex::new(LruPrefixCache::new(max_size))));
+            <span class="self">Self </span>{
+                client,
+                lru_read_keys,
+            }
         }
     }
 }

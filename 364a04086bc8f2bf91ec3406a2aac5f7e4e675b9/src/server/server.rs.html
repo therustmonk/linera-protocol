@@ -450,6 +450,12 @@
 <span id="450">450</span>
 <span id="451">451</span>
 <span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -752,6 +758,10 @@
         <span class="doccomment">/// The WebAssembly runtime to use.
         </span><span class="attribute">#[structopt(long)]
         </span>wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
+
+        <span class="doccomment">/// The size of the cache
+        </span><span class="attribute">#[structopt(long)]
+        </span>cache_size: <span class="prelude-ty">Option</span>&lt;usize&gt;,
     },
 
     <span class="doccomment">/// Act as a trusted third-party and generate all server configurations
@@ -793,6 +803,7 @@
             shard,
             grace_period,
             wasm_runtime,
+            cache_size,
         } =&gt; {
             <span class="kw">let </span>genesis_config = GenesisConfig::read(<span class="kw-2">&amp;</span>genesis_config_path)
                 .expect(<span class="string">&quot;Fail to read initial chain config&quot;</span>);
@@ -806,8 +817,9 @@
                 grace_period_micros: grace_period,
             };
             <span class="kw">let </span>wasm_runtime = wasm_runtime.with_wasm_default();
+            <span class="kw">let </span>cache_size = cache_size.unwrap_or_default();
             storage_config
-                .run_with_storage(<span class="kw-2">&amp;</span>genesis_config, wasm_runtime, job)
+                .run_with_storage(<span class="kw-2">&amp;</span>genesis_config, wasm_runtime, cache_size, job)
                 .<span class="kw">await
                 </span>.unwrap();
         }

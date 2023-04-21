@@ -202,6 +202,14 @@
 <span id="202">202</span>
 <span id="203">203</span>
 <span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -275,6 +283,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         config: <span class="kw-2">&amp;</span>GenesisConfig,
         wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
+        cache_size: usize,
         job: Job,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Output, anyhow::Error&gt;
     <span class="kw">where
@@ -289,12 +298,12 @@
             </span>}
             Rocksdb { path } <span class="kw">if </span>path.is_dir() =&gt; {
                 <span class="macro">tracing::warn!</span>(<span class="string">&quot;Using existing database {:?}&quot;</span>, path);
-                <span class="kw">let </span>client = RocksdbStoreClient::new(path.clone(), wasm_runtime);
+                <span class="kw">let </span>client = RocksdbStoreClient::new(path.clone(), wasm_runtime, cache_size);
                 job.run(client).<span class="kw">await
             </span>}
             Rocksdb { path } =&gt; {
                 std::fs::create_dir_all(path)<span class="question-mark">?</span>;
-                <span class="kw">let </span><span class="kw-2">mut </span>client = RocksdbStoreClient::new(path.clone(), wasm_runtime);
+                <span class="kw">let </span><span class="kw-2">mut </span>client = RocksdbStoreClient::new(path.clone(), wasm_runtime, cache_size);
                 config.initialize_store(<span class="kw-2">&amp;mut </span>client).<span class="kw">await</span><span class="question-mark">?</span>;
                 job.run(client).<span class="kw">await
             </span>}
@@ -305,9 +314,16 @@
             } =&gt; {
                 <span class="kw">let </span>(<span class="kw-2">mut </span>client, table_status) = <span class="kw">match </span>use_localstack {
                     <span class="bool-val">true </span>=&gt; {
-                        DynamoDbStoreClient::with_localstack(table.clone(), wasm_runtime).<span class="kw">await</span><span class="question-mark">?
+                        DynamoDbStoreClient::with_localstack(
+                            table.clone(),
+                            cache_size,
+                            wasm_runtime,
+                        )
+                        .<span class="kw">await</span><span class="question-mark">?
                     </span>}
-                    <span class="bool-val">false </span>=&gt; DynamoDbStoreClient::new(table.clone(), wasm_runtime).<span class="kw">await</span><span class="question-mark">?</span>,
+                    <span class="bool-val">false </span>=&gt; {
+                        DynamoDbStoreClient::new(table.clone(), cache_size, wasm_runtime).<span class="kw">await</span><span class="question-mark">?
+                    </span>}
                 };
                 <span class="kw">if </span>table_status == TableStatus::New {
                     config.initialize_store(<span class="kw-2">&amp;mut </span>client).<span class="kw">await</span><span class="question-mark">?</span>;

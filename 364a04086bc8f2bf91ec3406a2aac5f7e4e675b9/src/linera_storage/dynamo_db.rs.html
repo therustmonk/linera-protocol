@@ -99,6 +99,26 @@
 <span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -122,19 +142,22 @@
 <span class="kw">impl </span>DynamoDbStoreClient {
     <span class="kw">pub async fn </span>new(
         table: TableName,
+        cache_size: usize,
         wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, TableStatus), DynamoDbContextError&gt; {
-        <span class="self">Self</span>::with_store(DynamoDbStore::new(table, wasm_runtime)).<span class="kw">await
+        <span class="self">Self</span>::with_store(DynamoDbStore::new(table, cache_size, wasm_runtime)).<span class="kw">await
     </span>}
 
     <span class="kw">pub async fn </span>from_config(
         config: <span class="kw">impl </span>Into&lt;Config&gt;,
         table: TableName,
+        cache_size: usize,
         wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, TableStatus), DynamoDbContextError&gt; {
         <span class="self">Self</span>::with_store(DynamoDbStore::from_config(
             config.into(),
             table,
+            cache_size,
             wasm_runtime,
         ))
         .<span class="kw">await
@@ -142,9 +165,15 @@
 
     <span class="kw">pub async fn </span>with_localstack(
         table: TableName,
+        cache_size: usize,
         wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, TableStatus), DynamoDbContextError&gt; {
-        <span class="self">Self</span>::with_store(DynamoDbStore::with_localstack(table, wasm_runtime)).<span class="kw">await
+        <span class="self">Self</span>::with_store(DynamoDbStore::with_localstack(
+            table,
+            cache_size,
+            wasm_runtime,
+        ))
+        .<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>with_store&lt;E&gt;(
@@ -161,24 +190,35 @@
 <span class="kw">impl </span>DynamoDbStore {
     <span class="kw">pub async fn </span>new(
         table: TableName,
+        cache_size: usize,
         wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, TableStatus), DynamoDbContextError&gt; {
-        <span class="self">Self</span>::with_client(|| DynamoDbClient::new(table), wasm_runtime).<span class="kw">await
+        <span class="self">Self</span>::with_client(|| DynamoDbClient::new(table, cache_size), wasm_runtime).<span class="kw">await
     </span>}
 
     <span class="kw">pub async fn </span>from_config(
         config: Config,
         table: TableName,
+        cache_size: usize,
         wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, TableStatus), DynamoDbContextError&gt; {
-        <span class="self">Self</span>::with_client(|| DynamoDbClient::from_config(config, table), wasm_runtime).<span class="kw">await
+        <span class="self">Self</span>::with_client(
+            || DynamoDbClient::from_config(config, table, cache_size),
+            wasm_runtime,
+        )
+        .<span class="kw">await
     </span>}
 
     <span class="kw">pub async fn </span>with_localstack(
         table: TableName,
+        cache_size: usize,
         wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, TableStatus), DynamoDbContextError&gt; {
-        <span class="self">Self</span>::with_client(|| DynamoDbClient::with_localstack(table), wasm_runtime).<span class="kw">await
+        <span class="self">Self</span>::with_client(
+            || DynamoDbClient::with_localstack(table, cache_size),
+            wasm_runtime,
+        )
+        .<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>with_client&lt;F, E&gt;(

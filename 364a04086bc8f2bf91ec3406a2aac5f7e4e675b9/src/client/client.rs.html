@@ -1261,6 +1261,16 @@
 <span id="1261">1261</span>
 <span id="1262">1262</span>
 <span id="1263">1263</span>
+<span id="1264">1264</span>
+<span id="1265">1265</span>
+<span id="1266">1266</span>
+<span id="1267">1267</span>
+<span id="1268">1268</span>
+<span id="1269">1269</span>
+<span id="1270">1270</span>
+<span id="1271">1271</span>
+<span id="1272">1272</span>
+<span id="1273">1273</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1790,6 +1800,10 @@
     <span class="doccomment">/// Subcommand.
     </span><span class="attribute">#[structopt(subcommand)]
     </span>command: ClientCommand,
+
+    <span class="doccomment">/// The maximal number of entries in the cache.
+    </span><span class="attribute">#[structopt(long, default_value = <span class="string">&quot;1000&quot;</span>)]
+    </span>cache_size: usize,
 }
 
 <span class="attribute">#[derive(StructOpt)]
@@ -2514,10 +2528,16 @@
                 <span class="kw">let </span>context = ClientContext::from_options(<span class="kw-2">&amp;</span>options)<span class="question-mark">?</span>;
                 <span class="kw">let </span>genesis_config = context.wallet_state.genesis_config().clone();
                 <span class="kw">let </span>wasm_runtime = options.wasm_runtime.with_wasm_default();
+                <span class="kw">let </span>cache_size = options.cache_size;
 
                 options
                     .storage_config
-                    .run_with_storage(<span class="kw-2">&amp;</span>genesis_config, wasm_runtime, Job(context, options.command))
+                    .run_with_storage(
+                        <span class="kw-2">&amp;</span>genesis_config,
+                        wasm_runtime,
+                        cache_size,
+                        Job(context, options.command),
+                    )
                     .<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(())
             }
