@@ -57,7 +57,6 @@ var sourcesIndex = JSON.parse('{\
 "cfg_if":["",[],["lib.rs"]],\
 "chrono":["",[["datetime",[],["mod.rs"]],["format",[],["mod.rs","parse.rs","parsed.rs","scan.rs","strftime.rs"]],["naive",[["datetime",[],["mod.rs"]],["time",[],["mod.rs"]]],["date.rs","internals.rs","isoweek.rs","mod.rs"]],["offset",[["local",[["tz_info",[],["mod.rs","parser.rs","rule.rs","timezone.rs"]]],["mod.rs","unix.rs"]]],["fixed.rs","mod.rs","utc.rs"]]],["date.rs","lib.rs","month.rs","round.rs","traits.rs","weekday.rs"]],\
 "clap":["",[["app",[],["help.rs","meta.rs","mod.rs","parser.rs","settings.rs","usage.rs","validator.rs"]],["args",[["arg_builder",[],["base.rs","flag.rs","mod.rs","option.rs","positional.rs","switched.rs","valued.rs"]]],["any_arg.rs","arg.rs","arg_matcher.rs","arg_matches.rs","group.rs","macros.rs","matched_arg.rs","mod.rs","settings.rs","subcommand.rs"]],["completions",[],["bash.rs","elvish.rs","fish.rs","macros.rs","mod.rs","powershell.rs","shell.rs","zsh.rs"]]],["errors.rs","fmt.rs","lib.rs","macros.rs","map.rs","osstringext.rs","strext.rs","suggestions.rs","usage_parser.rs"]],\
-"client":["",[],["client.rs"]],\
 "colored":["",[],["color.rs","control.rs","lib.rs","style.rs"]],\
 "comfy_table":["",[["style",[],["cell.rs","column.rs","mod.rs","modifiers.rs","presets.rs","table.rs"]],["utils",[["arrangement",[],["constraint.rs","disabled.rs","dynamic.rs","helper.rs","mod.rs"]],["formatting",[],["borders.rs","content_format.rs","content_split.rs","mod.rs"]]],["mod.rs"]]],["cell.rs","column.rs","lib.rs","row.rs","table.rs"]],\
 "corosensei":["",[["arch",[],["mod.rs","x86_64.rs"]],["stack",[],["mod.rs","unix.rs","valgrind.rs"]]],["coroutine.rs","lib.rs","trap.rs","unwind.rs","util.rs"]],\
@@ -154,6 +153,7 @@ var sourcesIndex = JSON.parse('{\
 "libc":["",[["unix",[["linux_like",[["linux",[["arch",[["generic",[],["mod.rs"]]],["mod.rs"]],["gnu",[["b64",[["x86_64",[],["align.rs","mod.rs","not_x32.rs"]]],["mod.rs"]]],["align.rs","mod.rs"]]],["align.rs","mod.rs","non_exhaustive.rs"]]],["mod.rs"]]],["align.rs","mod.rs"]]],["fixed_width_ints.rs","lib.rs","macros.rs"]],\
 "librocksdb_sys":["",[],["lib.rs"]],\
 "libz_sys":["",[],["lib.rs"]],\
+"linera":["",[],["linera.rs"]],\
 "linera_base":["",[],["crypto.rs","data_types.rs","graphql.rs","identifiers.rs","lib.rs"]],\
 "linera_chain":["",[],["chain.rs","data_types.rs","inbox.rs","lib.rs","manager.rs","outbox.rs"]],\
 "linera_core":["",[["unit_tests",[],["client_test_utils.rs"]]],["client.rs","data_types.rs","lib.rs","node.rs","notifier.rs","updater.rs","worker.rs"]],\

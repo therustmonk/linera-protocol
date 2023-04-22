@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":[["ClientCommand",""],["WalletCommand",""]],"fn":[["deserialize_response",""],["main",""]],"struct":[["ClientContext",""],["ClientOptions",""],["Job",""]]};
