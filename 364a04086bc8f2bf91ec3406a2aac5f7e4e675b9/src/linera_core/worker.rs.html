@@ -1144,7 +1144,6 @@
 <span id="1144">1144</span>
 <span id="1145">1145</span>
 <span id="1146">1146</span>
-<span id="1147">1147</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1988,8 +1987,7 @@
             <span class="kw-2">*</span>round,
         )<span class="question-mark">? </span>== ChainManagerOutcome::Skip
         {
-            <span class="comment">// If we just processed the same pending block, return the chain info
-            // unchanged.
+            <span class="comment">// If we just processed the same pending block, return the chain info unchanged.
             </span><span class="kw">return </span><span class="prelude-val">Ok</span>((
                 ChainInfoResponse::new(<span class="kw-2">&amp;</span>chain, <span class="self">self</span>.key_pair()),
                 NetworkActions::default(),

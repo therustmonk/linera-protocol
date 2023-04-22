@@ -118,6 +118,9 @@
 <span id="118">118</span>
 <span id="119">119</span>
 <span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -133,6 +136,7 @@
 
 <span class="doccomment">/// A general node provider which delegates node provision to the underlying
 /// node provider according to the `ValidatorPublicNetworkConfig`.
+</span><span class="attribute">#[derive(Copy, Clone)]
 </span><span class="kw">pub struct </span>NodeProvider {
     grpc: GrpcNodeProvider,
     simple: SimpleNodeProvider,
@@ -169,7 +173,8 @@
     }
 }
 
-<span class="kw">pub struct </span>GrpcNodeProvider {
+<span class="attribute">#[derive(Copy, Clone)]
+</span><span class="kw">pub struct </span>GrpcNodeProvider {
     send_timeout: Duration,
     recv_timeout: Duration,
 }
@@ -208,6 +213,7 @@
 }
 
 <span class="doccomment">/// A client without an address - serves as a client factory.
+</span><span class="attribute">#[derive(Copy, Clone)]
 </span><span class="kw">pub struct </span>SimpleNodeProvider {
     send_timeout: Duration,
     recv_timeout: Duration,

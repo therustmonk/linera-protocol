@@ -1271,6 +1271,26 @@
 <span id="1271">1271</span>
 <span id="1272">1272</span>
 <span id="1273">1273</span>
+<span id="1274">1274</span>
+<span id="1275">1275</span>
+<span id="1276">1276</span>
+<span id="1277">1277</span>
+<span id="1278">1278</span>
+<span id="1279">1279</span>
+<span id="1280">1280</span>
+<span id="1281">1281</span>
+<span id="1282">1282</span>
+<span id="1283">1283</span>
+<span id="1284">1284</span>
+<span id="1285">1285</span>
+<span id="1286">1286</span>
+<span id="1287">1287</span>
+<span id="1288">1288</span>
+<span id="1289">1289</span>
+<span id="1290">1290</span>
+<span id="1291">1291</span>
+<span id="1292">1292</span>
+<span id="1293">1293</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1283,12 +1303,14 @@
 <span class="kw">use </span>linera_base::{
     crypto::{KeyPair, PublicKey},
     data_types::{Amount, Balance, BlockHeight, Timestamp},
-    identifiers::{BytecodeId, ChainDescription, ChainId},
+    identifiers::{BytecodeId, ChainDescription, ChainId, EffectId},
 };
 <span class="kw">use </span>linera_chain::data_types::Certificate;
 <span class="kw">use </span>linera_core::{
     client::{ChainClient, ValidatorNodeProvider},
-    worker::Reason,
+    data_types::ChainInfoQuery,
+    node::{LocalNodeClient, ValidatorNode},
+    worker::{Reason, WorkerState},
 };
 <span class="kw">use </span>linera_execution::{
     committee::{ValidatorName, ValidatorState},
@@ -1297,7 +1319,7 @@
 };
 <span class="kw">use </span>linera_rpc::node_provider::NodeProvider;
 <span class="kw">use </span>linera_service::{
-    config::{CommitteeConfig, GenesisConfig, Import, UserChain, WalletState},
+    config::{CommitteeConfig, Export, GenesisConfig, Import, UserChain, WalletState},
     storage::{Runnable, StorageConfig},
     tracker::NotificationTracker,
 };
@@ -1312,18 +1334,13 @@
 <span class="kw">use </span>structopt::StructOpt;
 <span class="kw">use </span>tracing::{debug, info, warn};
 
-<span class="kw">use </span>linera_service::config::Export;
 <span class="attribute">#[cfg(feature = <span class="string">&quot;benchmark&quot;</span>)]
 </span><span class="kw">use </span>{
     linera_base::data_types::RoundNumber,
     linera_chain::data_types::{
         Block, BlockAndRound, BlockProposal, HashedValue, SignatureAggregator, Vote,
     },
-    linera_core::{
-        data_types::{ChainInfoQuery, ChainInfoResponse},
-        node::{LocalNodeClient, ValidatorNode},
-        worker::WorkerState,
-    },
+    linera_core::data_types::ChainInfoResponse,
     linera_execution::{
         committee::Epoch,
         system::{Recipient, SystemOperation},
@@ -1451,7 +1468,6 @@
             </span>.wallet_state
             .get(chain_id)
             .unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">&quot;Unknown chain: {}&quot;</span>, chain_id));
-        <span class="kw">let </span>node_provider = NodeProvider::new(<span class="self">self</span>.send_timeout, <span class="self">self</span>.recv_timeout);
         ChainClient::new(
             chain_id,
             chain
@@ -1460,7 +1476,7 @@
                 .map(|kp| kp.copy())
                 .into_iter()
                 .collect(),
-            node_provider,
+            <span class="self">self</span>.make_node_provider(),
             storage,
             <span class="self">self</span>.wallet_state.genesis_admin_chain(),
             <span class="self">self</span>.max_pending_messages,
@@ -1470,6 +1486,10 @@
             <span class="self">self</span>.cross_chain_delay,
             <span class="self">self</span>.cross_chain_retries,
         )
+    }
+
+    <span class="kw">fn </span>make_node_provider(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; NodeProvider {
+        NodeProvider::new(<span class="self">self</span>.send_timeout, <span class="self">self</span>.recv_timeout)
     }
 
     <span class="attribute">#[cfg(feature = <span class="string">&quot;benchmark&quot;</span>)]
@@ -1620,7 +1640,7 @@
 
     <span class="kw">async fn </span>update_wallet_from_client&lt;P, S&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, state: <span class="kw-2">&amp;mut </span>ChainClient&lt;P, S&gt;)
     <span class="kw">where
-        </span>P: ValidatorNodeProvider + Send + <span class="lifetime">&#39;static</span>,
+        </span>P: ValidatorNodeProvider + Sync + <span class="lifetime">&#39;static</span>,
         S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
         ViewError: From&lt;S::ContextError&gt;,
     {
@@ -1713,7 +1733,7 @@
 
     <span class="kw">async fn </span>publish_bytecode&lt;S&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        chain_client: <span class="kw-2">&amp;mut </span>ChainClient&lt;<span class="kw">impl </span>ValidatorNodeProvider, S&gt;,
+        chain_client: <span class="kw-2">&amp;mut </span>ChainClient&lt;<span class="kw">impl </span>ValidatorNodeProvider + Sync, S&gt;,
         contract: PathBuf,
         service: PathBuf,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;BytecodeId, anyhow::Error&gt;
@@ -1997,10 +2017,7 @@
         </span>key: PublicKey,
 
         <span class="attribute">#[structopt(long)]
-        </span>certificate: String,
-
-        <span class="attribute">#[structopt(long)]
-        </span>chain: ChainId,
+        </span>effect_id: EffectId,
     },
 
     <span class="doccomment">/// Show the contents of the wallet.
@@ -2068,16 +2085,18 @@
                 };
                 <span class="macro">info!</span>(<span class="string">&quot;Starting operation to open a new chain&quot;</span>);
                 <span class="kw">let </span>time_start = Instant::now();
-                <span class="kw">let </span>(id, certificate) = chain_client.open_chain(new_public_key).<span class="kw">await</span>.unwrap();
+                <span class="kw">let </span>(effect_id, certificate) =
+                    chain_client.open_chain(new_public_key).<span class="kw">await</span>.unwrap();
                 <span class="kw">let </span>time_total = time_start.elapsed().as_micros();
                 <span class="macro">info!</span>(<span class="string">&quot;Operation confirmed after {} us&quot;</span>, time_total);
                 <span class="macro">info!</span>(<span class="string">&quot;{:#?}&quot;</span>, certificate);
                 context.update_wallet_from_client(<span class="kw-2">&amp;mut </span>chain_client).<span class="kw">await</span>;
+                <span class="kw">let </span>id = ChainId::child(effect_id);
                 <span class="kw">let </span>timestamp = certificate.value.block().timestamp;
                 context.update_wallet_for_new_chain(id, key_pair, timestamp);
-                <span class="comment">// Print the new chain id and certificate on stdout for the scripting purposes.
-                </span><span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, id);
-                <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, certificate);
+                <span class="comment">// Print the new chain ID and effect ID on stdout for scripting purposes.
+                </span><span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, effect_id);
+                <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, ChainId::child(effect_id));
                 context.save_wallet();
             }
 
@@ -2419,19 +2438,40 @@
                 <span class="macro">info!</span>(<span class="string">&quot;Time elapsed: {}s&quot;</span>, start_time.elapsed().as_secs());
             }
 
-            Assign {
-                key,
-                certificate,
-                chain,
-            } =&gt; {
-                <span class="kw">let </span>certificate: Certificate = certificate.parse()<span class="question-mark">?</span>;
+            Assign { key, effect_id } =&gt; {
+                <span class="kw">let </span>state = WorkerState::new(<span class="string">&quot;Local node&quot;</span>.to_string(), <span class="prelude-val">None</span>, storage)
+                    .with_allow_inactive_chains(<span class="bool-val">true</span>)
+                    .with_allow_messages_from_deprecated_epochs(<span class="bool-val">true</span>);
+                <span class="kw">let </span><span class="kw-2">mut </span>node_client = LocalNodeClient::new(state);
+
+                <span class="comment">// Take the latest committee we know of.
+                </span><span class="kw">let </span>admin_chain_id = context.wallet_state.genesis_admin_chain();
+                <span class="kw">let </span>query = ChainInfoQuery::new(admin_chain_id).with_committees();
+                <span class="kw">let </span>info = node_client.handle_chain_info_query(query).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span><span class="prelude-val">Some</span>(committee) = info.latest_committee() <span class="kw">else </span>{
+                    <span class="macro">bail!</span>(<span class="string">&quot;Invalid chain info response; missing latest committee&quot;</span>);
+                };
+                <span class="kw">let </span>nodes = context.make_node_provider().make_nodes(committee).<span class="kw">await</span><span class="question-mark">?</span>;
+
+                <span class="comment">// Download the parent chain.
+                </span><span class="kw">let </span>target_height = effect_id.height.try_add_one()<span class="question-mark">?</span>;
+                node_client
+                    .download_certificates(nodes, effect_id.chain_id, target_height)
+                    .<span class="kw">await
+                    </span>.context(<span class="string">&quot;failed to download parent chain&quot;</span>)<span class="question-mark">?</span>;
+
+                <span class="comment">// The initial timestamp for the new chain is taken from the block with the effect.
+                </span><span class="kw">let </span>certificate = node_client
+                    .certificate_for(<span class="kw-2">&amp;</span>effect_id)
+                    .<span class="kw">await
+                    </span>.context(<span class="string">&quot;could not find OpenChain effect&quot;</span>)<span class="question-mark">?</span>;
                 <span class="kw">let </span>timestamp = certificate.value.block().timestamp;
+                <span class="kw">let </span>chain_id = ChainId::child(effect_id);
                 context
                     .wallet_state
-                    .assign_new_chain_to_key(key, chain, timestamp)
-                    .unwrap();
-                <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, chain);
-                chain_client.receive_certificate(certificate).<span class="kw">await</span>.unwrap();
+                    .assign_new_chain_to_key(key, chain_id, timestamp)
+                    .context(<span class="string">&quot;could not assign the new chain&quot;</span>)<span class="question-mark">?</span>;
+                <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, chain_id);
                 context.save_wallet();
             }
 

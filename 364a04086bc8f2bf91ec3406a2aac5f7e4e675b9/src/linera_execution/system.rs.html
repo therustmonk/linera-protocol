@@ -877,12 +877,6 @@
 <span id="877">877</span>
 <span id="878">878</span>
 <span id="879">879</span>
-<span id="880">880</span>
-<span id="881">881</span>
-<span id="882">882</span>
-<span id="883">883</span>
-<span id="884">884</span>
-<span id="885">885</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -988,7 +982,6 @@
     <span class="doccomment">/// Creates (or activates) a new chain by installing the given authentication key.
     /// This will automatically subscribe to the future committees created by `admin_id`.
     </span>OpenChain {
-        id: ChainId,
         public_key: PublicKey,
         admin_id: ChainId,
         epoch: Epoch,
@@ -1324,20 +1317,15 @@
         <span class="kw">let </span><span class="kw-2">mut </span>new_application = <span class="prelude-val">None</span>;
         <span class="kw">match </span>operation {
             OpenChain {
-                id,
                 public_key,
                 committees,
                 admin_id,
                 epoch,
             } =&gt; {
-                <span class="kw">let </span>expected_id = ChainId::child((<span class="kw-2">*</span>context).into());
-                <span class="macro">ensure!</span>(
-                    id == <span class="kw-2">&amp;</span>expected_id,
-                    SystemExecutionError::InvalidNewChainId(<span class="kw-2">*</span>id)
-                );
+                <span class="kw">let </span>child_id = ChainId::child((<span class="kw-2">*</span>context).into());
                 <span class="macro">ensure!</span>(
                     <span class="self">self</span>.admin_id.get().as_ref() == <span class="prelude-val">Some</span>(admin_id),
-                    SystemExecutionError::InvalidNewChainAdminId(<span class="kw-2">*</span>id)
+                    SystemExecutionError::InvalidNewChainAdminId(child_id)
                 );
                 <span class="macro">ensure!</span>(
                     <span class="self">self</span>.committees.get() == committees,
@@ -1346,12 +1334,12 @@
                 <span class="macro">ensure!</span>(
                     <span class="self">self</span>.epoch.get().as_ref() == <span class="prelude-val">Some</span>(epoch),
                     SystemExecutionError::InvalidEpoch {
-                        chain_id: <span class="kw-2">*</span>id,
+                        chain_id: child_id,
                         epoch: <span class="kw-2">*</span>epoch
                     }
                 );
                 <span class="kw">let </span>e1 = (
-                    Destination::Recipient(<span class="kw-2">*</span>id),
+                    Destination::Recipient(child_id),
                     <span class="bool-val">false</span>,
                     SystemEffect::OpenChain {
                         public_key: <span class="kw-2">*</span>public_key,
@@ -1368,7 +1356,7 @@
                     Destination::Recipient(<span class="kw-2">*</span>admin_id),
                     <span class="bool-val">false</span>,
                     SystemEffect::Subscribe {
-                        id: <span class="kw-2">*</span>id,
+                        id: child_id,
                         subscription,
                     },
                 );

@@ -734,7 +734,7 @@
 <span class="kw">use </span>linera_base::{
     crypto::CryptoError,
     data_types::{ArithmeticError, BlockHeight},
-    identifiers::ChainId,
+    identifiers::{ChainId, EffectId},
 };
 <span class="kw">use </span>linera_chain::{
     data_types::{
@@ -971,8 +971,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         proposal: BlockProposal,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfoResponse, NodeError&gt; {
-        <span class="kw">let </span>node = <span class="self">self</span>.node.clone();
-        <span class="kw">let </span><span class="kw-2">mut </span>node = node.lock().<span class="kw">await</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>node = <span class="self">self</span>.node.lock().<span class="kw">await</span>;
         <span class="comment">// In local nodes, we can trust fully_handle_certificate to carry all actions eventually.
         </span><span class="kw">let </span>(response, _actions) = node.state.handle_block_proposal(proposal).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(response)
@@ -982,8 +981,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         certificate: LiteCertificate,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfoResponse, NodeError&gt; {
-        <span class="kw">let </span>node = <span class="self">self</span>.node.clone();
-        <span class="kw">let </span><span class="kw-2">mut </span>node = node.lock().<span class="kw">await</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>node = <span class="self">self</span>.node.lock().<span class="kw">await</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>notifications = Vec::new();
         <span class="kw">let </span>value = node
             .state
@@ -1013,8 +1011,7 @@
         certificate: Certificate,
         blobs: Vec&lt;HashedValue&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfoResponse, NodeError&gt; {
-        <span class="kw">let </span>node = <span class="self">self</span>.node.clone();
-        <span class="kw">let </span><span class="kw-2">mut </span>node = node.lock().<span class="kw">await</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>node = <span class="self">self</span>.node.lock().<span class="kw">await</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>notifications = Vec::new();
         <span class="kw">let </span>response = node
             .state
@@ -1035,15 +1032,9 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         query: ChainInfoQuery,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfoResponse, NodeError&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>node = <span class="self">self</span>.node.lock().<span class="kw">await</span>;
         <span class="comment">// In local nodes, we can trust fully_handle_certificate to carry all actions eventually.
-        </span><span class="kw">let </span>(response, _actions) = <span class="self">self
-            </span>.node
-            .clone()
-            .lock()
-            .<span class="kw">await
-            </span>.state
-            .handle_chain_info_query(query)
-            .<span class="kw">await</span><span class="question-mark">?</span>;
+        </span><span class="kw">let </span>(response, _actions) = node.state.handle_chain_info_query(query).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(response)
     }
 
@@ -1068,8 +1059,7 @@
     </span>S: Clone,
 {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>storage_client(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; S {
-        <span class="kw">let </span>node = <span class="self">self</span>.node.clone();
-        <span class="kw">let </span>node = node.lock().<span class="kw">await</span>;
+        <span class="kw">let </span>node = <span class="self">self</span>.node.lock().<span class="kw">await</span>;
         node.state.storage_client().clone()
     }
 }
@@ -1083,14 +1073,8 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         block: <span class="kw-2">&amp;</span>Block,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(Vec&lt;OutgoingEffect&gt;, ChainInfoResponse), NodeError&gt; {
-        <span class="kw">let </span>(effects, info) = <span class="self">self
-            </span>.node
-            .clone()
-            .lock()
-            .<span class="kw">await
-            </span>.state
-            .stage_block_execution(block)
-            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>node = <span class="self">self</span>.node.lock().<span class="kw">await</span>;
+        <span class="kw">let </span>(effects, info) = node.state.stage_block_execution(block).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>((effects, info))
     }
 
@@ -1157,8 +1141,7 @@
         chain_id: ChainId,
         query: <span class="kw-2">&amp;</span>Query,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response, NodeError&gt; {
-        <span class="kw">let </span>node = <span class="self">self</span>.node.clone();
-        <span class="kw">let </span><span class="kw-2">mut </span>node = node.lock().<span class="kw">await</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>node = <span class="self">self</span>.node.lock().<span class="kw">await</span>;
         <span class="kw">let </span>response = node.state.query_application(chain_id, query).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(response)
     }
@@ -1168,8 +1151,7 @@
         chain_id: ChainId,
         application_id: UserApplicationId,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;UserApplicationDescription, NodeError&gt; {
-        <span class="kw">let </span>node = <span class="self">self</span>.node.clone();
-        <span class="kw">let </span><span class="kw-2">mut </span>node = node.lock().<span class="kw">await</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>node = <span class="self">self</span>.node.lock().<span class="kw">await</span>;
         <span class="kw">let </span>response = node
             .state
             .describe_application(chain_id, application_id)
@@ -1280,6 +1262,24 @@
             }
         }
         <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
+    }
+
+    <span class="doccomment">/// Obtains the certificate containing the specified effect.
+    </span><span class="kw">pub async fn </span>certificate_for(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        effect_id: <span class="kw-2">&amp;</span>EffectId,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, NodeError&gt; {
+        <span class="kw">let </span>query = ChainInfoQuery::new(effect_id.chain_id)
+            .with_sent_certificates_in_range(BlockHeightRange::single(effect_id.height));
+        <span class="kw">let </span>info = <span class="self">self</span>.handle_chain_info_query(query).<span class="kw">await</span><span class="question-mark">?</span>.info;
+        <span class="kw">let </span>certificate = info
+            .requested_sent_certificates
+            .into_iter()
+            .find(|certificate| certificate.value.has_effect(effect_id))
+            .ok_or_else(|| {
+                ViewError::not_found(<span class="string">&quot;could not find certificate with effect {}&quot;</span>, effect_id)
+            })<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(certificate)
     }
 
     <span class="kw">async fn </span>try_download_certificates_from&lt;A&gt;(

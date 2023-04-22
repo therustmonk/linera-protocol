@@ -225,6 +225,7 @@
 <span id="225">225</span>
 <span id="226">226</span>
 <span id="227">227</span>
+<span id="228">228</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -424,6 +425,7 @@
     ChainDescription.&quot;
 </span>);
 <span class="macro">doc_scalar!</span>(ChannelName, <span class="string">&quot;The name of a subscription channel&quot;</span>);
+<span class="macro">bcs_scalar!</span>(EffectId, <span class="string">&quot;The index of an effect in a chain&quot;</span>);
 <span class="macro">doc_scalar!</span>(
     Owner,
     <span class="string">&quot;The owner of a chain. This is currently the hash of the owner&#39;s public key used to verify \

@@ -1268,6 +1268,10 @@
 <span id="1268">1268</span>
 <span id="1269">1269</span>
 <span id="1270">1270</span>
+<span id="1271">1271</span>
+<span id="1272">1272</span>
+<span id="1273">1273</span>
+<span id="1274">1274</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1362,6 +1366,19 @@
     <span class="kw">type </span>Node: ValidatorNode + Clone + Send + Sync + <span class="lifetime">&#39;static</span>;
 
     <span class="kw">async fn </span>make_node(<span class="kw-2">&amp;</span><span class="self">self</span>, address: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Node, NodeError&gt;;
+
+    <span class="kw">async fn </span>make_nodes(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        committee: <span class="kw-2">&amp;</span>Committee,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(ValidatorName, <span class="self">Self</span>::Node)&gt;, NodeError&gt; {
+        futures::future::join_all(committee.validators.iter().map(|(name, validator)| <span class="kw">async </span>{
+            <span class="kw">let </span>node = <span class="self">self</span>.make_node(<span class="kw-2">&amp;</span>validator.network_address).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="prelude-val">Ok</span>((<span class="kw-2">*</span>name, node))
+        }))
+        .<span class="kw">await
+        </span>.into_iter()
+        .collect()
+    }
 }
 
 <span class="kw">impl</span>&lt;P, S&gt; ChainClient&lt;P, S&gt; {
@@ -1409,7 +1426,8 @@
         <span class="self">self</span>.chain_id
     }
 
-    <span class="kw">pub fn </span>block_hash(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;CryptoHash&gt; {
+    <span class="doccomment">/// Returns the hash of the latest known block.
+    </span><span class="kw">pub fn </span>block_hash(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;CryptoHash&gt; {
         <span class="self">self</span>.block_hash
     }
 
@@ -1434,7 +1452,7 @@
 
 <span class="kw">impl</span>&lt;P, S&gt; ChainClient&lt;P, S&gt;
 <span class="kw">where
-    </span>P: ValidatorNodeProvider,
+    </span>P: ValidatorNodeProvider + Sync,
     S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
     ViewError: From&lt;S::ContextError&gt;,
 {
@@ -1453,14 +1471,14 @@
         <span class="prelude-val">Ok</span>(Arc::new(chain_state_view))
     }
 
-    <span class="doccomment">/// Obtain the basic `ChainInfo` data for the local chain.
+    <span class="doccomment">/// Obtains the basic `ChainInfo` data for the local chain.
     </span><span class="kw">async fn </span>chain_info(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfo, NodeError&gt; {
         <span class="kw">let </span>query = ChainInfoQuery::new(<span class="self">self</span>.chain_id);
         <span class="kw">let </span>response = <span class="self">self</span>.node_client.handle_chain_info_query(query).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(response.info)
     }
 
-    <span class="doccomment">/// Obtain up to `self.max_pending_messages` pending messages for the local chain.
+    <span class="doccomment">/// Obtains up to `self.max_pending_messages` pending messages for the local chain.
     ///
     /// Messages known to be redundant are filtered out: A `RegisterApplications` effect whose
     /// entries are already known never needs to be included in a block.
@@ -1550,7 +1568,7 @@
     <span class="doccomment">/// Obtain the validators trusted by the local chain.
     </span><span class="kw">async fn </span>validator_nodes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(ValidatorName, P::Node)&gt;, NodeError&gt; {
         <span class="kw">match </span><span class="self">self</span>.local_committee().<span class="kw">await </span>{
-            <span class="prelude-val">Ok</span>(committee) =&gt; <span class="self">self</span>.make_validator_nodes(<span class="kw-2">&amp;</span>committee).<span class="kw">await</span>,
+            <span class="prelude-val">Ok</span>(committee) =&gt; <span class="self">self</span>.validator_node_provider.make_nodes(<span class="kw-2">&amp;</span>committee).<span class="kw">await</span>,
             <span class="prelude-val">Err</span>(NodeError::InactiveChain(<span class="kw">_</span>)) | <span class="prelude-val">Err</span>(NodeError::InactiveLocalChain(<span class="kw">_</span>)) =&gt; {
                 <span class="prelude-val">Ok</span>(Vec::new())
             }
@@ -1619,26 +1637,11 @@
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.key_pair().<span class="kw">await</span><span class="question-mark">?</span>.public())
     }
 
-    <span class="kw">async fn </span>make_validator_nodes(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        committee: <span class="kw-2">&amp;</span>Committee,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(ValidatorName, P::Node)&gt;, NodeError&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>nodes = Vec::new();
-        <span class="kw">for </span>(name, validator) <span class="kw">in </span><span class="kw-2">&amp;</span>committee.validators {
-            <span class="kw">let </span>node = <span class="self">self
-                </span>.validator_node_provider
-                .make_node(<span class="kw-2">&amp;</span>validator.network_address)
-                .<span class="kw">await</span><span class="question-mark">?</span>;
-            nodes.push((<span class="kw-2">*</span>name, node));
-        }
-        <span class="prelude-val">Ok</span>(nodes)
-    }
-
     <span class="doccomment">/// Subscribe to notifications for all validators.
     </span><span class="kw">pub async fn </span>subscribe_all(<span class="kw-2">&amp;mut </span><span class="self">self</span>, chain_ids: Vec&lt;ChainId&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;NotificationStream&gt; {
         <span class="kw">let </span>committee = <span class="self">self</span>.local_committee().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>streams = Vec::new();
-        <span class="kw">for </span>(name, <span class="kw-2">mut </span>node) <span class="kw">in </span><span class="self">self</span>.make_validator_nodes(<span class="kw-2">&amp;</span>committee).<span class="kw">await</span><span class="question-mark">? </span>{
+        <span class="kw">for </span>(name, <span class="kw-2">mut </span>node) <span class="kw">in </span><span class="self">self</span>.validator_node_provider.make_nodes(<span class="kw-2">&amp;</span>committee).<span class="kw">await</span><span class="question-mark">? </span>{
             <span class="kw">match </span>node.subscribe(chain_ids.clone()).<span class="kw">await </span>{
                 <span class="prelude-val">Ok</span>(notification_stream) =&gt; {
                     streams.push(notification_stream);
@@ -1671,25 +1674,20 @@
                 NodeError::InvalidLocalBlockChaining
             );
         }
-        <span class="kw">if </span><span class="macro">matches!</span>(info.manager, ChainManagerInfo::Multi(<span class="kw">_</span>)) {
-            <span class="comment">// For multi-owner chains, we could be missing recent certificates created by
-            // other owners. Further synchronize blocks from the network. This is a
-            // best-effort that depends on network conditions.
+        <span class="kw">if </span>!<span class="macro">matches!</span>(
+            <span class="kw-2">&amp;</span>info.manager,
+            ChainManagerInfo::Single(single) <span class="kw">if </span><span class="self">self</span>.known_key_pairs.contains_key(<span class="kw-2">&amp;</span>single.owner))
+        {
+            <span class="comment">// For multi-owner chains, or for single-owner chains that are owned by someone else, we
+            // could be missing recent certificates created by other owners. Further synchronize
+            // blocks from the network. This is a best-effort that depends on network conditions.
             </span><span class="kw">let </span>nodes = <span class="self">self</span>.validator_nodes().<span class="kw">await</span><span class="question-mark">?</span>;
             info = <span class="self">self
                 </span>.node_client
                 .synchronize_chain_state(nodes, <span class="self">self</span>.chain_id)
                 .<span class="kw">await</span><span class="question-mark">?</span>;
         }
-        <span class="comment">// Update chain information tracked by the client.
-        </span><span class="kw">if </span>(info.next_block_height, info.manager.next_round())
-            &gt; (<span class="self">self</span>.next_block_height, <span class="self">self</span>.next_round)
-        {
-            <span class="self">self</span>.next_block_height = info.next_block_height;
-            <span class="self">self</span>.next_round = info.manager.next_round();
-            <span class="self">self</span>.block_hash = info.block_hash;
-            <span class="self">self</span>.timestamp = info.timestamp;
-        }
+        <span class="self">self</span>.update_from_info(<span class="kw-2">&amp;</span>info);
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -1704,7 +1702,7 @@
         <span class="kw">let </span>storage_client = <span class="self">self</span>.node_client.storage_client().<span class="kw">await</span>;
         <span class="kw">let </span>cross_chain_delay = <span class="self">self</span>.cross_chain_delay;
         <span class="kw">let </span>cross_chain_retries = <span class="self">self</span>.cross_chain_retries;
-        <span class="kw">let </span>nodes = <span class="self">self</span>.make_validator_nodes(committee).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>nodes = <span class="self">self</span>.validator_node_provider.make_nodes(committee).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>result = communicate_with_quorum(
             <span class="kw-2">&amp;</span>nodes,
             committee,
@@ -1810,7 +1808,10 @@
         }
         <span class="comment">// Recover history from the network. We assume that the committee that signed the
         // certificate is still active.
-        </span><span class="kw">let </span>nodes = <span class="self">self</span>.make_validator_nodes(remote_committee).<span class="kw">await</span><span class="question-mark">?</span>;
+        </span><span class="kw">let </span>nodes = <span class="self">self
+            </span>.validator_node_provider
+            .make_nodes(remote_committee)
+            .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.node_client
             .download_certificates(nodes.clone(), block.chain_id, block.height)
             .<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1856,7 +1857,10 @@
         <span class="comment">// Use network information from the local chain.
         </span><span class="kw">let </span>chain_id = <span class="self">self</span>.chain_id;
         <span class="kw">let </span>local_committee = <span class="self">self</span>.local_committee().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>nodes = <span class="self">self</span>.make_validator_nodes(<span class="kw-2">&amp;</span>local_committee).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>nodes = <span class="self">self
+            </span>.validator_node_provider
+            .make_nodes(<span class="kw-2">&amp;</span>local_committee)
+            .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="comment">// Synchronize the state of the admin chain from the network.
         </span><span class="self">self</span>.node_client
             .synchronize_chain_state(nodes.clone(), <span class="self">self</span>.admin_id)
@@ -1883,10 +1887,7 @@
                     <span class="kw">let </span><span class="kw-2">mut </span>new_tracker = tracker;
                     <span class="kw">for </span>cah <span class="kw">in </span>response.info.requested_received_log {
                         <span class="kw">let </span>query = ChainInfoQuery::new(cah.chain_id)
-                            .with_sent_certificates_in_range(BlockHeightRange {
-                                start: cah.height,
-                                limit: <span class="prelude-val">Some</span>(<span class="number">1</span>),
-                            });
+                            .with_sent_certificates_in_range(BlockHeightRange::single(cah.height));
 
                         <span class="kw">let </span><span class="kw-2">mut </span>response = client.handle_chain_info_query(query).<span class="kw">await</span><span class="question-mark">?</span>;
                         <span class="kw">let </span><span class="prelude-val">Some</span>(certificate) = response.info
@@ -2033,6 +2034,12 @@
             .handle_certificate(certificate, blobs)
             .<span class="kw">await</span><span class="question-mark">?
             </span>.info;
+        <span class="self">self</span>.update_from_info(<span class="kw-2">&amp;</span>info);
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="doccomment">/// Updates the latest block and next block height and round information from the chain info.
+    </span><span class="kw">fn </span>update_from_info(<span class="kw-2">&amp;mut </span><span class="self">self</span>, info: <span class="kw-2">&amp;</span>ChainInfo) {
         <span class="kw">if </span>info.chain_id == <span class="self">self</span>.chain_id
             &amp;&amp; (info.next_block_height, info.manager.next_round())
                 &gt; (<span class="self">self</span>.next_block_height, <span class="self">self</span>.next_round)
@@ -2042,7 +2049,6 @@
             <span class="self">self</span>.next_round = info.manager.next_round();
             <span class="self">self</span>.timestamp = info.timestamp;
         }
-        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Execute (or retry) a regular block proposal. Update local balance.
@@ -2066,7 +2072,7 @@
         </span><span class="self">self</span>.pending_block = <span class="prelude-val">Some</span>(block.clone());
         <span class="comment">// Collect blobs required for execution.
         </span><span class="kw">let </span>committee = <span class="self">self</span>.local_committee().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>nodes = <span class="self">self</span>.make_validator_nodes(<span class="kw-2">&amp;</span>committee).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>nodes = <span class="self">self</span>.validator_node_provider.make_nodes(<span class="kw-2">&amp;</span>committee).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>blobs = <span class="self">self
             </span>.node_client
             .read_or_download_blobs(nodes, block.bytecode_locations())
@@ -2327,13 +2333,13 @@
     </span>}
 
     <span class="doccomment">/// Open a new chain with a derived UID.
-    </span><span class="kw">pub async fn </span>open_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>, public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainId, Certificate)&gt; {
+    </span><span class="kw">pub async fn </span>open_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>, public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;(EffectId, Certificate)&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>id = ChainId::child(EffectId {
+        <span class="kw">let </span>effect_id = EffectId {
             chain_id: <span class="self">self</span>.chain_id,
             height: <span class="self">self</span>.next_block_height,
             index: <span class="number">0</span>,
-        });
+        };
         <span class="kw">let </span>(epoch, committees) = <span class="self">self</span>.epoch_and_committees(<span class="self">self</span>.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>epoch = epoch.ok_or(NodeError::InactiveLocalChain(<span class="self">self</span>.chain_id))<span class="question-mark">?</span>;
         <span class="kw">let </span>certificate = <span class="self">self
@@ -2341,7 +2347,6 @@
                 <span class="comment">// Cannot add incoming messages to preserve the effect id.
                 </span><span class="macro">vec!</span>[],
                 <span class="macro">vec!</span>[Operation::System(SystemOperation::OpenChain {
-                    id,
                     public_key,
                     committees,
                     admin_id: <span class="self">self</span>.admin_id,
@@ -2349,7 +2354,10 @@
                 })],
             )
             .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>((id, certificate))
+        <span class="kw">if </span>!certificate.value.has_effect(<span class="kw-2">&amp;</span>effect_id) {
+            <span class="macro">bail!</span>(<span class="string">&quot;Failed to open a new chain&quot;</span>);
+        }
+        <span class="prelude-val">Ok</span>((effect_id, certificate))
     }
 
     <span class="doccomment">/// Close the chain (and lose everything in it!!).
