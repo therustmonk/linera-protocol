@@ -188,9 +188,9 @@
 }
 
 <span class="kw">impl </span>BlockBuilder {
-    <span class="doccomment">/// Creates a new [`BlockBuilder`], initializing the block so that it belongs to a micro-chain.
+    <span class="doccomment">/// Creates a new [`BlockBuilder`], initializing the block so that it belongs to a microchain.
     ///
-    /// Initializes the block so that it belongs to the micro-chain identified by `chain_id` and
+    /// Initializes the block so that it belongs to the microchain identified by `chain_id` and
     /// owned by `owner`. It becomes the block after the specified `previous_block`, or the genesis
     /// block if [`None`] is specified.
     ///
@@ -260,7 +260,7 @@
     <span class="doccomment">/// Adds a message sent by the effect referenced by the [`EffectId`] to this block.
     ///
     /// The block that produces the effect must have already been executed by the test validator,
-    /// so that the message is already in the inbox of the micro-chain this block belongs to.
+    /// so that the message is already in the inbox of the microchain this block belongs to.
     </span><span class="kw">pub fn </span>with_incoming_message(<span class="kw-2">&amp;mut </span><span class="self">self</span>, effect_id: EffectId) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="self">self</span>.incoming_messages.push(effect_id);
         <span class="self">self
@@ -269,7 +269,7 @@
     <span class="doccomment">/// Adds the `messages` directly to this block.
     ///
     /// This is an internal method that bypasses the check to see if the messages are already
-    /// present in the inboxes of the micro-chain that owns this block.
+    /// present in the inboxes of the microchain that owns this block.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>with_raw_messages(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         messages: <span class="kw">impl </span>IntoIterator&lt;Item = Message&gt;,
@@ -303,7 +303,7 @@
 
     <span class="doccomment">/// Collects and adds the previously requested messages to this block.
     ///
-    /// The requested messages must already all be in the inboxes of the micro-chain that owns this
+    /// The requested messages must already all be in the inboxes of the microchain that owns this
     /// block.
     </span><span class="kw">async fn </span>collect_incoming_messages(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">let </span>chain_id = <span class="self">self</span>.block.chain_id;

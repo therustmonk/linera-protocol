@@ -175,7 +175,7 @@
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="doccomment">//! Functions and types to interface with the system API available to application contracts.
+</span><span class="doccomment">//! Functions and types to interface with the system API available to application services.
 
 </span><span class="kw">use </span><span class="kw">super</span>::queryable_system <span class="kw">as </span>system;
 <span class="kw">use </span>async_trait::async_trait;
@@ -192,7 +192,7 @@
 <span class="kw">use </span>serde::de::DeserializeOwned;
 <span class="kw">use </span>std::{fmt, future::Future, task::Poll};
 
-<span class="doccomment">/// Load the contract state, without locking it for writes.
+<span class="doccomment">/// Loads the application state, without locking it for writes.
 </span><span class="kw">pub async fn </span>load&lt;State&gt;() -&gt; State
 <span class="kw">where
     </span>State: Default + DeserializeOwned,
@@ -201,16 +201,16 @@
     load_using(future::poll_fn(|_context| future.poll().into())).<span class="kw">await
 </span>}
 
-<span class="doccomment">/// Helper function to load the contract state or create a new one if it doesn&#39;t exist.
+<span class="doccomment">/// Helper function to load the application state or create a new one if it doesn&#39;t exist.
 </span><span class="kw">async fn </span>load_using&lt;State&gt;(future: <span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, String&gt;&gt;) -&gt; State
 <span class="kw">where
     </span>State: Default + DeserializeOwned,
 {
-    <span class="kw">let </span>bytes = future.<span class="kw">await</span>.expect(<span class="string">&quot;Failed to load contract state&quot;</span>);
+    <span class="kw">let </span>bytes = future.<span class="kw">await</span>.expect(<span class="string">&quot;Failed to load application state&quot;</span>);
     <span class="kw">if </span>bytes.is_empty() {
         State::default()
     } <span class="kw">else </span>{
-        bcs::from_bytes(<span class="kw-2">&amp;</span>bytes).expect(<span class="string">&quot;Invalid contract state&quot;</span>)
+        bcs::from_bytes(<span class="kw-2">&amp;</span>bytes).expect(<span class="string">&quot;Invalid application state&quot;</span>)
     }
 }
 
@@ -287,7 +287,7 @@
     <span class="kw">let </span>future = system::Lock::new();
     future::poll_fn(|_context| -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), ViewError&gt;&gt; { future.poll().into() })
         .<span class="kw">await
-        </span>.expect(<span class="string">&quot;Failed to lock contract state&quot;</span>);
+        </span>.expect(<span class="string">&quot;Failed to lock application state&quot;</span>);
     load_view_using::&lt;State&gt;().<span class="kw">await
 </span>}
 
@@ -302,7 +302,7 @@
     <span class="kw">let </span>context = ReadOnlyViewStorageContext::default();
     State::load(context)
         .<span class="kw">await
-        </span>.expect(<span class="string">&quot;Failed to load contract state&quot;</span>)
+        </span>.expect(<span class="string">&quot;Failed to load application state&quot;</span>)
 }
 
 <span class="doccomment">/// Retrieve the current chain ID.

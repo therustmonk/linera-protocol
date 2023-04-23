@@ -160,7 +160,7 @@
 </span><span class="doccomment">//! A minimal validator implementation suited for tests.
 //!
 //! The [`TestValidator`] is a minimal validator with a single shard. Micro-chains can be added to
-//! it, and blocks can be added to each micro-chain individually.
+//! it, and blocks can be added to each microchain individually.
 
 </span><span class="kw">use </span><span class="kw">super</span>::ActiveChain;
 <span class="kw">use </span>dashmap::DashMap;
@@ -225,7 +225,7 @@
 }
 
 <span class="kw">impl </span>TestValidator {
-    <span class="doccomment">/// Creates a new [`TestValidator`] with a single micro-chain with the bytecode of the crate
+    <span class="doccomment">/// Creates a new [`TestValidator`] with a single microchain with the bytecode of the crate
     /// calling this method published on it.
     ///
     /// Returns the new [`TestValidator`] and the [`BytecodeId`] of the published bytecode.
@@ -241,8 +241,8 @@
     <span class="doccomment">/// Creates a new [`TestValidator`] with the application of the crate calling this method
     /// created on a chain.
     ///
-    /// The bytecode is first published on one micro-chain, then the application is created on
-    /// another micro-chain.
+    /// The bytecode is first published on one microchain, then the application is created on
+    /// another microchain.
     ///
     /// Returns the new [`TestValidator`] and the [`ApplicationId`] of the created application.
     </span><span class="kw">pub async fn </span>with_current_application(
@@ -277,7 +277,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.committee
     }
 
-    <span class="doccomment">/// Creates a new micro-chain and returns the [`ActiveChain`] that can be used to add blocks to
+    <span class="doccomment">/// Creates a new microchain and returns the [`ActiveChain`] that can be used to add blocks to
     /// it.
     </span><span class="kw">pub async fn </span>new_chain(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ActiveChain {
         <span class="kw">let </span>key_pair = KeyPair::generate();
@@ -305,7 +305,7 @@
         chain
     }
 
-    <span class="doccomment">/// Returns the [`ActiveChain`] reference to the micro-chain identified by `chain_id`.
+    <span class="doccomment">/// Returns the [`ActiveChain`] reference to the microchain identified by `chain_id`.
     </span><span class="kw">pub fn </span>get_chain(<span class="kw-2">&amp;</span><span class="self">self</span>, chain_id: <span class="kw-2">&amp;</span>ChainId) -&gt; ActiveChain {
         <span class="self">self</span>.chains.get(chain_id).expect(<span class="string">&quot;Chain not found&quot;</span>).clone()
     }
