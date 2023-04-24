@@ -764,6 +764,7 @@
                 internal_network.clone(),
                 cross_chain_config.max_retries,
                 Duration::from_millis(cross_chain_config.retry_delay_ms),
+                Duration::from_millis(cross_chain_config.sender_delay_ms),
                 shard_id,
                 cross_chain_receiver,
             )
@@ -867,8 +868,9 @@
     </span><span class="kw">async fn </span>forward_cross_chain_queries(
         nickname: String,
         network: ValidatorInternalNetworkConfig,
-        cross_chain_max_retries: usize,
+        cross_chain_max_retries: u32,
         cross_chain_retry_delay: Duration,
+        cross_chain_sender_delay: Duration,
         this_shard: ShardId,
         <span class="kw-2">mut </span>receiver: mpsc::Receiver&lt;(linera_core::data_types::CrossChainRequest, ShardId)&gt;,
     ) {
@@ -877,9 +879,12 @@
         <span class="kw">while let </span><span class="prelude-val">Some</span>((cross_chain_request, shard_id)) = receiver.next().<span class="kw">await </span>{
             <span class="kw">let </span>shard = network.shard(shard_id);
             <span class="kw">let </span>remote_address = <span class="macro">format!</span>(<span class="string">&quot;http://{}&quot;</span>, shard.address());
-            <span class="kw">let </span><span class="kw-2">mut </span>attempt = <span class="number">0</span>;
+
             <span class="comment">// Send the cross-chain query and retry if needed.
-            </span><span class="kw">loop </span>{
+            </span><span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..cross_chain_max_retries {
+                <span class="comment">// Delay increases linearly with the attempt number.
+                </span>tokio::time::sleep(cross_chain_sender_delay + cross_chain_retry_delay * i).<span class="kw">await</span>;
+
                 <span class="kw">let </span>result = || <span class="kw">async </span>{
                     <span class="kw">let </span>cross_chain_request = cross_chain_request.clone().try_into()<span class="question-mark">?</span>;
                     <span class="kw">let </span>request = Request::new(cross_chain_request);
@@ -890,19 +895,14 @@
                 };
                 <span class="kw">match </span>result().<span class="kw">await </span>{
                     <span class="prelude-val">Err</span>(error) =&gt; {
-                        <span class="macro">error!</span>(
+                        <span class="macro">warn!</span>(
                             nickname,
                             %error,
-                            attempt,
+                            i,
+                            from_shard = this_shard,
+                            to_shard = shard_id,
                             <span class="string">&quot;Failed to send cross-chain query&quot;</span>,
                         );
-                        <span class="kw">if </span>attempt &lt; cross_chain_max_retries {
-                            tokio::time::sleep(cross_chain_retry_delay).<span class="kw">await</span>;
-                            attempt += <span class="number">1</span>;
-                            <span class="comment">// retry
-                        </span>} <span class="kw">else </span>{
-                            <span class="kw">break</span>;
-                        }
                     }
                     <span class="kw">_ </span>=&gt; {
                         <span class="macro">debug!</span>(
@@ -913,6 +913,12 @@
                         <span class="kw">break</span>;
                     }
                 }
+                <span class="macro">error!</span>(
+                    nickname,
+                    from_shard = this_shard,
+                    to_shard = shard_id,
+                    <span class="string">&quot;Dropping cross-chain query&quot;</span>,
+                );
             }
         }
     }
@@ -1041,7 +1047,7 @@
 }
 
 <span class="kw">impl </span>GrpcClient {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>new(
+    <span class="kw">pub fn </span>new(
         network: ValidatorPublicNetworkConfig,
         connect_timeout: Duration,
         timeout: Duration,
@@ -1050,8 +1056,7 @@
         <span class="kw">let </span>channel = Channel::from_shared(address.clone())<span class="question-mark">?
             </span>.connect_timeout(connect_timeout)
             .timeout(timeout)
-            .connect()
-            .<span class="kw">await</span><span class="question-mark">?</span>;
+            .connect_lazy();
         <span class="kw">let </span>client = ValidatorNodeClient::new(channel);
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ address, client })
     }
@@ -1180,19 +1185,14 @@
     }
 }
 
-<span class="kw">pub struct </span>GrpcMassClient(ValidatorPublicNetworkConfig);
-
-<span class="kw">impl </span>GrpcMassClient {
-    <span class="kw">pub fn </span>new(network: ValidatorPublicNetworkConfig) -&gt; <span class="self">Self </span>{
-        <span class="self">Self</span>(network)
-    }
-}
-
 <span class="attribute">#[async_trait]
-</span><span class="kw">impl </span>MassClient <span class="kw">for </span>GrpcMassClient {
+</span><span class="kw">impl </span>MassClient <span class="kw">for </span>GrpcClient {
     <span class="attribute">#[instrument(skip_all, err)]
-    </span><span class="kw">async fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, requests: Vec&lt;RpcMessage&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;RpcMessage&gt;, MassClientError&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>client = ValidatorNodeClient::connect(<span class="self">self</span>.<span class="number">0</span>.http_address()).<span class="kw">await</span><span class="question-mark">?</span>;
+    </span><span class="kw">async fn </span>send(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        requests: Vec&lt;RpcMessage&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;RpcMessage&gt;, MassClientError&gt; {
+        <span class="kw">let </span>client = <span class="kw-2">&amp;mut </span><span class="self">self</span>.client;
         <span class="kw">let </span><span class="kw-2">mut </span>responses = Vec::new();
 
         <span class="kw">for </span>request <span class="kw">in </span>requests {

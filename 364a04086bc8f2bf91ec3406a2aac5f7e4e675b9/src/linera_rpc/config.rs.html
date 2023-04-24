@@ -201,6 +201,12 @@
 <span id="201">201</span>
 <span id="202">202</span>
 <span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -212,20 +218,26 @@
 <span class="attribute">#[derive(Clone, Debug, StructOpt)]
 </span><span class="kw">pub struct </span>CrossChainConfig {
     <span class="doccomment">/// Number of cross-chains messages allowed before dropping them.
-    </span><span class="attribute">#[structopt(long = <span class="string">&quot;cross_chain_queue_size&quot;</span>, default_value = <span class="string">&quot;1000&quot;</span>)]
+    </span><span class="attribute">#[structopt(long = <span class="string">&quot;cross-chain-queue-size&quot;</span>, default_value = <span class="string">&quot;1000&quot;</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) queue_size: usize,
+
     <span class="doccomment">/// Maximum number of retries for a cross-chain message.
-    </span><span class="attribute">#[structopt(long = <span class="string">&quot;cross_chain_max_retries&quot;</span>, default_value = <span class="string">&quot;10&quot;</span>)]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) max_retries: usize,
+    </span><span class="attribute">#[structopt(long = <span class="string">&quot;cross-chain-max-retries&quot;</span>, default_value = <span class="string">&quot;10&quot;</span>)]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) max_retries: u32,
+
     <span class="doccomment">/// Delay before retrying of cross-chain message.
-    </span><span class="attribute">#[structopt(long = <span class="string">&quot;cross_chain_retry_delay_ms&quot;</span>, default_value = <span class="string">&quot;2000&quot;</span>)]
+    </span><span class="attribute">#[structopt(long = <span class="string">&quot;cross-chain-retry-delay-ms&quot;</span>, default_value = <span class="string">&quot;2000&quot;</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) retry_delay_ms: u64,
+
+    <span class="doccomment">/// Introduce a delay before sending every cross-chain message (e.g. for testing purpose).
+    </span><span class="attribute">#[structopt(long = <span class="string">&quot;cross-chain-sender-delay-ms&quot;</span>, default_value = <span class="string">&quot;0&quot;</span>)]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) sender_delay_ms: u64,
 }
 
 <span class="attribute">#[derive(Clone, Debug, StructOpt)]
 </span><span class="kw">pub struct </span>NotificationConfig {
     <span class="doccomment">/// Number of notifications allowed before blocking the main server loop
-    </span><span class="attribute">#[structopt(long = <span class="string">&quot;notification_queue_size&quot;</span>, default_value = <span class="string">&quot;1000&quot;</span>)]
+    </span><span class="attribute">#[structopt(long = <span class="string">&quot;notification-queue-size&quot;</span>, default_value = <span class="string">&quot;1000&quot;</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) notification_queue_size: usize,
 }
 

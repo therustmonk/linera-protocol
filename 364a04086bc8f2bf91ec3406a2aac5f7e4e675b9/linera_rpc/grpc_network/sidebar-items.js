@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["GrpcError",""]],"mod":[["grpc",""]],"struct":[["GrpcClient",""],["GrpcMassClient",""],["GrpcServer",""],["GrpcServerHandle",""]],"trait":[["Proxyable","Types which are proxyable and expose the appropriate methods to be handled by the `GrpcProxy`"]]};
+window.SIDEBAR_ITEMS = {"enum":[["GrpcError",""]],"mod":[["grpc",""]],"struct":[["GrpcClient",""],["GrpcServer",""],["GrpcServerHandle",""]],"trait":[["Proxyable","Types which are proxyable and expose the appropriate methods to be handled by the `GrpcProxy`"]]};

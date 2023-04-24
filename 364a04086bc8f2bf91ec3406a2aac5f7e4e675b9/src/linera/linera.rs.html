@@ -1291,6 +1291,9 @@
 <span id="1291">1291</span>
 <span id="1292">1292</span>
 <span id="1293">1293</span>
+<span id="1294">1294</span>
+<span id="1295">1295</span>
+<span id="1296">1296</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1310,6 +1313,7 @@
     client::{ChainClient, ValidatorNodeProvider},
     data_types::ChainInfoQuery,
     node::{LocalNodeClient, ValidatorNode},
+    tracker::NotificationTracker,
     worker::{Reason, WorkerState},
 };
 <span class="kw">use </span>linera_execution::{
@@ -1321,7 +1325,6 @@
 <span class="kw">use </span>linera_service::{
     config::{CommitteeConfig, Export, GenesisConfig, Import, UserChain, WalletState},
     storage::{Runnable, StorageConfig},
-    tracker::NotificationTracker,
 };
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;
@@ -1347,7 +1350,7 @@
         Operation,
     },
     linera_rpc::{
-        config::NetworkProtocol, grpc_network::GrpcMassClient, mass::MassClient, simple_network,
+        config::NetworkProtocol, grpc_network::GrpcClient, mass::MassClient, simple_network,
         RpcMessage,
     },
     std::collections::{HashMap, HashSet},
@@ -1446,7 +1449,10 @@
                         max_in_flight,
                     ))
                 }
-                NetworkProtocol::Grpc =&gt; Box::new(GrpcMassClient::new(config.network.clone())),
+                NetworkProtocol::Grpc =&gt; Box::new(
+                    GrpcClient::new(config.network.clone(), <span class="self">self</span>.send_timeout, <span class="self">self</span>.recv_timeout)
+                        .unwrap(),
+                ),
             };
 
             validator_clients.push(client);
@@ -1602,7 +1608,7 @@
         <span class="kw">let </span>time_start = Instant::now();
         <span class="macro">info!</span>(<span class="string">&quot;Broadcasting {} {}&quot;</span>, proposals.len(), phase);
         <span class="kw">let </span><span class="kw-2">mut </span>handles = Vec::new();
-        <span class="kw">for </span>client <span class="kw">in </span><span class="self">self</span>.make_validator_mass_clients(max_in_flight) {
+        <span class="kw">for </span><span class="kw-2">mut </span>client <span class="kw">in </span><span class="self">self</span>.make_validator_mass_clients(max_in_flight) {
             <span class="kw">let </span>proposals = proposals.clone();
             handles.push(tokio::spawn(<span class="kw">async move </span>{
                 <span class="macro">info!</span>(<span class="string">&quot;Sending {} requests&quot;</span>, proposals.len());
@@ -1817,13 +1823,13 @@
     </span><span class="attribute">#[structopt(long)]
     </span>wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
 
+    <span class="doccomment">/// The maximal number of entries in the storage cache.
+    </span><span class="attribute">#[structopt(long, default_value = <span class="string">&quot;1000&quot;</span>)]
+    </span>cache_size: usize,
+
     <span class="doccomment">/// Subcommand.
     </span><span class="attribute">#[structopt(subcommand)]
     </span>command: ClientCommand,
-
-    <span class="doccomment">/// The maximal number of entries in the cache.
-    </span><span class="attribute">#[structopt(long, default_value = <span class="string">&quot;1000&quot;</span>)]
-    </span>cache_size: usize,
 }
 
 <span class="attribute">#[derive(StructOpt)]
@@ -1882,7 +1888,7 @@
     <span class="doccomment">/// Show the current set of validators for a chain.
     </span><span class="attribute">#[structopt(name = <span class="string">&quot;query_validators&quot;</span>)]
     </span>QueryValidators {
-        <span class="doccomment">/// Chain id (defaults to admin chain)
+        <span class="doccomment">/// Chain id
         </span>chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
     },
 
@@ -1970,10 +1976,10 @@
         </span>chain_ids: Vec&lt;ChainId&gt;,
     },
 
-    <span class="doccomment">/// Run Client as a service.
+    <span class="doccomment">/// Run a GraphQL service on the local node of a given chain.
     </span><span class="attribute">#[structopt(name = <span class="string">&quot;service&quot;</span>)]
     </span>Service {
-        <span class="doccomment">/// Chain id (defaults to admin chain)
+        <span class="doccomment">/// Chain id
         </span>chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
 
         <span class="doccomment">/// The port on which to run the server
@@ -2451,7 +2457,7 @@
                 <span class="kw">let </span><span class="prelude-val">Some</span>(committee) = info.latest_committee() <span class="kw">else </span>{
                     <span class="macro">bail!</span>(<span class="string">&quot;Invalid chain info response; missing latest committee&quot;</span>);
                 };
-                <span class="kw">let </span>nodes = context.make_node_provider().make_nodes(committee).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>nodes = context.make_node_provider().make_nodes(committee)<span class="question-mark">?</span>;
 
                 <span class="comment">// Download the parent chain.
                 </span><span class="kw">let </span>target_height = effect_id.height.try_add_one()<span class="question-mark">?</span>;

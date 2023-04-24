@@ -624,14 +624,6 @@
 <span id="624">624</span>
 <span id="625">625</span>
 <span id="626">626</span>
-<span id="627">627</span>
-<span id="628">628</span>
-<span id="629">629</span>
-<span id="630">630</span>
-<span id="631">631</span>
-<span id="632">632</span>
-<span id="633">633</span>
-<span id="634">634</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -647,7 +639,6 @@
     http::{StatusCode, Uri},
     response,
     response::IntoResponse,
-    routing::get,
     Extension, Router, Server,
 };
 <span class="kw">use </span>futures::{lock::Mutex, StreamExt};
@@ -660,6 +651,7 @@
 <span class="kw">use </span>linera_chain::ChainStateView;
 <span class="kw">use </span>linera_core::{
     client::{ChainClient, ValidatorNodeProvider},
+    tracker::NotificationTracker,
     worker::{Notification, Reason},
 };
 <span class="kw">use </span>linera_execution::{
@@ -673,18 +665,23 @@
 <span class="kw">use </span>std::{net::SocketAddr, num::NonZeroU16, sync::Arc};
 <span class="kw">use </span>thiserror::Error <span class="kw">as </span>ThisError;
 <span class="kw">use </span>tower_http::cors::CorsLayer;
-<span class="kw">use </span>tracing::{error, info};
-
-<span class="kw">use </span><span class="kw">crate</span>::tracker::NotificationTracker;
+<span class="kw">use </span>tracing::{debug, error, info, warn};
 
 <span class="doccomment">/// Our root GraphQL query type.
-</span><span class="kw">struct </span>QueryRoot&lt;P, S&gt;(Arc&lt;NodeService&lt;P, S&gt;&gt;);
+</span><span class="kw">struct </span>QueryRoot&lt;P, S&gt; {
+    client: Arc&lt;Mutex&lt;ChainClient&lt;P, S&gt;&gt;&gt;,
+    port: NonZeroU16,
+}
 
 <span class="doccomment">/// Our root GraphQL subscription type.
-</span><span class="kw">struct </span>SubscriptionRoot&lt;P, S&gt;(Arc&lt;NodeService&lt;P, S&gt;&gt;);
+</span><span class="kw">struct </span>SubscriptionRoot&lt;P, S&gt; {
+    client: Arc&lt;Mutex&lt;ChainClient&lt;P, S&gt;&gt;&gt;,
+}
 
 <span class="doccomment">/// Our root GraphQL mutation type.
-</span><span class="kw">struct </span>MutationRoot&lt;P, S&gt;(Arc&lt;NodeService&lt;P, S&gt;&gt;);
+</span><span class="kw">struct </span>MutationRoot&lt;P, S&gt; {
+    client: Arc&lt;Mutex&lt;ChainClient&lt;P, S&gt;&gt;&gt;,
+}
 
 <span class="attribute">#[derive(Debug, ThisError)]
 </span><span class="kw">enum </span>NodeServiceError {
@@ -750,7 +747,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         chain_ids: Vec&lt;ChainId&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Stream&lt;Item = Notification&gt;, Error&gt; {
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="number">0</span>.client.lock().<span class="kw">await</span>.subscribe_all(chain_ids).<span class="kw">await</span><span class="question-mark">?</span>)
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.client.lock().<span class="kw">await</span>.subscribe_all(chain_ids).<span class="kw">await</span><span class="question-mark">?</span>)
     }
 }
 
@@ -765,7 +762,7 @@
         system_operation: SystemOperation,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;CryptoHash, Error&gt; {
         <span class="kw">let </span>operation = Operation::System(system_operation);
-        <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.<span class="number">0</span>.client.lock().<span class="kw">await</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
         client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(client.execute_operation(operation).<span class="kw">await</span><span class="question-mark">?</span>.value.hash())
     }
@@ -787,7 +784,7 @@
         amount: Amount,
         user_data: <span class="prelude-ty">Option</span>&lt;UserData&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;CryptoHash, Error&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.<span class="number">0</span>.client.lock().<span class="kw">await</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
         <span class="kw">let </span>certificate = client
             .transfer(owner, amount, recipient, user_data.unwrap_or_default())
             .<span class="kw">await</span><span class="question-mark">?</span>;
@@ -805,7 +802,7 @@
         amount: Amount,
         user_data: <span class="prelude-ty">Option</span>&lt;UserData&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;CryptoHash, Error&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.<span class="number">0</span>.client.lock().<span class="kw">await</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
         <span class="kw">let </span>certificate = client
             .claim(
                 owner,
@@ -821,14 +818,14 @@
     <span class="doccomment">/// Creates (or activates) a new chain by installing the given authentication key.
     /// This will automatically subscribe to the future committees created by `admin_id`.
     </span><span class="kw">async fn </span>open_chain(<span class="kw-2">&amp;</span><span class="self">self</span>, public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;ChainId, Error&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.<span class="number">0</span>.client.lock().<span class="kw">await</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
         <span class="kw">let </span>(effect_id, <span class="kw">_</span>) = client.open_chain(public_key).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(ChainId::child(effect_id))
     }
 
     <span class="doccomment">/// Closes the chain.
     </span><span class="kw">async fn </span>close_chain(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CryptoHash, Error&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.<span class="number">0</span>.client.lock().<span class="kw">await</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
         <span class="kw">let </span>certificate = client.close_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(certificate.value.hash())
     }
@@ -899,7 +896,7 @@
         contract: Bytecode,
         service: Bytecode,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;BytecodeId, Error&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.<span class="number">0</span>.client.lock().<span class="kw">await</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
         <span class="kw">let </span>(bytecode_id, <span class="kw">_</span>) = client.publish_bytecode(contract, service).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(bytecode_id)
     }
@@ -911,7 +908,7 @@
         initialization_argument: Vec&lt;u8&gt;,
         required_application_ids: Vec&lt;UserApplicationId&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ApplicationId, Error&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.<span class="number">0</span>.client.lock().<span class="kw">await</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
         <span class="kw">let </span>(application_id, <span class="kw">_</span>) = client
             .create_application(
                 bytecode_id,
@@ -935,13 +932,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Arc&lt;ChainStateView&lt;S::Context&gt;&gt;, Error&gt; {
-        <span class="prelude-val">Ok</span>(<span class="self">self
-            </span>.<span class="number">0
-            </span>.client
-            .lock()
-            .<span class="kw">await
-            </span>.chain_state_view(chain_id)
-            .<span class="kw">await</span><span class="question-mark">?</span>)
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.client.lock().<span class="kw">await</span>.chain_state_view(chain_id).<span class="kw">await</span><span class="question-mark">?</span>)
     }
 
     <span class="kw">async fn </span>applications(
@@ -949,7 +940,6 @@
         chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;ApplicationOverview&gt;, Error&gt; {
         <span class="kw">let </span>applications = <span class="self">self
-            </span>.<span class="number">0
             </span>.client
             .lock()
             .<span class="kw">await
@@ -961,7 +951,7 @@
 
         <span class="kw">let </span>overviews = applications
             .into_iter()
-            .map(|(id, description)| ApplicationOverview::new(id, description, <span class="self">self</span>.<span class="number">0</span>.port))
+            .map(|(id, description)| ApplicationOverview::new(id, description, <span class="self">self</span>.port))
             .map(ApplicationOverview::from)
             .collect();
 
@@ -990,55 +980,6 @@
     }
 }
 
-<span class="doccomment">/// Execute a GraphQL query and generate a response for our `Schema`.
-</span><span class="kw">async fn </span>index_handler&lt;P, S&gt;(
-    client: Extension&lt;Arc&lt;NodeService&lt;P, S&gt;&gt;&gt;,
-    req: GraphQLRequest,
-) -&gt; GraphQLResponse
-<span class="kw">where
-    </span>P: ValidatorNodeProvider + Send + Sync + <span class="lifetime">&#39;static</span>,
-    S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
-    ViewError: From&lt;S::ContextError&gt;,
-{
-    <span class="kw">let </span>schema = Schema::build(
-        QueryRoot(client.<span class="number">0</span>.clone()),
-        MutationRoot(client.<span class="number">0</span>.clone()),
-        SubscriptionRoot(client.<span class="number">0</span>.clone()),
-    )
-    .finish();
-
-    schema.execute(req.into_inner()).<span class="kw">await</span>.into()
-}
-
-<span class="doccomment">/// Execute a GraphQL query against an application.
-/// Pattern matches on the `OperationType` of the query and routes the query
-/// accordingly.
-</span><span class="kw">async fn </span>application_handler&lt;P, S&gt;(
-    Path(application_id): Path&lt;String&gt;,
-    service: Extension&lt;Arc&lt;NodeService&lt;P, S&gt;&gt;&gt;,
-    req: GraphQLRequest,
-) -&gt; <span class="prelude-ty">Result</span>&lt;GraphQLResponse, NodeServiceError&gt;
-<span class="kw">where
-    </span>P: ValidatorNodeProvider + Send + Sync + <span class="lifetime">&#39;static</span>,
-    S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
-    ViewError: From&lt;S::ContextError&gt;,
-{
-    <span class="kw">let </span><span class="kw-2">mut </span>req = req.into_inner();
-
-    <span class="kw">let </span>parsed_query = req.parsed_query()<span class="question-mark">?</span>;
-    <span class="kw">let </span>operation_type = operation_type(parsed_query)<span class="question-mark">?</span>;
-
-    <span class="kw">let </span>application_id: UserApplicationId = application_id.parse()<span class="question-mark">?</span>;
-
-    <span class="kw">let </span>response = <span class="kw">match </span>operation_type {
-        OperationType::Query =&gt; user_application_query(application_id, service, <span class="kw-2">&amp;</span>req).<span class="kw">await</span><span class="question-mark">?</span>,
-        OperationType::Mutation =&gt; user_application_mutation(application_id, service, <span class="kw-2">&amp;</span>req).<span class="kw">await</span><span class="question-mark">?</span>,
-        OperationType::Subscription =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(NodeServiceError::UnsupportedQueryType),
-    };
-
-    <span class="prelude-val">Ok</span>(response.into())
-}
-
 <span class="doccomment">/// Given a parsed GraphQL query (or `ExecutableDocument`), return the `OperationType`.
 ///
 /// Errors:
@@ -1059,70 +1000,9 @@
     }
 }
 
-<span class="doccomment">/// Handles queries for user applications.
-</span><span class="kw">async fn </span>user_application_query&lt;P, S&gt;(
-    application_id: UserApplicationId,
-    service: Extension&lt;Arc&lt;NodeService&lt;P, S&gt;&gt;&gt;,
-    request: <span class="kw-2">&amp;</span>Request,
-) -&gt; <span class="prelude-ty">Result</span>&lt;async_graphql::Response, NodeServiceError&gt;
-<span class="kw">where
-    </span>P: ValidatorNodeProvider + Send + Sync + <span class="lifetime">&#39;static</span>,
-    S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
-    ViewError: From&lt;S::ContextError&gt;,
-{
-    <span class="kw">let </span>bytes = serde_json::to_vec(<span class="kw-2">&amp;</span>request)<span class="question-mark">?</span>;
-    <span class="kw">let </span>query = Query::User {
-        application_id,
-        bytes,
-    };
-    <span class="kw">let </span>response = service
-        .<span class="number">0
-        </span>.client
-        .lock()
-        .<span class="kw">await
-        </span>.query_application(<span class="kw-2">&amp;</span>query)
-        .<span class="kw">await</span><span class="question-mark">?</span>;
-    <span class="kw">let </span>user_response_bytes = <span class="kw">match </span>response {
-        Response::System(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;cannot get a system response for a user query&quot;</span>),
-        Response::User(user) =&gt; user,
-    };
-    <span class="prelude-val">Ok</span>(serde_json::from_slice(<span class="kw-2">&amp;</span>user_response_bytes)<span class="question-mark">?</span>)
-}
-
-<span class="doccomment">/// Handles mutations for user applications.
-</span><span class="kw">async fn </span>user_application_mutation&lt;P, S&gt;(
-    application_id: UserApplicationId,
-    service: Extension&lt;Arc&lt;NodeService&lt;P, S&gt;&gt;&gt;,
-    req: <span class="kw-2">&amp;</span>Request,
-) -&gt; <span class="prelude-ty">Result</span>&lt;async_graphql::Response, NodeServiceError&gt;
-<span class="kw">where
-    </span>P: ValidatorNodeProvider + Send + Sync + <span class="lifetime">&#39;static</span>,
-    S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
-    ViewError: From&lt;S::ContextError&gt;,
-{
-    <span class="kw">let </span>graphql_res = user_application_query(application_id, service.clone(), req).<span class="kw">await</span><span class="question-mark">?</span>;
-    <span class="kw">let </span>bcs_bytes_list = bytes_from_res(graphql_res.data);
-    <span class="kw">if </span>bcs_bytes_list.is_empty() {
-        <span class="kw">return </span><span class="prelude-val">Err</span>(NodeServiceError::MalformedApplicationResponse);
-    }
-    <span class="kw">let </span>operations = bcs_bytes_list
-        .into_iter()
-        .map(|bytes| Operation::User {
-            application_id,
-            bytes,
-        })
-        .collect();
-
-    <span class="kw">let </span><span class="kw-2">mut </span>client = service.<span class="number">0</span>.client.lock().<span class="kw">await</span>;
-    client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
-    <span class="kw">let </span>certificate = client.execute_operations(operations).<span class="kw">await</span><span class="question-mark">?</span>;
-    <span class="kw">let </span>value = async_graphql::Value::from_json(serde_json::to_value(certificate)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
-    <span class="prelude-val">Ok</span>(async_graphql::Response::new(value))
-}
-
 <span class="doccomment">/// Extracts the underlying byte vector from a serialized GraphQL response
 /// from an application.
-</span><span class="kw">fn </span>bytes_from_res(data: async_graphql::Value) -&gt; Vec&lt;Vec&lt;u8&gt;&gt; {
+</span><span class="kw">fn </span>bytes_from_response(data: async_graphql::Value) -&gt; Vec&lt;Vec&lt;u8&gt;&gt; {
     <span class="kw">if let </span>async_graphql::Value::Object(map) = data {
         map.values()
             .filter_map(|value| {
@@ -1163,8 +1043,17 @@
 <span class="doccomment">/// The `NodeService` is a server that exposes a web-server to the client.
 /// The node service is primarily used to explore the state of a chain in GraphQL.
 </span><span class="kw">pub struct </span>NodeService&lt;P, S&gt; {
-    client: Mutex&lt;ChainClient&lt;P, S&gt;&gt;,
+    client: Arc&lt;Mutex&lt;ChainClient&lt;P, S&gt;&gt;&gt;,
     port: NonZeroU16,
+}
+
+<span class="kw">impl</span>&lt;P, S&gt; Clone <span class="kw">for </span>NodeService&lt;P, S&gt; {
+    <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            client: <span class="self">self</span>.client.clone(),
+            port: <span class="self">self</span>.port,
+        }
+    }
 }
 
 <span class="kw">impl</span>&lt;P, S&gt; NodeService&lt;P, S&gt;
@@ -1175,95 +1064,190 @@
 {
     <span class="doccomment">/// Create a new instance of the node service given a client chain and a port.
     </span><span class="kw">pub fn </span>new(client: ChainClient&lt;P, S&gt;, port: NonZeroU16) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>client = Mutex::new(client);
+        <span class="kw">let </span>client = Arc::new(Mutex::new(client));
         <span class="self">Self </span>{ client, port }
     }
 
-    <span class="doccomment">/// Run the node service.
-    </span><span class="kw">pub async fn </span>run(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), anyhow::Error&gt; {
-        <span class="kw">let </span>port = <span class="self">self</span>.port.get();
-        <span class="kw">let </span>chain_id = <span class="self">self</span>.client.get_mut().chain_id();
-        <span class="kw">let </span>service = Arc::new(<span class="self">self</span>);
-        <span class="kw">let </span>service_sync = service.clone();
-
-        <span class="kw">let </span>index_handler = get(graphiql).post(index_handler::&lt;P, S&gt;);
-        <span class="kw">let </span>applications_handler = get(graphiql).post(application_handler::&lt;P, S&gt;);
-
-        <span class="kw">let </span>schema = Schema::build(
-            QueryRoot(service.clone()),
-            MutationRoot(service.clone()),
-            SubscriptionRoot(service.clone()),
+    <span class="kw">fn </span>schema(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Schema&lt;QueryRoot&lt;P, S&gt;, MutationRoot&lt;P, S&gt;, SubscriptionRoot&lt;P, S&gt;&gt; {
+        Schema::build(
+            QueryRoot {
+                client: <span class="self">self</span>.client.clone(),
+                port: <span class="self">self</span>.port,
+            },
+            MutationRoot {
+                client: <span class="self">self</span>.client.clone(),
+            },
+            SubscriptionRoot {
+                client: <span class="self">self</span>.client.clone(),
+            },
         )
-        .finish();
+        .finish()
+    }
+
+    <span class="doccomment">/// Run the node service.
+    </span><span class="kw">pub async fn </span>run(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), anyhow::Error&gt; {
+        <span class="kw">let </span>port = <span class="self">self</span>.port.get();
+        <span class="kw">let </span>chain_id = <span class="self">self</span>.client.lock().<span class="kw">await</span>.chain_id();
+
+        <span class="kw">let </span>index_handler = axum::routing::get(graphiql).post(<span class="self">Self</span>::index_handler);
+        <span class="kw">let </span>applications_handler = axum::routing::get(graphiql).post(<span class="self">Self</span>::application_handler);
 
         <span class="kw">let </span>app = Router::new()
             .route(<span class="string">&quot;/&quot;</span>, index_handler)
             .route(<span class="string">&quot;/applications/:id&quot;</span>, applications_handler)
             .route(<span class="string">&quot;/ready&quot;</span>, axum::routing::get(|| <span class="kw">async </span>{ <span class="string">&quot;ready!&quot; </span>}))
-            .route_service(<span class="string">&quot;/ws&quot;</span>, GraphQLSubscription::new(schema.clone()))
-            .layer(Extension(service))
+            .route_service(<span class="string">&quot;/ws&quot;</span>, GraphQLSubscription::new(<span class="self">self</span>.schema()))
+            .layer(Extension(<span class="self">self</span>.clone()))
             <span class="comment">// TODO(#551): Provide application authentication.
             </span>.layer(CorsLayer::permissive());
 
         <span class="macro">info!</span>(<span class="string">&quot;GraphiQL IDE: http://localhost:{}&quot;</span>, port);
 
-        <span class="comment">// TODO: Deduplicate with client.rs Synchronize handling.
-        </span><span class="kw">let </span>sync_fut =
-            <span class="kw">async move </span>{
-                <span class="kw">let </span><span class="kw-2">mut </span>notification_stream = service_sync
-                    .client
-                    .lock()
-                    .<span class="kw">await
-                    </span>.subscribe_all(<span class="macro">vec!</span>[chain_id])
-                    .<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span><span class="kw-2">mut </span>tracker = NotificationTracker::default();
-                <span class="kw">while let </span><span class="prelude-val">Some</span>(notification) = notification_stream.next().<span class="kw">await </span>{
-                    <span class="macro">tracing::debug!</span>(<span class="string">&quot;Received notification: {:?}&quot;</span>, notification);
-                    <span class="kw">let </span><span class="kw-2">mut </span>client = service_sync.client.lock().<span class="kw">await</span>;
-                    <span class="kw">if </span>tracker.insert(notification.clone()) {
-                        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = client.synchronize_and_recompute_balance().<span class="kw">await </span>{
-                            <span class="macro">tracing::warn!</span>(
+        <span class="comment">// TODO(#646): Deduplicate with linera.rs synchronize handling.
+        </span><span class="kw">let </span>sync_fut = <span class="kw">async move </span>{
+            <span class="kw">let </span><span class="kw-2">mut </span>notification_stream = <span class="self">self
+                </span>.client
+                .lock()
+                .<span class="kw">await
+                </span>.subscribe_all(<span class="macro">vec!</span>[chain_id])
+                .<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span><span class="kw-2">mut </span>tracker = NotificationTracker::default();
+            <span class="kw">while let </span><span class="prelude-val">Some</span>(notification) = notification_stream.next().<span class="kw">await </span>{
+                <span class="macro">debug!</span>(<span class="string">&quot;Received notification: {:?}&quot;</span>, notification);
+                <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
+                <span class="kw">if </span>tracker.insert(notification.clone()) {
+                    <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = client.synchronize_and_recompute_balance().<span class="kw">await </span>{
+                        <span class="macro">warn!</span>(
                             <span class="string">&quot;Failed to synchronize and recompute balance for notification {:?} \
                             with error: {:?}&quot;</span>,
-                            notification,
-                            e
+                            notification, e
                         );
-                            <span class="comment">// If synchronization failed there is nothing to update validators
-                            // about.
-                            </span><span class="kw">continue</span>;
-                        }
-                        <span class="kw">match </span><span class="kw-2">&amp;</span>notification.reason {
-                            Reason::NewBlock { .. } =&gt; {
-                                <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = client.update_validators_about_local_chain().<span class="kw">await </span>{
-                                    <span class="macro">tracing::warn!</span>(
-                                        <span class="string">&quot;Failed to update validators about the local chain after \
-                                    receiving notification {:?} with error: {:?}&quot;</span>,
-                                        notification,
-                                        e
-                                    );
-                                }
+                        <span class="comment">// If synchronization failed there is nothing to update validators
+                        // about.
+                        </span><span class="kw">continue</span>;
+                    }
+                    <span class="kw">match </span><span class="kw-2">&amp;</span>notification.reason {
+                        Reason::NewBlock { .. } =&gt; {
+                            <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = client.update_validators_about_local_chain().<span class="kw">await </span>{
+                                <span class="macro">warn!</span>(
+                                    <span class="string">&quot;Failed to update validators about the local chain after \
+                                         receiving notification {:?} with error: {:?}&quot;</span>,
+                                    notification, e
+                                );
                             }
-                            Reason::NewMessage { .. } =&gt; {
-                                <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = client.process_inbox().<span class="kw">await </span>{
-                                    <span class="macro">tracing::warn!</span>(
+                        }
+                        Reason::NewMessage { .. } =&gt; {
+                            <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = client.process_inbox().<span class="kw">await </span>{
+                                <span class="macro">warn!</span>(
                                     <span class="string">&quot;Failed to process inbox after receiving new message: {:?} \
-                                    with error: {:?}&quot;</span>, notification, e);
-                                }
+                                    with error: {:?}&quot;</span>,
+                                    notification, e
+                                );
                             }
                         }
                     }
                 }
-                <span class="prelude-val">Ok</span>::&lt;(), anyhow::Error&gt;(())
-            };
+            }
+            <span class="prelude-val">Ok</span>::&lt;(), anyhow::Error&gt;(())
+        };
 
         <span class="kw">let </span>serve_fut =
             Server::bind(<span class="kw-2">&amp;</span>SocketAddr::from(([<span class="number">127</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>], port))).serve(app.into_make_service());
 
-        <span class="kw">let </span>(serve_res, sync_res) = <span class="macro">futures::join!</span>(serve_fut, sync_fut);
-        serve_res<span class="question-mark">?</span>;
-        sync_res<span class="question-mark">?</span>;
+        <span class="kw">let </span>(serve_response, sync_response) = <span class="macro">futures::join!</span>(serve_fut, sync_fut);
+        serve_response<span class="question-mark">?</span>;
+        sync_response<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="doccomment">/// Handles queries for user applications.
+    </span><span class="kw">async fn </span>user_application_query(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        application_id: UserApplicationId,
+        request: <span class="kw-2">&amp;</span>Request,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;async_graphql::Response, NodeServiceError&gt; {
+        <span class="kw">let </span>bytes = serde_json::to_vec(<span class="kw-2">&amp;</span>request)<span class="question-mark">?</span>;
+        <span class="kw">let </span>query = Query::User {
+            application_id,
+            bytes,
+        };
+        <span class="kw">let </span>response = <span class="self">self</span>.client.lock().<span class="kw">await</span>.query_application(<span class="kw-2">&amp;</span>query).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>user_response_bytes = <span class="kw">match </span>response {
+            Response::System(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;cannot get a system response for a user query&quot;</span>),
+            Response::User(user) =&gt; user,
+        };
+        <span class="prelude-val">Ok</span>(serde_json::from_slice(<span class="kw-2">&amp;</span>user_response_bytes)<span class="question-mark">?</span>)
+    }
+
+    <span class="doccomment">/// Handles mutations for user applications.
+    </span><span class="kw">async fn </span>user_application_mutation(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        application_id: UserApplicationId,
+        request: <span class="kw-2">&amp;</span>Request,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;async_graphql::Response, NodeServiceError&gt; {
+        <span class="kw">let </span>graphql_response = <span class="self">self</span>.user_application_query(application_id, request).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>bcs_bytes_list = bytes_from_response(graphql_response.data);
+        <span class="kw">if </span>bcs_bytes_list.is_empty() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(NodeServiceError::MalformedApplicationResponse);
+        }
+        <span class="kw">let </span>operations = bcs_bytes_list
+            .into_iter()
+            .map(|bytes| Operation::User {
+                application_id,
+                bytes,
+            })
+            .collect();
+
+        <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
+        client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>certificate = client.execute_operations(operations).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>value = async_graphql::Value::from_json(serde_json::to_value(certificate)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(async_graphql::Response::new(value))
+    }
+
+    <span class="doccomment">/// Executes a GraphQL query and generates a response for our `Schema`.
+    </span><span class="kw">async fn </span>index_handler(service: Extension&lt;<span class="self">Self</span>&gt;, request: GraphQLRequest) -&gt; GraphQLResponse {
+        service
+            .<span class="number">0
+            </span>.schema()
+            .execute(request.into_inner())
+            .<span class="kw">await
+            </span>.into()
+    }
+
+    <span class="doccomment">/// Executes a GraphQL query against an application.
+    /// Pattern matches on the `OperationType` of the query and routes the query
+    /// accordingly.
+    </span><span class="kw">async fn </span>application_handler(
+        Path(application_id): Path&lt;String&gt;,
+        service: Extension&lt;<span class="self">Self</span>&gt;,
+        request: GraphQLRequest,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;GraphQLResponse, NodeServiceError&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>request = request.into_inner();
+
+        <span class="kw">let </span>parsed_query = request.parsed_query()<span class="question-mark">?</span>;
+        <span class="kw">let </span>operation_type = operation_type(parsed_query)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>application_id: UserApplicationId = application_id.parse()<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>response = <span class="kw">match </span>operation_type {
+            OperationType::Query =&gt; {
+                service
+                    .<span class="number">0
+                    </span>.user_application_query(application_id, <span class="kw-2">&amp;</span>request)
+                    .<span class="kw">await</span><span class="question-mark">?
+            </span>}
+            OperationType::Mutation =&gt; {
+                service
+                    .<span class="number">0
+                    </span>.user_application_mutation(application_id, <span class="kw-2">&amp;</span>request)
+                    .<span class="kw">await</span><span class="question-mark">?
+            </span>}
+            OperationType::Subscription =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(NodeServiceError::UnsupportedQueryType),
+        };
+
+        <span class="prelude-val">Ok</span>(response.into())
     }
 }
 </code></pre></div>

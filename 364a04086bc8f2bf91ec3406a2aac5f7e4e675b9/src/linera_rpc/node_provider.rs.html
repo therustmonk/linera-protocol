@@ -115,12 +115,6 @@
 <span id="115">115</span>
 <span id="116">116</span>
 <span id="117">117</span>
-<span id="118">118</span>
-<span id="119">119</span>
-<span id="120">120</span>
-<span id="121">121</span>
-<span id="122">122</span>
-<span id="123">123</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -130,7 +124,6 @@
     grpc_network::GrpcClient,
     simple_network::SimpleClient,
 };
-<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>linera_core::{client::ValidatorNodeProvider, node::NodeError};
 <span class="kw">use </span>std::{str::FromStr, time::Duration};
 
@@ -150,18 +143,15 @@
     }
 }
 
-<span class="attribute">#[async_trait]
-</span><span class="kw">impl </span>ValidatorNodeProvider <span class="kw">for </span>NodeProvider {
+<span class="kw">impl </span>ValidatorNodeProvider <span class="kw">for </span>NodeProvider {
     <span class="kw">type </span>Node = Client;
 
-    <span class="kw">async fn </span>make_node(<span class="kw-2">&amp;</span><span class="self">self</span>, address: <span class="kw-2">&amp;</span>str) -&gt; anyhow::Result&lt;<span class="self">Self</span>::Node, NodeError&gt; {
+    <span class="kw">fn </span>make_node(<span class="kw-2">&amp;</span><span class="self">self</span>, address: <span class="kw-2">&amp;</span>str) -&gt; anyhow::Result&lt;<span class="self">Self</span>::Node, NodeError&gt; {
         <span class="kw">let </span>client = <span class="kw">match </span><span class="kw-2">&amp;</span>address.to_lowercase() {
             address <span class="kw">if </span>address.starts_with(<span class="string">&quot;tcp&quot;</span>) || address.starts_with(<span class="string">&quot;upd&quot;</span>) =&gt; {
-                Client::Simple(<span class="self">self</span>.simple.make_node(address).<span class="kw">await</span><span class="question-mark">?</span>)
+                Client::Simple(<span class="self">self</span>.simple.make_node(address)<span class="question-mark">?</span>)
             }
-            address <span class="kw">if </span>address.starts_with(<span class="string">&quot;grpc&quot;</span>) =&gt; {
-                Client::Grpc(<span class="self">self</span>.grpc.make_node(address).<span class="kw">await</span><span class="question-mark">?</span>)
-            }
+            address <span class="kw">if </span>address.starts_with(<span class="string">&quot;grpc&quot;</span>) =&gt; Client::Grpc(<span class="self">self</span>.grpc.make_node(address)<span class="question-mark">?</span>),
             <span class="kw">_ </span>=&gt; {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(NodeError::CannotResolveValidatorAddress {
                     address: address.to_string(),
@@ -188,26 +178,25 @@
     }
 }
 
-<span class="attribute">#[async_trait]
-</span><span class="kw">impl </span>ValidatorNodeProvider <span class="kw">for </span>GrpcNodeProvider {
+<span class="kw">impl </span>ValidatorNodeProvider <span class="kw">for </span>GrpcNodeProvider {
     <span class="kw">type </span>Node = GrpcClient;
 
-    <span class="kw">async fn </span>make_node(<span class="kw-2">&amp;</span><span class="self">self</span>, address: <span class="kw-2">&amp;</span>str) -&gt; anyhow::Result&lt;<span class="self">Self</span>::Node, NodeError&gt; {
+    <span class="kw">fn </span>make_node(<span class="kw-2">&amp;</span><span class="self">self</span>, address: <span class="kw-2">&amp;</span>str) -&gt; anyhow::Result&lt;<span class="self">Self</span>::Node, NodeError&gt; {
         <span class="kw">let </span>network = ValidatorPublicNetworkConfig::from_str(address).map_err(|<span class="kw">_</span>| {
             NodeError::CannotResolveValidatorAddress {
                 address: address.to_string(),
             }
         })<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>client = GrpcClient::new(network, <span class="self">self</span>.send_timeout, <span class="self">self</span>.recv_timeout)
-            .<span class="kw">await
-            </span>.map_err(|e| NodeError::GrpcError {
-                error: <span class="macro">format!</span>(
-                    <span class="string">&quot;could not initialise gRPC client for address {} : {}&quot;</span>,
-                    address, e
-                ),
+        <span class="kw">let </span>client =
+            GrpcClient::new(network, <span class="self">self</span>.send_timeout, <span class="self">self</span>.recv_timeout).map_err(|e| {
+                NodeError::GrpcError {
+                    error: <span class="macro">format!</span>(
+                        <span class="string">&quot;could not initialize gRPC client for address {} : {}&quot;</span>,
+                        address, e
+                    ),
+                }
             })<span class="question-mark">?</span>;
-
         <span class="prelude-val">Ok</span>(client)
     }
 }
@@ -228,11 +217,10 @@
     }
 }
 
-<span class="attribute">#[async_trait]
-</span><span class="kw">impl </span>ValidatorNodeProvider <span class="kw">for </span>SimpleNodeProvider {
+<span class="kw">impl </span>ValidatorNodeProvider <span class="kw">for </span>SimpleNodeProvider {
     <span class="kw">type </span>Node = SimpleClient;
 
-    <span class="kw">async fn </span>make_node(<span class="kw-2">&amp;</span><span class="self">self</span>, address: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Node, NodeError&gt; {
+    <span class="kw">fn </span>make_node(<span class="kw-2">&amp;</span><span class="self">self</span>, address: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Node, NodeError&gt; {
         <span class="kw">let </span>network = ValidatorPublicNetworkPreConfig::from_str(address).map_err(|<span class="kw">_</span>| {
             NodeError::CannotResolveValidatorAddress {
                 address: address.to_string(),

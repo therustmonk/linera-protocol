@@ -156,11 +156,11 @@ var sourcesIndex = JSON.parse('{\
 "linera":["",[],["linera.rs"]],\
 "linera_base":["",[],["crypto.rs","data_types.rs","graphql.rs","identifiers.rs","lib.rs"]],\
 "linera_chain":["",[],["chain.rs","data_types.rs","inbox.rs","lib.rs","manager.rs","outbox.rs"]],\
-"linera_core":["",[["unit_tests",[],["client_test_utils.rs"]]],["client.rs","data_types.rs","lib.rs","node.rs","notifier.rs","updater.rs","worker.rs"]],\
+"linera_core":["",[["unit_tests",[],["client_test_utils.rs"]]],["client.rs","data_types.rs","lib.rs","node.rs","notifier.rs","tracker.rs","updater.rs","worker.rs"]],\
 "linera_execution":["",[["wasm",[],["async_boundary.rs","async_determinism.rs","common.rs","conversions_from_wit.rs","conversions_to_wit.rs","guest_futures.rs","mod.rs","sanitizer.rs","system_api.rs","wasmer.rs","wasmtime.rs"]]],["applications.rs","committee.rs","execution.rs","graphql.rs","lib.rs","ownership.rs","runtime.rs","system.rs"]],\
 "linera_rpc":["",[],["client.rs","codec.rs","config.rs","conversions.rs","grpc_network.rs","grpc_pool.rs","lib.rs","mass.rs","node_provider.rs","rpc.rs","simple_network.rs","transport.rs"]],\
 "linera_sdk":["",[["contract",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs","wit_types.rs"]],["service",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs","wit_types.rs"]],["test",[],["block.rs","chain.rs","mod.rs","validator.rs"]]],["base.rs","exported_future.rs","extensions.rs","lib.rs","log.rs"]],\
-"linera_service":["",[],["config.rs","grpc_proxy.rs","lib.rs","node_service.rs","storage.rs","tracker.rs"]],\
+"linera_service":["",[],["config.rs","grpc_proxy.rs","lib.rs","node_service.rs","storage.rs"]],\
 "linera_storage":["",[],["chain_guards.rs","dynamo_db.rs","lib.rs","memory.rs","rocksdb.rs"]],\
 "linera_views":["",[["test_utils",[],["mod.rs"]]],["batch.rs","collection_view.rs","common.rs","dynamo_db.rs","hashable_wrapper.rs","key_value_store_view.rs","lib.rs","localstack.rs","log_view.rs","lru_caching.rs","map_view.rs","memory.rs","queue_view.rs","reentrant_collection_view.rs","register_view.rs","rocksdb.rs","set_view.rs","views.rs"]],\
 "linera_views_derive":["",[],["lib.rs","util.rs"]],\

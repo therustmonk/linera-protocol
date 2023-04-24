@@ -1068,6 +1068,8 @@
 <span id="1068">1068</span>
 <span id="1069">1069</span>
 <span id="1070">1070</span>
+<span id="1071">1071</span>
+<span id="1072">1072</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -1732,7 +1734,8 @@
         <span class="prelude-val">Ok</span>(result.into_iter().collect::&lt;<span class="prelude-ty">Result</span>&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;()<span class="question-mark">?</span>)
     }
 
-    <span class="kw">async fn </span>find_keys_by_prefix(
+    <span class="comment">// TODO(#201): Large responses may be truncated.
+    </span><span class="kw">async fn </span>find_keys_by_prefix(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         key_prefix: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;DynamoDbKeys, DynamoDbContextError&gt; {
@@ -1746,7 +1749,8 @@
         })
     }
 
-    <span class="kw">async fn </span>find_key_values_by_prefix(
+    <span class="comment">// TODO(#201): Large responses may be truncated.
+    </span><span class="kw">async fn </span>find_key_values_by_prefix(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         key_prefix: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;DynamoDbKeyValues, DynamoDbContextError&gt; {

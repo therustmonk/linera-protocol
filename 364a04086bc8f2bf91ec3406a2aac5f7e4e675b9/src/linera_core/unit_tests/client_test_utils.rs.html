@@ -559,7 +559,6 @@
 <span id="559">559</span>
 <span id="560">560</span>
 <span id="561">561</span>
-<span id="562">562</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -754,15 +753,14 @@
 
 <span class="kw">pub struct </span>NodeProvider&lt;S&gt;(BTreeMap&lt;ValidatorName, LocalValidatorClient&lt;S&gt;&gt;);
 
-<span class="attribute">#[async_trait]
-</span><span class="kw">impl</span>&lt;S&gt; ValidatorNodeProvider <span class="kw">for </span>NodeProvider&lt;S&gt;
+<span class="kw">impl</span>&lt;S&gt; ValidatorNodeProvider <span class="kw">for </span>NodeProvider&lt;S&gt;
 <span class="kw">where
     </span>S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
     ViewError: From&lt;S::ContextError&gt;,
 {
     <span class="kw">type </span>Node = LocalValidatorClient&lt;S&gt;;
 
-    <span class="kw">async fn </span>make_node(<span class="kw-2">&amp;</span><span class="self">self</span>, address: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Node, NodeError&gt; {
+    <span class="kw">fn </span>make_node(<span class="kw-2">&amp;</span><span class="self">self</span>, address: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Node, NodeError&gt; {
         <span class="kw">let </span>name = ValidatorName::from_str(address).unwrap();
         <span class="kw">let </span>node = <span class="self">self
             </span>.<span class="number">0

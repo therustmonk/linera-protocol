@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"struct":[["NotificationTracker","A structure which tracks the latest block heights seen for a given ChainId."]]};
