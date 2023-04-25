@@ -1317,6 +1317,24 @@
 <span id="1317">1317</span>
 <span id="1318">1318</span>
 <span id="1319">1319</span>
+<span id="1320">1320</span>
+<span id="1321">1321</span>
+<span id="1322">1322</span>
+<span id="1323">1323</span>
+<span id="1324">1324</span>
+<span id="1325">1325</span>
+<span id="1326">1326</span>
+<span id="1327">1327</span>
+<span id="1328">1328</span>
+<span id="1329">1329</span>
+<span id="1330">1330</span>
+<span id="1331">1331</span>
+<span id="1332">1332</span>
+<span id="1333">1333</span>
+<span id="1334">1334</span>
+<span id="1335">1335</span>
+<span id="1336">1336</span>
+<span id="1337">1337</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1348,6 +1366,7 @@
 <span class="kw">use </span>linera_service::{
     config::{CommitteeConfig, Export, GenesisConfig, Import, UserChain, WalletState},
     node_service::NodeService,
+    project::Project,
     storage::{Runnable, StorageConfig},
 };
 <span class="kw">use </span>linera_storage::Store;
@@ -2056,6 +2075,10 @@
     <span class="doccomment">/// Show the contents of the wallet.
     </span><span class="attribute">#[structopt(name = <span class="string">&quot;wallet&quot;</span>)]
     </span>Wallet(WalletCommand),
+
+    <span class="doccomment">/// Manage Linera projects.
+    </span><span class="attribute">#[structopt(name = <span class="string">&quot;project&quot;</span>)]
+    </span>Project(ProjectCommand),
 }
 
 <span class="attribute">#[derive(StructOpt)]
@@ -2072,6 +2095,12 @@
         </span><span class="attribute">#[structopt(long = <span class="string">&quot;genesis&quot;</span>)]
         </span>genesis_config_path: PathBuf,
     },
+}
+
+<span class="attribute">#[derive(StructOpt)]
+</span><span class="kw">enum </span>ProjectCommand {
+    <span class="doccomment">/// Create a new Linera project.
+    </span>New { path: PathBuf },
 }
 
 <span class="kw">struct </span>Job(ClientContext, ClientCommand);
@@ -2527,7 +2556,7 @@
                 context.save_wallet();
             }
 
-            CreateGenesisConfig { .. } | KeyGen | Wallet(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
+            CreateGenesisConfig { .. } | KeyGen | Wallet(<span class="kw">_</span>) | Project(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -2581,6 +2610,13 @@
             context.save_wallet();
             <span class="prelude-val">Ok</span>(())
         }
+
+        ClientCommand::Project(project_command) =&gt; <span class="kw">match </span>project_command {
+            ProjectCommand::New { path } =&gt; {
+                Project::new(path.clone())<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(())
+            }
+        },
 
         command =&gt; <span class="kw">match </span>command {
             ClientCommand::KeyGen =&gt; {
