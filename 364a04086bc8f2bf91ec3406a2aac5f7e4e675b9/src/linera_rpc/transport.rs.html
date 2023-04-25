@@ -403,7 +403,7 @@
 }
 
 <span class="kw">impl </span>TransportProtocol {
-    <span class="doccomment">/// Create a transport for this protocol.
+    <span class="doccomment">/// Creates a transport for this protocol.
     </span><span class="kw">pub async fn </span>connect(<span class="self">self</span>, address: String) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Transport, std::io::Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>addresses = address
             .to_socket_addrs()
@@ -431,7 +431,7 @@
         <span class="prelude-val">Ok</span>(stream)
     }
 
-    <span class="doccomment">/// Create a [`ConnectionPool`] for this protocol.
+    <span class="doccomment">/// Creates a [`ConnectionPool`] for this protocol.
     </span><span class="kw">pub async fn </span>make_outgoing_connection_pool(
         <span class="self">self</span>,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>ConnectionPool&gt;, std::io::Error&gt; {
@@ -442,7 +442,7 @@
         <span class="prelude-val">Ok</span>(pool)
     }
 
-    <span class="doccomment">/// Run a server for this protocol and the given message handler.
+    <span class="doccomment">/// Runs a server for this protocol and the given message handler.
     </span><span class="kw">pub async fn </span>spawn_server&lt;S&gt;(
         <span class="self">self</span>,
         address: <span class="kw-2">&amp;</span>str,

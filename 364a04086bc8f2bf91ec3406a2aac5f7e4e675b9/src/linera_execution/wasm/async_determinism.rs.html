@@ -619,10 +619,10 @@
     };
     <span class="kw">use </span>tokio::time;
 
-    <span class="doccomment">/// Test if futures that finish in a non-sequential order complete sequentially.
+    <span class="doccomment">/// Tests if futures that finish in a non-sequential order complete sequentially.
     ///
-    /// Start some futures, with each one finishing in a different time without respecting the
-    /// creation order, and check that their respective [`HostFuture`]s complete in order.
+    /// Starts some futures, with each one finishing in a different time without respecting the
+    /// creation order, and checks that their respective [`HostFuture`]s complete in order.
     </span><span class="attribute">#[tokio::test]
     </span><span class="kw">async fn </span>futures_complete_in_order() {
         time::pause();

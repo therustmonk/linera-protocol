@@ -163,7 +163,7 @@
 </span><span class="kw">pub type </span>MemoryContext&lt;E&gt; = ContextFromDb&lt;E, MemoryClient&gt;;
 
 <span class="kw">impl</span>&lt;E&gt; MemoryContext&lt;E&gt; {
-    <span class="doccomment">/// Create a [`MemoryContext`].
+    <span class="doccomment">/// Creates a [`MemoryContext`].
     </span><span class="kw">pub fn </span>new(guard: MutexGuardArc&lt;MemoryStoreMap&gt;, extra: E) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             db: Arc::new(RwLock::new(guard)),
@@ -173,7 +173,7 @@
     }
 }
 
-<span class="doccomment">/// Provide a MemoryContext&lt;()&gt; that can be used for tests.
+<span class="doccomment">/// Provides a `MemoryContext&lt;()&gt;` that can be used for tests.
 </span><span class="kw">pub fn </span>create_test_context() -&gt; MemoryContext&lt;()&gt; {
     <span class="kw">let </span>state = Arc::new(Mutex::new(BTreeMap::new()));
     <span class="kw">let </span>guard = state

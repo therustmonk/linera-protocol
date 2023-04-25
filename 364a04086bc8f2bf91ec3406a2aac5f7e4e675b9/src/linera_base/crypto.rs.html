@@ -512,6 +512,9 @@
 <span id="512">512</span>
 <span id="513">513</span>
 <span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -586,7 +589,7 @@
 }
 
 <span class="kw">impl </span>KeyPair {
-    <span class="doccomment">/// Generate a new key-pair.
+    <span class="doccomment">/// Generates a new key-pair.
     </span><span class="attribute">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
     </span><span class="kw">pub fn </span>generate() -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>csprng = OsRng;
@@ -594,12 +597,15 @@
         KeyPair(keypair)
     }
 
-    <span class="doccomment">/// Obtain the public key of a key-pair.
+    <span class="doccomment">/// Obtains the public key of a key-pair.
     </span><span class="kw">pub fn </span>public(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; PublicKey {
         PublicKey(<span class="self">self</span>.<span class="number">0</span>.public.to_bytes())
     }
 
-    <span class="doccomment">/// Avoid implementing `clone` on secret keys to prevent mistakes.
+    <span class="doccomment">/// Copies the key-pair, **including the secret key**.
+    ///
+    /// The `Clone` and `Copy` traits are deliberately not implemented for `KeyPair` to prevent
+    /// accidental copies of secret keys.
     </span><span class="kw">pub fn </span>copy(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; KeyPair {
         KeyPair(dalek::Keypair {
             secret: dalek::SecretKey::from_bytes(<span class="self">self</span>.<span class="number">0</span>.secret.as_bytes()).unwrap(),

@@ -202,7 +202,7 @@
 }
 
 <span class="kw">impl </span>ChainGuards {
-    <span class="doccomment">/// Obtain a guard for a specified chain, waiting if there&#39;s already a live guard.
+    <span class="doccomment">/// Obtains a guard for a specified chain, waiting if there&#39;s already a live guard.
     ///
     /// Only one guard can be active for a chain, so if there&#39;s already a guard for the requested
     /// chain, this method will wait until it is able to obtain the guard.
@@ -220,7 +220,7 @@
         }
     }
 
-    <span class="doccomment">/// Obtain the lock used for guarding a chain.
+    <span class="doccomment">/// Obtains the lock used for guarding a chain.
     ///
     /// When obtaining a lock, first a write lock to the map entry is obtained. If there is no
     /// entry, a new lock for that entry is created.
@@ -257,7 +257,7 @@
         (new_guard, weak_reference)
     }
 
-    <span class="doccomment">/// Obtain the current number of active guards.
+    <span class="doccomment">/// Obtains the current number of active guards.
     </span><span class="attribute">#[cfg(any(test))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>active_guards(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.guards.len()
@@ -277,7 +277,7 @@
 }
 
 <span class="kw">impl </span>Drop <span class="kw">for </span>ChainGuard {
-    <span class="doccomment">/// Release the lock and remove the entry from the map if possible.
+    <span class="doccomment">/// Releases the lock and removes the entry from the map if possible.
     ///
     /// Before the releasing the lock, a weak reference to the lock is obtained. After releasing
     /// the lock, an attempt is made to upgrade the weak reference to a strong reference. If that

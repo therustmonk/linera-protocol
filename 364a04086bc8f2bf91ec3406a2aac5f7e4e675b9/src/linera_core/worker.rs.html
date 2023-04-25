@@ -1287,21 +1287,21 @@
 ///   to be communicated to other workers of the same validator.
 </span><span class="attribute">#[async_trait]
 </span><span class="kw">pub trait </span>ValidatorWorker {
-    <span class="doccomment">/// Propose a new block. In case of success, the chain info contains a vote on the new
+    <span class="doccomment">/// Proposes a new block. In case of success, the chain info contains a vote on the new
     /// block.
     </span><span class="kw">async fn </span>handle_block_proposal(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         proposal: BlockProposal,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainInfoResponse, NetworkActions), WorkerError&gt;;
 
-    <span class="doccomment">/// Process a certificate, e.g. to extend a chain with a confirmed block.
+    <span class="doccomment">/// Processes a certificate, e.g. to extend a chain with a confirmed block.
     </span><span class="kw">async fn </span>handle_lite_certificate(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         certificate: LiteCertificate,
         notify_message_delivery: <span class="prelude-ty">Option</span>&lt;oneshot::Sender&lt;()&gt;&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainInfoResponse, NetworkActions), WorkerError&gt;;
 
-    <span class="doccomment">/// Process a certificate, e.g. to extend a chain with a confirmed block.
+    <span class="doccomment">/// Processes a certificate, e.g. to extend a chain with a confirmed block.
     </span><span class="kw">async fn </span>handle_certificate(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         certificate: Certificate,
@@ -1309,13 +1309,13 @@
         notify_message_delivery: <span class="prelude-ty">Option</span>&lt;oneshot::Sender&lt;()&gt;&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainInfoResponse, NetworkActions), WorkerError&gt;;
 
-    <span class="doccomment">/// Handle information queries on chains.
+    <span class="doccomment">/// Handles information queries on chains.
     </span><span class="kw">async fn </span>handle_chain_info_query(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         query: ChainInfoQuery,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainInfoResponse, NetworkActions), WorkerError&gt;;
 
-    <span class="doccomment">/// Handle a (trusted!) cross-chain request.
+    <span class="doccomment">/// Handles a (trusted!) cross-chain request.
     </span><span class="kw">async fn </span>handle_cross_chain_request(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         request: CrossChainRequest,
@@ -1339,7 +1339,7 @@
 }
 
 <span class="attribute">#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-</span><span class="doccomment">/// Notify that a chain has a new certified block or a new message.
+</span><span class="doccomment">/// Notification that a chain has a new certified block or a new message.
 </span><span class="kw">pub struct </span>Notification {
     <span class="kw">pub </span>chain_id: ChainId,
     <span class="kw">pub </span>reason: Reason,
@@ -1558,7 +1558,7 @@
         <span class="prelude-val">Ok</span>(response)
     }
 
-    <span class="doccomment">/// Try to execute a block proposal without any verification other than block execution.
+    <span class="doccomment">/// Tries to execute a block proposal without any verification other than block execution.
     </span><span class="kw">pub async fn </span>stage_block_execution(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         block: <span class="kw-2">&amp;</span>Block,
@@ -1623,7 +1623,7 @@
         <span class="prelude-val">Ok</span>(response)
     }
 
-    <span class="doccomment">/// Get a reference to the [`KeyPair`], if available.
+    <span class="doccomment">/// Gets a reference to the [`KeyPair`], if available.
     </span><span class="kw">fn </span>key_pair(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>KeyPair&gt; {
         <span class="self">self</span>.key_pair.as_ref().map(Arc::as_ref)
     }
@@ -1652,7 +1652,7 @@
         })
     }
 
-    <span class="doccomment">/// Load pending cross-chain requests.
+    <span class="doccomment">/// Loads pending cross-chain requests.
     </span><span class="kw">async fn </span>create_network_actions(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         chain: <span class="kw-2">&amp;mut </span>ChainStateView&lt;Client::Context&gt;,
@@ -1682,7 +1682,7 @@
         <span class="prelude-val">Ok</span>(actions)
     }
 
-    <span class="doccomment">/// Process a confirmed block (aka a commit).
+    <span class="doccomment">/// Processes a confirmed block (aka a commit).
     </span><span class="kw">async fn </span>process_confirmed_block(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         certificate: Certificate,
@@ -1840,7 +1840,7 @@
         }
     }
 
-    <span class="doccomment">/// Process a validated block issued from a multi-owner chain.
+    <span class="doccomment">/// Processes a validated block issued from a multi-owner chain.
     </span><span class="kw">async fn </span>process_validated_block(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         certificate: Certificate,
@@ -2181,7 +2181,7 @@
 
     <span class="comment">// Other fields will be included in handle_certificate&#39;s span.
     </span><span class="attribute">#[instrument(skip_all, fields(hash = %certificate.value.value_hash))]
-    </span><span class="doccomment">/// Process a certificate, e.g. to extend a chain with a confirmed block.
+    </span><span class="doccomment">/// Processes a certificate, e.g. to extend a chain with a confirmed block.
     </span><span class="kw">async fn </span>handle_lite_certificate(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         certificate: LiteCertificate,
@@ -2199,7 +2199,7 @@
             .<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Process a certificate.
+    <span class="doccomment">/// Processes a certificate.
     </span><span class="attribute">#[instrument(skip_all, fields(
         nick = <span class="self">self</span>.nickname,
         chain_id = <span class="macro">format!</span>(<span class="string">&quot;{:.8}&quot;</span>, certificate.value.block().chain_id),
@@ -2387,8 +2387,8 @@
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; CrossChainUpdateHelper&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="doccomment">/// Check basic invariants and deal with repeated heights and deprecated epochs.
-    /// * Return a range of certificates that are both new to us and not relying on an
+    <span class="doccomment">/// Checks basic invariants and deals with repeated heights and deprecated epochs.
+    /// * Returns a range of certificates that are both new to us and not relying on an
     /// untrusted set of validators.
     /// * In the case of validators, if the epoch(s) of the highest certificates are not
     /// trusted, we only accept certificates that contain effects that were already

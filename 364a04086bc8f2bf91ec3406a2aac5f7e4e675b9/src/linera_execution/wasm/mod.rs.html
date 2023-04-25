@@ -346,7 +346,7 @@
 }
 
 <span class="kw">impl </span>WasmApplication {
-    <span class="doccomment">/// Create a new [`WasmApplication`] using the WebAssembly module with the provided bytecodes.
+    <span class="doccomment">/// Creates a new [`WasmApplication`] using the WebAssembly module with the provided bytecodes.
     </span><span class="kw">pub fn </span>new(
         contract_bytecode: Bytecode,
         service_bytecode: Bytecode,
@@ -366,7 +366,7 @@
         })
     }
 
-    <span class="doccomment">/// Create a new [`WasmApplication`] using the WebAssembly module in `bytecode_file`.
+    <span class="doccomment">/// Creates a new [`WasmApplication`] using the WebAssembly module in `bytecode_file`.
     </span><span class="kw">pub async fn </span>from_files(
         contract_bytecode_file: <span class="kw">impl </span>AsRef&lt;Path&gt;,
         service_bytecode_file: <span class="kw">impl </span>AsRef&lt;Path&gt;,

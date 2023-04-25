@@ -528,7 +528,7 @@
 }
 
 <span class="kw">impl </span>WasmApplication {
-    <span class="doccomment">/// Prepare a runtime instance to call into the WASM contract.
+    <span class="doccomment">/// Prepares a runtime instance to call into the WASM contract.
     </span><span class="kw">pub fn </span>prepare_contract_runtime_with_wasmtime&lt;<span class="lifetime">&#39;runtime</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         runtime: <span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ContractRuntime,
@@ -565,7 +565,7 @@
         })
     }
 
-    <span class="doccomment">/// Prepare a runtime instance to call into the WASM service.
+    <span class="doccomment">/// Prepares a runtime instance to call into the WASM service.
     </span><span class="kw">pub fn </span>prepare_service_runtime_with_wasmtime&lt;<span class="lifetime">&#39;runtime</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         runtime: <span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ServiceRuntime,
@@ -609,7 +609,7 @@
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;runtime</span>&gt; ContractState&lt;<span class="lifetime">&#39;runtime</span>&gt; {
-    <span class="doccomment">/// Create a new instance of [`ContractState`].
+    <span class="doccomment">/// Creates a new instance of [`ContractState`].
     ///
     /// Uses `runtime` to export the system API, and the `waker` to be able to correctly handle
     /// asynchronous calls from the guest WASM module.
@@ -625,12 +625,12 @@
         }
     }
 
-    <span class="doccomment">/// Obtain the runtime instance specific [`ContractData`].
+    <span class="doccomment">/// Obtains the runtime instance specific [`ContractData`].
     </span><span class="kw">pub fn </span>data(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>ContractData {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.data
     }
 
-    <span class="doccomment">/// Obtain the data required by the runtime to export the system API.
+    <span class="doccomment">/// Obtains the data required by the runtime to export the system API.
     </span><span class="kw">pub fn </span>system_api(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
     ) -&gt; (
@@ -642,7 +642,7 @@
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;runtime</span>&gt; ServiceState&lt;<span class="lifetime">&#39;runtime</span>&gt; {
-    <span class="doccomment">/// Create a new instance of [`ServiceState`].
+    <span class="doccomment">/// Creates a new instance of [`ServiceState`].
     ///
     /// Uses `runtime` to export the system API, and the `waker` to be able to correctly handle
     /// asynchronous calls from the guest WASM module.
@@ -654,12 +654,12 @@
         }
     }
 
-    <span class="doccomment">/// Obtain the runtime instance specific [`ServiceData`].
+    <span class="doccomment">/// Obtains the runtime instance specific [`ServiceData`].
     </span><span class="kw">pub fn </span>data(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>ServiceData {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.data
     }
 
-    <span class="doccomment">/// Obtain the data required by the runtime to export the system API.
+    <span class="doccomment">/// Obtains the data required by the runtime to export the system API.
     </span><span class="kw">pub fn </span>system_api(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
     ) -&gt; (

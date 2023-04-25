@@ -1365,6 +1365,10 @@
 <span id="1365">1365</span>
 <span id="1366">1366</span>
 <span id="1367">1367</span>
+<span id="1368">1368</span>
+<span id="1369">1369</span>
+<span id="1370">1370</span>
+<span id="1371">1371</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1588,7 +1592,7 @@
         }
     }
 
-    <span class="doccomment">/// Make one block proposal per chain, up to `max_proposals` blocks.
+    <span class="doccomment">/// Makes one block proposal per chain, up to `max_proposals` blocks.
     </span><span class="attribute">#[cfg(feature = <span class="string">&quot;benchmark&quot;</span>)]
     </span><span class="kw">fn </span>make_benchmark_block_proposals(<span class="kw-2">&amp;mut </span><span class="self">self</span>, max_proposals: usize) -&gt; Vec&lt;RpcMessage&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>proposals = Vec::new();
@@ -1631,7 +1635,7 @@
         proposals
     }
 
-    <span class="doccomment">/// Try to aggregate votes into certificates.
+    <span class="doccomment">/// Tries to aggregate votes into certificates.
     </span><span class="attribute">#[cfg(feature = <span class="string">&quot;benchmark&quot;</span>)]
     </span><span class="kw">fn </span>make_benchmark_certificates_from_votes(<span class="kw-2">&amp;</span><span class="self">self</span>, votes: Vec&lt;Vote&gt;) -&gt; Vec&lt;Certificate&gt; {
         <span class="kw">let </span>committee = <span class="self">self
@@ -1673,7 +1677,7 @@
         certificates
     }
 
-    <span class="doccomment">/// Broadcast a bulk of blocks to each validator.
+    <span class="doccomment">/// Broadcasts a bulk of blocks to each validator.
     </span><span class="attribute">#[cfg(feature = <span class="string">&quot;benchmark&quot;</span>)]
     </span><span class="kw">async fn </span>mass_broadcast(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -1729,7 +1733,7 @@
         <span class="self">self</span>.wallet_state.update_from_state(state).<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Remember the new private key (if any) in the wallet.
+    <span class="doccomment">/// Remembers the new private key (if any) in the wallet.
     </span><span class="kw">fn </span>update_wallet_for_new_chain(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         chain_id: ChainId,
@@ -2075,7 +2079,9 @@
     </span><span class="attribute">#[structopt(name = <span class="string">&quot;create_application&quot;</span>)]
     </span>CreateApplication {
         bytecode_id: BytecodeId,
-        arguments: String,
+        <span class="doccomment">/// The initialization arguments, passed to the contract&#39;s `initialize` method on the chain
+        /// that creates the application. (But not on other chains, when it is registered there.)
+        </span>arguments: String,
         creator: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
         <span class="attribute">#[structopt(long = <span class="string">&quot;parameters&quot;</span>)]
         </span>parameters: <span class="prelude-ty">Option</span>&lt;String&gt;,
@@ -2088,7 +2094,9 @@
     </span>PublishAndCreate {
         contract: PathBuf,
         service: PathBuf,
-        arguments: String,
+        <span class="doccomment">/// The initialization arguments, passed to the contract&#39;s `initialize` method on the chain
+        /// that creates the application. (But not on other chains, when it is registered there.)
+        </span>arguments: String,
         publisher: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
         <span class="attribute">#[structopt(long = <span class="string">&quot;parameters&quot;</span>)]
         </span>parameters: <span class="prelude-ty">Option</span>&lt;String&gt;,
@@ -2532,7 +2540,7 @@
                     .<span class="kw">await
                     </span>.context(<span class="string">&quot;failed to create application&quot;</span>)<span class="question-mark">?</span>;
 
-                <span class="macro">info!</span>(<span class="string">&quot;{}&quot;</span>, <span class="string">&quot;Application published successfully!&quot;</span>.green().bold());
+                <span class="macro">info!</span>(<span class="string">&quot;{}&quot;</span>, <span class="string">&quot;Application created successfully!&quot;</span>.green().bold());
                 <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, application_id);
                 <span class="macro">info!</span>(<span class="string">&quot;Time elapsed: {}s&quot;</span>, start_time.elapsed().as_secs());
                 context.update_wallet_from_client(<span class="kw-2">&amp;mut </span>chain_client).<span class="kw">await</span>;

@@ -1776,7 +1776,7 @@
     </span>C: Context + Sync + Send + Clone,
     ViewError: From&lt;C::Error&gt;,
 {
-    <span class="doccomment">/// Create a [`ViewContainer`].
+    <span class="doccomment">/// Creates a [`ViewContainer`].
     </span><span class="kw">pub async fn </span>new(context: C) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ViewError&gt; {
         <span class="kw">let </span>view = KeyValueStoreView::load(context).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
@@ -1791,7 +1791,7 @@
 
 <span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
 </span><span class="kw">impl</span>&lt;E&gt; KeyValueStoreMemoryContext&lt;E&gt; {
-    <span class="doccomment">/// Create a [`KeyValueStoreMemoryContext`].
+    <span class="doccomment">/// Creates a [`KeyValueStoreMemoryContext`].
     </span><span class="kw">pub async fn </span>new(
         guard: MutexGuardArc&lt;MemoryStoreMap&gt;,
         base_key: Vec&lt;u8&gt;,

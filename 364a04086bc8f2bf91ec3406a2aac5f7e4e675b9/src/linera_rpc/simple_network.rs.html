@@ -912,7 +912,7 @@
 
 <span class="attribute">#[async_trait]
 </span><span class="kw">impl </span>ValidatorNode <span class="kw">for </span>SimpleClient {
-    <span class="doccomment">/// Initiate a new block.
+    <span class="doccomment">/// Initiates a new block.
     </span><span class="kw">async fn </span>handle_block_proposal(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         proposal: BlockProposal,
@@ -920,7 +920,7 @@
         <span class="self">self</span>.send_recv_info(proposal.into()).<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Process a hash certificate.
+    <span class="doccomment">/// Processes a hash certificate.
     </span><span class="kw">async fn </span>handle_lite_certificate(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         certificate: LiteCertificate,
@@ -928,7 +928,7 @@
         <span class="self">self</span>.send_recv_info(certificate.into()).<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Process a certificate.
+    <span class="doccomment">/// Processes a certificate.
     </span><span class="kw">async fn </span>handle_certificate(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         certificate: Certificate,
@@ -937,7 +937,7 @@
         <span class="self">self</span>.send_recv_info((certificate, blobs).into()).<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Handle information queries for this chain.
+    <span class="doccomment">/// Handles information queries for this chain.
     </span><span class="kw">async fn </span>handle_chain_info_query(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         query: ChainInfoQuery,

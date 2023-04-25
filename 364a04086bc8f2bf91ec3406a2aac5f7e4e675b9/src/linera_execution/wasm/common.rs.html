@@ -508,7 +508,7 @@
     <span class="doccomment">/// The WIT type eqivalent for [`Poll&lt;Result&lt;SessionCallResult, String&gt;&gt;`].
     </span><span class="kw">type </span>PollCallSession;
 
-    <span class="doccomment">/// Create a new future for the user application to initialize itself on the owner chain.
+    <span class="doccomment">/// Creates a new future for the user application to initialize itself on the owner chain.
     </span><span class="kw">fn </span>initialize_new(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         store: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Store,
@@ -516,14 +516,14 @@
         argument: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Initialize, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Poll a user contract future that&#39;s initializing the application.
+    <span class="doccomment">/// Polls a user contract future that&#39;s initializing the application.
     </span><span class="kw">fn </span>initialize_poll(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         store: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Store,
         future: <span class="kw-2">&amp;</span><span class="self">Self</span>::Initialize,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::PollExecutionResult, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Create a new future for the user application to execute an operation.
+    <span class="doccomment">/// Creates a new future for the user application to execute an operation.
     </span><span class="kw">fn </span>execute_operation_new(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         store: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Store,
@@ -531,14 +531,14 @@
         operation: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::ExecuteOperation, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Poll a user contract future that&#39;s executing an operation.
+    <span class="doccomment">/// Polls a user contract future that&#39;s executing an operation.
     </span><span class="kw">fn </span>execute_operation_poll(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         store: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Store,
         future: <span class="kw-2">&amp;</span><span class="self">Self</span>::ExecuteOperation,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::PollExecutionResult, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Create a new future for the user contract to execute an effect.
+    <span class="doccomment">/// Creates a new future for the user contract to execute an effect.
     </span><span class="kw">fn </span>execute_effect_new(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         store: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Store,
@@ -546,14 +546,14 @@
         effect: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::ExecuteEffect, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Poll a user contract future that&#39;s executing an effect.
+    <span class="doccomment">/// Polls a user contract future that&#39;s executing an effect.
     </span><span class="kw">fn </span>execute_effect_poll(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         store: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Store,
         future: <span class="kw-2">&amp;</span><span class="self">Self</span>::ExecuteEffect,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::PollExecutionResult, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Create a new future for the user contract to handle a call from another contract.
+    <span class="doccomment">/// Creates a new future for the user contract to handle a call from another contract.
     </span><span class="kw">fn </span>handle_application_call_new(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         store: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Store,
@@ -562,14 +562,14 @@
         forwarded_sessions: <span class="kw-2">&amp;</span>[<span class="self">Self</span>::SessionId],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::HandleApplicationCall, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Poll a user contract future that&#39;s handling a call from another contract.
+    <span class="doccomment">/// Polls a user contract future that&#39;s handling a call from another contract.
     </span><span class="kw">fn </span>handle_application_call_poll(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         store: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Store,
         future: <span class="kw-2">&amp;</span><span class="self">Self</span>::HandleApplicationCall,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::PollCallApplication, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Create a new future for the user contract to handle a session call from another
+    <span class="doccomment">/// Creates a new future for the user contract to handle a session call from another
     /// contract.
     </span><span class="kw">fn </span>handle_session_call_new(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -580,7 +580,7 @@
         forwarded_sessions: <span class="kw-2">&amp;</span>[<span class="self">Self</span>::SessionId],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::HandleSessionCall, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Poll a user contract future that&#39;s handling a session call from another contract.
+    <span class="doccomment">/// Polls a user contract future that&#39;s handling a session call from another contract.
     </span><span class="kw">fn </span>handle_session_call_poll(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         store: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Store,
@@ -600,7 +600,7 @@
     <span class="doccomment">/// The WIT type eqivalent for [`Poll&lt;Result&lt;Vec&lt;u8&gt;, String&gt;&gt;`].
     </span><span class="kw">type </span>PollQuery;
 
-    <span class="doccomment">/// Create a new future for the user application to handle a query.
+    <span class="doccomment">/// Creates a new future for the user application to handle a query.
     </span><span class="kw">fn </span>query_application_new(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         store: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Store,
@@ -608,7 +608,7 @@
         argument: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::QueryApplication, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Poll a user service future that&#39;s handling a query.
+    <span class="doccomment">/// Polls a user service future that&#39;s handling a query.
     </span><span class="kw">fn </span>query_application_poll(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         store: <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Store,
@@ -643,7 +643,7 @@
 <span class="kw">where
     </span>A: Contract,
 {
-    <span class="doccomment">/// Call the guest WASM module&#39;s implementation of
+    <span class="doccomment">/// Calls the guest WASM module&#39;s implementation of
     /// [`UserApplication::initialize`][`linera_execution::UserApplication::initialize`].
     ///
     /// This method returns a [`Future`][`std::future::Future`], and is equivalent to
@@ -667,7 +667,7 @@
         GuestFuture::new(future, <span class="self">self</span>)
     }
 
-    <span class="doccomment">/// Call the guest WASM module&#39;s implementation of
+    <span class="doccomment">/// Calls the guest WASM module&#39;s implementation of
     /// [`UserApplication::execute_operation`][`linera_execution::UserApplication::execute_operation`].
     ///
     /// This method returns a [`Future`][`std::future::Future`], and is equivalent to
@@ -691,7 +691,7 @@
         GuestFuture::new(future, <span class="self">self</span>)
     }
 
-    <span class="doccomment">/// Call the guest WASM module&#39;s implementation of
+    <span class="doccomment">/// Calls the guest WASM module&#39;s implementation of
     /// [`UserApplication::execute_effect`][`linera_execution::UserApplication::execute_effect`].
     ///
     /// This method returns a [`Future`][`std::future::Future`], and is equivalent to
@@ -715,7 +715,7 @@
         GuestFuture::new(future, <span class="self">self</span>)
     }
 
-    <span class="doccomment">/// Call the guest WASM module&#39;s implementation of
+    <span class="doccomment">/// Calls the guest WASM module&#39;s implementation of
     /// [`UserApplication::handle_application_call`][`linera_execution::UserApplication::handle_application_call`].
     ///
     /// This method returns a [`Future`][`std::future::Future`], and is equivalent to
@@ -749,7 +749,7 @@
         GuestFuture::new(future, <span class="self">self</span>)
     }
 
-    <span class="doccomment">/// Call the guest WASM module&#39;s implementation of
+    <span class="doccomment">/// Calls the guest WASM module&#39;s implementation of
     /// [`UserApplication::handle_session_call`][`linera_execution::UserApplication::handle_session_call`].
     ///
     /// This method returns a [`Future`][`std::future::Future`], and is equivalent to
@@ -807,7 +807,7 @@
 <span class="kw">where
     </span>A: Service,
 {
-    <span class="doccomment">/// Call the guest WASM module&#39;s implementation of
+    <span class="doccomment">/// Calls the guest WASM module&#39;s implementation of
     /// [`UserApplication::query_application`][`linera_execution::UserApplication::query_application`].
     ///
     /// This method returns a [`Future`][`std::future::Future`], and is equivalent to

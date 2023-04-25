@@ -129,7 +129,7 @@
     ViewError: From&lt;C::Error&gt;,
 {
     <span class="doccomment">/// Schedules a message at the given height if we haven&#39;t already.
-    /// Return true if a change was made.
+    /// Returns true if a change was made.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>schedule_message(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         height: BlockHeight,
@@ -142,8 +142,8 @@
         <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)
     }
 
-    <span class="doccomment">/// Mark all messages as received up to the given height.
-    /// Return true if a change was made.
+    <span class="doccomment">/// Marks all messages as received up to the given height.
+    /// Returns true if a change was made.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>mark_messages_as_received(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         height: BlockHeight,

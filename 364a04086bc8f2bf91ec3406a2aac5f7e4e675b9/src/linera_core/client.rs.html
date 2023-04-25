@@ -1450,7 +1450,7 @@
     S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
     ViewError: From&lt;S::ContextError&gt;,
 {
-    <span class="doccomment">/// Obtain a `ChainStateView` for a given `ChainId`.
+    <span class="doccomment">/// Obtains a `ChainStateView` for a given `ChainId`.
     </span><span class="kw">pub async fn </span>chain_state_view(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
@@ -1511,13 +1511,13 @@
         <span class="prelude-val">Ok</span>(pending_messages)
     }
 
-    <span class="doccomment">/// Obtain the set of committees trusted by the local chain.
+    <span class="doccomment">/// Obtains the set of committees trusted by the local chain.
     </span><span class="kw">async fn </span>committees(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;BTreeMap&lt;Epoch, Committee&gt;, NodeError&gt; {
         <span class="kw">let </span>(_epoch, committees) = <span class="self">self</span>.epoch_and_committees(<span class="self">self</span>.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(committees)
     }
 
-    <span class="doccomment">/// Obtain the current epoch of the given chain as well as its set of trusted committees.
+    <span class="doccomment">/// Obtains the current epoch of the given chain as well as its set of trusted committees.
     </span><span class="kw">async fn </span>epoch_and_committees(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         chain_id: ChainId,
@@ -1531,13 +1531,13 @@
         <span class="prelude-val">Ok</span>((epoch, committees))
     }
 
-    <span class="doccomment">/// Obtain the epochs of the committees trusted by the local chain.
+    <span class="doccomment">/// Obtains the epochs of the committees trusted by the local chain.
     </span><span class="kw">pub async fn </span>epochs(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Epoch&gt;, NodeError&gt; {
         <span class="kw">let </span>committees = <span class="self">self</span>.committees().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(committees.into_keys().collect())
     }
 
-    <span class="doccomment">/// Obtain the committee for the current epoch of the local chain.
+    <span class="doccomment">/// Obtains the committee for the current epoch of the local chain.
     </span><span class="kw">pub async fn </span>local_committee(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Committee, NodeError&gt; {
         <span class="kw">let </span>(epoch, <span class="kw-2">mut </span>committees) = <span class="self">self</span>.epoch_and_committees(<span class="self">self</span>.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
         committees
@@ -1549,7 +1549,7 @@
             .ok_or(NodeError::InactiveLocalChain(<span class="self">self</span>.chain_id))
     }
 
-    <span class="doccomment">/// Obtain all the committees trusted by either the local chain or its admin chain. Also
+    <span class="doccomment">/// Obtains all the committees trusted by either the local chain or its admin chain. Also
     /// return the latest trusted epoch.
     </span><span class="kw">async fn </span>known_committees(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(BTreeMap&lt;Epoch, Committee&gt;, Epoch), NodeError&gt; {
         <span class="kw">let </span>(epoch, <span class="kw-2">mut </span>committees) = <span class="self">self</span>.epoch_and_committees(<span class="self">self</span>.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1559,7 +1559,7 @@
         <span class="prelude-val">Ok</span>((committees, epoch))
     }
 
-    <span class="doccomment">/// Obtain the validators trusted by the local chain.
+    <span class="doccomment">/// Obtains the validators trusted by the local chain.
     </span><span class="kw">async fn </span>validator_nodes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(ValidatorName, P::Node)&gt;, NodeError&gt; {
         <span class="kw">match </span><span class="self">self</span>.local_committee().<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(committee) =&gt; <span class="self">self</span>.validator_node_provider.make_nodes(<span class="kw-2">&amp;</span>committee),
@@ -1570,7 +1570,7 @@
         }
     }
 
-    <span class="doccomment">/// Obtain the current epoch of the local chain.
+    <span class="doccomment">/// Obtains the current epoch of the local chain.
     </span><span class="kw">async fn </span>epoch(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Epoch, anyhow::Error&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">self
             </span>.chain_info()
@@ -1579,7 +1579,7 @@
             .ok_or(NodeError::InactiveLocalChain(<span class="self">self</span>.chain_id))<span class="question-mark">?</span>)
     }
 
-    <span class="doccomment">/// Obtain the identity of the current owner of the chain. HACK: In the case of a
+    <span class="doccomment">/// Obtains the identity of the current owner of the chain. HACK: In the case of a
     /// multi-owner chain, we pick one identity for which we know the private key.
     </span><span class="kw">pub async fn </span>identity(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Owner, anyhow::Error&gt; {
         <span class="kw">match </span><span class="self">self</span>.chain_info().<span class="kw">await</span><span class="question-mark">?</span>.manager {
@@ -1617,7 +1617,7 @@
         }
     }
 
-    <span class="doccomment">/// Obtain the key pair associated to the current identity.
+    <span class="doccomment">/// Obtains the key pair associated to the current identity.
     </span><span class="kw">pub async fn </span>key_pair(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>KeyPair&gt; {
         <span class="kw">let </span>id = <span class="self">self</span>.identity().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">self
@@ -1626,12 +1626,12 @@
             .expect(<span class="string">&quot;key should be known at this point&quot;</span>))
     }
 
-    <span class="doccomment">/// Obtain the public key associated to the current identity.
+    <span class="doccomment">/// Obtains the public key associated to the current identity.
     </span><span class="kw">pub async fn </span>public_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PublicKey&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.key_pair().<span class="kw">await</span><span class="question-mark">?</span>.public())
     }
 
-    <span class="doccomment">/// Subscribe to notifications for all validators.
+    <span class="doccomment">/// Subscribes to notifications for all validators.
     </span><span class="kw">pub async fn </span>subscribe_all(<span class="kw-2">&amp;mut </span><span class="self">self</span>, chain_ids: Vec&lt;ChainId&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;NotificationStream&gt; {
         <span class="kw">let </span>committee = <span class="self">self</span>.local_committee().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>streams = Vec::new();
@@ -1651,7 +1651,7 @@
         <span class="prelude-val">Ok</span>(Box::pin(select_all(streams)))
     }
 
-    <span class="doccomment">/// Prepare the chain for the next operation.
+    <span class="doccomment">/// Prepares the chain for the next operation.
     </span><span class="kw">async fn </span>prepare_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), NodeError&gt; {
         <span class="comment">// Verify that our local storage contains enough history compared to the
         // expected block height. Otherwise, download the missing history from the
@@ -1685,7 +1685,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Broadcast certified blocks and optionally one more block proposal.
+    <span class="doccomment">/// Broadcasts certified blocks and optionally one more block proposal.
     /// The corresponding block heights should be consecutive and increasing.
     </span><span class="kw">async fn </span>communicate_chain_updates(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -1836,7 +1836,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Attempt to download new received certificates.
+    <span class="doccomment">/// Attempts to download new received certificates.
     ///
     /// This is a best effort: it will only find certificates that have been confirmed
     /// amongst sufficiently many validators of the current committee of the target
@@ -1967,7 +1967,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Send money.
+    <span class="doccomment">/// Sends money.
     </span><span class="kw">pub async fn </span>transfer(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         owner: <span class="prelude-ty">Option</span>&lt;Owner&gt;,
@@ -1989,7 +1989,7 @@
         .<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Claim money in a remote chain.
+    <span class="doccomment">/// Claims money in a remote chain.
     </span><span class="kw">pub async fn </span>claim(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         owner: Owner,
@@ -2039,7 +2039,7 @@
         }
     }
 
-    <span class="doccomment">/// Execute (or retry) a regular block proposal. Update local balance.
+    <span class="doccomment">/// Executes (or retries) a regular block proposal. Update local balance.
     /// If `with_confirmation` is false, we stop short of executing the finalized block.
     </span><span class="kw">async fn </span>propose_block(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: Block) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="kw">let </span>next_round = <span class="self">self</span>.next_round;
@@ -2146,19 +2146,19 @@
         <span class="prelude-val">Ok</span>(final_certificate)
     }
 
-    <span class="doccomment">/// Execute a list of operations.
+    <span class="doccomment">/// Executes a list of operations.
     </span><span class="kw">pub async fn </span>execute_operations(<span class="kw-2">&amp;mut </span><span class="self">self</span>, operations: Vec&lt;Operation&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.execute_block(messages, operations).<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Execute an operation.
+    <span class="doccomment">/// Executes an operation.
     </span><span class="kw">pub async fn </span>execute_operation(<span class="kw-2">&amp;mut </span><span class="self">self</span>, operation: Operation) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="self">self</span>.execute_operations(<span class="macro">vec!</span>[operation]).<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Execute a new block
+    <span class="doccomment">/// Executes a new block
     </span><span class="kw">async fn </span>execute_block(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         incoming_messages: Vec&lt;Message&gt;,
@@ -2192,7 +2192,7 @@
             .max(<span class="self">self</span>.timestamp)
     }
 
-    <span class="doccomment">/// Query an application.
+    <span class="doccomment">/// Queries an application.
     </span><span class="kw">pub async fn </span>query_application(<span class="kw-2">&amp;mut </span><span class="self">self</span>, query: <span class="kw-2">&amp;</span>Query) -&gt; <span class="prelude-ty">Result</span>&lt;Response&gt; {
         <span class="kw">let </span>response = <span class="self">self
             </span>.node_client
@@ -2222,7 +2222,7 @@
         <span class="prelude-val">Ok</span>(response.info.system_balance)
     }
 
-    <span class="doccomment">/// Attempt to update all validators about the local chain.
+    <span class="doccomment">/// Attempts to update all validators about the local chain.
     </span><span class="kw">pub async fn </span>update_validators_about_local_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>committee = <span class="self">self</span>.local_committee().<span class="kw">await</span><span class="question-mark">?</span>;
         committee.quorum_threshold = committee.total_votes;
@@ -2235,7 +2235,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Send tokens to a chain.
+    <span class="doccomment">/// Sends tokens to a chain.
     </span><span class="kw">pub async fn </span>transfer_to_account(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         owner: <span class="prelude-ty">Option</span>&lt;Owner&gt;,
@@ -2247,7 +2247,7 @@
             .<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Burn tokens.
+    <span class="doccomment">/// Burns tokens.
     </span><span class="kw">pub async fn </span>burn(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         owner: <span class="prelude-ty">Option</span>&lt;Owner&gt;,
@@ -2258,14 +2258,14 @@
             .<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Attempt to synchronize with validators and re-compute our balance.
+    <span class="doccomment">/// Attempts to synchronize with validators and re-compute our balance.
     </span><span class="kw">pub async fn </span>synchronize_and_recompute_balance(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Balance&gt; {
         <span class="self">self</span>.find_received_certificates().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.local_balance().<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Retry the last pending block
+    <span class="doccomment">/// Retries the last pending block
     </span><span class="kw">pub async fn </span>retry_pending_block(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Certificate&gt;&gt; {
         <span class="self">self</span>.find_received_certificates().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -2280,25 +2280,25 @@
         }
     }
 
-    <span class="doccomment">/// Clear the information on any operation that previously failed.
+    <span class="doccomment">/// Clears the information on any operation that previously failed.
     </span><span class="kw">pub async fn </span>clear_pending_block(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.pending_block = <span class="prelude-val">None</span>;
     }
 
-    <span class="doccomment">/// Process confirmed operation for which this chain is a recipient.
+    <span class="doccomment">/// Processes confirmed operation for which this chain is a recipient.
     </span><span class="kw">pub async fn </span>receive_certificate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, certificate: Certificate) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.receive_certificate_internal(certificate, ReceiveCertificateMode::NeedsCheck)
             .<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Rotate the key of the chain.
+    <span class="doccomment">/// Rotates the key of the chain.
     </span><span class="kw">pub async fn </span>rotate_key_pair(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key_pair: KeyPair) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="kw">let </span>new_public_key = key_pair.public();
         <span class="self">self</span>.known_key_pairs.insert(new_public_key.into(), key_pair);
         <span class="self">self</span>.transfer_ownership(new_public_key).<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Transfer ownership of the chain.
+    <span class="doccomment">/// Transfers ownership of the chain.
     </span><span class="kw">pub async fn </span>transfer_ownership(<span class="kw-2">&amp;mut </span><span class="self">self</span>, new_public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::ChangeOwner {
             new_public_key,
@@ -2306,7 +2306,7 @@
         .<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Add another owner to the chain.
+    <span class="doccomment">/// Adds another owner to the chain.
     </span><span class="kw">pub async fn </span>share_ownership(<span class="kw-2">&amp;mut </span><span class="self">self</span>, new_public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>public_key = <span class="self">self</span>.public_key().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -2320,7 +2320,7 @@
         .<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Open a new chain with a derived UID.
+    <span class="doccomment">/// Opens a new chain with a derived UID.
     </span><span class="kw">pub async fn </span>open_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>, public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;(EffectId, Certificate)&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>effect_id = EffectId {
@@ -2348,13 +2348,13 @@
         <span class="prelude-val">Ok</span>((effect_id, certificate))
     }
 
-    <span class="doccomment">/// Close the chain (and lose everything in it!!).
+    <span class="doccomment">/// Closes the chain (and loses everything in it!!).
     </span><span class="kw">pub async fn </span>close_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::CloseChain))
             .<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Publish some bytecode.
+    <span class="doccomment">/// Publishes some bytecode.
     </span><span class="kw">pub async fn </span>publish_bytecode(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         contract: Bytecode,
@@ -2379,7 +2379,7 @@
         <span class="prelude-val">Ok</span>((id, certificate))
     }
 
-    <span class="doccomment">/// Create an application by instantiating some bytecode.
+    <span class="doccomment">/// Creates an application by instantiating some bytecode.
     </span><span class="kw">pub async fn </span>create_application(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         bytecode_id: BytecodeId,
@@ -2411,7 +2411,7 @@
         <span class="prelude-val">Ok</span>((id, certificate))
     }
 
-    <span class="doccomment">/// Create a new committee and start using it (admin chains only).
+    <span class="doccomment">/// Creates a new committee and start using it (admin chains only).
     </span><span class="kw">pub async fn </span>stage_new_committee(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         validators: BTreeMap&lt;ValidatorName, ValidatorState&gt;,
@@ -2431,7 +2431,7 @@
         .<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Create an empty block to process all incoming messages. This may require several blocks.
+    <span class="doccomment">/// Creates an empty block to process all incoming messages. This may require several blocks.
     </span><span class="kw">pub async fn </span>process_inbox(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Certificate&gt;&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>certificates = Vec::new();
@@ -2446,7 +2446,7 @@
         <span class="prelude-val">Ok</span>(certificates)
     }
 
-    <span class="doccomment">/// Start listening to the admin chain for new committees. (This is only useful for
+    <span class="doccomment">/// Starts listening to the admin chain for new committees. (This is only useful for
     /// other genesis chains or for testing.)
     </span><span class="kw">pub async fn </span>subscribe_to_new_committees(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::Subscribe {
@@ -2456,7 +2456,7 @@
         .<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Stop listening to the admin chain for new committees. (This is only useful for
+    <span class="doccomment">/// Stops listening to the admin chain for new committees. (This is only useful for
     /// testing.)
     </span><span class="kw">pub async fn </span>unsubscribe_from_new_committees(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::Unsubscribe {
@@ -2466,7 +2466,7 @@
         .<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Start listening to the given chain for published bytecodes.
+    <span class="doccomment">/// Starts listening to the given chain for published bytecodes.
     </span><span class="kw">pub async fn </span>subscribe_to_published_bytecodes(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         chain_id: ChainId,
@@ -2478,7 +2478,7 @@
         .<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Stop listening to the given chain for published bytecodes.
+    <span class="doccomment">/// Stops listening to the given chain for published bytecodes.
     </span><span class="kw">pub async fn </span>unsubscribe_from_published_bytecodes(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         chain_id: ChainId,
@@ -2490,7 +2490,7 @@
         .<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Deprecate all the configurations of voting rights but the last one (admin chains
+    <span class="doccomment">/// Deprecates all the configurations of voting rights but the last one (admin chains
     /// only). Currently, each individual chain is still entitled to wait before accepting
     /// this command. However, it is expected that deprecated validators stop functioning
     /// shortly after such command is issued.
@@ -2515,7 +2515,7 @@
         <span class="self">self</span>.execute_block(messages, operations).<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Send money to a chain.
+    <span class="doccomment">/// Sends money to a chain.
     /// Do not check balance. (This may block the client)
     /// Do not confirm the transaction.
     </span><span class="kw">pub async fn </span>transfer_to_account_unsafe_unconfirmed(

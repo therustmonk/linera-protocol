@@ -443,7 +443,7 @@
     ViewError:
         From&lt;&lt;MemoryContext&lt;TestExecutionRuntimeContext&gt; <span class="kw">as </span>linera_views::common::Context&gt;::Error&gt;,
 {
-    <span class="doccomment">/// Create an in-memory view where the system state is set. This is used notably to
+    <span class="doccomment">/// Creates an in-memory view where the system state is set. This is used notably to
     /// generate state hashes in tests.
     </span><span class="kw">pub async fn </span>from_system_state(state: SystemExecutionState) -&gt; <span class="self">Self </span>{
         <span class="comment">// Destructure, to make sure we don&#39;t miss any fields.

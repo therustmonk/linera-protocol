@@ -352,21 +352,21 @@
         <span class="prelude-val">Ok</span>(Endpoint::immutable(endpoint_address))
     }
 
-    <span class="doccomment">/// Create a new [`aws_sdk_s3::Config`] for tests, using a LocalStack instance.
+    <span class="doccomment">/// Creates a new [`aws_sdk_s3::Config`] for tests, using a LocalStack instance.
     </span><span class="kw">pub fn </span>s3_config(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; aws_sdk_s3::Config {
         aws_sdk_s3::config::Builder::from(<span class="kw-2">&amp;</span><span class="self">self</span>.base_config)
             .endpoint_resolver(<span class="self">self</span>.endpoint.clone())
             .build()
     }
 
-    <span class="doccomment">/// Create a new [`aws_sdk_dynamodb::Config`] for tests, using a LocalStack instance.
+    <span class="doccomment">/// Creates a new [`aws_sdk_dynamodb::Config`] for tests, using a LocalStack instance.
     </span><span class="kw">pub fn </span>dynamo_db_config(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; aws_sdk_dynamodb::Config {
         aws_sdk_dynamodb::config::Builder::from(<span class="kw-2">&amp;</span><span class="self">self</span>.base_config)
             .endpoint_resolver(<span class="self">self</span>.endpoint.clone())
             .build()
     }
 
-    <span class="doccomment">/// Remove all stored data from LocalStack storage.
+    <span class="doccomment">/// Removes all stored data from LocalStack storage.
     </span><span class="kw">async fn </span>clear(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
         <span class="self">self</span>.remove_buckets().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.remove_tables().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -374,7 +374,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Remove all buckets from the LocalStack S3 storage.
+    <span class="doccomment">/// Removes all buckets from the LocalStack S3 storage.
     </span><span class="kw">async fn </span>remove_buckets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
         <span class="kw">let </span>client = aws_sdk_s3::Client::from_conf(<span class="self">self</span>.s3_config());
 
@@ -398,7 +398,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Remove all tables from the LocalStack DynamoDB storage.
+    <span class="doccomment">/// Removes all tables from the LocalStack DynamoDB storage.
     </span><span class="kw">async fn </span>remove_tables(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
         <span class="kw">let </span>client = aws_sdk_dynamodb::Client::from_conf(<span class="self">self</span>.dynamo_db_config());
 
@@ -435,7 +435,7 @@
         .expect(<span class="string">&quot;List of tables was not returned&quot;</span>))
 }
 
-<span class="doccomment">/// Shuffle the values entries randomly
+<span class="doccomment">/// Shuffles the values entries randomly
 </span><span class="kw">pub fn </span>random_shuffle&lt;R: RngCore, T: Clone&gt;(rng: <span class="kw-2">&amp;mut </span>R, values: <span class="kw-2">&amp;mut </span>Vec&lt;T&gt;) {
     <span class="kw">let </span>n = values.len();
     <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">4 </span>* n {
@@ -450,7 +450,7 @@
     }
 }
 
-<span class="doccomment">/// Take a random number generator, a key_prefix and extend it by n random bytes.
+<span class="doccomment">/// Takes a random number generator, a key_prefix and extends it by n random bytes.
 </span><span class="kw">pub fn </span>get_random_byte_vector&lt;R: RngCore&gt;(rng: <span class="kw-2">&amp;mut </span>R, key_prefix: <span class="kw-2">&amp;</span>[u8], n: usize) -&gt; Vec&lt;u8&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>v = key_prefix.to_vec();
     <span class="kw">for _ in </span><span class="number">0</span>..n {
@@ -460,7 +460,7 @@
     v
 }
 
-<span class="doccomment">/// Build a random k element subset of n
+<span class="doccomment">/// Builds a random k element subset of n
 </span><span class="kw">pub fn </span>get_random_kset&lt;R: RngCore&gt;(rng: <span class="kw-2">&amp;mut </span>R, n: usize, k: usize) -&gt; Vec&lt;usize&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>values = Vec::new();
     <span class="kw">for </span>u <span class="kw">in </span><span class="number">0</span>..n {
@@ -470,7 +470,7 @@
     values[..k].to_vec()
 }
 
-<span class="doccomment">/// Take a random number generator, a key_prefix and generate
+<span class="doccomment">/// Takes a random number generator, a key_prefix and generates
 /// pairs (key,value) with key obtained by appending 8 bytes at random to key_prefix
 /// and value obtained by appending 8 bytes to the trivial vector.
 /// We return n such (key,value) pairs which are all distinct
@@ -495,7 +495,7 @@
     }
 }
 
-<span class="doccomment">/// Take a random number generator rng, a number n and return n random (key,value)
+<span class="doccomment">/// Takes a random number generator rng, a number n and returns n random (key,value)
 /// which are all distinct with key and value are of length 8.
 </span><span class="kw">pub fn </span>get_random_key_value_vec&lt;R: RngCore&gt;(rng: <span class="kw-2">&amp;mut </span>R, n: usize) -&gt; Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt; {
     get_random_key_value_vec_prefix(rng, Vec::new(), n)

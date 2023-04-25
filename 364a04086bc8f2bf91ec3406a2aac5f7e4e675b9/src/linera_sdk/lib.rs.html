@@ -591,7 +591,7 @@
 </span><span class="attribute">#[derive(Debug, Default, Deserialize, Serialize)]
 #[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Eq, PartialEq))]
 </span><span class="kw">pub struct </span>ExecutionResult {
-    <span class="doccomment">/// Send messages to the given destinations, possibly forwarding the authenticated
+    <span class="doccomment">/// Sends messages to the given destinations, possibly forwarding the authenticated
     /// signer.
     </span><span class="kw">pub </span>effects: Vec&lt;(Destination, bool, Vec&lt;u8&gt;)&gt;,
     <span class="doccomment">/// Subscribe chains to channels.
@@ -601,7 +601,7 @@
 }
 
 <span class="kw">impl </span>ExecutionResult {
-    <span class="doccomment">/// Add an effect to the execution result.
+    <span class="doccomment">/// Adds an effect to the execution result.
     </span><span class="kw">pub fn </span>with_effect(
         <span class="kw-2">mut </span><span class="self">self</span>,
         destination: <span class="kw">impl </span>Into&lt;Destination&gt;,
@@ -612,7 +612,7 @@
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Add an authenticated effect to the execution result.
+    <span class="doccomment">/// Adds an authenticated effect to the execution result.
     </span><span class="kw">pub fn </span>with_authenticated_effect(
         <span class="kw-2">mut </span><span class="self">self</span>,
         destination: <span class="kw">impl </span>Into&lt;Destination&gt;,

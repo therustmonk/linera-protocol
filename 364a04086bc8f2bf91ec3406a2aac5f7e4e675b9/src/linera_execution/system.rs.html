@@ -1161,7 +1161,7 @@
 </span><span class="kw">pub enum </span>Recipient {
     <span class="doccomment">/// This is mainly a placeholder for future extensions.
     </span>Burn,
-    <span class="doccomment">/// Transfer to the system balance of the given owner (or any owner) at the given
+    <span class="doccomment">/// Transfers to the system balance of the given owner (or any owner) at the given
     /// chain.
     </span>Account(Account),
 }
@@ -1587,7 +1587,7 @@
         <span class="prelude-val">Ok</span>((result, new_application))
     }
 
-    <span class="doccomment">/// Execute the recipient&#39;s side of an operation, aka a &quot;remote effect&quot;.
+    <span class="doccomment">/// Executes the recipient&#39;s side of an operation, aka a &quot;remote effect&quot;.
     ///
     /// * Effects should not return an error unless it is a temporary failure (e.g.
     /// storage) or a global system failure. An error will fail the entire cross-chain
@@ -1714,7 +1714,7 @@
         <span class="prelude-val">Ok</span>(result)
     }
 
-    <span class="doccomment">/// Initialize the system application state on a newly opened chain.
+    <span class="doccomment">/// Initializes the system application state on a newly opened chain.
     </span><span class="attribute">#[allow(clippy::too_many_arguments)]
     </span><span class="kw">pub fn </span>open_chain(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,

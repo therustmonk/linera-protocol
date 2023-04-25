@@ -658,7 +658,7 @@
     Malicious,
 }
 
-<span class="doccomment">/// An validator used for testing. &quot;Faulty&quot; validators ignore block proposals (but not
+<span class="doccomment">/// A validator used for testing. &quot;Faulty&quot; validators ignore block proposals (but not
 /// certificates or info queries) and have the wrong initial balance for all chains.
 ///
 /// All methods are executed in spawned Tokio tasks, so that canceling a client task doesn&#39;t cause
@@ -1091,7 +1091,7 @@
         ))
     }
 
-    <span class="doccomment">/// Try to find a (confirmation) certificate for the given chain_id and block height.
+    <span class="doccomment">/// Tries to find a (confirmation) certificate for the given chain_id and block height.
     </span><span class="kw">pub async fn </span>check_that_validators_have_certificate(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         chain_id: ChainId,

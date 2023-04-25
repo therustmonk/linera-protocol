@@ -1107,14 +1107,14 @@
     </span>InconsistentChainId,
 }
 
-<span class="doccomment">/// Extract an optional field from a Proto type and map it.
+<span class="doccomment">/// Extracts an optional field from a Proto type and maps it.
 </span><span class="macro">macro_rules! </span>proto_convert {
     (<span class="macro-nonterminal">$expr</span>:expr) =&gt; {
         <span class="macro-nonterminal">$expr</span>.ok_or(ProtoConversionError::MissingField)<span class="question-mark">?</span>.into()
     };
 }
 
-<span class="doccomment">/// Extract an optional field from a Proto type and try to map it.
+<span class="doccomment">/// Extracts an optional field from a Proto type and tries to map it.
 </span><span class="macro">macro_rules! </span>try_proto_convert {
     (<span class="macro-nonterminal">$expr</span>:expr) =&gt; {
         <span class="macro-nonterminal">$expr
@@ -1123,7 +1123,7 @@
     </span>};
 }
 
-<span class="doccomment">/// Try to map an iterable collection into a vector.
+<span class="doccomment">/// Tries to map an iterable collection into a vector.
 </span><span class="macro">macro_rules! </span>try_proto_convert_vec {
     (<span class="macro-nonterminal">$expr</span>:expr, <span class="macro-nonterminal">$ty</span>:ty) =&gt; {
         <span class="macro-nonterminal">$expr
@@ -1133,14 +1133,14 @@
     </span>};
 }
 
-<span class="doccomment">/// Map a type into another type.
+<span class="doccomment">/// Maps a type into another type.
 </span><span class="macro">macro_rules! </span>map_into {
     (<span class="macro-nonterminal">$expr</span>:expr) =&gt; {
         <span class="macro-nonterminal">$expr</span>.map(|x| x.into())
     };
 }
 
-<span class="doccomment">/// Cast a type to another type via a map.
+<span class="doccomment">/// Casts a type to another type via a map.
 </span><span class="macro">macro_rules! </span>map_as {
     (<span class="macro-nonterminal">$expr</span>:expr, <span class="macro-nonterminal">$ty</span>:ty) =&gt; {
         <span class="macro-nonterminal">$expr</span>.map(|x| x <span class="kw">as </span><span class="macro-nonterminal">$ty</span>)

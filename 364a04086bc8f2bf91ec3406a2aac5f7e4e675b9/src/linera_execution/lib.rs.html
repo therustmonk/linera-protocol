@@ -943,22 +943,22 @@
     <span class="doccomment">/// The current application parameters.
     </span><span class="kw">fn </span>application_parameters(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;u8&gt;;
 
-    <span class="doccomment">/// Read the system balance.
+    <span class="doccomment">/// Reads the system balance.
     </span><span class="kw">fn </span>read_system_balance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Balance;
 
-    <span class="doccomment">/// Read the system timestamp.
+    <span class="doccomment">/// Reads the system timestamp.
     </span><span class="kw">fn </span>read_system_timestamp(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Timestamp;
 
-    <span class="doccomment">/// Read the application state.
+    <span class="doccomment">/// Reads the application state.
     </span><span class="kw">async fn </span>try_read_my_state(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, ExecutionError&gt;;
 
-    <span class="doccomment">/// Lock the view user state and prevent further reading/loading
+    <span class="doccomment">/// Locks the view user state and prevents further reading/loading
     </span><span class="kw">async fn </span>lock_view_user_state(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ExecutionError&gt;;
 
-    <span class="doccomment">/// Unlock the view user state and prevent further reading/loading
+    <span class="doccomment">/// Unlocks the view user state and allows reading/loading again
     </span><span class="kw">async fn </span>unlock_view_user_state(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ExecutionError&gt;;
 
-    <span class="doccomment">/// Read the key from the KV store
+    <span class="doccomment">/// Reads the key from the KV store
     </span><span class="kw">async fn </span>read_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, key: Vec&lt;u8&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, ExecutionError&gt;;
 
     <span class="doccomment">/// Reads the data from the keys having a specific prefix.
@@ -976,7 +976,7 @@
 
 <span class="attribute">#[async_trait]
 </span><span class="kw">pub trait </span>ServiceRuntime: BaseRuntime {
-    <span class="doccomment">/// Query another application.
+    <span class="doccomment">/// Queries another application.
     </span><span class="kw">async fn </span>try_query_application(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         queried_id: UserApplicationId,
@@ -1000,19 +1000,19 @@
     <span class="doccomment">/// Sets the amount of execution fuel remaining before execution is aborted.
     </span><span class="kw">fn </span>set_remaining_fuel(<span class="kw-2">&amp;</span><span class="self">self</span>, remaining_fuel: u64);
 
-    <span class="doccomment">/// Read the application state and prevent further reading/loading until the state is saved.
+    <span class="doccomment">/// Reads the application state and prevents further reading/loading until the state is saved.
     </span><span class="kw">async fn </span>try_read_and_lock_my_state(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, ExecutionError&gt;;
 
-    <span class="doccomment">/// Save the application state and allow reading/loading the state again.
+    <span class="doccomment">/// Saves the application state and allows reading/loading the state again.
     </span><span class="kw">fn </span>save_and_unlock_my_state(<span class="kw-2">&amp;</span><span class="self">self</span>, state: Vec&lt;u8&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), ExecutionError&gt;;
 
-    <span class="doccomment">/// Allow reading/loading the state again (without saving anything).
+    <span class="doccomment">/// Allows reading/loading the state again (without saving anything).
     </span><span class="kw">fn </span>unlock_my_state(<span class="kw-2">&amp;</span><span class="self">self</span>);
 
-    <span class="doccomment">/// Write the batch and then unlock
+    <span class="doccomment">/// Writes the batch and then unlock
     </span><span class="kw">async fn </span>write_batch_and_unlock(<span class="kw-2">&amp;</span><span class="self">self</span>, batch: Batch) -&gt; <span class="prelude-ty">Result</span>&lt;(), ExecutionError&gt;;
 
-    <span class="doccomment">/// Call another application. Forwarded sessions will now be visible to
+    <span class="doccomment">/// Calls another application. Forwarded sessions will now be visible to
     /// `callee_id` (but not to the caller any more).
     </span><span class="kw">async fn </span>try_call_application(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -1022,7 +1022,7 @@
         forwarded_sessions: Vec&lt;SessionId&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;CallResult, ExecutionError&gt;;
 
-    <span class="doccomment">/// Call into a session that is in our scope. Forwarded sessions will be visible to
+    <span class="doccomment">/// Calls into a session that is in our scope. Forwarded sessions will be visible to
     /// the application that runs `session_id`.
     </span><span class="kw">async fn </span>try_call_session(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -1095,7 +1095,7 @@
 </span><span class="kw">pub struct </span>RawExecutionResult&lt;Effect&gt; {
     <span class="doccomment">/// The signer who created the effects.
     </span><span class="kw">pub </span>authenticated_signer: <span class="prelude-ty">Option</span>&lt;Owner&gt;,
-    <span class="doccomment">/// Send messages to the given destinations, possibly forwarding the authenticated
+    <span class="doccomment">/// Sends messages to the given destinations, possibly forwarding the authenticated
     /// signer.
     </span><span class="kw">pub </span>effects: Vec&lt;(Destination, bool, Effect)&gt;,
     <span class="doccomment">/// Subscribe chains to channels.
@@ -1356,7 +1356,7 @@
     }
 }
 
-<span class="doccomment">/// Attempt to create an invalid [`WasmRuntime`] instance from a string.
+<span class="doccomment">/// Attempts to create an invalid [`WasmRuntime`] instance from a string.
 </span><span class="attribute">#[derive(Clone, Debug, Error)]
 #[error(<span class="string">&quot;{0:?} is not a valid WebAssembly runtime&quot;</span>)]
 </span><span class="kw">pub struct </span>InvalidWasmRuntime(String);

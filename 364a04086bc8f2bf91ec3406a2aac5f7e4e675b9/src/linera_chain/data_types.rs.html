@@ -907,7 +907,7 @@
         <span class="self">Self </span>{ value, signatures }
     }
 
-    <span class="doccomment">/// Verify the certificate.
+    <span class="doccomment">/// Verifies the certificate.
     </span><span class="kw">pub fn </span>check(<span class="self">self</span>, committee: <span class="kw-2">&amp;</span>Committee) -&gt; <span class="prelude-ty">Result</span>&lt;LiteValue, ChainError&gt; {
         check_signatures(<span class="kw-2">&amp;</span><span class="self">self</span>.value, <span class="kw-2">&amp;</span><span class="self">self</span>.signatures, committee)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.value)
@@ -1113,7 +1113,7 @@
 }
 
 <span class="kw">impl </span>LiteVote {
-    <span class="doccomment">/// Use signing key to create a signed object.
+    <span class="doccomment">/// Uses the signing key to create a signed object.
     </span><span class="kw">pub fn </span>new(value: LiteValue, key_pair: <span class="kw-2">&amp;</span>KeyPair) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>signature = Signature::new(<span class="kw-2">&amp;</span>value, key_pair);
         <span class="self">Self </span>{
@@ -1123,7 +1123,7 @@
         }
     }
 
-    <span class="doccomment">/// Verify the signature in the vote.
+    <span class="doccomment">/// Verifies the signature in the vote.
     </span><span class="kw">pub fn </span>check(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.signature.check(<span class="kw-2">&amp;</span><span class="self">self</span>.value, <span class="self">self</span>.validator.<span class="number">0</span>)<span class="question-mark">?</span>)
     }
@@ -1137,7 +1137,7 @@
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SignatureAggregator&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="doccomment">/// Start aggregating signatures for the given value into a certificate.
+    <span class="doccomment">/// Starts aggregating signatures for the given value into a certificate.
     </span><span class="kw">pub fn </span>new(value: HashedValue, committee: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Committee) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             committee,
@@ -1150,9 +1150,9 @@
         }
     }
 
-    <span class="doccomment">/// Try to append a signature to a (partial) certificate. Returns Some(certificate) if a quorum was reached.
-    /// The resulting final certificate is guaranteed to be valid in the sense of `check` below.
-    /// Returns an error if the signed value cannot be aggregated.
+    <span class="doccomment">/// Tries to append a signature to a (partial) certificate. Returns Some(certificate) if a
+    /// quorum was reached. The resulting final certificate is guaranteed to be valid in the sense
+    /// of `check` below. Returns an error if the signed value cannot be aggregated.
     </span><span class="kw">pub fn </span>append(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         validator: ValidatorName,
@@ -1186,7 +1186,7 @@
         <span class="self">Self </span>{ value, signatures }
     }
 
-    <span class="doccomment">/// Verify the certificate.
+    <span class="doccomment">/// Verifies the certificate.
     </span><span class="kw">pub fn </span>check&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, committee: <span class="kw-2">&amp;</span>Committee) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HashedValue, ChainError&gt; {
         check_signatures(<span class="kw-2">&amp;</span><span class="self">self</span>.lite(), <span class="kw-2">&amp;</span><span class="self">self</span>.signatures, committee)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.value)

@@ -616,7 +616,7 @@
     Lazy::new(|| std::sync::Mutex::new(()));
 
 <span class="kw">impl </span>WasmApplication {
-    <span class="doccomment">/// Prepare a runtime instance to call into the WASM contract.
+    <span class="doccomment">/// Prepares a runtime instance to call into the WASM contract.
     </span><span class="kw">pub fn </span>prepare_contract_runtime_with_wasmer&lt;<span class="lifetime">&#39;runtime</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         runtime: <span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ContractRuntime,
@@ -663,7 +663,7 @@
         })
     }
 
-    <span class="doccomment">/// Prepare a runtime instance to call into the WASM service.
+    <span class="doccomment">/// Prepares a runtime instance to call into the WASM service.
     </span><span class="kw">pub fn </span>prepare_service_runtime_with_wasmer&lt;<span class="lifetime">&#39;runtime</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         runtime: <span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ServiceRuntime,

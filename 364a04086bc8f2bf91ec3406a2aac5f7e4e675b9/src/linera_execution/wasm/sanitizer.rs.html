@@ -987,7 +987,7 @@
     <span class="kw">use </span><span class="kw">super</span>::sanitize;
     <span class="kw">use </span><span class="kw">crate</span>::Bytecode;
 
-    <span class="doccomment">/// Test if an already sanitized bytecode isn&#39;t changed.
+    <span class="doccomment">/// Tests if an already sanitized bytecode isn&#39;t changed.
     </span><span class="attribute">#[test]
     </span><span class="kw">fn </span>doesnt_change_already_sanitized_bytecode() {
         <span class="kw">let </span>wat = <span class="string">r#&quot;
@@ -1068,7 +1068,7 @@
         <span class="macro">assert_eq!</span>(input, output);
     }
 
-    <span class="doccomment">/// Test if a bytecode is properly sanitized.
+    <span class="doccomment">/// Tests if a bytecode is properly sanitized.
     ///
     /// Checks if a function without a `return` instruction is changed to have that instruction at
     /// the end, and that the changed bytecode is still valid.

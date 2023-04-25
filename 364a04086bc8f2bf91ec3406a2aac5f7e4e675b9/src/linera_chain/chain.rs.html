@@ -732,7 +732,7 @@
         }
     }
 
-    <span class="doccomment">/// Verify that this chain is up-to-date and all the messages executed ahead of time
+    <span class="doccomment">/// Verifies that this chain is up-to-date and all the messages executed ahead of time
     /// have been properly received by now.
     </span><span class="kw">pub async fn </span>validate_incoming_messages(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt; {
         <span class="kw">let </span>chain_id = <span class="self">self</span>.chain_id();
@@ -924,7 +924,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Execute a new block: first the incoming messages, then the main operation.
+    <span class="doccomment">/// Executes a new block: first the incoming messages, then the main operation.
     /// * Modifies the state of inboxes, outboxes, and channels, if needed.
     /// * As usual, in case of errors, `self` may not be consistent any more and should be thrown away.
     /// * Returns the list of effects caused by the block being executed.

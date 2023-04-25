@@ -386,7 +386,7 @@
     </span>C: Context + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
     ViewError: From&lt;C::Error&gt;,
 {
-    <span class="doccomment">/// Convert the internal cursor for added events into an externally-visible block height.
+    <span class="doccomment">/// Converts the internal cursor for added events into an externally-visible block height.
     /// This makes sense because the rest of the system always adds events one block at a time.
     </span><span class="kw">pub fn </span>next_block_height_to_receive(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;BlockHeight, ChainError&gt; {
         <span class="kw">let </span>cursor = <span class="self">self</span>.next_cursor_to_add.get();

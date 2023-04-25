@@ -194,7 +194,7 @@
 }
 
 <span class="kw">impl</span>&lt;Output&gt; ExportedFuture&lt;Output&gt; {
-    <span class="doccomment">/// Create a new [`ExportedFuture`] by exporting the provided `future`.
+    <span class="doccomment">/// Creates a new [`ExportedFuture`] by exporting the provided `future`.
     </span><span class="kw">pub fn </span>new(future: <span class="kw">impl </span>Future&lt;Output = Output&gt; + <span class="lifetime">&#39;static</span>) -&gt; <span class="self">Self </span>{
         ExportedFuture {
             future: RefCell::new(Box::pin(future)),
@@ -202,7 +202,7 @@
         }
     }
 
-    <span class="doccomment">/// Poll the future from the host.
+    <span class="doccomment">/// Polls the future from the host.
     ///
     /// A fake task context is created so that it can capture any scheduled awakes, and poll again
     /// immediately in that case.
@@ -239,30 +239,30 @@
 </span><span class="kw">struct </span>ShouldWake(Box&lt;Arc&lt;AtomicBool&gt;&gt;);
 
 <span class="kw">impl </span>ShouldWake {
-    <span class="doccomment">/// Create a new [`ShouldWake`] instance using the reference to the `should_wake` flag.
+    <span class="doccomment">/// Creates a new [`ShouldWake`] instance using the reference to the `should_wake` flag.
     </span><span class="kw">pub fn </span>new(should_wake: Arc&lt;AtomicBool&gt;) -&gt; <span class="self">Self </span>{
         ShouldWake(Box::new(should_wake))
     }
 
-    <span class="doccomment">/// Create a [`Waker`] object from this [`ShouldWake`] instance.
+    <span class="doccomment">/// Creates a [`Waker`] object from this [`ShouldWake`] instance.
     </span><span class="kw">pub fn </span>into_waker(<span class="self">self</span>) -&gt; Waker {
         <span class="kw">let </span>raw_waker = RawWaker::new(<span class="kw">unsafe </span>{ <span class="self">self</span>.stay_alive() }, <span class="kw-2">&amp;</span>WAKER_VTABLE);
         <span class="kw">unsafe </span>{ Waker::from_raw(raw_waker) }
     }
 
-    <span class="doccomment">/// Restore this [`ShouldWake`] instance from a &quot;cookie&quot; pointer.
+    <span class="doccomment">/// Restores this [`ShouldWake`] instance from a &quot;cookie&quot; pointer.
     </span><span class="kw">unsafe fn </span>unwrap_from(pointer: <span class="kw-2">*const </span>()) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>payload = Box::from_raw(pointer <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>);
         ShouldWake(payload)
     }
 
-    <span class="doccomment">/// Convert this [`ShouldWake`] instance into a &quot;cookie&quot; pointer, so that it can be used again
+    <span class="doccomment">/// Converts this [`ShouldWake`] instance into a &quot;cookie&quot; pointer, so that it can be used again
     /// later.
     </span><span class="kw">unsafe fn </span>stay_alive(<span class="self">self</span>) -&gt; <span class="kw-2">*const </span>() {
         Box::leak(<span class="self">self</span>.<span class="number">0</span>) <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_ as </span><span class="kw-2">*const </span>()
     }
 
-    <span class="doccomment">/// Flag that the [`ExportedFuture`] needs to be polled again.
+    <span class="doccomment">/// Flags that the [`ExportedFuture`] needs to be polled again.
     </span><span class="kw">fn </span>wake(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="self">self</span>.<span class="number">0</span>.store(<span class="bool-val">true</span>, Ordering::Release);
     }
@@ -271,7 +271,7 @@
 <span class="doccomment">/// A static function pointer table for the custom [`Waker`] type.
 </span><span class="kw">const </span>WAKER_VTABLE: RawWakerVTable = RawWakerVTable::new(clone, wake, wake_by_ref, drop);
 
-<span class="doccomment">/// Clone the [`ShouldWake`] instance.
+<span class="doccomment">/// Clones the [`ShouldWake`] instance.
 </span><span class="kw">unsafe fn </span>clone(internal_waker: <span class="kw-2">*const </span>()) -&gt; RawWaker {
     <span class="kw">let </span>should_wake = ShouldWake::unwrap_from(internal_waker);
     <span class="kw">let </span>new_internal_waker = should_wake.clone().stay_alive();
@@ -279,13 +279,13 @@
     RawWaker::new(new_internal_waker, <span class="kw-2">&amp;</span>WAKER_VTABLE)
 }
 
-<span class="doccomment">/// Use the [`ShouldWake`] instance to flag that the future needs to be polled again.
+<span class="doccomment">/// Uses the [`ShouldWake`] instance to flag that the future needs to be polled again.
 </span><span class="kw">unsafe fn </span>wake(internal_waker: <span class="kw-2">*const </span>()) {
     <span class="kw">let </span>should_wake = ShouldWake::unwrap_from(internal_waker);
     should_wake.wake();
 }
 
-<span class="doccomment">/// Use the [`ShouldWake`] instance to flag that the future needs to be polled again, without
+<span class="doccomment">/// Uses the [`ShouldWake`] instance to flag that the future needs to be polled again, without
 /// consuming the waker so that it can be used again later.
 </span><span class="kw">unsafe fn </span>wake_by_ref(internal_waker: <span class="kw-2">*const </span>()) {
     <span class="kw">let </span>should_wake = ShouldWake::unwrap_from(internal_waker);
@@ -293,7 +293,7 @@
     should_wake.stay_alive();
 }
 
-<span class="doccomment">/// Finalize a [`ShouldWake`] instance.
+<span class="doccomment">/// Finalizes a [`ShouldWake`] instance.
 </span><span class="kw">unsafe fn </span>drop(internal_waker: <span class="kw-2">*const </span>()) {
     <span class="kw">let _ </span>= ShouldWake::unwrap_from(internal_waker);
 }

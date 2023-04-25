@@ -262,14 +262,14 @@
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;future</span>, Output&gt; HostFuture&lt;<span class="lifetime">&#39;future</span>, Output&gt; {
-    <span class="doccomment">/// Wrap a given `future` so that it can be called from guest WASM modules.
+    <span class="doccomment">/// Wraps a given `future` so that it can be called from guest WASM modules.
     </span><span class="kw">pub fn </span>new(future: <span class="kw">impl </span>Future&lt;Output = Output&gt; + Send + <span class="lifetime">&#39;future</span>) -&gt; <span class="self">Self </span>{
         HostFuture {
             future: Mutex::new(Box::pin(future)),
         }
     }
 
-    <span class="doccomment">/// Poll a future from a WASM module.
+    <span class="doccomment">/// Polls a future from a WASM module.
     ///
     /// Requires the task [`Waker`] to have been saved in the provided `waker`. If it hasn&#39;t, or if
     /// the waker for a task other than the task used to call the WASM module code is provided, the
@@ -325,7 +325,7 @@
 <span class="kw">where
     </span>Application: ApplicationRuntimeContext,
 {
-    <span class="doccomment">/// Create a [`GuestFuture`] instance with `creation_result` of a future resource type.
+    <span class="doccomment">/// Creates a [`GuestFuture`] instance with `creation_result` of a future resource type.
     ///
     /// If the guest resource type could not be created by the WASM module, the error is stored so
     /// that it can be returned when the [`GuestFuture`] is polled.
@@ -381,7 +381,7 @@
     <span class="doccomment">/// The output of the guest future.
     </span><span class="kw">type </span>Output;
 
-    <span class="doccomment">/// Poll the guest future to attempt to progress it.
+    <span class="doccomment">/// Polls the guest future to attempt to progress it.
     ///
     /// May return an [`ExecutionError`] if the guest WASM module panics, for example.
     </span><span class="kw">fn </span>poll(

@@ -604,7 +604,7 @@
     <span class="kw">where
         </span><span class="self">Self</span>: <span class="lifetime">&#39;a</span>;
 
-    <span class="doccomment">/// Iterate keys by reference.
+    <span class="doccomment">/// Iterates keys by reference.
     </span><span class="kw">fn </span>iterator(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Iterator&lt;<span class="lifetime">&#39;_</span>&gt;;
 }
 
@@ -618,10 +618,10 @@
     <span class="doccomment">/// The iterator returning key-value pairs by value.
     </span><span class="kw">type </span>IteratorOwned: Iterator&lt;Item = <span class="prelude-ty">Result</span>&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;), Error&gt;&gt;;
 
-    <span class="doccomment">/// Iterate keys and values by reference.
+    <span class="doccomment">/// Iterates keys and values by reference.
     </span><span class="kw">fn </span>iterator(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Iterator&lt;<span class="lifetime">&#39;_</span>&gt;;
 
-    <span class="doccomment">/// Iterate keys and values by value.
+    <span class="doccomment">/// Iterates keys and values by value.
     </span><span class="kw">fn </span>into_iterator_owned(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IteratorOwned;
 }
 
@@ -631,10 +631,10 @@
     <span class="doccomment">/// The error type.
     </span><span class="kw">type </span>Error: Debug;
 
-    <span class="doccomment">/// Return type for key search operations.
+    <span class="doccomment">/// Returns type for key search operations.
     </span><span class="kw">type </span>Keys: KeyIterable&lt;<span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Return type for key-value search operations.
+    <span class="doccomment">/// Returns type for key-value search operations.
     </span><span class="kw">type </span>KeyValues: KeyValueIterable&lt;<span class="self">Self</span>::Error&gt;;
 
     <span class="doccomment">/// Retrieves a `Vec&lt;u8&gt;` from the database using the provided `key`.
@@ -766,10 +766,10 @@
     /// In practice, we always want `ViewError: From&lt;Self::Error&gt;` here.
     </span><span class="kw">type </span>Error: std::error::Error + Debug + Send + Sync + <span class="lifetime">&#39;static </span>+ From&lt;bcs::Error&gt;;
 
-    <span class="doccomment">/// Return type for key search operations.
+    <span class="doccomment">/// Returns type for key search operations.
     </span><span class="kw">type </span>Keys: KeyIterable&lt;<span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Return type for key-value search operations.
+    <span class="doccomment">/// Returns type for key-value search operations.
     </span><span class="kw">type </span>KeyValues: KeyValueIterable&lt;<span class="self">Self</span>::Error&gt;;
 
     <span class="doccomment">/// Retrieves a `Vec&lt;u8&gt;` from the database using the provided `key` prefixed by the current
@@ -782,10 +782,10 @@
         key: Vec&lt;Vec&lt;u8&gt;&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt;, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Find keys matching the `key_prefix`. The `key_prefix` is not included in the returned keys.
+    <span class="doccomment">/// Finds keys matching the `key_prefix`. The `key_prefix` is not included in the returned keys.
     </span><span class="kw">async fn </span>find_keys_by_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Keys, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Find the `(key,value)` pairs matching the `key_prefix`. The `key_prefix` is not included in the returned keys.
+    <span class="doccomment">/// Finds the `(key,value)` pairs matching the `key_prefix`. The `key_prefix` is not included in the returned keys.
     </span><span class="kw">async fn </span>find_key_values_by_prefix(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         key_prefix: <span class="kw-2">&amp;</span>[u8],

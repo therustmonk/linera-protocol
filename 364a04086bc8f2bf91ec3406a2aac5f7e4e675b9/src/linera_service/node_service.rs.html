@@ -746,7 +746,7 @@
     S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
     ViewError: From&lt;S::ContextError&gt;,
 {
-    <span class="doccomment">/// Get a subscription to a stream of `Notification`s for a collection of `ChainId`s.
+    <span class="doccomment">/// Gets a subscription to a stream of `Notification`s for a collection of `ChainId`s.
     </span><span class="kw">async fn </span>notifications(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         chain_ids: Vec&lt;ChainId&gt;,

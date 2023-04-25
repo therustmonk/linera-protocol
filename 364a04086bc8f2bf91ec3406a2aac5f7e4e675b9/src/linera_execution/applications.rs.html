@@ -417,7 +417,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Register a published bytecode so that it can be used by applications.
+    <span class="doccomment">/// Registers a published bytecode so that it can be used by applications.
     ///
     /// Keeps track of the bytecode&#39;s location so that it can be loaded when needed.
     </span><span class="kw">pub fn </span>register_published_bytecode(
@@ -451,7 +451,7 @@
         <span class="prelude-val">Ok</span>(locations)
     }
 
-    <span class="doccomment">/// Register an existing application.
+    <span class="doccomment">/// Registers an existing application.
     ///
     /// Keeps track of an existing application that the current chain is seeing for the first time.
     </span><span class="kw">pub async fn </span>register_application(
@@ -467,7 +467,7 @@
         <span class="prelude-val">Ok</span>(id)
     }
 
-    <span class="doccomment">/// Register a newly created application.
+    <span class="doccomment">/// Registers a newly created application.
     </span><span class="kw">pub async fn </span>create_application(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         application_id: UserApplicationId,
@@ -500,7 +500,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Retrieve an application&#39;s description.
+    <span class="doccomment">/// Retrieves an application&#39;s description.
     </span><span class="kw">pub async fn </span>describe_application(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         id: UserApplicationId,
@@ -511,7 +511,7 @@
             </span>.ok_or_else(|| SystemExecutionError::UnknownApplicationId(Box::new(id)))
     }
 
-    <span class="doccomment">/// Retrieve the recursive dependencies of applications and apply a topological sort.
+    <span class="doccomment">/// Retrieves the recursive dependencies of applications and apply a topological sort.
     </span><span class="kw">pub async fn </span>find_dependencies(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="kw-2">mut </span>stack: Vec&lt;UserApplicationId&gt;,
@@ -554,7 +554,7 @@
         <span class="prelude-val">Ok</span>(result)
     }
 
-    <span class="doccomment">/// Retrieve applications&#39; descriptions preceded by their recursive dependencies.
+    <span class="doccomment">/// Retrieves applications&#39; descriptions preceded by their recursive dependencies.
     </span><span class="kw">pub async fn </span>describe_applications_with_dependencies(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         ids: Vec&lt;UserApplicationId&gt;,

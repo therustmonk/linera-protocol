@@ -337,7 +337,7 @@
         <span class="self">self</span>.validity_threshold
     }
 
-    <span class="doccomment">/// Find the highest value than is supported by a certain subset of validators.
+    <span class="doccomment">/// Finds the highest value than is supported by a certain subset of validators.
     </span><span class="kw">pub fn </span>get_lower_bound&lt;V&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, threshold: u64, <span class="kw-2">mut </span>values: Vec&lt;(ValidatorName, V)&gt;) -&gt; V
     <span class="kw">where
         </span>V: Default + std::cmp::Ord,
@@ -354,7 +354,7 @@
         V::default()
     }
 
-    <span class="doccomment">/// Find the highest value than is supported by a quorum of validators.
+    <span class="doccomment">/// Finds the highest value than is supported by a quorum of validators.
     </span><span class="kw">pub fn </span>get_strong_majority_lower_bound&lt;V&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, values: Vec&lt;(ValidatorName, V)&gt;) -&gt; V
     <span class="kw">where
         </span>V: Default + std::cmp::Ord,
@@ -362,7 +362,7 @@
         <span class="self">self</span>.get_lower_bound(<span class="self">self</span>.quorum_threshold(), values)
     }
 
-    <span class="doccomment">/// Find the highest value than is guaranteed to be supported by at least one honest validator.
+    <span class="doccomment">/// Finds the highest value than is guaranteed to be supported by at least one honest validator.
     </span><span class="kw">pub fn </span>get_validity_lower_bound&lt;V&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, values: Vec&lt;(ValidatorName, V)&gt;) -&gt; V
     <span class="kw">where
         </span>V: Default + std::cmp::Ord,
