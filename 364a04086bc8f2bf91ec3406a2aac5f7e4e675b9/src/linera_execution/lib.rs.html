@@ -679,6 +679,18 @@
 <span id="679">679</span>
 <span id="680">680</span>
 <span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -1318,6 +1330,18 @@
 }
 
 <span class="kw">impl </span>WasmRuntime {
+    <span class="attribute">#[cfg(any(feature = <span class="string">&quot;wasmer&quot;</span>, feature = <span class="string">&quot;wasmtime&quot;</span>))]
+    </span><span class="kw">pub fn </span>default_with_sanitizer() -&gt; <span class="self">Self </span>{
+        <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmer&quot;</span>)]
+        </span>{
+            WasmRuntime::WasmerWithSanitizer
+        }
+        <span class="attribute">#[cfg(not(feature = <span class="string">&quot;wasmer&quot;</span>))]
+        </span>{
+            WasmRuntime::WasmtimeWithSanitizer
+        }
+    }
+
     <span class="kw">pub fn </span>needs_sanitizer(<span class="self">self</span>) -&gt; bool {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmer&quot;</span>)]
