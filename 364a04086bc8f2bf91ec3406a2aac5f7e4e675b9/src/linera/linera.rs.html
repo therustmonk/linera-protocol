@@ -1335,6 +1335,36 @@
 <span id="1335">1335</span>
 <span id="1336">1336</span>
 <span id="1337">1337</span>
+<span id="1338">1338</span>
+<span id="1339">1339</span>
+<span id="1340">1340</span>
+<span id="1341">1341</span>
+<span id="1342">1342</span>
+<span id="1343">1343</span>
+<span id="1344">1344</span>
+<span id="1345">1345</span>
+<span id="1346">1346</span>
+<span id="1347">1347</span>
+<span id="1348">1348</span>
+<span id="1349">1349</span>
+<span id="1350">1350</span>
+<span id="1351">1351</span>
+<span id="1352">1352</span>
+<span id="1353">1353</span>
+<span id="1354">1354</span>
+<span id="1355">1355</span>
+<span id="1356">1356</span>
+<span id="1357">1357</span>
+<span id="1358">1358</span>
+<span id="1359">1359</span>
+<span id="1360">1360</span>
+<span id="1361">1361</span>
+<span id="1362">1362</span>
+<span id="1363">1363</span>
+<span id="1364">1364</span>
+<span id="1365">1365</span>
+<span id="1366">1366</span>
+<span id="1367">1367</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1360,7 +1390,7 @@
 <span class="kw">use </span>linera_execution::{
     committee::{ValidatorName, ValidatorState},
     system::{Account, UserData},
-    Bytecode, WasmRuntime, WithWasmDefault,
+    Bytecode, UserApplicationId, WasmRuntime, WithWasmDefault,
 };
 <span class="kw">use </span>linera_rpc::node_provider::NodeProvider;
 <span class="kw">use </span>linera_service::{
@@ -2047,6 +2077,10 @@
         bytecode_id: BytecodeId,
         arguments: String,
         creator: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
+        <span class="attribute">#[structopt(long = <span class="string">&quot;parameters&quot;</span>)]
+        </span>parameters: <span class="prelude-ty">Option</span>&lt;String&gt;,
+        <span class="attribute">#[structopt(long = <span class="string">&quot;required-application-ids&quot;</span>)]
+        </span>required_application_ids: <span class="prelude-ty">Option</span>&lt;Vec&lt;UserApplicationId&gt;&gt;,
     },
 
     <span class="doccomment">/// Create an application, and publish the required bytecode.
@@ -2056,6 +2090,10 @@
         service: PathBuf,
         arguments: String,
         publisher: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
+        <span class="attribute">#[structopt(long = <span class="string">&quot;parameters&quot;</span>)]
+        </span>parameters: <span class="prelude-ty">Option</span>&lt;String&gt;,
+        <span class="attribute">#[structopt(long = <span class="string">&quot;required-application-ids&quot;</span>)]
+        </span>required_application_ids: <span class="prelude-ty">Option</span>&lt;Vec&lt;UserApplicationId&gt;&gt;,
     },
 
     <span class="doccomment">/// Create an unassigned key-pair.
@@ -2466,12 +2504,18 @@
                 bytecode_id,
                 arguments,
                 creator,
+                parameters,
+                required_application_ids,
             } =&gt; {
                 <span class="kw">let </span>start_time = Instant::now();
                 <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, creator);
 
                 <span class="macro">info!</span>(<span class="string">&quot;Processing arguments...&quot;</span>);
                 <span class="kw">let </span>arguments = hex::decode(<span class="kw-2">&amp;</span>arguments)<span class="question-mark">?</span>;
+                <span class="kw">let </span>parameters = <span class="kw">match </span>parameters {
+                    <span class="prelude-val">None </span>=&gt; <span class="macro">vec!</span>[],
+                    <span class="prelude-val">Some</span>(parameters) =&gt; hex::decode(parameters)<span class="question-mark">?</span>,
+                };
 
                 <span class="macro">info!</span>(<span class="string">&quot;Synchronizing...&quot;</span>);
                 chain_client.synchronize_and_recompute_balance().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -2479,7 +2523,12 @@
 
                 <span class="macro">info!</span>(<span class="string">&quot;Creating application...&quot;</span>);
                 <span class="kw">let </span>(application_id, <span class="kw">_</span>) = chain_client
-                    .create_application(bytecode_id, <span class="macro">vec!</span>[], arguments, <span class="macro">vec!</span>[])
+                    .create_application(
+                        bytecode_id,
+                        parameters,
+                        arguments,
+                        required_application_ids.unwrap_or_default(),
+                    )
                     .<span class="kw">await
                     </span>.context(<span class="string">&quot;failed to create application&quot;</span>)<span class="question-mark">?</span>;
 
@@ -2495,12 +2544,18 @@
                 service,
                 arguments,
                 publisher,
+                parameters,
+                required_application_ids,
             } =&gt; {
                 <span class="kw">let </span>start_time = Instant::now();
                 <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, publisher);
 
                 <span class="macro">info!</span>(<span class="string">&quot;Processing arguments...&quot;</span>);
                 <span class="kw">let </span>arguments = hex::decode(<span class="kw-2">&amp;</span>arguments)<span class="question-mark">?</span>;
+                <span class="kw">let </span>parameters = <span class="kw">match </span>parameters {
+                    <span class="prelude-val">None </span>=&gt; <span class="macro">vec!</span>[],
+                    <span class="prelude-val">Some</span>(parameters) =&gt; hex::decode(parameters)<span class="question-mark">?</span>,
+                };
 
                 <span class="kw">let </span>bytecode_id = context
                     .publish_bytecode(<span class="kw-2">&amp;mut </span>chain_client, contract, service)
@@ -2508,7 +2563,12 @@
 
                 <span class="macro">info!</span>(<span class="string">&quot;Creating application...&quot;</span>);
                 <span class="kw">let </span>(application_id, <span class="kw">_</span>) = chain_client
-                    .create_application(bytecode_id, <span class="macro">vec!</span>[], arguments, <span class="macro">vec!</span>[])
+                    .create_application(
+                        bytecode_id,
+                        parameters,
+                        arguments,
+                        required_application_ids.unwrap_or_default(),
+                    )
                     .<span class="kw">await
                     </span>.context(<span class="string">&quot;failed to create application&quot;</span>)<span class="question-mark">?</span>;
 
