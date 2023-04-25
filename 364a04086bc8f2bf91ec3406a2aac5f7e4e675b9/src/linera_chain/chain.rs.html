@@ -521,6 +521,51 @@
 <span id="521">521</span>
 <span id="522">522</span>
 <span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -553,7 +598,7 @@
     views::{CryptoHashView, GraphQLView, RootView, View, ViewError},
 };
 <span class="kw">use </span>serde::{Deserialize, Serialize};
-<span class="kw">use </span>std::collections::HashSet;
+<span class="kw">use </span>std::collections::{BTreeMap, HashSet};
 
 <span class="doccomment">/// A view accessing the state of a chain.
 </span><span class="attribute">#[derive(Debug, RootView, GraphQLView)]
@@ -579,6 +624,9 @@
     </span><span class="kw">pub </span>inboxes: CollectionView&lt;C, Origin, InboxStateView&lt;C&gt;&gt;,
     <span class="doccomment">/// Mailboxes used to send messages, indexed by their target.
     </span><span class="kw">pub </span>outboxes: CollectionView&lt;C, Target, OutboxStateView&lt;C&gt;&gt;,
+    <span class="doccomment">/// Number of outgoing messages in flight for each block height.
+    /// We use a `RegisterView` to prioritize speed for small maps.
+    </span><span class="kw">pub </span>outbox_counters: RegisterView&lt;C, BTreeMap&lt;BlockHeight, u32&gt;&gt;,
     <span class="doccomment">/// Channels able to multicast messages to subscribers.
     </span><span class="kw">pub </span>channels: CollectionView&lt;C, ChannelFullName, ChannelStateView&lt;C&gt;&gt;,
 }
@@ -640,11 +688,43 @@
         height: BlockHeight,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;bool, ChainError&gt; {
         <span class="kw">let </span>outbox = <span class="self">self</span>.outboxes.load_entry_mut(<span class="kw-2">&amp;</span>target).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>updated = outbox.mark_messages_as_received(height).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">if </span>updated &amp;&amp; outbox.queue.count() == <span class="number">0 </span>{
+        <span class="kw">let </span>updates = outbox.mark_messages_as_received(height).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">if </span>updates.is_empty() {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="bool-val">false</span>);
+        }
+        <span class="kw">for </span>update <span class="kw">in </span>updates {
+            <span class="kw">let </span>counter = <span class="self">self
+                </span>.outbox_counters
+                .get_mut()
+                .get_mut(<span class="kw-2">&amp;</span>update)
+                .expect(<span class="string">&quot;message counter should be present&quot;</span>);
+            <span class="kw-2">*</span>counter = counter
+                .checked_sub(<span class="number">1</span>)
+                .expect(<span class="string">&quot;message counter should not underflow&quot;</span>);
+            <span class="kw">if </span><span class="kw-2">*</span>counter == <span class="number">0 </span>{
+                <span class="comment">// Important for the test in `all_messages_delivered_up_to`.
+                </span><span class="self">self</span>.outbox_counters.get_mut().remove(<span class="kw-2">&amp;</span>update);
+            }
+        }
+        <span class="kw">if </span>outbox.queue.count() == <span class="number">0 </span>{
             <span class="self">self</span>.outboxes.remove_entry(<span class="kw-2">&amp;</span>target)<span class="question-mark">?</span>;
         }
-        <span class="prelude-val">Ok</span>(updated)
+        <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)
+    }
+
+    <span class="doccomment">/// Returns true if there is no more outgoing messages in flight up to the given
+    /// block height.
+    </span><span class="kw">pub fn </span>all_messages_delivered_up_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, height: BlockHeight) -&gt; bool {
+        <span class="macro">tracing::debug!</span>(
+            <span class="string">&quot;Messages left in {:?}&#39;s outbox: {:?}&quot;</span>,
+            <span class="self">self</span>.chain_id(),
+            <span class="self">self</span>.outbox_counters.get()
+        );
+        <span class="kw">if let </span><span class="prelude-val">Some</span>((key, <span class="kw">_</span>)) = <span class="self">self</span>.outbox_counters.get().first_key_value() {
+            key &gt; <span class="kw-2">&amp;</span>height
+        } <span class="kw">else </span>{
+            <span class="bool-val">true
+        </span>}
     }
 
     <span class="doccomment">/// Invariant for the states of active chains.
@@ -929,6 +1009,7 @@
                         ApplicationId::System,
                         Effect::System,
                         <span class="kw-2">&amp;mut </span><span class="self">self</span>.outboxes,
+                        <span class="self">self</span>.outbox_counters.get_mut(),
                         <span class="kw-2">&amp;mut </span><span class="self">self</span>.channels,
                         effects,
                         height,
@@ -944,6 +1025,7 @@
                             bytes,
                         },
                         <span class="kw-2">&amp;mut </span><span class="self">self</span>.outboxes,
+                        <span class="self">self</span>.outbox_counters.get_mut(),
                         <span class="kw-2">&amp;mut </span><span class="self">self</span>.channels,
                         effects,
                         height,
@@ -956,10 +1038,12 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">async fn </span>process_raw_execution_result&lt;E, F&gt;(
+    <span class="attribute">#[allow(clippy::too_many_arguments)]
+    </span><span class="kw">async fn </span>process_raw_execution_result&lt;E, F&gt;(
         application_id: ApplicationId,
         lift: F,
         outboxes: <span class="kw-2">&amp;mut </span>CollectionView&lt;C, Target, OutboxStateView&lt;C&gt;&gt;,
+        outbox_counters: <span class="kw-2">&amp;mut </span>BTreeMap&lt;BlockHeight, u32&gt;,
         channels: <span class="kw-2">&amp;mut </span>CollectionView&lt;C, ChannelFullName, ChannelStateView&lt;C&gt;&gt;,
         effects: <span class="kw-2">&amp;mut </span>Vec&lt;OutgoingEffect&gt;,
         height: BlockHeight,
@@ -996,7 +1080,9 @@
         <span class="comment">// Update the (regular) outboxes.
         </span><span class="kw">for </span>recipient <span class="kw">in </span>recipients {
             <span class="kw">let </span>outbox = outboxes.load_entry_mut(<span class="kw-2">&amp;</span>Target::chain(recipient)).<span class="kw">await</span><span class="question-mark">?</span>;
-            outbox.schedule_message(height)<span class="question-mark">?</span>;
+            <span class="kw">if </span>outbox.schedule_message(height)<span class="question-mark">? </span>{
+                <span class="kw-2">*</span>outbox_counters.entry(height).or_default() += <span class="number">1</span>;
+            }
         }
 
         <span class="comment">// Update the channels.
@@ -1019,7 +1105,9 @@
                 <span class="kw">let </span>outbox = outboxes
                     .load_entry_mut(<span class="kw-2">&amp;</span>Target::channel(recipient, full_name.clone()))
                     .<span class="kw">await</span><span class="question-mark">?</span>;
-                outbox.schedule_message(height)<span class="question-mark">?</span>;
+                <span class="kw">if </span>outbox.schedule_message(height)<span class="question-mark">? </span>{
+                    <span class="kw-2">*</span>outbox_counters.entry(height).or_default() += <span class="number">1</span>;
+                }
             }
             channel.block_height.set(<span class="prelude-val">Some</span>(height));
         }
@@ -1036,7 +1124,9 @@
                     <span class="kw">let </span>outbox = outboxes
                         .load_entry_mut(<span class="kw-2">&amp;</span>Target::channel(id, full_name.clone()))
                         .<span class="kw">await</span><span class="question-mark">?</span>;
-                    outbox.schedule_message(<span class="kw-2">*</span>latest_height)<span class="question-mark">?</span>;
+                    <span class="kw">if </span>outbox.schedule_message(<span class="kw-2">*</span>latest_height)<span class="question-mark">? </span>{
+                        <span class="kw-2">*</span>outbox_counters.entry(<span class="kw-2">*</span>latest_height).or_default() += <span class="number">1</span>;
+                    }
                 }
                 channel.subscribers.insert(<span class="kw-2">&amp;</span>id)<span class="question-mark">?</span>;
             }

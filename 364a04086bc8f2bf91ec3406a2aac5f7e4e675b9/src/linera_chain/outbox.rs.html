@@ -147,16 +147,16 @@
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>mark_messages_as_received(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         height: BlockHeight,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;bool, ViewError&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>updated = <span class="bool-val">false</span>;
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;BlockHeight&gt;, ViewError&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>updates = Vec::new();
         <span class="kw">while let </span><span class="prelude-val">Some</span>(h) = <span class="self">self</span>.queue.front().<span class="kw">await</span><span class="question-mark">? </span>{
             <span class="kw">if </span>h &gt; height {
                 <span class="kw">break</span>;
             }
             <span class="self">self</span>.queue.delete_front();
-            updated = <span class="bool-val">true</span>;
+            updates.push(h);
         }
-        <span class="prelude-val">Ok</span>(updated)
+        <span class="prelude-val">Ok</span>(updates)
     }
 }
 
