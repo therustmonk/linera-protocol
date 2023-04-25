@@ -128,7 +128,7 @@
     </span>C: Context + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
     ViewError: From&lt;C::Error&gt;,
 {
-    <span class="doccomment">/// Schedule a message at the given height if we haven&#39;t already.
+    <span class="doccomment">/// Schedules a message at the given height if we haven&#39;t already.
     /// Return true if a change was made.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>schedule_message(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,

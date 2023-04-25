@@ -628,7 +628,6 @@
 <span id="628">628</span>
 <span id="629">629</span>
 <span id="630">630</span>
-<span id="631">631</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -636,7 +635,7 @@
     futures_util::Stream,
     http::GraphiQLSource,
     parser::types::{DocumentOperations, ExecutableDocument, OperationType},
-    Error, Object, Request, Schema, ServerError, SimpleObject, Subscription,
+    Error, Object, Request, ScalarType, Schema, ServerError, SimpleObject, Subscription,
 };
 <span class="kw">use </span>async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
 <span class="kw">use </span>axum::{
@@ -985,11 +984,11 @@
     }
 }
 
-<span class="doccomment">/// Given a parsed GraphQL query (or `ExecutableDocument`), return the `OperationType`.
+<span class="doccomment">/// Given a parsed GraphQL query (or `ExecutableDocument`), returns the `OperationType`.
 ///
 /// Errors:
 ///
-/// If we have no `OperationTypes` or the `OperationTypes` heterogeneous, i.e. a query
+/// If we have no `OperationType`s or the `OperationTypes` are heterogeneous, i.e. a query
 /// was submitted with a `mutation` and `subscription`.
 </span><span class="kw">fn </span>operation_type(document: <span class="kw-2">&amp;</span>ExecutableDocument) -&gt; <span class="prelude-ty">Result</span>&lt;OperationType, NodeServiceError&gt; {
     <span class="kw">match </span><span class="kw-2">&amp;</span>document.operations {
@@ -1067,7 +1066,7 @@
     S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
     ViewError: From&lt;S::ContextError&gt;,
 {
-    <span class="doccomment">/// Create a new instance of the node service given a client chain and a port.
+    <span class="doccomment">/// Creates a new instance of the node service given a client chain and a port.
     </span><span class="kw">pub fn </span>new(client: ChainClient&lt;P, S&gt;, port: NonZeroU16) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>client = Arc::new(Mutex::new(client));
         <span class="self">Self </span>{ client, port }
@@ -1089,7 +1088,7 @@
         .finish()
     }
 
-    <span class="doccomment">/// Run the node service.
+    <span class="doccomment">/// Runs the node service.
     </span><span class="kw">pub async fn </span>run&lt;C, F&gt;(<span class="self">self</span>, <span class="kw-2">mut </span>context: C, wallet_updater: F) -&gt; <span class="prelude-ty">Result</span>&lt;(), anyhow::Error&gt;
     <span class="kw">where
         for</span>&lt;<span class="lifetime">&#39;a</span>&gt; F:
@@ -1211,9 +1210,8 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
         client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>certificate = client.execute_operations(operations).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>value = async_graphql::Value::from_json(serde_json::to_value(certificate)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(async_graphql::Response::new(value))
+        <span class="kw">let </span>hash = client.execute_operations(operations).<span class="kw">await</span><span class="question-mark">?</span>.value.hash();
+        <span class="prelude-val">Ok</span>(async_graphql::Response::new(hash.to_value()))
     }
 
     <span class="doccomment">/// Executes a GraphQL query and generates a response for our `Schema`.

@@ -636,8 +636,6 @@
 <span id="636">636</span>
 <span id="637">637</span>
 <span id="638">638</span>
-<span id="639">639</span>
-<span id="640">640</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -645,7 +643,6 @@
 </span><span class="kw">use </span><span class="kw">crate</span>::ChainError;
 <span class="kw">use </span>async_graphql::SimpleObject;
 <span class="kw">use </span>linera_base::{
-    bcs_scalar,
     crypto::{BcsHashable, BcsSignable, CryptoHash, KeyPair, Signature},
     data_types::{BlockHeight, RoundNumber, Timestamp},
     doc_scalar, ensure,
@@ -1257,7 +1254,6 @@
 
 <span class="kw">impl </span>BcsSignable <span class="kw">for </span>LiteValue {}
 
-<span class="macro">bcs_scalar!</span>(Certificate, <span class="string">&quot;A certified statement from the committee&quot;</span>);
 <span class="macro">doc_scalar!</span>(
     ChannelFullName,
     <span class="string">&quot;A channel name together with its application id&quot;

@@ -559,6 +559,62 @@
 <span id="559">559</span>
 <span id="560">560</span>
 <span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
+<span id="617">617</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -586,6 +642,7 @@
 <span class="kw">use </span>linera_views::views::ViewError;
 <span class="kw">use </span>std::{
     collections::{BTreeMap, HashMap, HashSet},
+    slice::SliceIndex,
     str::FromStr,
     sync::Arc,
 };
@@ -594,6 +651,13 @@
 <span class="attribute">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
 </span><span class="kw">use </span>{linera_storage::DynamoDbStoreClient, linera_views::test_utils::LocalStackTestContext};
 
+<span class="attribute">#[derive(Debug, PartialEq, Clone, Copy)]
+</span><span class="kw">pub enum </span>FaultType {
+    Honest,
+    Offline,
+    Malicious,
+}
+
 <span class="doccomment">/// An validator used for testing. &quot;Faulty&quot; validators ignore block proposals (but not
 /// certificates or info queries) and have the wrong initial balance for all chains.
 ///
@@ -601,12 +665,15 @@
 /// the validator&#39;s tasks to be canceled: In a real network, a validator also wouldn&#39;t cancel
 /// tasks if the client stopped waiting for the response.
 </span><span class="kw">struct </span>LocalValidator&lt;S&gt; {
-    is_faulty: bool,
+    fault_type: FaultType,
     state: WorkerState&lt;S&gt;,
 }
 
 <span class="attribute">#[derive(Clone)]
-</span><span class="kw">pub struct </span>LocalValidatorClient&lt;S&gt;(Arc&lt;Mutex&lt;LocalValidator&lt;S&gt;&gt;&gt;);
+</span><span class="kw">pub struct </span>LocalValidatorClient&lt;S&gt; {
+    name: ValidatorName,
+    client: Arc&lt;Mutex&lt;LocalValidator&lt;S&gt;&gt;&gt;,
+}
 
 <span class="attribute">#[async_trait]
 </span><span class="kw">impl</span>&lt;S&gt; ValidatorNode <span class="kw">for </span>LocalValidatorClient&lt;S&gt;
@@ -667,9 +734,23 @@
     </span>S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
     ViewError: From&lt;S::ContextError&gt;,
 {
-    <span class="kw">fn </span>new(is_faulty: bool, state: WorkerState&lt;S&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>validator = LocalValidator { is_faulty, state };
-        <span class="self">Self</span>(Arc::new(Mutex::new(validator)))
+    <span class="kw">fn </span>new(name: ValidatorName, state: WorkerState&lt;S&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>client = LocalValidator {
+            fault_type: FaultType::Honest,
+            state,
+        };
+        <span class="self">Self </span>{
+            name,
+            client: Arc::new(Mutex::new(client)),
+        }
+    }
+
+    <span class="kw">async fn </span>set_fault_type(<span class="kw-2">&amp;</span><span class="self">self</span>, fault_type: FaultType) {
+        <span class="self">self</span>.client.lock().<span class="kw">await</span>.fault_type = fault_type;
+    }
+
+    <span class="kw">async fn </span>fault_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; FaultType {
+        <span class="self">self</span>.client.lock().<span class="kw">await</span>.fault_type
     }
 
     <span class="doccomment">/// Executes the future produced by `f` in a new thread in a new Tokio runtime.
@@ -695,14 +776,20 @@
         proposal: BlockProposal,
         sender: oneshot::Sender&lt;<span class="prelude-ty">Result</span>&lt;ChainInfoResponse, NodeError&gt;&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="prelude-ty">Result</span>&lt;ChainInfoResponse, NodeError&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>validator = <span class="self">self</span>.<span class="number">0</span>.lock().<span class="kw">await</span>;
-        <span class="kw">let </span>result = <span class="kw">if </span>validator.is_faulty {
-            <span class="prelude-val">Err</span>(ArithmeticError::Overflow.into())
-        } <span class="kw">else </span>{
-            validator.state.handle_block_proposal(proposal).<span class="kw">await
-        </span>};
+        <span class="kw">let </span><span class="kw-2">mut </span>validator = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
+        <span class="kw">let </span>result = <span class="kw">match </span>validator.fault_type {
+            FaultType::Offline =&gt; <span class="prelude-val">Err</span>(NodeError::ClientIoError {
+                error: <span class="string">&quot;offline&quot;</span>.to_string(),
+            }),
+            FaultType::Malicious =&gt; <span class="prelude-val">Err</span>(ArithmeticError::Overflow.into()),
+            FaultType::Honest =&gt; validator
+                .state
+                .handle_block_proposal(proposal)
+                .<span class="kw">await
+                </span>.map_err(Into::into),
+        };
         <span class="comment">// In a local node cross-chain messages can&#39;t get lost, so we can ignore the actions here.
-        </span>sender.send(result.map_err(Into::into).map(|(info, _actions)| info))
+        </span>sender.send(result.map(|(info, _actions)| info))
     }
 
     <span class="kw">async fn </span>do_handle_lite_certificate(
@@ -710,7 +797,7 @@
         certificate: LiteCertificate,
         sender: oneshot::Sender&lt;<span class="prelude-ty">Result</span>&lt;ChainInfoResponse, NodeError&gt;&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="prelude-ty">Result</span>&lt;ChainInfoResponse, NodeError&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>validator = <span class="self">self</span>.<span class="number">0</span>.lock().<span class="kw">await</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>validator = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
         <span class="kw">let </span>result = <span class="kw">match </span>validator.state.recent_value(<span class="kw-2">&amp;</span>certificate.value.value_hash) {
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(NodeError::MissingCertificateValue),
             <span class="prelude-val">Some</span>(value) =&gt; <span class="kw">match </span>certificate.with_value(value.clone()) {
@@ -731,7 +818,7 @@
         blobs: Vec&lt;HashedValue&gt;,
         sender: oneshot::Sender&lt;<span class="prelude-ty">Result</span>&lt;ChainInfoResponse, NodeError&gt;&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="prelude-ty">Result</span>&lt;ChainInfoResponse, NodeError&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>validator = <span class="self">self</span>.<span class="number">0</span>.lock().<span class="kw">await</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>validator = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
         <span class="kw">let </span>result = validator
             .state
             .fully_handle_certificate(certificate, blobs)
@@ -744,14 +831,14 @@
         query: ChainInfoQuery,
         sender: oneshot::Sender&lt;<span class="prelude-ty">Result</span>&lt;ChainInfoResponse, NodeError&gt;&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="prelude-ty">Result</span>&lt;ChainInfoResponse, NodeError&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>validator = <span class="self">self</span>.<span class="number">0</span>.lock().<span class="kw">await</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>validator = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
         <span class="kw">let </span>result = validator.state.handle_chain_info_query(query).<span class="kw">await</span>;
         <span class="comment">// In a local node cross-chain messages can&#39;t get lost, so we can ignore the actions here.
         </span>sender.send(result.map_err(Into::into).map(|(info, _actions)| info))
     }
 }
 
-<span class="kw">pub struct </span>NodeProvider&lt;S&gt;(BTreeMap&lt;ValidatorName, LocalValidatorClient&lt;S&gt;&gt;);
+<span class="kw">pub struct </span>NodeProvider&lt;S&gt;(BTreeMap&lt;ValidatorName, Arc&lt;Mutex&lt;LocalValidator&lt;S&gt;&gt;&gt;&gt;);
 
 <span class="kw">impl</span>&lt;S&gt; ValidatorNodeProvider <span class="kw">for </span>NodeProvider&lt;S&gt;
 <span class="kw">where
@@ -762,13 +849,24 @@
 
     <span class="kw">fn </span>make_node(<span class="kw-2">&amp;</span><span class="self">self</span>, address: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Node, NodeError&gt; {
         <span class="kw">let </span>name = ValidatorName::from_str(address).unwrap();
-        <span class="kw">let </span>node = <span class="self">self
+        <span class="kw">let </span>client = <span class="self">self
             </span>.<span class="number">0
             </span>.get(<span class="kw-2">&amp;</span>name)
             .ok_or_else(|| NodeError::CannotResolveValidatorAddress {
                 address: address.to_string(),
-            })<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(node.clone())
+            })<span class="question-mark">?
+            </span>.clone();
+        <span class="prelude-val">Ok</span>(LocalValidatorClient { name, client })
+    }
+}
+
+<span class="kw">impl</span>&lt;S&gt; FromIterator&lt;LocalValidatorClient&lt;S&gt;&gt; <span class="kw">for </span>NodeProvider&lt;S&gt; {
+    <span class="kw">fn </span>from_iter&lt;T&gt;(iter: T) -&gt; <span class="self">Self
+    </span><span class="kw">where
+        </span>T: IntoIterator&lt;Item = LocalValidatorClient&lt;S&gt;&gt;,
+    {
+        <span class="kw">let </span>destructure = |validator: LocalValidatorClient&lt;S&gt;| (validator.name, validator.client);
+        <span class="self">Self</span>(iter.into_iter().map(destructure).collect())
     }
 }
 
@@ -783,8 +881,7 @@
     <span class="kw">pub </span>initial_committee: Committee,
     admin_id: ChainId,
     genesis_store_builder: GenesisStoreBuilder,
-    faulty_validators: HashSet&lt;ValidatorName&gt;,
-    validator_clients: Vec&lt;(ValidatorName, LocalValidatorClient&lt;B::Store&gt;)&gt;,
+    validator_clients: Vec&lt;LocalValidatorClient&lt;B::Store&gt;&gt;,
     validator_stores: HashMap&lt;ValidatorName, B::Store&gt;,
     chain_client_stores: Vec&lt;B::Store&gt;,
 }
@@ -866,13 +963,12 @@
             <span class="kw">let </span>state = WorkerState::new(<span class="macro">format!</span>(<span class="string">&quot;Node {}&quot;</span>, i), <span class="prelude-val">Some</span>(key_pair), store.clone())
                 .with_allow_inactive_chains(<span class="bool-val">false</span>)
                 .with_allow_messages_from_deprecated_epochs(<span class="bool-val">false</span>);
-            <span class="kw">let </span>validator = <span class="kw">if </span>i &lt; with_faulty_validators {
+            <span class="kw">let </span>validator = LocalValidatorClient::new(name, state);
+            <span class="kw">if </span>i &lt; with_faulty_validators {
                 faulty_validators.insert(name);
-                LocalValidatorClient::new(<span class="bool-val">true</span>, state)
-            } <span class="kw">else </span>{
-                LocalValidatorClient::new(<span class="bool-val">false</span>, state)
-            };
-            validator_clients.push((name, validator));
+                validator.set_fault_type(FaultType::Malicious).<span class="kw">await</span>;
+            }
+            validator_clients.push(validator);
             validator_stores.insert(name, store);
         }
         <span class="macro">tracing::info!</span>(
@@ -884,11 +980,26 @@
             initial_committee,
             admin_id: ChainId::root(<span class="number">0</span>),
             genesis_store_builder: GenesisStoreBuilder::default(),
-            faulty_validators,
             validator_clients,
             validator_stores,
             chain_client_stores: Vec::new(),
         })
+    }
+
+    <span class="kw">pub async fn </span>set_fault_type&lt;I&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, range: I, fault_type: FaultType)
+    <span class="kw">where
+        </span>I: SliceIndex&lt;[LocalValidatorClient&lt;B::Store&gt;], Output = [LocalValidatorClient&lt;B::Store&gt;]&gt;,
+    {
+        <span class="kw">let </span><span class="kw-2">mut </span>faulty_validators = <span class="macro">vec!</span>[];
+        <span class="kw">for </span>validator <span class="kw">in </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.validator_clients[range] {
+            validator.set_fault_type(fault_type).<span class="kw">await</span>;
+            faulty_validators.push(validator.name);
+        }
+        <span class="macro">tracing::info!</span>(
+            <span class="string">&quot;Making the following validators {:?}: {:?}&quot;</span>,
+            fault_type,
+            faulty_validators
+        );
     }
 
     <span class="kw">pub async fn </span>add_initial_chain(
@@ -901,8 +1012,9 @@
         <span class="comment">// Remember what&#39;s in the genesis store for future clients to join.
         </span><span class="self">self</span>.genesis_store_builder
             .add(description, public_key, balance);
-        <span class="kw">for </span>(name, store) <span class="kw">in </span><span class="self">self</span>.validator_stores.iter_mut() {
-            <span class="kw">if </span><span class="self">self</span>.faulty_validators.contains(name) {
+        <span class="kw">for </span>validator <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.validator_clients {
+            <span class="kw">let </span>store = <span class="self">self</span>.validator_stores.get_mut(<span class="kw-2">&amp;</span>validator.name).unwrap();
+            <span class="kw">if </span>validator.fault_type().<span class="kw">await </span>== FaultType::Malicious {
                 store
                     .create_chain(
                         <span class="self">self</span>.initial_committee.clone(),
@@ -963,7 +1075,7 @@
             )
             .<span class="kw">await</span>;
         <span class="self">self</span>.chain_client_stores.push(store.clone());
-        <span class="kw">let </span>provider = NodeProvider(<span class="self">self</span>.validator_clients.iter().cloned().collect());
+        <span class="kw">let </span>provider = <span class="self">self</span>.validator_clients.iter().cloned().collect();
         <span class="prelude-val">Ok</span>(ChainClient::new(
             chain_id,
             <span class="macro">vec!</span>[key_pair],
@@ -993,9 +1105,9 @@
             });
         <span class="kw">let </span><span class="kw-2">mut </span>count = <span class="number">0</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>certificate = <span class="prelude-val">None</span>;
-        <span class="kw">for </span>(name, <span class="kw-2">mut </span>client) <span class="kw">in </span><span class="self">self</span>.validator_clients.clone() {
-            <span class="kw">if let </span><span class="prelude-val">Ok</span>(response) = client.handle_chain_info_query(query.clone()).<span class="kw">await </span>{
-                <span class="kw">if </span>response.check(name).is_ok() {
+        <span class="kw">for </span><span class="kw-2">mut </span>validator <span class="kw">in </span><span class="self">self</span>.validator_clients.clone() {
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>(response) = validator.handle_chain_info_query(query.clone()).<span class="kw">await </span>{
+                <span class="kw">if </span>response.check(validator.name).is_ok() {
                     <span class="kw">let </span>ChainInfo {
                         <span class="kw-2">mut </span>requested_sent_certificates,
                         ..

@@ -557,15 +557,6 @@
 <span id="557">557</span>
 <span id="558">558</span>
 <span id="559">559</span>
-<span id="560">560</span>
-<span id="561">561</span>
-<span id="562">562</span>
-<span id="563">563</span>
-<span id="564">564</span>
-<span id="565">565</span>
-<span id="566">566</span>
-<span id="567">567</span>
-<span id="568">568</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -712,7 +703,7 @@
         <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)
     }
 
-    <span class="doccomment">/// Returns true if there is no more outgoing messages in flight up to the given
+    <span class="doccomment">/// Returns true if there are no more outgoing messages in flight up to the given
     /// block height.
     </span><span class="kw">pub fn </span>all_messages_delivered_up_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, height: BlockHeight) -&gt; bool {
         <span class="macro">tracing::debug!</span>(
@@ -779,7 +770,7 @@
         }
     }
 
-    <span class="doccomment">/// Schedule operations to be executed as a recipient, unless this block was already
+    <span class="doccomment">/// Schedules operations to be executed as a recipient, unless this block was already
     /// processed. Returns true if the call changed the chain state. Operations must be
     /// received by order of heights and indices.
     </span><span class="kw">pub async fn </span>receive_block(
@@ -1005,12 +996,9 @@
         <span class="kw">for </span>result <span class="kw">in </span>results {
             <span class="kw">match </span>result {
                 ExecutionResult::System(result) =&gt; {
-                    <span class="self">Self</span>::process_raw_execution_result(
+                    <span class="self">self</span>.process_raw_execution_result(
                         ApplicationId::System,
                         Effect::System,
-                        <span class="kw-2">&amp;mut </span><span class="self">self</span>.outboxes,
-                        <span class="self">self</span>.outbox_counters.get_mut(),
-                        <span class="kw-2">&amp;mut </span><span class="self">self</span>.channels,
                         effects,
                         height,
                         result,
@@ -1018,15 +1006,12 @@
                     .<span class="kw">await</span><span class="question-mark">?</span>;
                 }
                 ExecutionResult::User(application_id, result) =&gt; {
-                    <span class="self">Self</span>::process_raw_execution_result(
+                    <span class="self">self</span>.process_raw_execution_result(
                         ApplicationId::User(application_id),
                         |bytes| Effect::User {
                             application_id,
                             bytes,
                         },
-                        <span class="kw-2">&amp;mut </span><span class="self">self</span>.outboxes,
-                        <span class="self">self</span>.outbox_counters.get_mut(),
-                        <span class="kw-2">&amp;mut </span><span class="self">self</span>.channels,
                         effects,
                         height,
                         result,
@@ -1038,13 +1023,10 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="attribute">#[allow(clippy::too_many_arguments)]
-    </span><span class="kw">async fn </span>process_raw_execution_result&lt;E, F&gt;(
+    <span class="kw">async fn </span>process_raw_execution_result&lt;E, F&gt;(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         application_id: ApplicationId,
         lift: F,
-        outboxes: <span class="kw-2">&amp;mut </span>CollectionView&lt;C, Target, OutboxStateView&lt;C&gt;&gt;,
-        outbox_counters: <span class="kw-2">&amp;mut </span>BTreeMap&lt;BlockHeight, u32&gt;,
-        channels: <span class="kw-2">&amp;mut </span>CollectionView&lt;C, ChannelFullName, ChannelStateView&lt;C&gt;&gt;,
         effects: <span class="kw-2">&amp;mut </span>Vec&lt;OutgoingEffect&gt;,
         height: BlockHeight,
         raw_result: RawExecutionResult&lt;E&gt;,
@@ -1078,8 +1060,10 @@
         }
 
         <span class="comment">// Update the (regular) outboxes.
-        </span><span class="kw">for </span>recipient <span class="kw">in </span>recipients {
-            <span class="kw">let </span>outbox = outboxes.load_entry_mut(<span class="kw-2">&amp;</span>Target::chain(recipient)).<span class="kw">await</span><span class="question-mark">?</span>;
+        </span><span class="kw">let </span>outbox_counters = <span class="self">self</span>.outbox_counters.get_mut();
+        <span class="kw">for </span>recipient <span class="kw">in </span>recipients {
+            <span class="kw">let </span>target = Target::chain(recipient);
+            <span class="kw">let </span>outbox = <span class="self">self</span>.outboxes.load_entry_mut(<span class="kw-2">&amp;</span>target).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">if </span>outbox.schedule_message(height)<span class="question-mark">? </span>{
                 <span class="kw-2">*</span>outbox_counters.entry(height).or_default() += <span class="number">1</span>;
             }
@@ -1091,7 +1075,7 @@
                 application_id,
                 name,
             };
-            <span class="kw">let </span>channel = channels.load_entry_mut(<span class="kw-2">&amp;</span>full_name).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>channel = <span class="self">self</span>.channels.load_entry_mut(<span class="kw-2">&amp;</span>full_name).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="comment">// Remove subscriber. Do not remove the channel outbox yet.
             </span>channel.subscribers.remove(<span class="kw-2">&amp;</span>id)<span class="question-mark">?</span>;
         }
@@ -1100,11 +1084,10 @@
                 application_id,
                 name,
             };
-            <span class="kw">let </span>channel = channels.load_entry_mut(<span class="kw-2">&amp;</span>full_name).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>channel = <span class="self">self</span>.channels.load_entry_mut(<span class="kw-2">&amp;</span>full_name).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">for </span>recipient <span class="kw">in </span>channel.subscribers.indices().<span class="kw">await</span><span class="question-mark">? </span>{
-                <span class="kw">let </span>outbox = outboxes
-                    .load_entry_mut(<span class="kw-2">&amp;</span>Target::channel(recipient, full_name.clone()))
-                    .<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>target = Target::channel(recipient, full_name.clone());
+                <span class="kw">let </span>outbox = <span class="self">self</span>.outboxes.load_entry_mut(<span class="kw-2">&amp;</span>target).<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="kw">if </span>outbox.schedule_message(height)<span class="question-mark">? </span>{
                     <span class="kw-2">*</span>outbox_counters.entry(height).or_default() += <span class="number">1</span>;
                 }
@@ -1116,14 +1099,13 @@
                 application_id,
                 name,
             };
-            <span class="kw">let </span>channel = channels.load_entry_mut(<span class="kw-2">&amp;</span>full_name).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>channel = <span class="self">self</span>.channels.load_entry_mut(<span class="kw-2">&amp;</span>full_name).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="comment">// Add subscriber.
             </span><span class="kw">if </span>!channel.subscribers.contains(<span class="kw-2">&amp;</span>id).<span class="kw">await</span><span class="question-mark">? </span>{
                 <span class="comment">// Send the latest message if any.
                 </span><span class="kw">if let </span><span class="prelude-val">Some</span>(latest_height) = channel.block_height.get() {
-                    <span class="kw">let </span>outbox = outboxes
-                        .load_entry_mut(<span class="kw-2">&amp;</span>Target::channel(id, full_name.clone()))
-                        .<span class="kw">await</span><span class="question-mark">?</span>;
+                    <span class="kw">let </span>target = Target::channel(id, full_name.clone());
+                    <span class="kw">let </span>outbox = <span class="self">self</span>.outboxes.load_entry_mut(<span class="kw-2">&amp;</span>target).<span class="kw">await</span><span class="question-mark">?</span>;
                     <span class="kw">if </span>outbox.schedule_message(<span class="kw-2">*</span>latest_height)<span class="question-mark">? </span>{
                         <span class="kw-2">*</span>outbox_counters.entry(<span class="kw-2">*</span>latest_height).or_default() += <span class="number">1</span>;
                     }

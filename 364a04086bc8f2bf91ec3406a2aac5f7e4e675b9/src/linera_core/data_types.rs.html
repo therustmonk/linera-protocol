@@ -439,7 +439,7 @@
         }
     }
 
-    <span class="doccomment">/// Returns true if the cross-requests has messages lower or equal than `height`.
+    <span class="doccomment">/// Returns true if the cross-chain request has messages lower or equal than `height`.
     </span><span class="kw">pub fn </span>has_messages_lower_or_equal_than(<span class="kw-2">&amp;</span><span class="self">self</span>, height: BlockHeight) -&gt; bool {
         <span class="kw">match </span><span class="self">self </span>{
             CrossChainRequest::UpdateRecipient { height_map, .. } =&gt; height_map
