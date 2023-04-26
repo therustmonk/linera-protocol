@@ -1229,6 +1229,7 @@
 <span id="1229">1229</span>
 <span id="1230">1230</span>
 <span id="1231">1231</span>
+<span id="1232">1232</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1244,8 +1245,8 @@
 };
 <span class="kw">use </span>linera_chain::{
     data_types::{
-        Block, BlockAndRound, BlockProposal, Certificate, ChannelFullName, HashedValue,
-        LiteCertificate, Medium, Message, Origin, OutgoingEffect, Target, ValueKind,
+        Block, BlockAndRound, BlockProposal, Certificate, HashedValue, LiteCertificate, Medium,
+        Message, Origin, OutgoingEffect, Target, ValueKind,
     },
     ChainManagerOutcome, ChainStateView,
 };
@@ -1273,6 +1274,7 @@
 <span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
 </span><span class="kw">use </span>{
     linera_base::identifiers::{Destination, EffectId},
+    linera_chain::data_types::ChannelFullName,
     linera_execution::ApplicationRegistryView,
 };
 
