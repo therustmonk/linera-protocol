@@ -240,6 +240,65 @@
 <span id="240">240</span>
 <span id="241">241</span>
 <span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -249,6 +308,7 @@
     fs::File,
     io::Write,
     path::{Path, PathBuf},
+    process::Command,
 };
 <span class="kw">use </span>tracing::debug;
 
@@ -402,7 +462,7 @@ target = &quot;wasm32-unknown-unknown&quot;
 &quot;#</span>;
 
 <span class="kw">pub struct </span>Project {
-    _root: PathBuf,
+    root: PathBuf,
 }
 
 <span class="kw">impl </span>Project {
@@ -434,7 +494,65 @@ target = &quot;wasm32-unknown-unknown&quot;
         <span class="macro">debug!</span>(<span class="string">&quot;creating cargo config&quot;</span>);
         <span class="self">Self</span>::create_cargo_config(<span class="kw-2">&amp;</span>root)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ _root: root })
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ root })
+    }
+
+    <span class="kw">pub fn </span>from_existing_project(root: PathBuf) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">if </span>!root.exists() {
+            <span class="macro">bail!</span>(<span class="string">&quot;could not find project at {}&quot;</span>, root.display());
+        }
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ root })
+    }
+
+    <span class="kw">pub fn </span>test(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if </span>!<span class="self">Self</span>::runner_is_installed()<span class="question-mark">? </span>{
+            <span class="macro">debug!</span>(<span class="string">&quot;Linera test runner not found&quot;</span>);
+            <span class="self">Self</span>::install_test_runner()<span class="question-mark">?</span>;
+        }
+        <span class="kw">let </span>cargo_test = Command::new(<span class="string">&quot;cargo&quot;</span>)
+            .env(
+                <span class="string">&quot;CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER&quot;</span>,
+                <span class="self">Self</span>::runner_path()<span class="question-mark">?</span>.display().to_string().as_str(),
+            )
+            .arg(<span class="string">&quot;test&quot;</span>)
+            .args([<span class="string">&quot;--target&quot;</span>, <span class="string">&quot;wasm32-unknown-unknown&quot;</span>])
+            .current_dir(<span class="kw-2">&amp;</span><span class="self">self</span>.root)
+            .spawn()<span class="question-mark">?
+            </span>.wait()<span class="question-mark">?</span>;
+        <span class="kw">if </span>!cargo_test.success() {
+            <span class="macro">bail!</span>(<span class="string">&quot;tests failed&quot;</span>)
+        }
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">pub fn </span>runner_is_installed() -&gt; <span class="prelude-ty">Result</span>&lt;bool&gt; {
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span>::runner_path()<span class="question-mark">?</span>.exists())
+    }
+
+    <span class="kw">fn </span>install_test_runner() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="macro">println!</span>(<span class="string">&quot;installing test runner...&quot;</span>);
+        <span class="kw">let </span>cargo_install = Command::new(<span class="string">&quot;cargo&quot;</span>)
+            .args([<span class="string">&quot;install&quot;</span>, <span class="string">&quot;linera-test-runner&quot;</span>])
+            .spawn()<span class="question-mark">?
+            </span>.wait()<span class="question-mark">?</span>;
+        <span class="kw">if </span>!cargo_install.success() {
+            <span class="macro">bail!</span>(<span class="string">&quot;failed to install linera-test-runner&quot;</span>)
+        }
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">fn </span>runner_path() -&gt; <span class="prelude-ty">Result</span>&lt;PathBuf&gt; {
+        <span class="self">Self</span>::cargo_home().map(|cargo_home| cargo_home.join(<span class="string">&quot;bin&quot;</span>).join(<span class="string">&quot;linera-test-runner&quot;</span>))
+    }
+
+    <span class="kw">fn </span>cargo_home() -&gt; <span class="prelude-ty">Result</span>&lt;PathBuf&gt; {
+        <span class="kw">if let </span><span class="prelude-val">Ok</span>(cargo_home) = std::env::var(<span class="string">&quot;CARGO_HOME&quot;</span>) {
+            <span class="prelude-val">Ok</span>(PathBuf::from(cargo_home))
+        } <span class="kw">else if let </span><span class="prelude-val">Some</span>(home) = dirs::home_dir() {
+            <span class="prelude-val">Ok</span>(home.join(<span class="string">&quot;.cargo&quot;</span>))
+        } <span class="kw">else </span>{
+            <span class="macro">bail!</span>(<span class="string">&quot;could not find CARGO_HOME directory, please specify it explicitly&quot;</span>)
+        }
     }
 
     <span class="kw">fn </span>create_source_directory(project_root: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;PathBuf&gt; {
