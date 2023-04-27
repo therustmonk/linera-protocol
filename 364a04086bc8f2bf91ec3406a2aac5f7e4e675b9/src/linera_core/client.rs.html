@@ -1266,6 +1266,11 @@
 <span id="1266">1266</span>
 <span id="1267">1267</span>
 <span id="1268">1268</span>
+<span id="1269">1269</span>
+<span id="1270">1270</span>
+<span id="1271">1271</span>
+<span id="1272">1272</span>
+<span id="1273">1273</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1630,6 +1635,11 @@
     </span><span class="kw">pub async fn </span>public_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PublicKey&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.key_pair().<span class="kw">await</span><span class="question-mark">?</span>.public())
     }
+
+    <span class="doccomment">/// Subscribes to notifications for all validators.
+    </span><span class="kw">pub async fn </span>subscribe_default(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;NotificationStream&gt; {
+        <span class="self">self</span>.subscribe_all(<span class="macro">vec!</span>[<span class="self">self</span>.chain_id]).<span class="kw">await
+    </span>}
 
     <span class="doccomment">/// Subscribes to notifications for all validators.
     </span><span class="kw">pub async fn </span>subscribe_all(<span class="kw-2">&amp;mut </span><span class="self">self</span>, chain_ids: Vec&lt;ChainId&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;NotificationStream&gt; {
