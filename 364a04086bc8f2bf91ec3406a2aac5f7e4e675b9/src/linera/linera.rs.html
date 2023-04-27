@@ -1358,26 +1358,6 @@
 <span id="1358">1358</span>
 <span id="1359">1359</span>
 <span id="1360">1360</span>
-<span id="1361">1361</span>
-<span id="1362">1362</span>
-<span id="1363">1363</span>
-<span id="1364">1364</span>
-<span id="1365">1365</span>
-<span id="1366">1366</span>
-<span id="1367">1367</span>
-<span id="1368">1368</span>
-<span id="1369">1369</span>
-<span id="1370">1370</span>
-<span id="1371">1371</span>
-<span id="1372">1372</span>
-<span id="1373">1373</span>
-<span id="1374">1374</span>
-<span id="1375">1375</span>
-<span id="1376">1376</span>
-<span id="1377">1377</span>
-<span id="1378">1378</span>
-<span id="1379">1379</span>
-<span id="1380">1380</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1924,7 +1904,6 @@
 <span class="attribute">#[derive(StructOpt)]
 </span><span class="kw">enum </span>ClientCommand {
     <span class="doccomment">/// Transfer funds
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;transfer&quot;</span>)]
     </span>Transfer {
         <span class="doccomment">/// Sending chain id (must be one of our chains)
         </span><span class="attribute">#[structopt(long = <span class="string">&quot;from&quot;</span>)]
@@ -1939,7 +1918,6 @@
     },
 
     <span class="doccomment">/// Open (i.e. activate) a new chain deriving the UID from an existing one.
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;open_chain&quot;</span>)]
     </span>OpenChain {
         <span class="doccomment">/// Sending chain id (must be one of our chains).
         </span><span class="attribute">#[structopt(long = <span class="string">&quot;from&quot;</span>)]
@@ -1950,9 +1928,8 @@
         </span>public_key: <span class="prelude-ty">Option</span>&lt;PublicKey&gt;,
     },
 
-    <span class="doccomment">/// Close (i.e. deactivate) an existing chain. (Consider `spend_and_transfer`
-    /// instead for real-life use cases.)
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;close_chain&quot;</span>)]
+    <span class="doccomment">/// Close (i.e. deactivate) an existing chain.
+    </span><span class="comment">// TODO: Consider `spend-and-transfer` instead for real-life use cases.
     </span>CloseChain {
         <span class="doccomment">/// Sending chain id (must be one of our chains)
         </span><span class="attribute">#[structopt(long = <span class="string">&quot;from&quot;</span>)]
@@ -1960,7 +1937,6 @@
     },
 
     <span class="doccomment">/// Read the balance of the chain from the local state of the client.
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;query_balance&quot;</span>)]
     </span>QueryBalance {
         <span class="doccomment">/// Chain id
         </span>chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
@@ -1968,46 +1944,41 @@
 
     <span class="doccomment">/// Synchronize the local state of the chain (including a conservative estimation of the
     /// available balance) with a quorum validators.
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;sync_balance&quot;</span>)]
-    </span>SynchronizeBalance {
+    </span>SyncBalance {
         <span class="doccomment">/// Chain id
         </span>chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
     },
 
     <span class="doccomment">/// Show the current set of validators for a chain.
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;query_validators&quot;</span>)]
     </span>QueryValidators {
         <span class="doccomment">/// Chain id
         </span>chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
     },
 
     <span class="doccomment">/// Add or modify a validator (admin only)
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;set_validator&quot;</span>)]
     </span>SetValidator {
         <span class="doccomment">/// The public key of the validator.
-        </span><span class="attribute">#[structopt(long = <span class="string">&quot;name&quot;</span>)]
+        </span><span class="attribute">#[structopt(long)]
         </span>name: ValidatorName,
 
         <span class="doccomment">/// Network address
-        </span><span class="attribute">#[structopt(long = <span class="string">&quot;address&quot;</span>)]
-        </span>network_address: String,
+        </span><span class="attribute">#[structopt(long)]
+        </span>address: String,
 
         <span class="doccomment">/// Voting power
-        </span><span class="attribute">#[structopt(long = <span class="string">&quot;votes&quot;</span>, default_value = <span class="string">&quot;1&quot;</span>)]
+        </span><span class="attribute">#[structopt(long, default_value = <span class="string">&quot;1&quot;</span>)]
         </span>votes: u64,
     },
 
     <span class="doccomment">/// Remove a validator (admin only)
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;remove_validator&quot;</span>)]
     </span>RemoveValidator {
         <span class="doccomment">/// The public key of the validator.
-        </span><span class="attribute">#[structopt(long = <span class="string">&quot;name&quot;</span>)]
+        </span><span class="attribute">#[structopt(long)]
         </span>name: ValidatorName,
     },
 
     <span class="doccomment">/// Send one transfer per chain in bulk mode
     </span><span class="attribute">#[cfg(feature = <span class="string">&quot;benchmark&quot;</span>)]
-    #[structopt(name = <span class="string">&quot;benchmark&quot;</span>)]
     </span>Benchmark {
         <span class="doccomment">/// Maximum number of blocks in flight
         </span><span class="attribute">#[structopt(long, default_value = <span class="string">&quot;200&quot;</span>)]
@@ -2021,7 +1992,6 @@
     <span class="doccomment">/// Create genesis configuration for a Linera deployment.
     /// Create initial user chains and print information to be used for initialization of validator setup.
     /// This will also create an initial wallet for the owner of the initial &quot;root&quot; chains.
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;create_genesis_config&quot;</span>)]
     </span>CreateGenesisConfig {
         <span class="doccomment">/// Sets the file describing the public configurations of all validators
         </span><span class="attribute">#[structopt(long = <span class="string">&quot;committee&quot;</span>)]
@@ -2048,7 +2018,6 @@
     },
 
     <span class="doccomment">/// Watch the network for notifications.
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;watch&quot;</span>)]
     </span>Watch {
         <span class="doccomment">/// The collection of Chain IDs to watch.
         </span>chain_ids: Vec&lt;ChainId&gt;,
@@ -2059,14 +2028,12 @@
     },
 
     <span class="doccomment">/// Acts as a Synchronizer on the network.
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;synchronize&quot;</span>)]
     </span>Synchronize {
         <span class="doccomment">/// The collection of Chain IDs to synchronize for.
         </span>chain_ids: Vec&lt;ChainId&gt;,
     },
 
     <span class="doccomment">/// Run a GraphQL service on the local node of a given chain.
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;service&quot;</span>)]
     </span>Service {
         <span class="doccomment">/// Chain id
         </span>chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
@@ -2077,7 +2044,6 @@
     },
 
     <span class="doccomment">/// Publish bytecode.
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;publish_bytecode&quot;</span>)]
     </span>PublishBytecode {
         contract: PathBuf,
         service: PathBuf,
@@ -2085,21 +2051,19 @@
     },
 
     <span class="doccomment">/// Create an application.
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;create_application&quot;</span>)]
     </span>CreateApplication {
         bytecode_id: BytecodeId,
         <span class="doccomment">/// The initialization arguments, passed to the contract&#39;s `initialize` method on the chain
         /// that creates the application. (But not on other chains, when it is registered there.)
         </span>arguments: String,
         creator: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
-        <span class="attribute">#[structopt(long = <span class="string">&quot;parameters&quot;</span>)]
+        <span class="attribute">#[structopt(long)]
         </span>parameters: <span class="prelude-ty">Option</span>&lt;String&gt;,
-        <span class="attribute">#[structopt(long = <span class="string">&quot;required-application-ids&quot;</span>)]
+        <span class="attribute">#[structopt(long)]
         </span>required_application_ids: <span class="prelude-ty">Option</span>&lt;Vec&lt;UserApplicationId&gt;&gt;,
     },
 
     <span class="doccomment">/// Create an application, and publish the required bytecode.
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;publish_and_create&quot;</span>)]
     </span>PublishAndCreate {
         contract: PathBuf,
         service: PathBuf,
@@ -2114,11 +2078,9 @@
     },
 
     <span class="doccomment">/// Create an unassigned key-pair.
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;keygen&quot;</span>)]
-    </span>KeyGen,
+    </span>Keygen,
 
     <span class="doccomment">/// Assign a key to a chain given a certificate.
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;assign&quot;</span>)]
     </span>Assign {
         <span class="attribute">#[structopt(long)]
         </span>key: PublicKey,
@@ -2128,11 +2090,9 @@
     },
 
     <span class="doccomment">/// Show the contents of the wallet.
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;wallet&quot;</span>)]
     </span>Wallet(WalletCommand),
 
     <span class="doccomment">/// Manage Linera projects.
-    </span><span class="attribute">#[structopt(name = <span class="string">&quot;project&quot;</span>)]
     </span>Project(ProjectCommand),
 }
 
@@ -2248,7 +2208,7 @@
                 context.save_wallet();
             }
 
-            SynchronizeBalance { chain_id } =&gt; {
+            SyncBalance { chain_id } =&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, chain_id);
                 <span class="macro">info!</span>(<span class="string">&quot;Synchronize chain information&quot;</span>);
                 <span class="kw">let </span>time_start = Instant::now();
@@ -2301,13 +2261,13 @@
                 <span class="kw">match </span>command {
                     SetValidator {
                         name,
-                        network_address,
+                        address,
                         votes,
                     } =&gt; {
                         validators.insert(
                             name,
                             ValidatorState {
-                                network_address,
+                                network_address: address,
                                 votes,
                             },
                         );
@@ -2637,7 +2597,7 @@
                 context.save_wallet();
             }
 
-            CreateGenesisConfig { .. } | KeyGen | Wallet(<span class="kw">_</span>) | Project(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
+            CreateGenesisConfig { .. } | Keygen | Wallet(<span class="kw">_</span>) | Project(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -2705,7 +2665,7 @@
         },
 
         command =&gt; <span class="kw">match </span>command {
-            ClientCommand::KeyGen =&gt; {
+            ClientCommand::Keygen =&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>context = ClientContext::from_options(<span class="kw-2">&amp;</span>options)<span class="question-mark">?</span>;
                 <span class="kw">let </span>key_pair = KeyPair::generate();
                 <span class="kw">let </span>public = key_pair.public();
