@@ -172,6 +172,10 @@
 <span id="172">172</span>
 <span id="173">173</span>
 <span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -267,6 +271,10 @@
     <span class="doccomment">/// The database is corrupt: Entries don&#39;t have the expected hash.
     </span><span class="attribute">#[error(<span class="string">&quot;Inconsistent database entries&quot;</span>)]
     </span>InconsistentEntries,
+
+    <span class="doccomment">/// The database is corrupt: Some entries are missing
+    </span><span class="attribute">#[error(<span class="string">&quot;Missing database entries&quot;</span>)]
+    </span>MissingEntries,
 }
 
 <span class="kw">impl </span>ViewError {

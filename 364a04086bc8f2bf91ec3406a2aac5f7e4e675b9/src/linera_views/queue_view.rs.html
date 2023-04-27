@@ -445,6 +445,12 @@
 <span id="445">445</span>
 <span id="446">446</span>
 <span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -633,12 +639,11 @@
     /// # })
     /// ```
     </span><span class="kw">pub async fn </span>back(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;T&gt;, ViewError&gt; {
-        <span class="kw">let </span>value = <span class="kw">match </span><span class="self">self</span>.new_back_values.back() {
+        <span class="prelude-val">Ok</span>(<span class="kw">match </span><span class="self">self</span>.new_back_values.back() {
             <span class="prelude-val">Some</span>(value) =&gt; <span class="prelude-val">Some</span>(value.clone()),
             <span class="prelude-val">None </span><span class="kw">if </span><span class="self">self</span>.stored_count() &gt; <span class="number">0 </span>=&gt; <span class="self">self</span>.get(<span class="self">self</span>.stored_indices.end - <span class="number">1</span>).<span class="kw">await</span><span class="question-mark">?</span>,
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
-        };
-        <span class="prelude-val">Ok</span>(value)
+        })
     }
 
     <span class="doccomment">/// Deletes the front value, if any.
@@ -703,11 +708,18 @@
     }
 
     <span class="kw">async fn </span>read_context(<span class="kw-2">&amp;</span><span class="self">self</span>, range: Range&lt;usize&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;T&gt;, ViewError&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>values = Vec::with_capacity(range.len());
+        <span class="kw">let </span>count = range.len();
+        <span class="kw">let </span><span class="kw-2">mut </span>keys = Vec::with_capacity(count);
         <span class="kw">for </span>index <span class="kw">in </span>range {
             <span class="kw">let </span>key = <span class="self">self</span>.context.derive_tag_key(KeyTag::Index <span class="kw">as </span>u8, <span class="kw-2">&amp;</span>index)<span class="question-mark">?</span>;
-            <span class="kw">match </span><span class="self">self</span>.context.read_key(<span class="kw-2">&amp;</span>key).<span class="kw">await</span><span class="question-mark">? </span>{
-                <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(values),
+            keys.push(key)
+        }
+        <span class="kw">let </span><span class="kw-2">mut </span>values = Vec::with_capacity(count);
+        <span class="kw">for </span>entry <span class="kw">in </span><span class="self">self</span>.context.read_multi_key(keys).<span class="kw">await</span><span class="question-mark">? </span>{
+            <span class="kw">match </span>entry {
+                <span class="prelude-val">None </span>=&gt; {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(ViewError::MissingEntries);
+                }
                 <span class="prelude-val">Some</span>(value) =&gt; values.push(value),
             }
         }

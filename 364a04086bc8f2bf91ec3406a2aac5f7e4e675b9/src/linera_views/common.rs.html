@@ -530,6 +530,42 @@
 <span id="530">530</span>
 <span id="531">531</span>
 <span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -640,10 +676,10 @@
     <span class="doccomment">/// Retrieves a `Vec&lt;u8&gt;` from the database using the provided `key`.
     </span><span class="kw">async fn </span>read_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Retrieves a `Vec&lt;u8&gt;` from the database using the provided `key`.
+    <span class="doccomment">/// Retrieves multiple `Vec&lt;u8&gt;` from the database using the provided `keys`.
     </span><span class="kw">async fn </span>read_multi_key_bytes(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        key: Vec&lt;Vec&lt;u8&gt;&gt;,
+        keys: Vec&lt;Vec&lt;u8&gt;&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt;, <span class="self">Self</span>::Error&gt;;
 
     <span class="doccomment">/// Finds the `key` matching the prefix. The prefix is not included in the returned keys.
@@ -657,6 +693,10 @@
 
     <span class="doccomment">/// Writes the `batch` in the database with `base_key` the base key of the entries for the journal.
     </span><span class="kw">async fn </span>write_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, batch: Batch, base_key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;;
+
+    <span class="doccomment">/// Clears any journal entry that may remain.
+    /// The journal is located at the `base_key`.
+    </span><span class="kw">async fn </span>clear_journal(<span class="kw-2">&amp;</span><span class="self">self</span>, base_key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;;
 
     <span class="doccomment">/// Reads a single `key` and deserialize the result if present.
     </span><span class="kw">async fn </span>read_key&lt;V: DeserializeOwned&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;V&gt;, <span class="self">Self</span>::Error&gt;
@@ -672,9 +712,23 @@
         }
     }
 
-    <span class="doccomment">/// Clears any journal entry that may remain.
-    /// The journal is located at the `base_key`.
-    </span><span class="kw">async fn </span>clear_journal(<span class="kw-2">&amp;</span><span class="self">self</span>, base_key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;;
+    <span class="doccomment">/// Reads multiple `keys` and deserializes the results if present.
+    </span><span class="kw">async fn </span>read_multi_key&lt;V: DeserializeOwned + Send&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        keys: Vec&lt;Vec&lt;u8&gt;&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;V&gt;&gt;, <span class="self">Self</span>::Error&gt;
+    <span class="kw">where
+        </span><span class="self">Self</span>::Error: From&lt;bcs::Error&gt;,
+    {
+        <span class="kw">let </span><span class="kw-2">mut </span>values = Vec::with_capacity(keys.len());
+        <span class="kw">for </span>entry <span class="kw">in </span><span class="self">self</span>.read_multi_key_bytes(keys).<span class="kw">await</span><span class="question-mark">? </span>{
+            values.push(<span class="kw">match </span>entry {
+                <span class="prelude-val">None </span>=&gt; <span class="prelude-val">None</span>,
+                <span class="prelude-val">Some</span>(bytes) =&gt; <span class="prelude-val">Some</span>(bcs::from_bytes(<span class="kw-2">&amp;</span>bytes)<span class="question-mark">?</span>),
+            });
+        }
+        <span class="prelude-val">Ok</span>(values)
+    }
 }
 
 <span class="attribute">#[doc(hidden)]
@@ -776,10 +830,10 @@
     /// context.
     </span><span class="kw">async fn </span>read_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Retrieves a `Vec&lt;u8&gt;` from the database using the provided `key`.
+    <span class="doccomment">/// Retrieves multiple `Vec&lt;u8&gt;` from the database using the provided `keys`.
     </span><span class="kw">async fn </span>read_multi_key_bytes(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        key: Vec&lt;Vec&lt;u8&gt;&gt;,
+        keys: Vec&lt;Vec&lt;u8&gt;&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt;, <span class="self">Self</span>::Error&gt;;
 
     <span class="doccomment">/// Finds keys matching the `key_prefix`. The `key_prefix` is not included in the returned keys.
@@ -865,6 +919,24 @@
             }
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
         }
+    }
+
+    <span class="doccomment">/// Reads multiple `keys` and deserializes the results if present.
+    </span><span class="kw">async fn </span>read_multi_key&lt;V: DeserializeOwned + Send&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        keys: Vec&lt;Vec&lt;u8&gt;&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;V&gt;&gt;, <span class="self">Self</span>::Error&gt;
+    <span class="kw">where
+        </span><span class="self">Self</span>::Error: From&lt;bcs::Error&gt;,
+    {
+        <span class="kw">let </span><span class="kw-2">mut </span>values = Vec::with_capacity(keys.len());
+        <span class="kw">for </span>entry <span class="kw">in </span><span class="self">self</span>.read_multi_key_bytes(keys).<span class="kw">await</span><span class="question-mark">? </span>{
+            values.push(<span class="kw">match </span>entry {
+                <span class="prelude-val">None </span>=&gt; <span class="prelude-val">None</span>,
+                <span class="prelude-val">Some</span>(bytes) =&gt; <span class="prelude-val">Some</span>(bcs::from_bytes(<span class="kw-2">&amp;</span>bytes)<span class="question-mark">?</span>),
+            });
+        }
+        <span class="prelude-val">Ok</span>(values)
     }
 }
 
