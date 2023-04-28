@@ -387,10 +387,6 @@
 <span id="387">387</span>
 <span id="388">388</span>
 <span id="389">389</span>
-<span id="390">390</span>
-<span id="391">391</span>
-<span id="392">392</span>
-<span id="393">393</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -412,11 +408,8 @@
     system::{SystemChannel, SystemEffect, SystemOperation},
     Bytecode, Effect, Query, Response,
 };
-<span class="kw">use </span>std::{
-    path::{Path, PathBuf},
-    sync::Arc,
-};
-<span class="kw">use </span>tokio::sync::Mutex;
+<span class="kw">use </span>std::{path::PathBuf, sync::Arc};
+<span class="kw">use </span>tokio::{fs, sync::Mutex};
 
 <span class="doccomment">/// A reference to a single microchain inside a [`TestValidator`].
 </span><span class="kw">pub struct </span>ActiveChain {
@@ -559,12 +552,11 @@
     ///
     /// Returns a tuple with the loaded contract and service [`Bytecode`]s.
     </span><span class="kw">async fn </span>find_current_bytecodes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (Bytecode, Bytecode) {
-        <span class="kw">let </span><span class="kw-2">mut </span>cargo_manifest =
-            Manifest::from_path(<span class="string">&quot;Cargo.toml&quot;</span>).expect(<span class="string">&quot;Failed to load Cargo.toml manifest&quot;</span>);
-
-        cargo_manifest
-            .complete_from_path(Path::new(<span class="string">&quot;.&quot;</span>))
-            .expect(<span class="string">&quot;Failed to populate manifest with information inferred from the repository&quot;</span>);
+        <span class="kw">let </span>manifest_path = fs::canonicalize(<span class="string">&quot;Cargo.toml&quot;</span>)
+            .<span class="kw">await
+            </span>.expect(<span class="string">&quot;Failed to get absolute path of Cargo manifest&quot;</span>);
+        <span class="kw">let </span>cargo_manifest =
+            Manifest::from_path(manifest_path).expect(<span class="string">&quot;Failed to load Cargo.toml manifest&quot;</span>);
 
         <span class="kw">let </span>binaries: Vec&lt;<span class="kw">_</span>&gt; = cargo_manifest
             .bin

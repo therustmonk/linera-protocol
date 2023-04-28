@@ -439,8 +439,8 @@
 </span><span class="kw">pub fn </span>random_shuffle&lt;R: RngCore, T: Clone&gt;(rng: <span class="kw-2">&amp;mut </span>R, values: <span class="kw-2">&amp;mut </span>Vec&lt;T&gt;) {
     <span class="kw">let </span>n = values.len();
     <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">4 </span>* n {
-        <span class="kw">let </span>index1: usize = rng.gen_range(<span class="number">0</span>..n);
-        <span class="kw">let </span>index2: usize = rng.gen_range(<span class="number">0</span>..n);
+        <span class="kw">let </span>index1: usize = rng.gen_range(<span class="number">0</span>, n);
+        <span class="kw">let </span>index2: usize = rng.gen_range(<span class="number">0</span>, n);
         <span class="kw">if </span>index1 != index2 {
             <span class="kw">let </span>val1 = values.get(index1).unwrap().clone();
             <span class="kw">let </span>val2 = values.get(index2).unwrap().clone();
@@ -454,7 +454,7 @@
 </span><span class="kw">pub fn </span>get_random_byte_vector&lt;R: RngCore&gt;(rng: <span class="kw-2">&amp;mut </span>R, key_prefix: <span class="kw-2">&amp;</span>[u8], n: usize) -&gt; Vec&lt;u8&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>v = key_prefix.to_vec();
     <span class="kw">for _ in </span><span class="number">0</span>..n {
-        <span class="kw">let </span>val = rng.gen_range(<span class="number">0</span>..<span class="number">256</span>) <span class="kw">as </span>u8;
+        <span class="kw">let </span>val = rng.gen_range(<span class="number">0</span>, <span class="number">256</span>) <span class="kw">as </span>u8;
         v.push(val);
     }
     v
@@ -532,7 +532,7 @@
     }
     <span class="kw">let </span><span class="kw-2">mut </span>pos_remove_vector = <span class="macro">vec!</span>[Vec::new(); n];
     <span class="kw">for </span>(i, pos) <span class="kw">in </span>indices_rev.iter().enumerate().take(k) {
-        <span class="kw">let </span>idx = rng.gen_range(<span class="kw-2">*</span>pos..n);
+        <span class="kw">let </span>idx = rng.gen_range(<span class="kw-2">*</span>pos, n);
         pos_remove_vector[idx].push(i);
     }
     <span class="kw">let </span><span class="kw-2">mut </span>operations = Vec::new();
