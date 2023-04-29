@@ -1298,66 +1298,6 @@
 <span id="1298">1298</span>
 <span id="1299">1299</span>
 <span id="1300">1300</span>
-<span id="1301">1301</span>
-<span id="1302">1302</span>
-<span id="1303">1303</span>
-<span id="1304">1304</span>
-<span id="1305">1305</span>
-<span id="1306">1306</span>
-<span id="1307">1307</span>
-<span id="1308">1308</span>
-<span id="1309">1309</span>
-<span id="1310">1310</span>
-<span id="1311">1311</span>
-<span id="1312">1312</span>
-<span id="1313">1313</span>
-<span id="1314">1314</span>
-<span id="1315">1315</span>
-<span id="1316">1316</span>
-<span id="1317">1317</span>
-<span id="1318">1318</span>
-<span id="1319">1319</span>
-<span id="1320">1320</span>
-<span id="1321">1321</span>
-<span id="1322">1322</span>
-<span id="1323">1323</span>
-<span id="1324">1324</span>
-<span id="1325">1325</span>
-<span id="1326">1326</span>
-<span id="1327">1327</span>
-<span id="1328">1328</span>
-<span id="1329">1329</span>
-<span id="1330">1330</span>
-<span id="1331">1331</span>
-<span id="1332">1332</span>
-<span id="1333">1333</span>
-<span id="1334">1334</span>
-<span id="1335">1335</span>
-<span id="1336">1336</span>
-<span id="1337">1337</span>
-<span id="1338">1338</span>
-<span id="1339">1339</span>
-<span id="1340">1340</span>
-<span id="1341">1341</span>
-<span id="1342">1342</span>
-<span id="1343">1343</span>
-<span id="1344">1344</span>
-<span id="1345">1345</span>
-<span id="1346">1346</span>
-<span id="1347">1347</span>
-<span id="1348">1348</span>
-<span id="1349">1349</span>
-<span id="1350">1350</span>
-<span id="1351">1351</span>
-<span id="1352">1352</span>
-<span id="1353">1353</span>
-<span id="1354">1354</span>
-<span id="1355">1355</span>
-<span id="1356">1356</span>
-<span id="1357">1357</span>
-<span id="1358">1358</span>
-<span id="1359">1359</span>
-<span id="1360">1360</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1378,7 +1318,7 @@
     data_types::ChainInfoQuery,
     node::{LocalNodeClient, ValidatorNode},
     tracker::NotificationTracker,
-    worker::{Reason, WorkerState},
+    worker::WorkerState,
 };
 <span class="kw">use </span>linera_execution::{
     committee::{ValidatorName, ValidatorState},
@@ -2019,18 +1959,12 @@
 
     <span class="doccomment">/// Watch the network for notifications.
     </span>Watch {
-        <span class="doccomment">/// The collection of Chain IDs to watch.
-        </span>chain_ids: Vec&lt;ChainId&gt;,
+        <span class="doccomment">/// The chain id to watch.
+        </span>chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
 
         <span class="doccomment">/// Show all notifications from all validators.
         </span><span class="attribute">#[structopt(long)]
         </span>raw: bool,
-    },
-
-    <span class="doccomment">/// Acts as a Synchronizer on the network.
-    </span>Synchronize {
-        <span class="doccomment">/// The collection of Chain IDs to synchronize for.
-        </span>chain_ids: Vec&lt;ChainId&gt;,
     },
 
     <span class="doccomment">/// Run a GraphQL service on the local node of a given chain.
@@ -2383,73 +2317,19 @@
                 context.save_wallet();
             }
 
-            Watch { chain_ids, raw } =&gt; {
-                <span class="macro">debug!</span>(<span class="string">&quot;Watching for notifications for chains: {:?}&quot;</span>, <span class="kw-2">&amp;</span>chain_ids);
-                <span class="kw">let </span>chain_id = <span class="kw">match </span>chain_ids.get(<span class="number">0</span>) {
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="macro">warn!</span>(<span class="string">&quot;No chains specified, exiting...&quot;</span>);
-                        <span class="kw">return </span><span class="prelude-val">Ok</span>(());
-                    }
-                    <span class="prelude-val">Some</span>(chain_id) =&gt; chain_id,
-                };
-                <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, <span class="kw-2">*</span>chain_id);
+            Watch { chain_id, raw } =&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, chain_id);
+                <span class="kw">let </span>chain_id = chain_client.chain_id();
+                <span class="macro">debug!</span>(<span class="string">&quot;Watching for notifications for chain {:?}&quot;</span>, chain_id);
                 <span class="kw">let </span><span class="kw-2">mut </span>tracker = NotificationTracker::default();
-                <span class="kw">let </span><span class="kw-2">mut </span>notification_stream = chain_client.subscribe_all(chain_ids).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span><span class="kw-2">mut </span>notification_stream = chain_client.listen().<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="kw">while let </span><span class="prelude-val">Some</span>(notification) = notification_stream.next().<span class="kw">await </span>{
-                    <span class="kw">if </span>raw {
-                        <span class="macro">info!</span>(<span class="string">&quot;{:?}&quot;</span>, notification);
-                    } <span class="kw">else if </span>tracker.insert(notification.clone()) {
-                        <span class="macro">info!</span>(<span class="string">&quot;{:?}&quot;</span>, notification);
+                    <span class="kw">if </span>raw || tracker.insert(notification.clone()) {
+                        <span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, notification);
                     }
                 }
                 <span class="macro">warn!</span>(<span class="string">&quot;Notification stream ended.&quot;</span>);
-                <span class="comment">// Not saving the wallet because `subscribe_all` has no effect on `chain_client`.
-            </span>}
-
-            Synchronize { chain_ids } =&gt; {
-                <span class="macro">debug!</span>(<span class="string">&quot;Synchronizing chains: {:#?}&quot;</span>, <span class="kw-2">&amp;</span>chain_ids);
-                <span class="kw">let </span>chain_id = <span class="kw">match </span>chain_ids.get(<span class="number">0</span>) {
-                    <span class="prelude-val">None </span>=&gt; {
-                        <span class="macro">warn!</span>(<span class="string">&quot;No chains specified, exiting...&quot;</span>);
-                        <span class="kw">return </span><span class="prelude-val">Ok</span>(());
-                    }
-                    <span class="prelude-val">Some</span>(chain_id) =&gt; chain_id,
-                };
-                <span class="kw">let </span><span class="kw-2">mut </span>notification_stream = context
-                    .make_chain_client(storage.clone(), <span class="kw-2">*</span>chain_id)
-                    .subscribe_all(chain_ids)
-                    .<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span><span class="kw-2">mut </span>tracker = NotificationTracker::default();
-                <span class="kw">while let </span><span class="prelude-val">Some</span>(notification) = notification_stream.next().<span class="kw">await </span>{
-                    <span class="macro">debug!</span>(<span class="string">&quot;Received notification: {:?}&quot;</span>, notification);
-                    <span class="kw">let </span><span class="kw-2">mut </span>chain_client =
-                        context.make_chain_client(storage.clone(), notification.chain_id);
-                    <span class="kw">if </span>tracker.insert(notification.clone()) {
-                        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = chain_client.synchronize_and_recompute_balance().<span class="kw">await </span>{
-                            <span class="macro">warn!</span>(<span class="string">&quot;Failed to synchronize and recompute balance for notification {:?} with error: {:?}&quot;</span>, notification, e);
-                            <span class="comment">// If synchronization failed there is nothing to update validators about.
-                            </span><span class="kw">continue</span>;
-                        }
-                        <span class="kw">match </span><span class="kw-2">&amp;</span>notification.reason {
-                            Reason::NewBlock { .. } =&gt; {
-                                <span class="kw">if let </span><span class="prelude-val">Err</span>(e) =
-                                    chain_client.update_validators_about_local_chain().<span class="kw">await
-                                </span>{
-                                    <span class="macro">warn!</span>(<span class="string">&quot;Failed to update validators about the local chain after receiving notification {:?} with error: {:?}&quot;</span>, notification, e);
-                                }
-                            }
-                            Reason::NewMessage { .. } =&gt; {
-                                <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = chain_client.process_inbox().<span class="kw">await </span>{
-                                    <span class="macro">warn!</span>(<span class="string">&quot;Failed to process inbox after receiving new message: {:?} with error: {:?}&quot;</span>, notification, e);
-                                }
-                            }
-                        }
-                        context.update_wallet_from_client(<span class="kw-2">&amp;mut </span>chain_client).<span class="kw">await</span>;
-                        context.save_wallet();
-                    }
-                }
-                <span class="macro">warn!</span>(<span class="string">&quot;Notification stream ended.&quot;</span>);
-                <span class="comment">// Wallet states are saved above.
+                <span class="comment">// Not saving the wallet because `connect()` has no effect on `chain_client`.
             </span>}
 
             Service { chain_id, port } =&gt; {

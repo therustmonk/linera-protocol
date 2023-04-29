@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":[["config",""],["grpc_proxy",""],["node_service",""],["project",""],["storage",""]]};
+window.SIDEBAR_ITEMS = {"mod":[["chain_leader",""],["config",""],["grpc_proxy",""],["node_service",""],["project",""],["storage",""]]};

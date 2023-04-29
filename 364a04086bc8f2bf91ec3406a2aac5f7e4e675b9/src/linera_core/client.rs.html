@@ -1266,11 +1266,6 @@
 <span id="1266">1266</span>
 <span id="1267">1267</span>
 <span id="1268">1268</span>
-<span id="1269">1269</span>
-<span id="1270">1270</span>
-<span id="1271">1271</span>
-<span id="1272">1272</span>
-<span id="1273">1273</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1636,17 +1631,12 @@
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.key_pair().<span class="kw">await</span><span class="question-mark">?</span>.public())
     }
 
-    <span class="doccomment">/// Subscribes to notifications for all validators.
-    </span><span class="kw">pub async fn </span>subscribe_default(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;NotificationStream&gt; {
-        <span class="self">self</span>.subscribe_all(<span class="macro">vec!</span>[<span class="self">self</span>.chain_id]).<span class="kw">await
-    </span>}
-
-    <span class="doccomment">/// Subscribes to notifications for all validators.
-    </span><span class="kw">pub async fn </span>subscribe_all(<span class="kw-2">&amp;mut </span><span class="self">self</span>, chain_ids: Vec&lt;ChainId&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;NotificationStream&gt; {
+    <span class="doccomment">/// Listens to notifications about the current chain from all validators.
+    </span><span class="kw">pub async fn </span>listen(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;NotificationStream&gt; {
         <span class="kw">let </span>committee = <span class="self">self</span>.local_committee().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>streams = Vec::new();
         <span class="kw">for </span>(name, <span class="kw-2">mut </span>node) <span class="kw">in </span><span class="self">self</span>.validator_node_provider.make_nodes(<span class="kw-2">&amp;</span>committee)<span class="question-mark">? </span>{
-            <span class="kw">match </span>node.subscribe(chain_ids.clone()).<span class="kw">await </span>{
+            <span class="kw">match </span>node.subscribe(<span class="macro">vec!</span>[<span class="self">self</span>.chain_id]).<span class="kw">await </span>{
                 <span class="prelude-val">Ok</span>(notification_stream) =&gt; {
                     streams.push(notification_stream);
                 }

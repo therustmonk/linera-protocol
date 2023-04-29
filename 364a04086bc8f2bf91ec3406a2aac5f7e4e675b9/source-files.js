@@ -161,7 +161,7 @@ var sourcesIndex = JSON.parse('{\
 "linera_rpc":["",[],["client.rs","codec.rs","config.rs","conversions.rs","grpc_network.rs","grpc_pool.rs","lib.rs","mass.rs","node_provider.rs","rpc.rs","simple_network.rs","transport.rs"]],\
 "linera_sdk":["",[["contract",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs","wit_types.rs"]],["service",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs","wit_types.rs"]],["test",[["integration",[],["block.rs","chain.rs","mod.rs","validator.rs"]]]]],["base.rs","exported_future.rs","extensions.rs","lib.rs","log.rs"]],\
 "linera_sdk_wasm_tests":["",[],["lib.rs"]],\
-"linera_service":["",[],["config.rs","grpc_proxy.rs","lib.rs","node_service.rs","project.rs","storage.rs"]],\
+"linera_service":["",[],["chain_leader.rs","config.rs","grpc_proxy.rs","lib.rs","node_service.rs","project.rs","storage.rs"]],\
 "linera_storage":["",[],["chain_guards.rs","dynamo_db.rs","lib.rs","memory.rs","rocksdb.rs"]],\
 "linera_views":["",[["test_utils",[],["mod.rs"]]],["batch.rs","collection_view.rs","common.rs","dynamo_db.rs","hashable_wrapper.rs","key_value_store_view.rs","lib.rs","localstack.rs","log_view.rs","lru_caching.rs","map_view.rs","memory.rs","queue_view.rs","reentrant_collection_view.rs","register_view.rs","rocksdb.rs","set_view.rs","views.rs"]],\
 "linera_views_derive":["",[],["lib.rs","util.rs"]],\
