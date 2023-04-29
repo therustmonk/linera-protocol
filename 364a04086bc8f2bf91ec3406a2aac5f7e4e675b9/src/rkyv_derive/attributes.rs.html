@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rkyv_derive-0.7.39/src/attributes.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>attributes.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../rkyv_derive/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rkyv_derive-0.7.41/src/attributes.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>attributes.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../rkyv_derive/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -204,6 +204,13 @@
 <span id="204">204</span>
 <span id="205">205</span>
 <span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::repr::Repr;
 <span class="kw">use </span>quote::ToTokens;
 <span class="kw">use </span>syn::{AttrStyle, DeriveInput, Error, Ident, Lit, LitStr, Meta, NestedMeta, Path};
@@ -219,8 +226,10 @@
     <span class="kw">pub </span>archive_bound: <span class="prelude-ty">Option</span>&lt;LitStr&gt;,
     <span class="kw">pub </span>serialize_bound: <span class="prelude-ty">Option</span>&lt;LitStr&gt;,
     <span class="kw">pub </span>deserialize_bound: <span class="prelude-ty">Option</span>&lt;LitStr&gt;,
+    <span class="kw">pub </span>check_bytes: <span class="prelude-ty">Option</span>&lt;Path&gt;,
     <span class="kw">pub </span>copy_safe: <span class="prelude-ty">Option</span>&lt;Path&gt;,
     <span class="kw">pub </span>rkyv_path: <span class="prelude-ty">Option</span>&lt;Path&gt;,
+    <span class="kw">pub </span>rkyv_path_str: <span class="prelude-ty">Option</span>&lt;LitStr&gt;,
 }
 
 <span class="kw">fn </span>try_set_attribute&lt;T: ToTokens&gt;(
@@ -234,7 +243,7 @@
     } <span class="kw">else </span>{
         <span class="prelude-val">Err</span>(Error::new_spanned(
             value,
-            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{} already specified&quot;</span>, name),
+            <span class="macro">format!</span>(<span class="string">&quot;{} already specified&quot;</span>, name),
         ))
     }
 }
@@ -242,7 +251,9 @@
 <span class="kw">fn </span>parse_archive_attributes(attributes: <span class="kw-2">&amp;mut </span>Attributes, meta: <span class="kw-2">&amp;</span>Meta) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
     <span class="kw">match </span>meta {
         Meta::Path(path) =&gt; {
-            <span class="kw">if </span>path.is_ident(<span class="string">&quot;copy_safe&quot;</span>) {
+            <span class="kw">if </span>path.is_ident(<span class="string">&quot;check_bytes&quot;</span>) {
+                try_set_attribute(<span class="kw-2">&amp;mut </span>attributes.check_bytes, path.clone(), <span class="string">&quot;check_bytes&quot;</span>)
+            } <span class="kw">else if </span>path.is_ident(<span class="string">&quot;copy_safe&quot;</span>) {
                 try_set_attribute(<span class="kw-2">&amp;mut </span>attributes.copy_safe, path.clone(), <span class="string">&quot;copy_safe&quot;</span>)
             } <span class="kw">else </span>{
                 <span class="prelude-val">Err</span>(Error::new_spanned(meta, <span class="string">&quot;unrecognized archive argument&quot;</span>))
@@ -351,7 +362,9 @@
                     <span class="kw">let </span>stream = syn::parse_str(<span class="kw-2">&amp;</span>lit_str.value())<span class="question-mark">?</span>;
                     <span class="kw">let </span>tokens = <span class="kw">crate</span>::serde::respan::respan(stream, lit_str.span());
                     <span class="kw">let </span>path = syn::parse2(tokens)<span class="question-mark">?</span>;
-                    try_set_attribute(<span class="kw-2">&amp;mut </span>attributes.rkyv_path, path, <span class="string">&quot;crate&quot;</span>)
+                    try_set_attribute(<span class="kw-2">&amp;mut </span>attributes.rkyv_path, path, <span class="string">&quot;crate&quot;</span>)<span class="question-mark">?</span>;
+                    attributes.rkyv_path_str = <span class="prelude-val">Some</span>(lit_str.clone());
+                    <span class="prelude-val">Ok</span>(())
                 } <span class="kw">else </span>{
                     <span class="prelude-val">Err</span>(Error::new_spanned(meta, <span class="string">&quot;crate must be a string&quot;</span>))
                 }
@@ -408,6 +421,7 @@
             }
         }
     }
+
     <span class="prelude-val">Ok</span>(result)
 }
 </code></pre></div>

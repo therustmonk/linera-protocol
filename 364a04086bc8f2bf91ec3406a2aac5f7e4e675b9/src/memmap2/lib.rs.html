@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/memmap2-0.5.8/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../memmap2/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/memmap2-0.5.10/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../memmap2/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -1701,6 +1701,57 @@
 <span id="1701">1701</span>
 <span id="1702">1702</span>
 <span id="1703">1703</span>
+<span id="1704">1704</span>
+<span id="1705">1705</span>
+<span id="1706">1706</span>
+<span id="1707">1707</span>
+<span id="1708">1708</span>
+<span id="1709">1709</span>
+<span id="1710">1710</span>
+<span id="1711">1711</span>
+<span id="1712">1712</span>
+<span id="1713">1713</span>
+<span id="1714">1714</span>
+<span id="1715">1715</span>
+<span id="1716">1716</span>
+<span id="1717">1717</span>
+<span id="1718">1718</span>
+<span id="1719">1719</span>
+<span id="1720">1720</span>
+<span id="1721">1721</span>
+<span id="1722">1722</span>
+<span id="1723">1723</span>
+<span id="1724">1724</span>
+<span id="1725">1725</span>
+<span id="1726">1726</span>
+<span id="1727">1727</span>
+<span id="1728">1728</span>
+<span id="1729">1729</span>
+<span id="1730">1730</span>
+<span id="1731">1731</span>
+<span id="1732">1732</span>
+<span id="1733">1733</span>
+<span id="1734">1734</span>
+<span id="1735">1735</span>
+<span id="1736">1736</span>
+<span id="1737">1737</span>
+<span id="1738">1738</span>
+<span id="1739">1739</span>
+<span id="1740">1740</span>
+<span id="1741">1741</span>
+<span id="1742">1742</span>
+<span id="1743">1743</span>
+<span id="1744">1744</span>
+<span id="1745">1745</span>
+<span id="1746">1746</span>
+<span id="1747">1747</span>
+<span id="1748">1748</span>
+<span id="1749">1749</span>
+<span id="1750">1750</span>
+<span id="1751">1751</span>
+<span id="1752">1752</span>
+<span id="1753">1753</span>
+<span id="1754">1754</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A cross-platform Rust API for memory mapped buffers.
 //!
 //! The core functionality is provided by either [`Mmap`] or [`MmapMut`],
@@ -2185,7 +2236,7 @@
             ));
         }
 
-        MmapInner::map_anon(len, <span class="self">self</span>.stack).map(|inner| MmapMut { inner })
+        MmapInner::map_anon(len, <span class="self">self</span>.stack, <span class="self">self</span>.populate).map(|inner| MmapMut { inner })
     }
 
     <span class="doccomment">/// Creates a raw memory map.
@@ -2330,7 +2381,19 @@
     /// See [madvise()](https://man7.org/linux/man-pages/man2/madvise.2.html) map page.
     </span><span class="attribute">#[cfg(unix)]
     </span><span class="kw">pub fn </span>advise(<span class="kw-2">&amp;</span><span class="self">self</span>, advice: Advice) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.inner.advise(advice)
+        <span class="self">self</span>.inner.advise(advice, <span class="number">0</span>, <span class="self">self</span>.inner.len())
+    }
+
+    <span class="doccomment">/// Advise OS how this range of memory map will be accessed.
+    ///
+    /// The offset and length must be in the bounds of the memory map.
+    ///
+    /// Only supported on Unix.
+    ///
+    /// See [madvise()](https://man7.org/linux/man-pages/man2/madvise.2.html) map page.
+    </span><span class="attribute">#[cfg(unix)]
+    </span><span class="kw">pub fn </span>advise_range(<span class="kw-2">&amp;</span><span class="self">self</span>, advice: Advice, offset: usize, len: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.inner.advise(advice, offset, len)
     }
 
     <span class="doccomment">/// Lock the whole memory map into RAM. Only supported on Unix.
@@ -2509,7 +2572,19 @@
     /// See [madvise()](https://man7.org/linux/man-pages/man2/madvise.2.html) map page.
     </span><span class="attribute">#[cfg(unix)]
     </span><span class="kw">pub fn </span>advise(<span class="kw-2">&amp;</span><span class="self">self</span>, advice: Advice) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.inner.advise(advice)
+        <span class="self">self</span>.inner.advise(advice, <span class="number">0</span>, <span class="self">self</span>.inner.len())
+    }
+
+    <span class="doccomment">/// Advise OS how this range of memory map will be accessed.
+    ///
+    /// The offset and length must be in the bounds of the memory map.
+    ///
+    /// Only supported on Unix.
+    ///
+    /// See [madvise()](https://man7.org/linux/man-pages/man2/madvise.2.html) map page.
+    </span><span class="attribute">#[cfg(unix)]
+    </span><span class="kw">pub fn </span>advise_range(<span class="kw-2">&amp;</span><span class="self">self</span>, advice: Advice, offset: usize, len: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.inner.advise(advice, offset, len)
     }
 
     <span class="doccomment">/// Lock the whole memory map into RAM. Only supported on Unix.
@@ -2535,6 +2610,18 @@
             .field(<span class="string">&quot;ptr&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.as_ptr())
             .field(<span class="string">&quot;len&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.len())
             .finish()
+    }
+}
+
+<span class="kw">impl </span>From&lt;Mmap&gt; <span class="kw">for </span>MmapRaw {
+    <span class="kw">fn </span>from(value: Mmap) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ inner: value.inner }
+    }
+}
+
+<span class="kw">impl </span>From&lt;MmapMut&gt; <span class="kw">for </span>MmapRaw {
+    <span class="kw">fn </span>from(value: MmapMut) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ inner: value.inner }
     }
 }
 
@@ -2753,7 +2840,19 @@
     /// See [madvise()](https://man7.org/linux/man-pages/man2/madvise.2.html) map page.
     </span><span class="attribute">#[cfg(unix)]
     </span><span class="kw">pub fn </span>advise(<span class="kw-2">&amp;</span><span class="self">self</span>, advice: Advice) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.inner.advise(advice)
+        <span class="self">self</span>.inner.advise(advice, <span class="number">0</span>, <span class="self">self</span>.inner.len())
+    }
+
+    <span class="doccomment">/// Advise OS how this range of memory map will be accessed.
+    ///
+    /// The offset and length must be in the bounds of the memory map.
+    ///
+    /// Only supported on Unix.
+    ///
+    /// See [madvise()](https://man7.org/linux/man-pages/man2/madvise.2.html) map page.
+    </span><span class="attribute">#[cfg(unix)]
+    </span><span class="kw">pub fn </span>advise_range(<span class="kw-2">&amp;</span><span class="self">self</span>, advice: Advice, offset: usize, len: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.inner.advise(advice, offset, len)
     }
 
     <span class="doccomment">/// Lock the whole memory map into RAM. Only supported on Unix.
@@ -3335,6 +3434,9 @@
 
         <span class="comment">// check that the mmap is empty
         </span><span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>zeros[..], <span class="kw-2">&amp;</span>mmap[..]);
+
+        mmap.advise_range(Advice::Sequential, <span class="number">0</span>, mmap.len())
+            .expect(<span class="string">&quot;mmap advising should be supported on unix&quot;</span>);
 
         <span class="comment">// write values into the mmap
         </span>(<span class="kw-2">&amp;mut </span>mmap[..]).write_all(<span class="kw-2">&amp;</span>incr[..]).unwrap();

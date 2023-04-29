@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/wast-50.0.0/src/component/binary.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>binary.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../wast/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/wast-57.0.0/src/component/binary.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>binary.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../wast/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -949,6 +949,48 @@
 <span id="949">949</span>
 <span id="950">950</span>
 <span id="951">951</span>
+<span id="952">952</span>
+<span id="953">953</span>
+<span id="954">954</span>
+<span id="955">955</span>
+<span id="956">956</span>
+<span id="957">957</span>
+<span id="958">958</span>
+<span id="959">959</span>
+<span id="960">960</span>
+<span id="961">961</span>
+<span id="962">962</span>
+<span id="963">963</span>
+<span id="964">964</span>
+<span id="965">965</span>
+<span id="966">966</span>
+<span id="967">967</span>
+<span id="968">968</span>
+<span id="969">969</span>
+<span id="970">970</span>
+<span id="971">971</span>
+<span id="972">972</span>
+<span id="973">973</span>
+<span id="974">974</span>
+<span id="975">975</span>
+<span id="976">976</span>
+<span id="977">977</span>
+<span id="978">978</span>
+<span id="979">979</span>
+<span id="980">980</span>
+<span id="981">981</span>
+<span id="982">982</span>
+<span id="983">983</span>
+<span id="984">984</span>
+<span id="985">985</span>
+<span id="986">986</span>
+<span id="987">987</span>
+<span id="988">988</span>
+<span id="989">989</span>
+<span id="990">990</span>
+<span id="991">991</span>
+<span id="992">992</span>
+<span id="993">993</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::component::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::core;
 <span class="kw">use </span><span class="kw">crate</span>::token::{Id, Index, NameAnnotation};
@@ -1041,6 +1083,10 @@
         TypeDef::Instance(i) =&gt; {
             encoder.instance(<span class="kw-2">&amp;</span>i.into());
         }
+        TypeDef::Resource(i) =&gt; {
+            <span class="kw">let </span>dtor = i.dtor.as_ref().map(|i| i.idx.into());
+            encoder.resource(i.rep.into(), dtor);
+        }
     }
 }
 
@@ -1081,6 +1127,8 @@
                 e.err.as_deref().map(Into::into),
             );
         }
+        ComponentDefinedType::Own(i) =&gt; encoder.own((<span class="kw-2">*</span>i).into()),
+        ComponentDefinedType::Borrow(i) =&gt; encoder.borrow((<span class="kw-2">*</span>i).into()),
     }
 }
 
@@ -1217,28 +1265,15 @@
 
     <span class="kw">fn </span>encode_alias(<span class="kw-2">&amp;mut </span><span class="self">self</span>, alias: <span class="kw-2">&amp;</span>Alias&lt;<span class="lifetime">&#39;a</span>&gt;) {
         <span class="kw">let </span>name = get_name(<span class="kw-2">&amp;</span>alias.id, <span class="kw-2">&amp;</span>alias.name);
+        <span class="self">self</span>.aliases.alias((<span class="kw-2">&amp;</span>alias.target).into());
         <span class="kw">match </span><span class="kw-2">&amp;</span>alias.target {
-            AliasTarget::Export {
-                instance,
-                name: export_name,
-                kind,
-            } =&gt; {
-                <span class="self">self</span>.aliases
-                    .instance_export((<span class="kw-2">*</span>instance).into(), (<span class="kw-2">*</span>kind).into(), export_name);
+            AliasTarget::Export { kind, .. } =&gt; {
                 <span class="self">self</span>.names_for_component_export_alias(<span class="kw-2">*</span>kind).push(name);
             }
-            AliasTarget::CoreExport {
-                instance,
-                name: export_name,
-                kind,
-            } =&gt; {
-                <span class="self">self</span>.aliases
-                    .core_instance_export((<span class="kw-2">*</span>instance).into(), (<span class="kw-2">*</span>kind).into(), export_name);
+            AliasTarget::CoreExport { kind, .. } =&gt; {
                 <span class="self">self</span>.names_for_core_export_alias(<span class="kw-2">*</span>kind).push(name);
             }
-            AliasTarget::Outer { outer, index, kind } =&gt; {
-                <span class="self">self</span>.aliases
-                    .outer((<span class="kw-2">*</span>outer).into(), (<span class="kw-2">*</span>kind).into(), (<span class="kw-2">*</span>index).into());
+            AliasTarget::Outer { kind, .. } =&gt; {
                 <span class="self">self</span>.names_for_component_outer_alias(<span class="kw-2">*</span>kind).push(name);
             }
         }
@@ -1279,6 +1314,18 @@
                 <span class="self">self</span>.funcs
                     .lower(info.func.idx.into(), info.opts.iter().map(Into::into));
             }
+            CanonicalFuncKind::ResourceNew(info) =&gt; {
+                <span class="self">self</span>.core_func_names.push(name);
+                <span class="self">self</span>.funcs.resource_new(info.ty.into());
+            }
+            CanonicalFuncKind::ResourceDrop(info) =&gt; {
+                <span class="self">self</span>.core_func_names.push(name);
+                <span class="self">self</span>.funcs.resource_drop((<span class="kw-2">&amp;</span>info.ty).into());
+            }
+            CanonicalFuncKind::ResourceRep(info) =&gt; {
+                <span class="self">self</span>.core_func_names.push(name);
+                <span class="self">self</span>.funcs.resource_rep(info.ty.into());
+            }
         }
 
         <span class="self">self</span>.flush(<span class="prelude-val">Some</span>(<span class="self">self</span>.funcs.id()));
@@ -1295,10 +1342,24 @@
         <span class="self">self</span>.flush(<span class="prelude-val">Some</span>(<span class="self">self</span>.imports.id()));
     }
 
-    <span class="kw">fn </span>encode_export(<span class="kw-2">&amp;mut </span><span class="self">self</span>, export: <span class="kw-2">&amp;</span>ComponentExport) {
+    <span class="kw">fn </span>encode_export(<span class="kw-2">&amp;mut </span><span class="self">self</span>, export: <span class="kw-2">&amp;</span>ComponentExport&lt;<span class="lifetime">&#39;a</span>&gt;) {
+        <span class="kw">let </span>name = get_name(<span class="kw-2">&amp;</span>export.id, <span class="kw-2">&amp;</span>export.debug_name);
         <span class="kw">let </span>(kind, index) = (<span class="kw-2">&amp;</span>export.kind).into();
-        <span class="self">self</span>.exports
-            .export(export.name, export.url.unwrap_or(<span class="string">&quot;&quot;</span>), kind, index);
+        <span class="self">self</span>.exports.export(
+            export.name,
+            export.url.unwrap_or(<span class="string">&quot;&quot;</span>),
+            kind,
+            index,
+            export.ty.as_ref().map(|ty| (<span class="kw-2">&amp;</span>ty.<span class="number">0</span>.kind).into()),
+        );
+        <span class="kw">match </span><span class="kw-2">&amp;</span>export.kind {
+            ComponentExportKind::CoreModule(<span class="kw">_</span>) =&gt; <span class="self">self</span>.core_module_names.push(name),
+            ComponentExportKind::Func(<span class="kw">_</span>) =&gt; <span class="self">self</span>.func_names.push(name),
+            ComponentExportKind::Instance(<span class="kw">_</span>) =&gt; <span class="self">self</span>.instance_names.push(name),
+            ComponentExportKind::Value(<span class="kw">_</span>) =&gt; <span class="self">self</span>.value_names.push(name),
+            ComponentExportKind::Component(<span class="kw">_</span>) =&gt; <span class="self">self</span>.component_names.push(name),
+            ComponentExportKind::Type(<span class="kw">_</span>) =&gt; <span class="self">self</span>.type_names.push(name),
+        }
         <span class="self">self</span>.flush(<span class="prelude-val">Some</span>(<span class="self">self</span>.exports.id()));
     }
 
@@ -1502,17 +1563,35 @@
             core::ValType::F32 =&gt; <span class="self">Self</span>::F32,
             core::ValType::F64 =&gt; <span class="self">Self</span>::F64,
             core::ValType::V128 =&gt; <span class="self">Self</span>::V128,
-            core::ValType::Ref(r) =&gt; r.into(),
+            core::ValType::Ref(r) =&gt; <span class="self">Self</span>::Ref(r.into()),
         }
     }
 }
 
-<span class="kw">impl </span>From&lt;core::RefType&lt;<span class="lifetime">&#39;_</span>&gt;&gt; <span class="kw">for </span>wasm_encoder::ValType {
+<span class="kw">impl </span>From&lt;core::RefType&lt;<span class="lifetime">&#39;_</span>&gt;&gt; <span class="kw">for </span>wasm_encoder::RefType {
     <span class="kw">fn </span>from(r: core::RefType&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">match </span>r.heap {
-            core::HeapType::Func =&gt; <span class="self">Self</span>::FuncRef,
-            core::HeapType::Extern =&gt; <span class="self">Self</span>::ExternRef,
-            <span class="kw">_ </span>=&gt; {
+        wasm_encoder::RefType {
+            nullable: r.nullable,
+            heap_type: r.heap.into(),
+        }
+    }
+}
+
+<span class="kw">impl </span>From&lt;core::HeapType&lt;<span class="lifetime">&#39;_</span>&gt;&gt; <span class="kw">for </span>wasm_encoder::HeapType {
+    <span class="kw">fn </span>from(r: core::HeapType&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">match </span>r {
+            core::HeapType::Func =&gt; <span class="self">Self</span>::Func,
+            core::HeapType::Extern =&gt; <span class="self">Self</span>::Extern,
+            core::HeapType::Index(Index::Num(i, <span class="kw">_</span>)) =&gt; <span class="self">Self</span>::TypedFunc(i),
+            core::HeapType::Index(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unresolved index&quot;</span>),
+            core::HeapType::Any
+            | core::HeapType::Eq
+            | core::HeapType::Struct
+            | core::HeapType::Array
+            | core::HeapType::NoFunc
+            | core::HeapType::NoExtern
+            | core::HeapType::None
+            | core::HeapType::I31 =&gt; {
                 <span class="macro">todo!</span>(<span class="string">&quot;encoding of GC proposal types not yet implemented&quot;</span>)
             }
         }
@@ -1709,7 +1788,10 @@
             ItemSigKind::Value(v) =&gt; <span class="self">Self</span>::Value((<span class="kw-2">&amp;</span>v.<span class="number">0</span>).into()),
             ItemSigKind::Func(f) =&gt; <span class="self">Self</span>::Func(f.into()),
             ItemSigKind::Type(TypeBounds::Eq(t)) =&gt; {
-                <span class="self">Self</span>::Type(wasm_encoder::TypeBounds::Eq, (<span class="kw-2">*</span>t).into())
+                <span class="self">Self</span>::Type(wasm_encoder::TypeBounds::Eq((<span class="kw-2">*</span>t).into()))
+            }
+            ItemSigKind::Type(TypeBounds::SubResource) =&gt; {
+                <span class="self">Self</span>::Type(wasm_encoder::TypeBounds::SubResource)
             }
         }
     }
@@ -1727,23 +1809,9 @@
                 ComponentTypeDecl::Type(t) =&gt; {
                     encode_type(encoded.ty(), <span class="kw-2">&amp;</span>t.def);
                 }
-                ComponentTypeDecl::Alias(a) =&gt; <span class="kw">match </span><span class="kw-2">&amp;</span>a.target {
-                    AliasTarget::Outer {
-                        outer,
-                        index,
-                        kind: ComponentOuterAliasKind::CoreType,
-                    } =&gt; {
-                        encoded.alias_outer_core_type(u32::from(<span class="kw-2">*</span>outer), u32::from(<span class="kw-2">*</span>index));
-                    }
-                    AliasTarget::Outer {
-                        outer,
-                        index,
-                        kind: ComponentOuterAliasKind::Type,
-                    } =&gt; {
-                        encoded.alias_outer_type(u32::from(<span class="kw-2">*</span>outer), u32::from(<span class="kw-2">*</span>index));
-                    }
-                    <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;only outer type aliases are supported&quot;</span>),
-                },
+                ComponentTypeDecl::Alias(a) =&gt; {
+                    encoded.alias((<span class="kw-2">&amp;</span>a.target).into());
+                }
                 ComponentTypeDecl::Import(i) =&gt; {
                     encoded.import(i.name, i.url.unwrap_or(<span class="string">&quot;&quot;</span>), (<span class="kw-2">&amp;</span>i.item.kind).into());
                 }
@@ -1769,23 +1837,9 @@
                 InstanceTypeDecl::Type(t) =&gt; {
                     encode_type(encoded.ty(), <span class="kw-2">&amp;</span>t.def);
                 }
-                InstanceTypeDecl::Alias(a) =&gt; <span class="kw">match </span><span class="kw-2">&amp;</span>a.target {
-                    AliasTarget::Outer {
-                        outer,
-                        index,
-                        kind: ComponentOuterAliasKind::CoreType,
-                    } =&gt; {
-                        encoded.alias_outer_core_type(u32::from(<span class="kw-2">*</span>outer), u32::from(<span class="kw-2">*</span>index));
-                    }
-                    AliasTarget::Outer {
-                        outer,
-                        index,
-                        kind: ComponentOuterAliasKind::Type,
-                    } =&gt; {
-                        encoded.alias_outer_type(u32::from(<span class="kw-2">*</span>outer), u32::from(<span class="kw-2">*</span>index));
-                    }
-                    <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;only outer type aliases are supported&quot;</span>),
-                },
+                InstanceTypeDecl::Alias(a) =&gt; {
+                    encoded.alias((<span class="kw-2">&amp;</span>a.target).into());
+                }
                 InstanceTypeDecl::Export(e) =&gt; {
                     encoded.export(e.name, e.url.unwrap_or(<span class="string">&quot;&quot;</span>), (<span class="kw-2">&amp;</span>e.item.kind).into());
                 }
@@ -1897,6 +1951,36 @@
             CanonOpt::Memory(m) =&gt; <span class="self">Self</span>::Memory(m.idx.into()),
             CanonOpt::Realloc(f) =&gt; <span class="self">Self</span>::Realloc(f.idx.into()),
             CanonOpt::PostReturn(f) =&gt; <span class="self">Self</span>::PostReturn(f.idx.into()),
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span>AliasTarget&lt;<span class="lifetime">&#39;a</span>&gt;&gt; <span class="kw">for </span>wasm_encoder::Alias&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>from(target: <span class="kw-2">&amp;</span>AliasTarget&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">match </span>target {
+            AliasTarget::Export {
+                instance,
+                name,
+                kind,
+            } =&gt; wasm_encoder::Alias::InstanceExport {
+                instance: (<span class="kw-2">*</span>instance).into(),
+                kind: (<span class="kw-2">*</span>kind).into(),
+                name,
+            },
+            AliasTarget::CoreExport {
+                instance,
+                name,
+                kind,
+            } =&gt; wasm_encoder::Alias::CoreInstanceExport {
+                instance: (<span class="kw-2">*</span>instance).into(),
+                kind: (<span class="kw-2">*</span>kind).into(),
+                name,
+            },
+            AliasTarget::Outer { outer, index, kind } =&gt; wasm_encoder::Alias::Outer {
+                count: (<span class="kw-2">*</span>outer).into(),
+                kind: (<span class="kw-2">*</span>kind).into(),
+                index: (<span class="kw-2">*</span>index).into(),
+            },
         }
     }
 }

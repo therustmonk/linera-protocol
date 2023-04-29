@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/wasm-encoder-0.24.1/src/core/code.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>code.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../wasm_encoder/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/wasm-encoder-0.26.0/src/core/code.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>code.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../wasm_encoder/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -2892,9 +2892,6 @@
 <span id="2892">2892</span>
 <span id="2893">2893</span>
 <span id="2894">2894</span>
-<span id="2895">2895</span>
-<span id="2896">2896</span>
-<span id="2897">2897</span>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{encode_section, Encode, HeapType, Section, SectionId, ValType};
 <span class="kw">use </span>std::borrow::Cow;
 
@@ -3666,15 +3663,17 @@
     F64x2ConvertLowI32x4U,
     F32x4DemoteF64x2Zero,
     F64x2PromoteLowF32x4,
-    I8x16RelaxedSwizzle,
-    I32x4RelaxedTruncSatF32x4S,
-    I32x4RelaxedTruncSatF32x4U,
-    I32x4RelaxedTruncSatF64x2SZero,
-    I32x4RelaxedTruncSatF64x2UZero,
-    F32x4RelaxedFma,
-    F32x4RelaxedFnma,
-    F64x2RelaxedFma,
-    F64x2RelaxedFnma,
+
+    <span class="comment">// Relaxed simd proposal
+    </span>I8x16RelaxedSwizzle,
+    I32x4RelaxedTruncF32x4S,
+    I32x4RelaxedTruncF32x4U,
+    I32x4RelaxedTruncF64x2SZero,
+    I32x4RelaxedTruncF64x2UZero,
+    F32x4RelaxedMadd,
+    F32x4RelaxedNmadd,
+    F64x2RelaxedMadd,
+    F64x2RelaxedNmadd,
     I8x16RelaxedLaneselect,
     I16x8RelaxedLaneselect,
     I32x4RelaxedLaneselect,
@@ -3684,9 +3683,8 @@
     F64x2RelaxedMin,
     F64x2RelaxedMax,
     I16x8RelaxedQ15mulrS,
-    I16x8DotI8x16I7x16S,
-    I32x4DotI8x16I7x16AddS,
-    F32x4RelaxedDotBf16x8AddF32x4,
+    I16x8RelaxedDotI8x16I7x16S,
+    I32x4RelaxedDotI8x16I7x16AddS,
 
     <span class="comment">// Atomic instructions (the threads proposal)
     </span>MemoryAtomicNotify(MemArg),
@@ -5267,35 +5265,35 @@
                 sink.push(<span class="number">0xFD</span>);
                 <span class="number">0x100u32</span>.encode(sink);
             }
-            Instruction::I32x4RelaxedTruncSatF32x4S =&gt; {
+            Instruction::I32x4RelaxedTruncF32x4S =&gt; {
                 sink.push(<span class="number">0xFD</span>);
                 <span class="number">0x101u32</span>.encode(sink);
             }
-            Instruction::I32x4RelaxedTruncSatF32x4U =&gt; {
+            Instruction::I32x4RelaxedTruncF32x4U =&gt; {
                 sink.push(<span class="number">0xFD</span>);
                 <span class="number">0x102u32</span>.encode(sink);
             }
-            Instruction::I32x4RelaxedTruncSatF64x2SZero =&gt; {
+            Instruction::I32x4RelaxedTruncF64x2SZero =&gt; {
                 sink.push(<span class="number">0xFD</span>);
                 <span class="number">0x103u32</span>.encode(sink);
             }
-            Instruction::I32x4RelaxedTruncSatF64x2UZero =&gt; {
+            Instruction::I32x4RelaxedTruncF64x2UZero =&gt; {
                 sink.push(<span class="number">0xFD</span>);
                 <span class="number">0x104u32</span>.encode(sink);
             }
-            Instruction::F32x4RelaxedFma =&gt; {
+            Instruction::F32x4RelaxedMadd =&gt; {
                 sink.push(<span class="number">0xFD</span>);
                 <span class="number">0x105u32</span>.encode(sink);
             }
-            Instruction::F32x4RelaxedFnma =&gt; {
+            Instruction::F32x4RelaxedNmadd =&gt; {
                 sink.push(<span class="number">0xFD</span>);
                 <span class="number">0x106u32</span>.encode(sink);
             }
-            Instruction::F64x2RelaxedFma =&gt; {
+            Instruction::F64x2RelaxedMadd =&gt; {
                 sink.push(<span class="number">0xFD</span>);
                 <span class="number">0x107u32</span>.encode(sink);
             }
-            Instruction::F64x2RelaxedFnma =&gt; {
+            Instruction::F64x2RelaxedNmadd =&gt; {
                 sink.push(<span class="number">0xFD</span>);
                 <span class="number">0x108u32</span>.encode(sink);
             }
@@ -5335,17 +5333,13 @@
                 sink.push(<span class="number">0xFD</span>);
                 <span class="number">0x111u32</span>.encode(sink);
             }
-            Instruction::I16x8DotI8x16I7x16S =&gt; {
+            Instruction::I16x8RelaxedDotI8x16I7x16S =&gt; {
                 sink.push(<span class="number">0xFD</span>);
                 <span class="number">0x112u32</span>.encode(sink);
             }
-            Instruction::I32x4DotI8x16I7x16AddS =&gt; {
+            Instruction::I32x4RelaxedDotI8x16I7x16AddS =&gt; {
                 sink.push(<span class="number">0xFD</span>);
                 <span class="number">0x113u32</span>.encode(sink);
-            }
-            Instruction::F32x4RelaxedDotBf16x8AddF32x4 =&gt; {
-                sink.push(<span class="number">0xFD</span>);
-                <span class="number">0x114u32</span>.encode(sink);
             }
 
             <span class="comment">// Atmoic instructions from the thread proposal

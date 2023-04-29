@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/linux-raw-sys-0.1.3/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../linux_raw_sys/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/linux-raw-sys-0.3.6/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../linux_raw_sys/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -303,6 +303,110 @@
 <span id="303">303</span>
 <span id="304">304</span>
 <span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
 </pre><pre class="rust"><code><span class="attribute">#![allow(non_camel_case_types, non_upper_case_globals, non_snake_case)]
 #![cfg_attr(not(feature = <span class="string">&quot;std&quot;</span>), no_std)]
 
@@ -383,6 +487,94 @@
 <span class="attribute">#[cfg(feature = <span class="string">&quot;general&quot;</span>)]
 </span><span class="kw">impl </span>Eq <span class="kw">for </span>general::__kernel_timespec {}
 
+<span class="attribute">#[cfg(feature = <span class="string">&quot;general&quot;</span>)]
+</span><span class="kw">pub mod </span>cmsg_macros {
+    <span class="kw">use </span><span class="kw">crate</span>::ctypes::{c_long, c_uint, c_uchar};
+    <span class="kw">use </span><span class="kw">crate</span>::general::{cmsghdr, msghdr};
+    <span class="kw">use </span>core::mem::size_of;
+    <span class="kw">use </span>core::ptr;
+
+    <span class="kw">pub unsafe fn </span>CMSG_ALIGN(len: c_uint) -&gt; c_uint {
+        <span class="kw">let </span>c_long_size = size_of::&lt;c_long&gt;() <span class="kw">as </span>c_uint;
+        (len + c_long_size - <span class="number">1</span>) &amp; !(c_long_size - <span class="number">1</span>)
+    }
+
+    <span class="kw">pub unsafe fn </span>CMSG_DATA(cmsg: <span class="kw-2">*const </span>cmsghdr) -&gt; <span class="kw-2">*mut </span>c_uchar {
+        (cmsg <span class="kw">as </span><span class="kw-2">*mut </span>c_uchar).offset(size_of::&lt;cmsghdr&gt;() <span class="kw">as </span>isize)
+    }
+
+    <span class="kw">pub unsafe fn </span>CMSG_SPACE(len: c_uint) -&gt; c_uint {
+        size_of::&lt;cmsghdr&gt;() <span class="kw">as </span>c_uint + CMSG_ALIGN(len)
+    }
+
+    <span class="kw">pub unsafe fn </span>CMSG_LEN(len: c_uint) -&gt; c_uint {
+        size_of::&lt;cmsghdr&gt;() <span class="kw">as </span>c_uint + len
+    }
+
+    <span class="kw">pub unsafe fn </span>CMSG_FIRSTHDR(mhdr: <span class="kw-2">*const </span>msghdr) -&gt; <span class="kw-2">*mut </span>cmsghdr {
+        <span class="kw">if </span>(<span class="kw-2">*</span>mhdr).msg_controllen &lt; size_of::&lt;cmsghdr&gt;() <span class="kw">as _ </span>{
+            <span class="kw">return </span>ptr::null_mut();
+        }
+
+        (<span class="kw-2">*</span>mhdr).msg_control <span class="kw">as </span><span class="kw-2">*mut </span>cmsghdr
+    }
+
+    <span class="kw">pub unsafe fn </span>CMSG_NXTHDR(mhdr: <span class="kw-2">*const </span>msghdr, cmsg: <span class="kw-2">*const </span>cmsghdr) -&gt; <span class="kw-2">*mut </span>cmsghdr {
+        <span class="comment">// We convert from raw pointers to isize here, which may not be sound in a future version of Rust.
+        // Once the provenance rules are set in stone, it will be a good idea to give this function a once-over.
+
+        </span><span class="kw">let </span>cmsg_len = (<span class="kw-2">*</span>cmsg).cmsg_len;
+        <span class="kw">let </span>next_cmsg = (cmsg <span class="kw">as </span><span class="kw-2">*mut </span>u8).offset(CMSG_ALIGN(cmsg_len <span class="kw">as _</span>) <span class="kw">as </span>isize) <span class="kw">as </span><span class="kw-2">*mut </span>cmsghdr;
+        <span class="kw">let </span>max = ((<span class="kw-2">*</span>mhdr).msg_control <span class="kw">as </span>usize) + ((<span class="kw-2">*</span>mhdr).msg_controllen <span class="kw">as </span>usize);
+
+        <span class="kw">if </span>cmsg_len &lt; size_of::&lt;cmsghdr&gt;() <span class="kw">as _ </span>{
+            <span class="kw">return </span>ptr::null_mut();
+        }
+
+        <span class="kw">if </span>next_cmsg.offset(<span class="number">1</span>) <span class="kw">as </span>usize &gt; max || next_cmsg <span class="kw">as </span>usize + CMSG_ALIGN(cmsg_len <span class="kw">as _</span>) <span class="kw">as </span>usize &gt; max
+        {
+            <span class="kw">return </span>ptr::null_mut();
+        }
+
+        next_cmsg
+    }
+}
+
+<span class="attribute">#[cfg(feature = <span class="string">&quot;general&quot;</span>)]
+</span><span class="kw">pub mod </span>select_macros {
+    <span class="kw">use </span><span class="kw">crate</span>::ctypes::c_int;
+    <span class="kw">use </span><span class="kw">crate</span>::general::__kernel_fd_set;
+    <span class="kw">use </span>core::mem::size_of;
+
+    <span class="kw">pub unsafe fn </span>FD_CLR(fd: c_int, set: <span class="kw-2">*mut </span>__kernel_fd_set) {
+        <span class="kw">let </span>bytes = set <span class="kw">as </span><span class="kw-2">*mut </span>u8;
+        <span class="kw">if </span>fd &gt;= <span class="number">0 </span>{
+            <span class="kw-2">*</span>bytes.offset((fd / <span class="number">8</span>) <span class="kw">as </span>isize) &amp;= !(<span class="number">1 </span>&lt;&lt; (fd % <span class="number">8</span>));
+        }
+    }
+
+    <span class="kw">pub unsafe fn </span>FD_SET(fd: c_int, set: <span class="kw-2">*mut </span>__kernel_fd_set) {
+        <span class="kw">let </span>bytes = set <span class="kw">as </span><span class="kw-2">*mut </span>u8;
+        <span class="kw">if </span>fd &gt;= <span class="number">0 </span>{
+            <span class="kw-2">*</span>bytes.offset((fd / <span class="number">8</span>) <span class="kw">as </span>isize) |= <span class="number">1 </span>&lt;&lt; (fd % <span class="number">8</span>);
+        }
+    }
+
+    <span class="kw">pub unsafe fn </span>FD_ISSET(fd: c_int, set: <span class="kw-2">*const </span>__kernel_fd_set) -&gt; bool {
+        <span class="kw">let </span>bytes = set <span class="kw">as </span><span class="kw-2">*const </span>u8;
+        <span class="kw">if </span>fd &gt;= <span class="number">0 </span>{
+            <span class="kw-2">*</span>bytes.offset((fd / <span class="number">8</span>) <span class="kw">as </span>isize) &amp; (<span class="number">1 </span>&lt;&lt; (fd % <span class="number">8</span>)) != <span class="number">0
+        </span>} <span class="kw">else </span>{
+            <span class="bool-val">false
+        </span>}
+    }
+
+    <span class="kw">pub unsafe fn </span>FD_ZERO(set: <span class="kw-2">*mut </span>__kernel_fd_set) {
+        <span class="kw">let </span>bytes = set <span class="kw">as </span><span class="kw-2">*mut </span>u8;
+        core::ptr::write_bytes(bytes, <span class="number">0</span>, size_of::&lt;__kernel_fd_set&gt;());
+    }
+}
+
 <span class="comment">// The rest of this file is auto-generated!
 </span><span class="attribute">#[cfg(feature = <span class="string">&quot;errno&quot;</span>)]
 #[cfg(target_arch = <span class="string">&quot;arm&quot;</span>)]
@@ -415,6 +607,22 @@
 <span class="attribute">#[cfg(feature = <span class="string">&quot;netlink&quot;</span>)]
 #[cfg(target_arch = <span class="string">&quot;aarch64&quot;</span>)]
 #[path = <span class="string">&quot;aarch64/netlink.rs&quot;</span>]
+</span><span class="kw">pub mod </span>netlink;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;errno&quot;</span>)]
+#[cfg(target_arch = <span class="string">&quot;loongarch64&quot;</span>)]
+#[path = <span class="string">&quot;loongarch64/errno.rs&quot;</span>]
+</span><span class="kw">pub mod </span>errno;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;general&quot;</span>)]
+#[cfg(target_arch = <span class="string">&quot;loongarch64&quot;</span>)]
+#[path = <span class="string">&quot;loongarch64/general.rs&quot;</span>]
+</span><span class="kw">pub mod </span>general;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;ioctl&quot;</span>)]
+#[cfg(target_arch = <span class="string">&quot;loongarch64&quot;</span>)]
+#[path = <span class="string">&quot;loongarch64/ioctl.rs&quot;</span>]
+</span><span class="kw">pub mod </span>ioctl;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;netlink&quot;</span>)]
+#[cfg(target_arch = <span class="string">&quot;loongarch64&quot;</span>)]
+#[path = <span class="string">&quot;loongarch64/netlink.rs&quot;</span>]
 </span><span class="kw">pub mod </span>netlink;
 <span class="attribute">#[cfg(feature = <span class="string">&quot;errno&quot;</span>)]
 #[cfg(target_arch = <span class="string">&quot;mips&quot;</span>)]

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-util-0.7.4/src/sync/cancellation_token/tree_node.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>tree_node.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../../tokio_util/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-util-0.7.8/src/sync/cancellation_token/tree_node.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>tree_node.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../../tokio_util/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -363,14 +363,6 @@
 <span id="363">363</span>
 <span id="364">364</span>
 <span id="365">365</span>
-<span id="366">366</span>
-<span id="367">367</span>
-<span id="368">368</span>
-<span id="369">369</span>
-<span id="370">370</span>
-<span id="371">371</span>
-<span id="372">372</span>
-<span id="373">373</span>
 </pre><pre class="rust"><code><span class="doccomment">//! This mod provides the logic for the inner tree structure of the CancellationToken.
 //!
 //! CancellationTokens are only light handles with references to TreeNode.
@@ -524,47 +516,43 @@
 <span class="kw">where
     </span>F: FnOnce(MutexGuard&lt;<span class="lifetime">&#39;_</span>, Inner&gt;, <span class="prelude-ty">Option</span>&lt;MutexGuard&lt;<span class="lifetime">&#39;_</span>, Inner&gt;&gt;) -&gt; Ret,
 {
-    <span class="kw">let </span><span class="kw-2">mut </span>potential_parent = {
-        <span class="kw">let </span>locked_node = node.inner.lock().unwrap();
-        <span class="kw">match </span>locked_node.parent.clone() {
-            <span class="prelude-val">Some</span>(parent) =&gt; parent,
-            <span class="comment">// If we locked the node and its parent is `None`, we are in a valid state
-            // and can return.
-            </span><span class="prelude-val">None </span>=&gt; <span class="kw">return </span>func(locked_node, <span class="prelude-val">None</span>),
-        }
-    };
+    <span class="kw">use </span>std::sync::TryLockError;
 
-    <span class="kw">loop </span>{
-        <span class="comment">// Deadlock safety:
-        //
-        // Due to invariant #2, we know that we have to lock the parent first, and then the child.
-        // This is true even if the potential_parent is no longer the current parent or even its
-        // sibling, as the invariant still holds.
-        </span><span class="kw">let </span>locked_parent = potential_parent.inner.lock().unwrap();
-        <span class="kw">let </span>locked_node = node.inner.lock().unwrap();
+    <span class="kw">let </span><span class="kw-2">mut </span>locked_node = node.inner.lock().unwrap();
 
-        <span class="kw">let </span>actual_parent = <span class="kw">match </span>locked_node.parent.clone() {
-            <span class="prelude-val">Some</span>(parent) =&gt; parent,
-            <span class="comment">// If we locked the node and its parent is `None`, we are in a valid state
-            // and can return.
-            </span><span class="prelude-val">None </span>=&gt; {
-                <span class="comment">// Was the wrong parent, so unlock it before calling `func`
-                </span>drop(locked_parent);
-                <span class="kw">return </span>func(locked_node, <span class="prelude-val">None</span>);
-            }
+    <span class="comment">// Every time this fails, the number of ancestors of the node decreases,
+    // so the loop must succeed after a finite number of iterations.
+    </span><span class="kw">loop </span>{
+        <span class="comment">// Look up the parent of the currently locked node.
+        </span><span class="kw">let </span>potential_parent = <span class="kw">match </span>locked_node.parent.as_ref() {
+            <span class="prelude-val">Some</span>(potential_parent) =&gt; potential_parent.clone(),
+            <span class="prelude-val">None </span>=&gt; <span class="kw">return </span>func(locked_node, <span class="prelude-val">None</span>),
         };
 
-        <span class="comment">// Loop until we managed to lock both the node and its parent
-        </span><span class="kw">if </span>Arc::ptr_eq(<span class="kw-2">&amp;</span>actual_parent, <span class="kw-2">&amp;</span>potential_parent) {
-            <span class="kw">return </span>func(locked_node, <span class="prelude-val">Some</span>(locked_parent));
+        <span class="comment">// Lock the parent. This may require unlocking the child first.
+        </span><span class="kw">let </span>locked_parent = <span class="kw">match </span>potential_parent.inner.try_lock() {
+            <span class="prelude-val">Ok</span>(locked_parent) =&gt; locked_parent,
+            <span class="prelude-val">Err</span>(TryLockError::WouldBlock) =&gt; {
+                drop(locked_node);
+                <span class="comment">// Deadlock safety:
+                //
+                // Due to invariant #2, the potential parent must come before
+                // the child in the creation order. Therefore, we can safely
+                // lock the child while holding the parent lock.
+                </span><span class="kw">let </span>locked_parent = potential_parent.inner.lock().unwrap();
+                locked_node = node.inner.lock().unwrap();
+                locked_parent
+            }
+            <span class="prelude-val">Err</span>(TryLockError::Poisoned(err)) =&gt; <span class="prelude-val">Err</span>(err).unwrap(),
+        };
+
+        <span class="comment">// If we unlocked the child, then the parent may have changed. Check
+        // that we still have the right parent.
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(actual_parent) = locked_node.parent.as_ref() {
+            <span class="kw">if </span>Arc::ptr_eq(actual_parent, <span class="kw-2">&amp;</span>potential_parent) {
+                <span class="kw">return </span>func(locked_node, <span class="prelude-val">Some</span>(locked_parent));
+            }
         }
-
-        <span class="comment">// Drop locked_parent before reassigning to potential_parent,
-        // as potential_parent is borrowed in it
-        </span>drop(locked_node);
-        drop(locked_parent);
-
-        potential_parent = actual_parent;
     }
 }
 
@@ -616,11 +604,7 @@
 
     <span class="kw">let </span>len = parent.children.len();
     <span class="kw">if </span><span class="number">4 </span>* len &lt;= parent.children.capacity() {
-        <span class="comment">// equal to:
-        //    parent.children.shrink_to(2 * len);
-        // but shrink_to was not yet stabilized in our minimal compatible version
-        </span><span class="kw">let </span>old_children = std::mem::replace(<span class="kw-2">&amp;mut </span>parent.children, Vec::with_capacity(<span class="number">2 </span>* len));
-        parent.children.extend(old_children);
+        parent.children.shrink_to(<span class="number">2 </span>* len);
     }
 }
 

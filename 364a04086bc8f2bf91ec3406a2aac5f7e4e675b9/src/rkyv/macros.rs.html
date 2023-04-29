@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rkyv-0.7.39/src/macros.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>macros.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rkyv-0.7.41/src/macros.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>macros.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="
     data:image/svg+xml,%3Csvg xmlns=&#x27;http://www.w3.org/2000/svg&#x27;
     viewBox=&#x27;0 0 26.458 26.458&#x27;%3E%3Cpath d=&#x27;M0 0v26.458h26.458V0zm9.175 3.772l8.107 8.106
     2.702-2.702 2.702 13.512-13.512-2.702 2.703-2.702-8.107-8.107z&#x27;/%3E%3C/svg%3E
@@ -154,6 +154,19 @@
 <span id="145">145</span>
 <span id="146">146</span>
 <span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
 </pre><pre class="rust"><code><span class="attribute">#[cfg(feature = <span class="string">&quot;copy&quot;</span>)]
 </span><span class="macro">macro_rules! </span>default {
     (<span class="attribute">#[inline] </span>$(<span class="macro-nonterminal">$</span><span class="kw">fn</span>:<span class="macro-nonterminal">tt</span>)<span class="kw-2">*</span>) =&gt; { <span class="attribute">#[inline] </span>default $(<span class="macro-nonterminal">$</span><span class="kw">fn</span>)* };
@@ -166,14 +179,24 @@
     ($(<span class="macro-nonterminal">$</span><span class="kw">fn</span>:<span class="macro-nonterminal">tt</span>)<span class="kw-2">*</span>) =&gt; { $(<span class="macro-nonterminal">$</span><span class="kw">fn</span>)* };
 }
 
-<span class="doccomment">/// Returns a tuple of the field offset and a mutable pointer to the field of the given struct
-/// pointer.
+<span class="doccomment">/// Returns a tuple of `(field_pos, field_out)`, where `field_pos` is the &quot;position&quot;,
+/// i.e. offset in bytes, of the field relative to the base address of the struct and `field_out`
+/// is a `*mut` that points to the field directly.
 ///
-/// # Examples
+/// This is essentially a convenience wrapper around [`core::ptr::addr_of_mut!`] that also
+/// gives back the relative offset of the field, as these are often needed together. You will often
+/// see the return values named `(fp, fo)` in internal use of this macro, which stand for `field_pos`
+/// and `field_out` respectively as discussed above.
+///
+/// # Example
+///
 /// ```
 /// use core::mem::MaybeUninit;
 /// use rkyv::out_field;
 ///
+/// // The macro works on repr(Rust) structs as well, but for the purposes of asserting
+/// // an exact guaranteed position of each field in this example, we&#39;ll use repr(C)
+/// #[repr(C)]
 /// struct Example {
 ///     a: i32,
 ///     b: bool,
@@ -182,10 +205,13 @@
 /// let mut result = MaybeUninit::&lt;Example&gt;::zeroed();
 /// let out = result.as_mut_ptr();
 ///
-/// let (a_off, a) = out_field!(out.a);
-/// unsafe { a.write(42); }
-/// let (b_off, b) = out_field!(out.b);
-/// unsafe { b.write(true); }
+/// let (a_pos, a_out) = out_field!(out.a);
+/// assert_eq!(a_pos, 0); // guaranteed by repr(C) layout, repr(Rust) has free reign
+/// unsafe { a_out.write(42); }
+///
+/// let (b_pos, b_out) = out_field!(out.b);
+/// assert_eq!(b_pos, 4); // guaranteed by repr(C) layout, repr(Rust) has free reign
+/// unsafe { b_out.write(true); }
 ///
 /// let result = unsafe { result.assume_init() };
 /// assert_eq!(result.a, 42);

@@ -1,8 +1,9 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Types and traits for generating responses."><meta name="keywords" content="rust, rustlang, rust-lang, response"><title>axum::response - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../axum/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../axum/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"><a href="#">Module response</a></h2><div class="sidebar-elems"><section><ul class="block"><li><a href="#reexports">Re-exports</a></li><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li><li><a href="#types">Type Definitions</a></li></ul></section></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1 class="fqn">Module <a href="../index.html">axum</a>::<wbr><a class="mod" href="#">response</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../../src/axum/response/mod.rs.html#1-230">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Types and traits for generating responses.</p>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Types and traits for generating responses."><meta name="keywords" content="rust, rustlang, rust-lang, response"><title>axum::response - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../axum/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../axum/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"><a href="#">Module response</a></h2><div class="sidebar-elems"><section><ul class="block"><li><a href="#reexports">Re-exports</a></li><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li><li><a href="#types">Type Definitions</a></li></ul></section></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1 class="fqn">Module <a href="../index.html">axum</a>::<wbr><a class="mod" href="#">response</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../../src/axum/response/mod.rs.html#1-231">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Types and traits for generating responses.</p>
 <h2 id="table-of-contents"><a href="#table-of-contents">Table of contents</a></h2>
 <ul>
 <li><a href="#building-responses">Building responses</a></li>
 <li><a href="#returning-different-response-types">Returning different response types</a></li>
+<li><a href="#regarding-impl-intoresponse">Regarding <code>impl IntoResponse</code></a></li>
 </ul>
 <h2 id="building-responses"><a href="#building-responses">Building responses</a></h2>
 <p>Anything that implements <a href="trait.IntoResponse.html"><code>IntoResponse</code></a> can be returned from a handler. axum
@@ -200,5 +201,80 @@ setting headers and extensions.</p>
 <span class="kw">fn </span>something_else() -&gt; bool {
     <span class="comment">// ...
 </span>}</code></pre></div>
+<h2 id="regarding-impl-intoresponse"><a href="#regarding-impl-intoresponse">Regarding <code>impl IntoResponse</code></a></h2>
+<p>You can use <code>impl IntoResponse</code> as the return type from handlers to avoid
+typing large types. For example</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>axum::http::StatusCode;
+
+<span class="kw">async fn </span>handler() -&gt; (StatusCode, [(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str); <span class="number">1</span>], <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str) {
+    (StatusCode::OK, [(<span class="string">&quot;x-foo&quot;</span>, <span class="string">&quot;bar&quot;</span>)], <span class="string">&quot;Hello, World!&quot;</span>)
+}</code></pre></div>
+<p>Becomes easier using <code>impl IntoResponse</code>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>axum::{http::StatusCode, response::IntoResponse};
+
+<span class="kw">async fn </span>impl_into_response() -&gt; <span class="kw">impl </span>IntoResponse {
+    (StatusCode::OK, [(<span class="string">&quot;x-foo&quot;</span>, <span class="string">&quot;bar&quot;</span>)], <span class="string">&quot;Hello, World!&quot;</span>)
+}</code></pre></div>
+<p>However <code>impl IntoResponse</code> has a few limitations. Firstly it can only be used
+to return a single type:</p>
+
+<div class="example-wrap compile_fail"><div class='tooltip'>ⓘ</div><pre class="rust rust-example-rendered"><code><span class="kw">use </span>axum::{http::StatusCode, response::IntoResponse};
+
+<span class="kw">async fn </span>handler() -&gt; <span class="kw">impl </span>IntoResponse {
+    <span class="kw">if </span>check_something() {
+        StatusCode::NOT_FOUND
+    } <span class="kw">else </span>{
+        <span class="string">&quot;Hello, World!&quot;
+    </span>}
+}
+
+<span class="kw">fn </span>check_something() -&gt; bool {
+    <span class="comment">// ...
+</span>}</code></pre></div>
+<p>This function returns either a <code>StatusCode</code> or a <code>&amp;'static str</code> which <code>impl Trait</code> doesn’t allow.</p>
+<p>Secondly <code>impl IntoResponse</code> can lead to type inference issues when used with
+<code>Result</code> and <code>?</code>:</p>
+
+<div class="example-wrap compile_fail"><div class='tooltip'>ⓘ</div><pre class="rust rust-example-rendered"><code><span class="kw">use </span>axum::{http::StatusCode, response::IntoResponse};
+
+<span class="kw">async fn </span>handler() -&gt; <span class="kw">impl </span>IntoResponse {
+    create_thing()<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(StatusCode::CREATED)
+}
+
+<span class="kw">fn </span>create_thing() -&gt; <span class="prelude-ty">Result</span>&lt;(), StatusCode&gt; {
+    <span class="comment">// ...
+</span>}</code></pre></div>
+<p>This is because <code>?</code> supports using the <a href="https://doc.rust-lang.org/1.66.1/core/convert/trait.From.html" title="From"><code>From</code></a> trait to convert to a different
+error type but it doesn’t know which type to convert to, because we only
+specified <code>impl IntoResponse</code> as the return type.</p>
+<p><code>Result&lt;impl IntoResponse, impl IntoResponse&gt;</code> doesn’t always work either:</p>
+
+<div class="example-wrap compile_fail"><div class='tooltip'>ⓘ</div><pre class="rust rust-example-rendered"><code><span class="kw">use </span>axum::{http::StatusCode, response::IntoResponse};
+
+<span class="kw">async fn </span>handler() -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>IntoResponse, <span class="kw">impl </span>IntoResponse&gt; {
+    create_thing()<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(StatusCode::CREATED)
+}
+
+<span class="kw">fn </span>create_thing() -&gt; <span class="prelude-ty">Result</span>&lt;(), StatusCode&gt; {
+    <span class="comment">// ...
+</span>}</code></pre></div>
+<p>The solution is to use a concrete error type, such as <code>Result&lt;impl IntoResponse, StatusCode&gt;</code>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>axum::{http::StatusCode, response::IntoResponse};
+
+<span class="kw">async fn </span>handler() -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>IntoResponse, StatusCode&gt; {
+    create_thing()<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(StatusCode::CREATED)
+}
+
+<span class="kw">fn </span>create_thing() -&gt; <span class="prelude-ty">Result</span>&lt;(), StatusCode&gt; {
+    <span class="comment">// ...
+</span>}</code></pre></div>
+<p>Because of this it is generally not recommended to use <code>impl IntoResponse</code>
+unless you’re familiar with the details of how <code>impl Trait</code> works.</p>
 </div></details><h2 id="reexports" class="small-section-header"><a href="#reexports">Re-exports</a></h2><div class="item-table"><div class="item-row"><div class="item-left import-item" id="reexport.Json"><code>pub use crate::<a class="struct" href="../struct.Json.html" title="struct axum::Json">Json</a>;</code></div></div><div class="item-row"><div class="item-left import-item" id="reexport.TypedHeader"><code>pub use crate::<a class="struct" href="../struct.TypedHeader.html" title="struct axum::TypedHeader">TypedHeader</a>;</code></div></div><div class="item-row"><div class="item-left import-item" id="reexport.Form"><code>pub use crate::form::<a class="struct" href="../struct.Form.html" title="struct axum::Form">Form</a>;</code></div></div><div class="item-row"><div class="item-left import-item" id="reexport.Extension"><code>pub use crate::<a class="struct" href="../struct.Extension.html" title="struct axum::Extension">Extension</a>;</code></div></div></div><h2 id="modules" class="small-section-header"><a href="#modules">Modules</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="sse/index.html" title="axum::response::sse mod">sse</a></div><div class="item-right docblock-short">Server-Sent Events (SSE) responses.</div></div></div><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.AppendHeaders.html" title="axum::response::AppendHeaders struct">AppendHeaders</a></div><div class="item-right docblock-short">Append headers to a response.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.ErrorResponse.html" title="axum::response::ErrorResponse struct">ErrorResponse</a></div><div class="item-right docblock-short">An <a href="trait.IntoResponse.html" title="IntoResponse"><code>IntoResponse</code></a>-based error type</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Html.html" title="axum::response::Html struct">Html</a></div><div class="item-right docblock-short">An HTML response.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Redirect.html" title="axum::response::Redirect struct">Redirect</a></div><div class="item-right docblock-short">Response that redirects the request to another location.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.ResponseParts.html" title="axum::response::ResponseParts struct">ResponseParts</a></div><div class="item-right docblock-short">Parts of a response.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Sse.html" title="axum::response::Sse struct">Sse</a></div><div class="item-right docblock-short">An SSE response</div></div></div><h2 id="traits" class="small-section-header"><a href="#traits">Traits</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.IntoResponse.html" title="axum::response::IntoResponse trait">IntoResponse</a></div><div class="item-right docblock-short">Trait for generating responses.</div></div><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.IntoResponseParts.html" title="axum::response::IntoResponseParts trait">IntoResponseParts</a></div><div class="item-right docblock-short">Trait for adding headers and extensions to a response.</div></div></div><h2 id="types" class="small-section-header"><a href="#types">Type Definitions</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="type" href="type.Response.html" title="axum::response::Response type">Response</a></div><div class="item-right docblock-short">Type alias for <a href="../../http/response/struct.Response.html" title="http::Response"><code>http::Response</code></a> whose body type defaults to <a href="../body/type.BoxBody.html" title="BoxBody"><code>BoxBody</code></a>, the most common body
 type used with axum.</div></div><div class="item-row"><div class="item-left module-item"><a class="type" href="type.Result.html" title="axum::response::Result type">Result</a></div><div class="item-right docblock-short">An <a href="trait.IntoResponse.html" title="IntoResponse"><code>IntoResponse</code></a>-based result type that uses <a href="struct.ErrorResponse.html" title="ErrorResponse"><code>ErrorResponse</code></a> as the error type.</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="axum" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

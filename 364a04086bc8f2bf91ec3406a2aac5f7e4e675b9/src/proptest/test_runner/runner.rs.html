@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/proptest-1.0.0/src/test_runner/runner.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>runner.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../proptest/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/proptest-1.1.0/src/test_runner/runner.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>runner.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../proptest/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -1458,6 +1458,84 @@
 <span id="1458">1458</span>
 <span id="1459">1459</span>
 <span id="1460">1460</span>
+<span id="1461">1461</span>
+<span id="1462">1462</span>
+<span id="1463">1463</span>
+<span id="1464">1464</span>
+<span id="1465">1465</span>
+<span id="1466">1466</span>
+<span id="1467">1467</span>
+<span id="1468">1468</span>
+<span id="1469">1469</span>
+<span id="1470">1470</span>
+<span id="1471">1471</span>
+<span id="1472">1472</span>
+<span id="1473">1473</span>
+<span id="1474">1474</span>
+<span id="1475">1475</span>
+<span id="1476">1476</span>
+<span id="1477">1477</span>
+<span id="1478">1478</span>
+<span id="1479">1479</span>
+<span id="1480">1480</span>
+<span id="1481">1481</span>
+<span id="1482">1482</span>
+<span id="1483">1483</span>
+<span id="1484">1484</span>
+<span id="1485">1485</span>
+<span id="1486">1486</span>
+<span id="1487">1487</span>
+<span id="1488">1488</span>
+<span id="1489">1489</span>
+<span id="1490">1490</span>
+<span id="1491">1491</span>
+<span id="1492">1492</span>
+<span id="1493">1493</span>
+<span id="1494">1494</span>
+<span id="1495">1495</span>
+<span id="1496">1496</span>
+<span id="1497">1497</span>
+<span id="1498">1498</span>
+<span id="1499">1499</span>
+<span id="1500">1500</span>
+<span id="1501">1501</span>
+<span id="1502">1502</span>
+<span id="1503">1503</span>
+<span id="1504">1504</span>
+<span id="1505">1505</span>
+<span id="1506">1506</span>
+<span id="1507">1507</span>
+<span id="1508">1508</span>
+<span id="1509">1509</span>
+<span id="1510">1510</span>
+<span id="1511">1511</span>
+<span id="1512">1512</span>
+<span id="1513">1513</span>
+<span id="1514">1514</span>
+<span id="1515">1515</span>
+<span id="1516">1516</span>
+<span id="1517">1517</span>
+<span id="1518">1518</span>
+<span id="1519">1519</span>
+<span id="1520">1520</span>
+<span id="1521">1521</span>
+<span id="1522">1522</span>
+<span id="1523">1523</span>
+<span id="1524">1524</span>
+<span id="1525">1525</span>
+<span id="1526">1526</span>
+<span id="1527">1527</span>
+<span id="1528">1528</span>
+<span id="1529">1529</span>
+<span id="1530">1530</span>
+<span id="1531">1531</span>
+<span id="1532">1532</span>
+<span id="1533">1533</span>
+<span id="1534">1534</span>
+<span id="1535">1535</span>
+<span id="1536">1536</span>
+<span id="1537">1537</span>
+<span id="1538">1538</span>
 </pre><pre class="rust"><code><span class="comment">//-
 // Copyright 2017, 2018, 2019 The proptest developers
 //
@@ -1638,27 +1716,34 @@
     _runner: <span class="kw-2">&amp;mut </span>TestRunner,
     case: V,
     test: <span class="kw-2">&amp;</span>F,
-    replay: <span class="kw-2">&amp;mut </span>R,
+    replay_from_fork: <span class="kw-2">&amp;mut </span>R,
     result_cache: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>ResultCache,
     <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>ForkOutput,
-) -&gt; TestCaseResult
+    is_from_persisted_seed: bool,
+) -&gt; TestCaseResultV2
 <span class="kw">where
     </span>V: fmt::Debug,
     F: Fn(V) -&gt; TestCaseResult,
     R: Iterator&lt;Item = TestCaseResult&gt;,
 {
-    <span class="kw">if let </span><span class="prelude-val">Some</span>(result) = replay.next() {
-        <span class="kw">return </span>result;
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(result) = replay_from_fork.next() {
+        <span class="kw">return </span>result.map(|<span class="kw">_</span>| TestCaseOk::ReplayFromForkSuccess);
     }
 
     <span class="kw">let </span>cache_key = result_cache.key(<span class="kw-2">&amp;</span>ResultCacheKey::new(<span class="kw-2">&amp;</span>case));
     <span class="kw">if let </span><span class="prelude-val">Some</span>(result) = result_cache.get(cache_key) {
-        <span class="kw">return </span>result.clone();
+        <span class="kw">return </span>result.clone().map(|<span class="kw">_</span>| TestCaseOk::CacheHitSuccess);
     }
 
     <span class="kw">let </span>result = test(case);
     result_cache.put(cache_key, <span class="kw-2">&amp;</span>result);
-    result
+    result.map(|<span class="kw">_</span>| {
+        <span class="kw">if </span>is_from_persisted_seed {
+            TestCaseOk::PersistedCaseSuccess
+        } <span class="kw">else </span>{
+            TestCaseOk::NewCaseSuccess
+        }
+    })
 }
 
 <span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
@@ -1666,10 +1751,11 @@
     runner: <span class="kw-2">&amp;mut </span>TestRunner,
     case: V,
     test: <span class="kw-2">&amp;</span>F,
-    replay: <span class="kw-2">&amp;mut </span>R,
+    replay_from_fork: <span class="kw-2">&amp;mut </span>R,
     result_cache: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>ResultCache,
     fork_output: <span class="kw-2">&amp;mut </span>ForkOutput,
-) -&gt; TestCaseResult
+    is_from_persisted_seed: bool,
+) -&gt; TestCaseResultV2
 <span class="kw">where
     </span>V: fmt::Debug,
     F: Fn(V) -&gt; TestCaseResult,
@@ -1679,8 +1765,8 @@
 
     <span class="kw">let </span>timeout = runner.config.timeout();
 
-    <span class="kw">if let </span><span class="prelude-val">Some</span>(result) = replay.next() {
-        <span class="kw">return </span>result;
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(result) = replay_from_fork.next() {
+        <span class="kw">return </span>result.map(|<span class="kw">_</span>| TestCaseOk::ReplayFromForkSuccess);
     }
 
     <span class="comment">// Now that we&#39;re about to start a new test (as far as the replay system is
@@ -1697,7 +1783,7 @@
             TRACE,
             <span class="string">&quot;Test input hit cache, skipping execution&quot;
         </span>);
-        <span class="kw">return </span>result.clone();
+        <span class="kw">return </span>result.clone().map(|<span class="kw">_</span>| TestCaseOk::CacheHitSuccess);
     }
 
     <span class="kw">let </span>time_start = time::Instant::now();
@@ -1745,7 +1831,13 @@
         ),
     }
 
-    result
+    result.map(|<span class="kw">_</span>| {
+        <span class="kw">if </span>is_from_persisted_seed {
+            TestCaseOk::PersistedCaseSuccess
+        } <span class="kw">else </span>{
+            TestCaseOk::NewCaseSuccess
+        }
+    })
 }
 
 <span class="kw">type </span>TestRunResult&lt;S&gt; = <span class="prelude-ty">Result</span>&lt;(), TestError&lt;&lt;S <span class="kw">as </span>Strategy&gt;::Value&gt;&gt;;
@@ -2029,7 +2121,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         strategy: <span class="kw-2">&amp;</span>S,
         test: <span class="kw">impl </span>Fn(S::Value) -&gt; TestCaseResult,
-        <span class="kw-2">mut </span>replay: <span class="kw">impl </span>Iterator&lt;Item = TestCaseResult&gt;,
+        <span class="kw-2">mut </span>replay_from_fork: <span class="kw">impl </span>Iterator&lt;Item = TestCaseResult&gt;,
         <span class="kw-2">mut </span>fork_output: ForkOutput,
     ) -&gt; TestRunResult&lt;S&gt; {
         <span class="kw">let </span>old_rng = <span class="self">self</span>.rng.clone();
@@ -2048,9 +2140,10 @@
             <span class="self">self</span>.gen_and_run_case(
                 strategy,
                 <span class="kw-2">&amp;</span>test,
-                <span class="kw-2">&amp;mut </span>replay,
+                <span class="kw-2">&amp;mut </span>replay_from_fork,
                 <span class="kw-2">&amp;mut *</span>result_cache,
                 <span class="kw-2">&amp;mut </span>fork_output,
+                <span class="bool-val">true</span>,
             )<span class="question-mark">?</span>;
         }
         <span class="self">self</span>.rng = old_rng;
@@ -2062,9 +2155,10 @@
             <span class="kw">let </span>result = <span class="self">self</span>.gen_and_run_case(
                 strategy,
                 <span class="kw-2">&amp;</span>test,
-                <span class="kw-2">&amp;mut </span>replay,
+                <span class="kw-2">&amp;mut </span>replay_from_fork,
                 <span class="kw-2">&amp;mut *</span>result_cache,
                 <span class="kw-2">&amp;mut </span>fork_output,
+                <span class="bool-val">false</span>,
             );
             <span class="kw">if let </span><span class="prelude-val">Err</span>(TestError::Fail(<span class="kw">_</span>, <span class="kw-2">ref </span>value)) = result {
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref mut </span>failure_persistence) =
@@ -2099,22 +2193,33 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         strategy: <span class="kw-2">&amp;</span>S,
         f: <span class="kw-2">&amp;</span><span class="kw">impl </span>Fn(S::Value) -&gt; TestCaseResult,
-        replay: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Iterator&lt;Item = TestCaseResult&gt;,
+        replay_from_fork: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Iterator&lt;Item = TestCaseResult&gt;,
         result_cache: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>ResultCache,
         fork_output: <span class="kw-2">&amp;mut </span>ForkOutput,
+        is_from_persisted_seed: bool,
     ) -&gt; TestRunResult&lt;S&gt; {
         <span class="kw">let </span>case = <span class="macro">unwrap_or!</span>(strategy.new_tree(<span class="self">self</span>), msg =&gt;
                 <span class="kw">return </span><span class="prelude-val">Err</span>(TestError::Abort(msg)));
 
-        <span class="kw">if </span><span class="self">self</span>.run_one_with_replay(
+        <span class="comment">// We only count new cases to our set of successful runs against
+        // `PROPTEST_CASES` config.
+        </span><span class="kw">let </span>ok_type = <span class="self">self</span>.run_one_with_replay(
             case,
             f,
-            replay,
+            replay_from_fork,
             result_cache,
             fork_output,
-        )<span class="question-mark">? </span>{
-            <span class="self">self</span>.successes += <span class="number">1</span>;
+            is_from_persisted_seed,
+        )<span class="question-mark">?</span>;
+        <span class="kw">match </span>ok_type {
+            TestCaseOk::NewCaseSuccess | TestCaseOk::ReplayFromForkSuccess =&gt; {
+                <span class="self">self</span>.successes += <span class="number">1
+            </span>}
+            TestCaseOk::PersistedCaseSuccess
+            | TestCaseOk::CacheHitSuccess
+            | TestCaseOk::Reject =&gt; (),
         }
+
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -2139,37 +2244,51 @@
             <span class="kw-2">&amp;mut </span>iter::empty::&lt;TestCaseResult&gt;().fuse(),
             <span class="kw-2">&amp;mut *</span>result_cache,
             <span class="kw-2">&amp;mut </span>ForkOutput::empty(),
+            <span class="bool-val">false</span>,
         )
+        .map(|ok_type| <span class="kw">match </span>ok_type {
+            TestCaseOk::Reject =&gt; <span class="bool-val">false</span>,
+            <span class="kw">_ </span>=&gt; <span class="bool-val">true</span>,
+        })
     }
 
     <span class="kw">fn </span>run_one_with_replay&lt;V: ValueTree&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         <span class="kw-2">mut </span>case: V,
         test: <span class="kw">impl </span>Fn(V::Value) -&gt; TestCaseResult,
-        replay: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Iterator&lt;Item = TestCaseResult&gt;,
+        replay_from_fork: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Iterator&lt;Item = TestCaseResult&gt;,
         result_cache: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>ResultCache,
         fork_output: <span class="kw-2">&amp;mut </span>ForkOutput,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;bool, TestError&lt;V::Value&gt;&gt; {
+        is_from_persisted_seed: bool,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;TestCaseOk, TestError&lt;V::Value&gt;&gt; {
         <span class="kw">let </span>result = call_test(
             <span class="self">self</span>,
             case.current(),
             <span class="kw-2">&amp;</span>test,
-            replay,
+            replay_from_fork,
             result_cache,
             fork_output,
+            is_from_persisted_seed,
         );
 
         <span class="kw">match </span>result {
-            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>),
+            <span class="prelude-val">Ok</span>(success_type) =&gt; <span class="prelude-val">Ok</span>(success_type),
             <span class="prelude-val">Err</span>(TestCaseError::Fail(why)) =&gt; {
                 <span class="kw">let </span>why = <span class="self">self
-                    </span>.shrink(<span class="kw-2">&amp;mut </span>case, test, replay, result_cache, fork_output)
+                    </span>.shrink(
+                        <span class="kw-2">&amp;mut </span>case,
+                        test,
+                        replay_from_fork,
+                        result_cache,
+                        fork_output,
+                        is_from_persisted_seed,
+                    )
                     .unwrap_or(why);
                 <span class="prelude-val">Err</span>(TestError::Fail(why, case.current()))
             }
             <span class="prelude-val">Err</span>(TestCaseError::Reject(whence)) =&gt; {
                 <span class="self">self</span>.reject_global(whence)<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>)
+                <span class="prelude-val">Ok</span>(TestCaseOk::Reject)
             }
         }
     }
@@ -2178,9 +2297,10 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         case: <span class="kw-2">&amp;mut </span>V,
         test: <span class="kw">impl </span>Fn(V::Value) -&gt; TestCaseResult,
-        replay: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Iterator&lt;Item = TestCaseResult&gt;,
+        replay_from_fork: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Iterator&lt;Item = TestCaseResult&gt;,
         result_cache: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>ResultCache,
         fork_output: <span class="kw-2">&amp;mut </span>ForkOutput,
+        is_from_persisted_seed: bool,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;Reason&gt; {
         <span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
         </span><span class="kw">use </span>std::time;
@@ -2268,9 +2388,10 @@
                     <span class="self">self</span>,
                     case.current(),
                     <span class="kw-2">&amp;</span>test,
-                    replay,
+                    replay_from_fork,
                     result_cache,
                     fork_output,
+                    is_from_persisted_seed,
                 );
 
                 <span class="kw">match </span>result {
@@ -2527,6 +2648,41 @@
             <span class="prelude-val">Ok</span>(())
         });
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Err</span>(TestError::Fail(<span class="string">&quot;not less than 5&quot;</span>.into(), <span class="number">5</span>)), result);
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>persisted_cases_do_not_count_towards_total_cases() {
+        <span class="kw">const </span>FILE: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str = <span class="string">&quot;persistence-test.txt&quot;</span>;
+        <span class="kw">let _ </span>= fs::remove_file(FILE);
+
+        <span class="kw">let </span>config = Config {
+            failure_persistence: <span class="prelude-val">Some</span>(Box::new(
+                FileFailurePersistence::Direct(FILE),
+            )),
+            cases: <span class="number">1</span>,
+            ..Config::default()
+        };
+
+        <span class="kw">let </span>max = <span class="number">10_000_000i32</span>;
+        {
+            TestRunner::new(config.clone())
+                .run(<span class="kw-2">&amp;</span>(<span class="number">0i32</span>..max), |_v| {
+                    <span class="prelude-val">Err</span>(TestCaseError::Fail(<span class="string">&quot;persist a failure&quot;</span>.into()))
+                })
+                .expect_err(<span class="string">&quot;didn&#39;t fail?&quot;</span>);
+        }
+
+        <span class="kw">let </span>run_count = RefCell::new(<span class="number">0</span>);
+        TestRunner::new(config.clone())
+            .run(<span class="kw-2">&amp;</span>(<span class="number">0i32</span>..max), |_v| {
+                <span class="kw-2">*</span>run_count.borrow_mut() += <span class="number">1</span>;
+                <span class="prelude-val">Ok</span>(())
+            })
+            .expect(<span class="string">&quot;should succeed&quot;</span>);
+
+        <span class="comment">// Persisted ran, and a new case ran, and only new case counts
+        // against `cases: 1`.
+        </span><span class="macro">assert_eq!</span>(run_count.into_inner(), <span class="number">2</span>);
     }
 
     <span class="attribute">#[derive(Clone, Copy, PartialEq)]

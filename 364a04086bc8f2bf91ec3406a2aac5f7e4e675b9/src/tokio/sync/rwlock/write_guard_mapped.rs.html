@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-1.25.0/src/sync/rwlock/write_guard_mapped.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>write_guard_mapped.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../../tokio/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-1.28.0/src/sync/rwlock/write_guard_mapped.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>write_guard_mapped.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../../tokio/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -195,11 +195,25 @@
 <span id="195">195</span>
 <span id="196">196</span>
 <span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::sync::batch_semaphore::Semaphore;
-<span class="kw">use </span>std::fmt;
-<span class="kw">use </span>std::marker;
-<span class="kw">use </span>std::mem;
-<span class="kw">use </span>std::ops;
+<span class="kw">use </span>std::marker::PhantomData;
+<span class="kw">use </span>std::{fmt, mem, ops};
 
 <span class="doccomment">/// RAII structure used to release the exclusive write access of a lock when
 /// dropped.
@@ -210,16 +224,41 @@
 ///
 /// [mapping]: method@crate::sync::RwLockWriteGuard::map
 /// [`RwLockWriteGuard`]: struct@crate::sync::RwLockWriteGuard
+</span><span class="attribute">#[clippy::has_significant_drop]
 </span><span class="kw">pub struct </span>RwLockMappedWriteGuard&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized&gt; {
-    <span class="attribute">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+    <span class="comment">// When changing the fields in this struct, make sure to update the
+    // `skip_drop` method.
+    </span><span class="attribute">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) resource_span: tracing::Span,
     <span class="kw">pub</span>(<span class="kw">super</span>) permits_acquired: u32,
     <span class="kw">pub</span>(<span class="kw">super</span>) s: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Semaphore,
     <span class="kw">pub</span>(<span class="kw">super</span>) data: <span class="kw-2">*mut </span>T,
-    <span class="kw">pub</span>(<span class="kw">super</span>) marker: marker::PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T&gt;,
+    <span class="kw">pub</span>(<span class="kw">super</span>) marker: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T&gt;,
+}
+
+<span class="attribute">#[allow(dead_code)] </span><span class="comment">// Unused fields are still used in Drop.
+</span><span class="kw">struct </span>Inner&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized&gt; {
+    <span class="attribute">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+    </span>resource_span: tracing::Span,
+    permits_acquired: u32,
+    s: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Semaphore,
+    data: <span class="kw-2">*mut </span>T,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized&gt; RwLockMappedWriteGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+    <span class="kw">fn </span>skip_drop(<span class="self">self</span>) -&gt; Inner&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+        <span class="kw">let </span>me = mem::ManuallyDrop::new(<span class="self">self</span>);
+        <span class="comment">// SAFETY: This duplicates the values in every field of the guard, then
+        // forgets the originals, so in the end no value is duplicated.
+        </span>Inner {
+            <span class="attribute">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            </span>resource_span: <span class="kw">unsafe </span>{ std::ptr::read(<span class="kw-2">&amp;</span>me.resource_span) },
+            permits_acquired: me.permits_acquired,
+            s: me.s,
+            data: me.data,
+        }
+    }
+
     <span class="doccomment">/// Makes a new `RwLockMappedWriteGuard` for a component of the locked data.
     ///
     /// This operation cannot fail as the `RwLockMappedWriteGuard` passed in already
@@ -261,20 +300,15 @@
         </span>F: FnOnce(<span class="kw-2">&amp;mut </span>T) -&gt; <span class="kw-2">&amp;mut </span>U,
     {
         <span class="kw">let </span>data = f(<span class="kw-2">&amp;mut *</span>this) <span class="kw">as </span><span class="kw-2">*mut </span>U;
-        <span class="kw">let </span>s = this.s;
-        <span class="kw">let </span>permits_acquired = this.permits_acquired;
-        <span class="attribute">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
-        </span><span class="kw">let </span>resource_span = this.resource_span.clone();
-        <span class="comment">// NB: Forget to avoid drop impl from being called.
-        </span>mem::forget(this);
+        <span class="kw">let </span>this = this.skip_drop();
 
         RwLockMappedWriteGuard {
-            permits_acquired,
-            s,
+            permits_acquired: this.permits_acquired,
+            s: this.s,
             data,
-            marker: marker::PhantomData,
+            marker: PhantomData,
             <span class="attribute">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
-            </span>resource_span,
+            </span>resource_span: this.resource_span,
         }
     }
 
@@ -328,23 +362,21 @@
             <span class="prelude-val">Some</span>(data) =&gt; data <span class="kw">as </span><span class="kw-2">*mut </span>U,
             <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(this),
         };
-        <span class="kw">let </span>s = this.s;
-        <span class="kw">let </span>permits_acquired = this.permits_acquired;
-        <span class="attribute">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
-        </span><span class="kw">let </span>resource_span = this.resource_span.clone();
-        <span class="comment">// NB: Forget to avoid drop impl from being called.
-        </span>mem::forget(this);
+        <span class="kw">let </span>this = this.skip_drop();
 
         <span class="prelude-val">Ok</span>(RwLockMappedWriteGuard {
-            permits_acquired,
-            s,
+            permits_acquired: this.permits_acquired,
+            s: this.s,
             data,
-            marker: marker::PhantomData,
+            marker: PhantomData,
             <span class="attribute">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
-            </span>resource_span,
+            </span>resource_span: this.resource_span,
         })
     }
-}
+
+    <span class="comment">// Note: No `downgrade`, `downgrade_map` nor `try_downgrade_map` because they would be unsound, as we&#39;re already
+    //       potentially been mapped with internal mutability.
+</span>}
 
 <span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; ops::Deref <span class="kw">for </span>RwLockMappedWriteGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {
     <span class="kw">type </span>Target = T;

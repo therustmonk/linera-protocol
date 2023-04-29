@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/base64-0.20.0/src/alphabet.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>alphabet.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../base64/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/base64-0.21.0/src/alphabet.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>alphabet.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../base64/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -239,12 +239,10 @@
 <span id="239">239</span>
 <span id="240">240</span>
 <span id="241">241</span>
-<span id="242">242</span>
-<span id="243">243</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Provides [Alphabet] and constants for alphabets commonly used in the wild.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::PAD_BYTE;
-<span class="kw">use </span>core::{convert, fmt};
+<span class="kw">use </span>core::fmt;
 <span class="attribute">#[cfg(any(feature = <span class="string">&quot;std&quot;</span>, test))]
 </span><span class="kw">use </span>std::error;
 
@@ -256,11 +254,11 @@
 /// can be made via `from_str` or the `TryFrom&lt;str&gt;` implementation.
 ///
 /// ```
-/// let custom = base64::alphabet::Alphabet::from_str(&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/&quot;).unwrap();
+/// let custom = base64::alphabet::Alphabet::new(&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/&quot;).unwrap();
 ///
-/// let engine = base64::engine::fast_portable::FastPortable::from(
+/// let engine = base64::engine::GeneralPurpose::new(
 ///     &amp;custom,
-///     base64::engine::fast_portable::PAD);
+///     base64::engine::general_purpose::PAD);
 /// ```
 </span><span class="attribute">#[derive(Clone, Debug, Eq, PartialEq)]
 </span><span class="kw">pub struct </span>Alphabet {
@@ -287,7 +285,7 @@
     <span class="doccomment">/// Create an `Alphabet` from a string of 64 unique printable ASCII bytes.
     ///
     /// The `=` byte is not allowed as it is used for padding.
-    </span><span class="kw">pub const fn </span>from_str(alphabet: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ParseAlphabetError&gt; {
+    </span><span class="kw">pub const fn </span>new(alphabet: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ParseAlphabetError&gt; {
         <span class="kw">let </span>bytes = alphabet.as_bytes();
         <span class="kw">if </span>bytes.len() != ALPHABET_SIZE {
             <span class="kw">return </span><span class="prelude-val">Err</span>(ParseAlphabetError::InvalidLength);
@@ -336,11 +334,11 @@
     }
 }
 
-<span class="kw">impl </span>convert::TryFrom&lt;<span class="kw-2">&amp;</span>str&gt; <span class="kw">for </span>Alphabet {
+<span class="kw">impl </span>TryFrom&lt;<span class="kw-2">&amp;</span>str&gt; <span class="kw">for </span>Alphabet {
     <span class="kw">type </span>Error = ParseAlphabetError;
 
     <span class="kw">fn </span>try_from(value: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
-        <span class="self">Self</span>::from_str(value)
+        <span class="self">Self</span>::new(value)
     }
 }
 
@@ -420,7 +418,7 @@
     </span><span class="kw">fn </span>detects_duplicate_start() {
         <span class="macro">assert_eq!</span>(
             ParseAlphabetError::DuplicatedByte(<span class="string">b&#39;A&#39;</span>),
-            Alphabet::from_str(<span class="string">&quot;AACDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/&quot;</span>)
+            Alphabet::new(<span class="string">&quot;AACDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/&quot;</span>)
                 .unwrap_err()
         );
     }
@@ -429,7 +427,7 @@
     </span><span class="kw">fn </span>detects_duplicate_end() {
         <span class="macro">assert_eq!</span>(
             ParseAlphabetError::DuplicatedByte(<span class="string">b&#39;/&#39;</span>),
-            Alphabet::from_str(<span class="string">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789//&quot;</span>)
+            Alphabet::new(<span class="string">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789//&quot;</span>)
                 .unwrap_err()
         );
     }
@@ -438,7 +436,7 @@
     </span><span class="kw">fn </span>detects_duplicate_middle() {
         <span class="macro">assert_eq!</span>(
             ParseAlphabetError::DuplicatedByte(<span class="string">b&#39;Z&#39;</span>),
-            Alphabet::from_str(<span class="string">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZZbcdefghijklmnopqrstuvwxyz0123456789+/&quot;</span>)
+            Alphabet::new(<span class="string">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZZbcdefghijklmnopqrstuvwxyz0123456789+/&quot;</span>)
                 .unwrap_err()
         );
     }
@@ -447,7 +445,7 @@
     </span><span class="kw">fn </span>detects_length() {
         <span class="macro">assert_eq!</span>(
             ParseAlphabetError::InvalidLength,
-            Alphabet::from_str(
+            Alphabet::new(
                 <span class="string">&quot;xxxxxxxxxABCDEFGHIJKLMNOPQRSTUVWXYZZbcdefghijklmnopqrstuvwxyz0123456789+/&quot;</span>,
             )
             .unwrap_err()
@@ -458,7 +456,7 @@
     </span><span class="kw">fn </span>detects_padding() {
         <span class="macro">assert_eq!</span>(
             ParseAlphabetError::ReservedByte(<span class="string">b&#39;=&#39;</span>),
-            Alphabet::from_str(<span class="string">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+=&quot;</span>)
+            Alphabet::new(<span class="string">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+=&quot;</span>)
                 .unwrap_err()
         );
     }
@@ -468,10 +466,8 @@
         <span class="comment">// form feed
         </span><span class="macro">assert_eq!</span>(
             ParseAlphabetError::UnprintableByte(<span class="number">0xc</span>),
-            Alphabet::from_str(
-                <span class="string">&quot;\x0cBCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/&quot;
-            </span>)
-            .unwrap_err()
+            Alphabet::new(<span class="string">&quot;\x0cBCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/&quot;</span>)
+                .unwrap_err()
         );
     }
 

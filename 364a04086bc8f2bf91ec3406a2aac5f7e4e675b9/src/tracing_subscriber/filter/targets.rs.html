@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-subscriber-0.3.16/src/filter/targets.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>targets.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../tracing_subscriber/index.html">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-subscriber-0.3.17/src/filter/targets.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>targets.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../tracing_subscriber/index.html">
                         <img src="https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
@@ -780,6 +780,59 @@
 <span id="779">779</span>
 <span id="780">780</span>
 <span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
+<span id="786">786</span>
+<span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
+<span id="792">792</span>
+<span id="793">793</span>
+<span id="794">794</span>
+<span id="795">795</span>
+<span id="796">796</span>
+<span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
+<span id="800">800</span>
+<span id="801">801</span>
+<span id="802">802</span>
+<span id="803">803</span>
+<span id="804">804</span>
+<span id="805">805</span>
+<span id="806">806</span>
+<span id="807">807</span>
+<span id="808">808</span>
+<span id="809">809</span>
+<span id="810">810</span>
+<span id="811">811</span>
+<span id="812">812</span>
+<span id="813">813</span>
+<span id="814">814</span>
+<span id="815">815</span>
+<span id="816">816</span>
+<span id="817">817</span>
+<span id="818">818</span>
+<span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
+<span id="831">831</span>
+<span id="832">832</span>
+<span id="833">833</span>
+<span id="834">834</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A [filter] that enables or disables spans and events based on their [target] and [level].
 //!
 //! See [`Targets`] for details.
@@ -798,6 +851,7 @@
 <span class="attribute">#[cfg(not(feature = <span class="string">&quot;std&quot;</span>))]
 </span><span class="kw">use </span>alloc::string::String;
 <span class="kw">use </span>core::{
+    fmt,
     iter::{Extend, FilterMap, FromIterator},
     slice,
     str::FromStr,
@@ -1106,7 +1160,7 @@
     /// assert_eq!(filter.default_level(), Some(LevelFilter::OFF));
     /// ```
     </span><span class="kw">pub fn </span>default_level(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;LevelFilter&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.directives().into_iter().find_map(|d| {
+        <span class="self">self</span>.<span class="number">0</span>.directives().find_map(|d| {
             <span class="kw">if </span>d.target.is_none() {
                 <span class="prelude-val">Some</span>(d.level)
             } <span class="kw">else </span>{
@@ -1267,6 +1321,20 @@
 
     <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
         Iter::new(<span class="self">self</span>)
+    }
+}
+
+<span class="kw">impl </span>fmt::Display <span class="kw">for </span>Targets {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+        <span class="kw">let </span><span class="kw-2">mut </span>directives = <span class="self">self</span>.<span class="number">0</span>.directives();
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(directive) = directives.next() {
+            <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, directive)<span class="question-mark">?</span>;
+            <span class="kw">for </span>directive <span class="kw">in </span>directives {
+                <span class="macro">write!</span>(f, <span class="string">&quot;,{}&quot;</span>, directive)<span class="question-mark">?</span>;
+            }
+        }
+
+        <span class="prelude-val">Ok</span>(())
     }
 }
 
@@ -1559,6 +1627,44 @@
             <span class="string">&quot;crate1::mod1=error,crate1::mod2=warn,crate1::mod2::mod3=info,\
             crate2=debug,crate3=trace,crate3::mod2::mod1=off&quot;</span>,
         );
+    }
+
+    <span class="doccomment">/// Test that the `fmt::Display` implementation for `Targets` emits a string
+    /// that can itself be parsed as a `Targets`, and that the parsed `Targets`
+    /// is equivalent to the original one.
+    </span><span class="attribute">#[test]
+    </span><span class="kw">fn </span>display_roundtrips() {
+        <span class="kw">fn </span>test_roundtrip(s: <span class="kw-2">&amp;</span>str) {
+            <span class="kw">let </span>filter = expect_parse(s);
+            <span class="comment">// we don&#39;t assert that the display output is equivalent to the
+            // original parsed filter string, because the `Display` impl always
+            // uses lowercase level names and doesn&#39;t use the
+            // target-without-level shorthand syntax. while they may not be
+            // textually equivalent, though, they should still *parse* to the
+            // same filter.
+            </span><span class="kw">let </span>formatted = filter.to_string();
+            <span class="kw">let </span>filter2 = <span class="kw">match </span><span class="macro">dbg!</span>(<span class="kw-2">&amp;</span>formatted).parse::&lt;Targets&gt;() {
+                <span class="prelude-val">Ok</span>(filter) =&gt; filter,
+                <span class="prelude-val">Err</span>(e) =&gt; <span class="macro">panic!</span>(
+                    <span class="string">&quot;failed to parse formatted filter string {:?}: {}&quot;</span>,
+                    formatted, e
+                ),
+            };
+            <span class="macro">assert_eq!</span>(filter, filter2);
+        }
+
+        test_roundtrip(<span class="string">&quot;crate1::mod1=error,crate1::mod2,crate2=debug,crate3=off&quot;</span>);
+        test_roundtrip(
+            <span class="string">&quot;crate1::mod1=ERROR,crate1::mod2=WARN,crate1::mod2::mod3=INFO,\
+        crate2=DEBUG,crate3=TRACE,crate3::mod2::mod1=OFF&quot;</span>,
+        );
+        test_roundtrip(
+            <span class="string">&quot;crate1::mod1=error,crate1::mod2=warn,crate1::mod2::mod3=info,\
+             crate2=debug,crate3=trace,crate3::mod2::mod1=off&quot;</span>,
+        );
+        test_roundtrip(<span class="string">&quot;crate1::mod1,crate1::mod2,info&quot;</span>);
+        test_roundtrip(<span class="string">&quot;crate1&quot;</span>);
+        test_roundtrip(<span class="string">&quot;info&quot;</span>);
     }
 }
 </code></pre></div>

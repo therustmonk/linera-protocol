@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-attributes-0.1.23/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../tracing_attributes/index.html">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/tracing-attributes-0.1.24/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../tracing_attributes/index.html">
                         <img src="https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
@@ -676,6 +676,24 @@
 <span id="675">675</span>
 <span id="676">676</span>
 <span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
+<span id="695">695</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A procedural macro attribute for instrumenting functions with [`tracing`].
 //!
 //! [`tracing`] is a framework for instrumenting Rust programs to collect
@@ -684,17 +702,17 @@
 //!
 //! Note that this macro is also re-exported by the main `tracing` crate.
 //!
-//! *Compiler support: [requires `rustc` 1.49+][msrv]*
+//! *Compiler support: [requires `rustc` 1.56+][msrv]*
 //!
 //! [msrv]: #supported-rust-versions
 //!
 //! ## Usage
 //!
-//! First, add this to your `Cargo.toml`:
+//! In the `Cargo.toml`:
 //!
 //! ```toml
 //! [dependencies]
-//! tracing-attributes = &quot;0.1.23&quot;
+//! tracing-attributes = &quot;0.1.24&quot;
 //! ```
 //!
 //! The [`#[instrument]`][instrument] attribute can now be added to a function
@@ -702,7 +720,7 @@
 //! called. For example:
 //!
 //! ```
-//! use tracing_attributes::instrument;
+//! use tracing::instrument;
 //!
 //! #[instrument]
 //! pub fn my_function(my_arg: usize) {
@@ -719,19 +737,18 @@
 //! ## Supported Rust Versions
 //!
 //! Tracing is built against the latest stable release. The minimum supported
-//! version is 1.49. The current Tracing version is not guaranteed to build on
+//! version is 1.56. The current Tracing version is not guaranteed to build on
 //! Rust versions earlier than the minimum supported version.
 //!
 //! Tracing follows the same compiler support policies as the rest of the Tokio
 //! project. The current stable Rust compiler and the three most recent minor
 //! versions before it will always be supported. For example, if the current
-//! stable compiler version is 1.45, the minimum supported version will not be
-//! increased past 1.42, three minor versions prior. Increasing the minimum
+//! stable compiler version is 1.69, the minimum supported version will not be
+//! increased past 1.66, three minor versions prior. Increasing the minimum
 //! supported compiler version is not considered a semver breaking change as
 //! long as doing so complies with this policy.
 //!
-</span><span class="attribute">#![doc(html_root_url = <span class="string">&quot;https://docs.rs/tracing-attributes/0.1.23&quot;</span>)]
-#![doc(
+</span><span class="attribute">#![doc(
     html_logo_url = <span class="string">&quot;https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png&quot;</span>,
     issue_tracker_base_url = <span class="string">&quot;https://github.com/tokio-rs/tracing/issues/&quot;
 </span>)]
@@ -742,7 +759,6 @@
     rust_2018_idioms,
     unreachable_pub,
     bad_style,
-    const_err,
     dead_code,
     improper_ctypes,
     non_shorthand_field_patterns,
@@ -762,7 +778,7 @@
 </span><span class="kw">extern crate </span>proc_macro;
 
 <span class="kw">use </span>proc_macro2::TokenStream;
-<span class="kw">use </span>quote::ToTokens;
+<span class="kw">use </span>quote::{quote, ToTokens};
 <span class="kw">use </span>syn::parse::{Parse, ParseStream};
 <span class="kw">use </span>syn::{Attribute, ItemFn, Signature, Visibility};
 
@@ -883,15 +899,16 @@
 ///
 /// # Adding Fields
 ///
-/// Additional fields (key-value pairs with arbitrary data) may be added to the
-/// generated span using the `fields` argument on the `#[instrument]` macro. Any
+/// Additional fields (key-value pairs with arbitrary data) can be passed to
+/// to the generated span through the `fields` argument on the
+/// `#[instrument]` macro. Strings, integers or boolean literals are accepted values
+/// for each field. The name of the field must be a single valid Rust
+/// identifier, nested (dotted) field names are not supported. Any
 /// Rust expression can be used as a field value in this manner. These
 /// expressions will be evaluated at the beginning of the function&#39;s body, so
 /// arguments to the function may be used in these expressions. Field names may
 /// also be specified *without* values. Doing so will result in an [empty field]
 /// whose value may be recorded later within the function body.
-///
-/// This supports the same [field syntax] as the `span!` and `event!` macros.
 ///
 /// Note that overlap between the names of fields and (non-skipped) arguments
 /// will result in a compile error.
@@ -1002,11 +1019,15 @@
 /// Setting the level for the generated span:
 /// ```
 /// # use tracing_attributes::instrument;
-/// #[instrument(level = &quot;debug&quot;)]
+/// # use tracing::Level;
+/// #[instrument(level = Level::DEBUG)]
 /// pub fn my_function() {
 ///     // ...
 /// }
 /// ```
+/// Levels can be specified either with [`Level`] constants, literal strings
+/// (e.g., `&quot;debug&quot;`, `&quot;info&quot;`) or numerically (1—5, corresponding to [`Level::TRACE`]—[`Level::ERROR`]).
+///
 /// Overriding the generated span&#39;s name:
 /// ```
 /// # use tracing_attributes::instrument;
@@ -1077,7 +1098,7 @@
 /// }
 /// ```
 ///
-/// To add an additional context to the span, pass key-value pairs to `fields`:
+/// To add additional context to the span, pass key-value pairs to `fields`:
 ///
 /// ```
 /// # use tracing_attributes::instrument;
@@ -1101,6 +1122,17 @@
 /// By default, this will be [`INFO`], but if the level is overridden, the event will be at the same
 /// level.
 ///
+/// It&#39;s also possible to override the level for the `ret` event independently:
+///
+/// ```
+/// # use tracing_attributes::instrument;
+/// # use tracing::Level;
+/// #[instrument(ret(level = Level::WARN))]
+/// fn my_function() -&gt; i32 {
+///     42
+/// }
+/// ```
+///
 /// **Note**:  if the function returns a `Result&lt;T, E&gt;`, `ret` will record returned values if and
 /// only if the function returns [`Result::Ok`].
 ///
@@ -1116,8 +1148,8 @@
 /// }
 /// ```
 ///
-/// If the function returns a `Result&lt;T, E&gt;` and `E` implements `std::fmt::Display`, you can add
-/// `err` or `err(Display)` to emit error events when the function returns `Err`:
+/// If the function returns a `Result&lt;T, E&gt;` and `E` implements `std::fmt::Display`, adding
+/// `err` or `err(Display)` will emit error events when the function returns `Err`:
 ///
 /// ```
 /// # use tracing_attributes::instrument;
@@ -1127,9 +1159,22 @@
 /// }
 /// ```
 ///
+/// The level of the error value event defaults to `ERROR`.
+///
+/// Similarly, overriding the level of the `err` event :
+///
+/// ```
+/// # use tracing_attributes::instrument;
+/// # use tracing::Level;
+/// #[instrument(err(level = Level::INFO))]
+/// fn my_function(arg: usize) -&gt; Result&lt;(), std::io::Error&gt; {
+///     Ok(())
+/// }
+/// ```
+///
 /// By default, error values will be recorded using their `std::fmt::Display` implementations.
 /// If an error implements `std::fmt::Debug`, it can be recorded using its `Debug` implementation
-/// instead, by writing `err(Debug)`:
+/// instead by writing `err(Debug)`:
 ///
 /// ```
 /// # use tracing_attributes::instrument;
@@ -1188,32 +1233,13 @@
 /// }
 /// ```
 ///
-/// Note than on `async-trait` &lt;= 0.1.43, references to the `Self`
-/// type inside the `fields` argument were only allowed when the instrumented
-/// function is a method (i.e., the function receives `self` as an argument).
-/// For example, this *used to not work* because the instrument function
-/// didn&#39;t receive `self`:
+/// `const fn` cannot be instrumented, and will result in a compilation failure:
+///
+/// ```compile_fail
+/// # use tracing_attributes::instrument;
+/// #[instrument]
+/// const fn my_const_function() {}
 /// ```
-/// # use tracing::instrument;
-/// use async_trait::async_trait;
-///
-/// #[async_trait]
-/// pub trait Bar {
-///     async fn bar();
-/// }
-///
-/// #[derive(Debug)]
-/// struct BarImpl(usize);
-///
-/// #[async_trait]
-/// impl Bar for BarImpl {
-///     #[instrument(fields(tmp = std::any::type_name::&lt;Self&gt;()))]
-///     async fn bar() {}
-/// }
-/// ```
-/// Instead, you should manually rewrite any `Self` types as the type for
-/// which you implement the trait: `#[instrument(fields(tmp = std::any::type_name::&lt;Bar&gt;()))]`
-/// (or maybe you can just bump `async-trait`).
 ///
 /// [span]: https://docs.rs/tracing/latest/tracing/span/index.html
 /// [name]: https://docs.rs/tracing/latest/tracing/struct.Metadata.html#method.name
@@ -1226,6 +1252,9 @@
 /// [`follows_from`]: https://docs.rs/tracing/latest/tracing/struct.Span.html#method.follows_from
 /// [`tracing`]: https://github.com/tokio-rs/tracing
 /// [`fmt::Debug`]: std::fmt::Debug
+/// [`Level`]: https://docs.rs/tracing/latest/tracing/struct.Level.html
+/// [`Level::TRACE`]: https://docs.rs/tracing/latest/tracing/struct.Level.html#associatedconstant.TRACE
+/// [`Level::ERROR`]: https://docs.rs/tracing/latest/tracing/struct.Level.html#associatedconstant.ERROR
 </span><span class="attribute">#[proc_macro_attribute]
 </span><span class="kw">pub fn </span>instrument(
     args: proc_macro::TokenStream,
@@ -1261,6 +1290,13 @@
 ) -&gt; <span class="prelude-ty">Result</span>&lt;proc_macro::TokenStream, syn::Error&gt; {
     <span class="kw">let </span>input = syn::parse::&lt;ItemFn&gt;(item)<span class="question-mark">?</span>;
     <span class="kw">let </span>instrumented_function_name = input.sig.ident.to_string();
+
+    <span class="kw">if </span>input.sig.constness.is_some() {
+        <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="macro">quote! </span>{
+            <span class="macro">compile_error!</span>(<span class="string">&quot;the `#[instrument]` attribute may not be used with `const fn`s&quot;</span>)
+        }
+        .into());
+    }
 
     <span class="comment">// check for async_trait-like patterns in the block, and instrument
     // the future instead of the wrapper

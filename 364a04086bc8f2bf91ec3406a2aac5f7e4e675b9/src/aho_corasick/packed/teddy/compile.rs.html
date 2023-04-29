@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/aho-corasick-0.7.20/src/packed/teddy/compile.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>compile.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../../aho_corasick/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/aho-corasick-1.0.1/src/packed/teddy/compile.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>compile.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../../aho_corasick/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -412,14 +412,104 @@
 <span id="412">412</span>
 <span id="413">413</span>
 <span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
 </pre><pre class="rust"><code><span class="comment">// See the README in this directory for an explanation of the Teddy algorithm.
 
-</span><span class="kw">use </span>std::cmp;
-<span class="kw">use </span>std::collections::BTreeMap;
-<span class="kw">use </span>std::fmt;
+</span><span class="kw">use </span>core::{cmp, fmt};
 
-<span class="kw">use </span><span class="kw">crate</span>::packed::pattern::{PatternID, Patterns};
-<span class="kw">use </span><span class="kw">crate</span>::packed::teddy::Teddy;
+<span class="kw">use </span>alloc::{collections::BTreeMap, format, vec, vec::Vec};
+
+<span class="kw">use </span><span class="kw">crate</span>::packed::{
+    pattern::{PatternID, Patterns},
+    teddy::Teddy,
+};
 
 <span class="doccomment">/// A builder for constructing a Teddy matcher.
 ///
@@ -498,21 +588,29 @@
         // available), then we bail and return nothing.
 
         </span><span class="kw">if </span>patterns.len() &gt; <span class="number">64 </span>{
+            <span class="macro">debug!</span>(<span class="string">&quot;skipping Teddy because of too many patterns&quot;</span>);
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
-        <span class="kw">let </span>has_ssse3 = <span class="macro">is_x86_feature_detected!</span>(<span class="string">&quot;ssse3&quot;</span>);
-        <span class="kw">let </span>has_avx = <span class="macro">is_x86_feature_detected!</span>(<span class="string">&quot;avx2&quot;</span>);
+        <span class="kw">let </span>has_ssse3 = <span class="macro">std::is_x86_feature_detected!</span>(<span class="string">&quot;ssse3&quot;</span>);
+        <span class="kw">let </span>has_avx = <span class="macro">std::is_x86_feature_detected!</span>(<span class="string">&quot;avx2&quot;</span>);
         <span class="kw">let </span>avx = <span class="kw">if </span><span class="self">self</span>.avx == <span class="prelude-val">Some</span>(<span class="bool-val">true</span>) {
             <span class="kw">if </span>!has_avx {
+                <span class="macro">debug!</span>(
+                    <span class="string">&quot;skipping Teddy because avx was demanded but unavailable&quot;
+                </span>);
                 <span class="kw">return </span><span class="prelude-val">None</span>;
             }
             <span class="bool-val">true
         </span>} <span class="kw">else if </span><span class="self">self</span>.avx == <span class="prelude-val">Some</span>(<span class="bool-val">false</span>) {
             <span class="kw">if </span>!has_ssse3 {
+                <span class="macro">debug!</span>(
+                    <span class="string">&quot;skipping Teddy because ssse3 was demanded but unavailable&quot;
+                </span>);
                 <span class="kw">return </span><span class="prelude-val">None</span>;
             }
             <span class="bool-val">false
         </span>} <span class="kw">else if </span>!has_ssse3 &amp;&amp; !has_avx {
+            <span class="macro">debug!</span>(<span class="string">&quot;skipping Teddy because ssse3 and avx are unavailable&quot;</span>);
             <span class="kw">return </span><span class="prelude-val">None</span>;
         } <span class="kw">else </span>{
             has_avx
@@ -520,7 +618,13 @@
         <span class="kw">let </span>fat = <span class="kw">match </span><span class="self">self</span>.fat {
             <span class="prelude-val">None </span>=&gt; avx &amp;&amp; patterns.len() &gt; <span class="number">32</span>,
             <span class="prelude-val">Some</span>(<span class="bool-val">false</span>) =&gt; <span class="bool-val">false</span>,
-            <span class="prelude-val">Some</span>(<span class="bool-val">true</span>) <span class="kw">if </span>!avx =&gt; <span class="kw">return </span><span class="prelude-val">None</span>,
+            <span class="prelude-val">Some</span>(<span class="bool-val">true</span>) <span class="kw">if </span>!avx =&gt; {
+                <span class="macro">debug!</span>(
+                    <span class="string">&quot;skipping Teddy because it needs to be fat, but fat \
+                     Teddy requires avx which is unavailable&quot;
+                </span>);
+                <span class="kw">return </span><span class="prelude-val">None</span>;
+            }
             <span class="prelude-val">Some</span>(<span class="bool-val">true</span>) =&gt; <span class="bool-val">true</span>,
         };
 
@@ -532,96 +636,168 @@
         // that the presence of (for example) TeddySlim1Mask256 means it is
         // safe to call functions marked with the `avx2` target feature.
         </span><span class="kw">match </span>(masks.len(), avx, fat) {
-            (<span class="number">1</span>, <span class="bool-val">false</span>, <span class="kw">_</span>) =&gt; <span class="prelude-val">Some</span>(Teddy {
-                buckets,
-                max_pattern_id: patterns.max_pattern_id(),
-                exec: runtime::Exec::TeddySlim1Mask128(
-                    runtime::TeddySlim1Mask128 {
-                        mask1: runtime::Mask128::new(masks[<span class="number">0</span>]),
-                    },
-                ),
-            }),
-            (<span class="number">1</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; <span class="prelude-val">Some</span>(Teddy {
-                buckets,
-                max_pattern_id: patterns.max_pattern_id(),
-                exec: runtime::Exec::TeddySlim1Mask256(
-                    runtime::TeddySlim1Mask256 {
-                        mask1: runtime::Mask256::new(masks[<span class="number">0</span>]),
-                    },
-                ),
-            }),
-            (<span class="number">1</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>) =&gt; <span class="prelude-val">Some</span>(Teddy {
-                buckets,
-                max_pattern_id: patterns.max_pattern_id(),
-                exec: runtime::Exec::TeddyFat1Mask256(
-                    runtime::TeddyFat1Mask256 {
-                        mask1: runtime::Mask256::new(masks[<span class="number">0</span>]),
-                    },
-                ),
-            }),
-            (<span class="number">2</span>, <span class="bool-val">false</span>, <span class="kw">_</span>) =&gt; <span class="prelude-val">Some</span>(Teddy {
-                buckets,
-                max_pattern_id: patterns.max_pattern_id(),
-                exec: runtime::Exec::TeddySlim2Mask128(
-                    runtime::TeddySlim2Mask128 {
-                        mask1: runtime::Mask128::new(masks[<span class="number">0</span>]),
-                        mask2: runtime::Mask128::new(masks[<span class="number">1</span>]),
-                    },
-                ),
-            }),
-            (<span class="number">2</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; <span class="prelude-val">Some</span>(Teddy {
-                buckets,
-                max_pattern_id: patterns.max_pattern_id(),
-                exec: runtime::Exec::TeddySlim2Mask256(
-                    runtime::TeddySlim2Mask256 {
-                        mask1: runtime::Mask256::new(masks[<span class="number">0</span>]),
-                        mask2: runtime::Mask256::new(masks[<span class="number">1</span>]),
-                    },
-                ),
-            }),
-            (<span class="number">2</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>) =&gt; <span class="prelude-val">Some</span>(Teddy {
-                buckets,
-                max_pattern_id: patterns.max_pattern_id(),
-                exec: runtime::Exec::TeddyFat2Mask256(
-                    runtime::TeddyFat2Mask256 {
-                        mask1: runtime::Mask256::new(masks[<span class="number">0</span>]),
-                        mask2: runtime::Mask256::new(masks[<span class="number">1</span>]),
-                    },
-                ),
-            }),
-            (<span class="number">3</span>, <span class="bool-val">false</span>, <span class="kw">_</span>) =&gt; <span class="prelude-val">Some</span>(Teddy {
-                buckets,
-                max_pattern_id: patterns.max_pattern_id(),
-                exec: runtime::Exec::TeddySlim3Mask128(
-                    runtime::TeddySlim3Mask128 {
-                        mask1: runtime::Mask128::new(masks[<span class="number">0</span>]),
-                        mask2: runtime::Mask128::new(masks[<span class="number">1</span>]),
-                        mask3: runtime::Mask128::new(masks[<span class="number">2</span>]),
-                    },
-                ),
-            }),
-            (<span class="number">3</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; <span class="prelude-val">Some</span>(Teddy {
-                buckets,
-                max_pattern_id: patterns.max_pattern_id(),
-                exec: runtime::Exec::TeddySlim3Mask256(
-                    runtime::TeddySlim3Mask256 {
-                        mask1: runtime::Mask256::new(masks[<span class="number">0</span>]),
-                        mask2: runtime::Mask256::new(masks[<span class="number">1</span>]),
-                        mask3: runtime::Mask256::new(masks[<span class="number">2</span>]),
-                    },
-                ),
-            }),
-            (<span class="number">3</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>) =&gt; <span class="prelude-val">Some</span>(Teddy {
-                buckets,
-                max_pattern_id: patterns.max_pattern_id(),
-                exec: runtime::Exec::TeddyFat3Mask256(
-                    runtime::TeddyFat3Mask256 {
-                        mask1: runtime::Mask256::new(masks[<span class="number">0</span>]),
-                        mask2: runtime::Mask256::new(masks[<span class="number">1</span>]),
-                        mask3: runtime::Mask256::new(masks[<span class="number">2</span>]),
-                    },
-                ),
-            }),
+            (<span class="number">1</span>, <span class="bool-val">false</span>, <span class="kw">_</span>) =&gt; {
+                <span class="macro">debug!</span>(<span class="string">&quot;Teddy choice: 128-bit slim, 1 byte&quot;</span>);
+                <span class="prelude-val">Some</span>(Teddy {
+                    buckets,
+                    max_pattern_id: patterns.max_pattern_id(),
+                    exec: runtime::Exec::TeddySlim1Mask128(
+                        runtime::TeddySlim1Mask128 {
+                            mask1: runtime::Mask128::new(masks[<span class="number">0</span>]),
+                        },
+                    ),
+                })
+            }
+            (<span class="number">1</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; {
+                <span class="macro">debug!</span>(<span class="string">&quot;Teddy choice: 256-bit slim, 1 byte&quot;</span>);
+                <span class="prelude-val">Some</span>(Teddy {
+                    buckets,
+                    max_pattern_id: patterns.max_pattern_id(),
+                    exec: runtime::Exec::TeddySlim1Mask256(
+                        runtime::TeddySlim1Mask256 {
+                            mask1: runtime::Mask256::new(masks[<span class="number">0</span>]),
+                        },
+                    ),
+                })
+            }
+            (<span class="number">1</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>) =&gt; {
+                <span class="macro">debug!</span>(<span class="string">&quot;Teddy choice: 256-bit fat, 1 byte&quot;</span>);
+                <span class="prelude-val">Some</span>(Teddy {
+                    buckets,
+                    max_pattern_id: patterns.max_pattern_id(),
+                    exec: runtime::Exec::TeddyFat1Mask256(
+                        runtime::TeddyFat1Mask256 {
+                            mask1: runtime::Mask256::new(masks[<span class="number">0</span>]),
+                        },
+                    ),
+                })
+            }
+            (<span class="number">2</span>, <span class="bool-val">false</span>, <span class="kw">_</span>) =&gt; {
+                <span class="macro">debug!</span>(<span class="string">&quot;Teddy choice: 128-bit slim, 2 bytes&quot;</span>);
+                <span class="prelude-val">Some</span>(Teddy {
+                    buckets,
+                    max_pattern_id: patterns.max_pattern_id(),
+                    exec: runtime::Exec::TeddySlim2Mask128(
+                        runtime::TeddySlim2Mask128 {
+                            mask1: runtime::Mask128::new(masks[<span class="number">0</span>]),
+                            mask2: runtime::Mask128::new(masks[<span class="number">1</span>]),
+                        },
+                    ),
+                })
+            }
+            (<span class="number">2</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; {
+                <span class="macro">debug!</span>(<span class="string">&quot;Teddy choice: 256-bit slim, 2 bytes&quot;</span>);
+                <span class="prelude-val">Some</span>(Teddy {
+                    buckets,
+                    max_pattern_id: patterns.max_pattern_id(),
+                    exec: runtime::Exec::TeddySlim2Mask256(
+                        runtime::TeddySlim2Mask256 {
+                            mask1: runtime::Mask256::new(masks[<span class="number">0</span>]),
+                            mask2: runtime::Mask256::new(masks[<span class="number">1</span>]),
+                        },
+                    ),
+                })
+            }
+            (<span class="number">2</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>) =&gt; {
+                <span class="macro">debug!</span>(<span class="string">&quot;Teddy choice: 256-bit fat, 2 bytes&quot;</span>);
+                <span class="prelude-val">Some</span>(Teddy {
+                    buckets,
+                    max_pattern_id: patterns.max_pattern_id(),
+                    exec: runtime::Exec::TeddyFat2Mask256(
+                        runtime::TeddyFat2Mask256 {
+                            mask1: runtime::Mask256::new(masks[<span class="number">0</span>]),
+                            mask2: runtime::Mask256::new(masks[<span class="number">1</span>]),
+                        },
+                    ),
+                })
+            }
+            (<span class="number">3</span>, <span class="bool-val">false</span>, <span class="kw">_</span>) =&gt; {
+                <span class="macro">debug!</span>(<span class="string">&quot;Teddy choice: 128-bit slim, 3 bytes&quot;</span>);
+                <span class="prelude-val">Some</span>(Teddy {
+                    buckets,
+                    max_pattern_id: patterns.max_pattern_id(),
+                    exec: runtime::Exec::TeddySlim3Mask128(
+                        runtime::TeddySlim3Mask128 {
+                            mask1: runtime::Mask128::new(masks[<span class="number">0</span>]),
+                            mask2: runtime::Mask128::new(masks[<span class="number">1</span>]),
+                            mask3: runtime::Mask128::new(masks[<span class="number">2</span>]),
+                        },
+                    ),
+                })
+            }
+            (<span class="number">3</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; {
+                <span class="macro">debug!</span>(<span class="string">&quot;Teddy choice: 256-bit slim, 3 bytes&quot;</span>);
+                <span class="prelude-val">Some</span>(Teddy {
+                    buckets,
+                    max_pattern_id: patterns.max_pattern_id(),
+                    exec: runtime::Exec::TeddySlim3Mask256(
+                        runtime::TeddySlim3Mask256 {
+                            mask1: runtime::Mask256::new(masks[<span class="number">0</span>]),
+                            mask2: runtime::Mask256::new(masks[<span class="number">1</span>]),
+                            mask3: runtime::Mask256::new(masks[<span class="number">2</span>]),
+                        },
+                    ),
+                })
+            }
+            (<span class="number">3</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>) =&gt; {
+                <span class="macro">debug!</span>(<span class="string">&quot;Teddy choice: 256-bit fat, 3 bytes&quot;</span>);
+                <span class="prelude-val">Some</span>(Teddy {
+                    buckets,
+                    max_pattern_id: patterns.max_pattern_id(),
+                    exec: runtime::Exec::TeddyFat3Mask256(
+                        runtime::TeddyFat3Mask256 {
+                            mask1: runtime::Mask256::new(masks[<span class="number">0</span>]),
+                            mask2: runtime::Mask256::new(masks[<span class="number">1</span>]),
+                            mask3: runtime::Mask256::new(masks[<span class="number">2</span>]),
+                        },
+                    ),
+                })
+            }
+            (<span class="number">4</span>, <span class="bool-val">false</span>, <span class="kw">_</span>) =&gt; {
+                <span class="macro">debug!</span>(<span class="string">&quot;Teddy choice: 128-bit slim, 4 bytes&quot;</span>);
+                <span class="prelude-val">Some</span>(Teddy {
+                    buckets,
+                    max_pattern_id: patterns.max_pattern_id(),
+                    exec: runtime::Exec::TeddySlim4Mask128(
+                        runtime::TeddySlim4Mask128 {
+                            mask1: runtime::Mask128::new(masks[<span class="number">0</span>]),
+                            mask2: runtime::Mask128::new(masks[<span class="number">1</span>]),
+                            mask3: runtime::Mask128::new(masks[<span class="number">2</span>]),
+                            mask4: runtime::Mask128::new(masks[<span class="number">3</span>]),
+                        },
+                    ),
+                })
+            }
+            (<span class="number">4</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; {
+                <span class="macro">debug!</span>(<span class="string">&quot;Teddy choice: 256-bit slim, 4 bytes&quot;</span>);
+                <span class="prelude-val">Some</span>(Teddy {
+                    buckets,
+                    max_pattern_id: patterns.max_pattern_id(),
+                    exec: runtime::Exec::TeddySlim4Mask256(
+                        runtime::TeddySlim4Mask256 {
+                            mask1: runtime::Mask256::new(masks[<span class="number">0</span>]),
+                            mask2: runtime::Mask256::new(masks[<span class="number">1</span>]),
+                            mask3: runtime::Mask256::new(masks[<span class="number">2</span>]),
+                            mask4: runtime::Mask256::new(masks[<span class="number">3</span>]),
+                        },
+                    ),
+                })
+            }
+            (<span class="number">4</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>) =&gt; {
+                <span class="macro">debug!</span>(<span class="string">&quot;Teddy choice: 256-bit fat, 4 bytes&quot;</span>);
+                <span class="prelude-val">Some</span>(Teddy {
+                    buckets,
+                    max_pattern_id: patterns.max_pattern_id(),
+                    exec: runtime::Exec::TeddyFat4Mask256(
+                        runtime::TeddyFat4Mask256 {
+                            mask1: runtime::Mask256::new(masks[<span class="number">0</span>]),
+                            mask2: runtime::Mask256::new(masks[<span class="number">1</span>]),
+                            mask3: runtime::Mask256::new(masks[<span class="number">2</span>]),
+                            mask4: runtime::Mask256::new(masks[<span class="number">3</span>]),
+                        },
+                    ),
+                })
+            }
             <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
         }
     }
@@ -642,8 +818,8 @@
     ///
     /// This panics if any of the patterns given are empty.
     </span><span class="kw">fn </span>new(patterns: <span class="kw-2">&amp;</span><span class="lifetime">&#39;p </span>Patterns, fat: bool) -&gt; Compiler&lt;<span class="lifetime">&#39;p</span>&gt; {
-        <span class="kw">let </span>mask_len = cmp::min(<span class="number">3</span>, patterns.minimum_len());
-        <span class="macro">assert!</span>(<span class="number">1 </span>&lt;= mask_len &amp;&amp; mask_len &lt;= <span class="number">3</span>);
+        <span class="kw">let </span>mask_len = cmp::min(<span class="number">4</span>, patterns.minimum_len());
+        <span class="macro">assert!</span>(<span class="number">1 </span>&lt;= mask_len &amp;&amp; mask_len &lt;= <span class="number">4</span>);
 
         Compiler {
             patterns,

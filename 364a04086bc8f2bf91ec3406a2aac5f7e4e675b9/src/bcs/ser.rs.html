@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/bcs-0.1.4/src/ser.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>ser.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../bcs/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/bcs-0.1.5/src/ser.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>ser.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../bcs/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -552,6 +552,48 @@
 <span id="552">552</span>
 <span id="553">553</span>
 <span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) The Diem Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
@@ -609,6 +651,20 @@
     <span class="prelude-val">Ok</span>(output)
 }
 
+<span class="doccomment">/// Same as `to_bytes` but use `limit` as max container depth instead of MAX_CONTAINER_DEPTH
+/// Note that `limit` has to be lower than MAX_CONTAINER_DEPTH
+</span><span class="kw">pub fn </span>to_bytes_with_limit&lt;T&gt;(value: <span class="kw-2">&amp;</span>T, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;&gt;
+<span class="kw">where
+    </span>T: <span class="question-mark">?</span>Sized + Serialize,
+{
+    <span class="kw">if </span>limit &gt; <span class="kw">crate</span>::MAX_CONTAINER_DEPTH {
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::NotSupported(<span class="string">&quot;limit exceeds the max allowed depth&quot;</span>));
+    }
+    <span class="kw">let </span><span class="kw-2">mut </span>output = Vec::new();
+    serialize_into_with_limit(<span class="kw-2">&amp;mut </span>output, value, limit)<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(output)
+}
+
 <span class="doccomment">/// Same as `to_bytes` but write directly into an `std::io::Write` object.
 </span><span class="kw">pub fn </span>serialize_into&lt;W, T&gt;(write: <span class="kw-2">&amp;mut </span>W, value: <span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
 <span class="kw">where
@@ -616,6 +672,20 @@
     T: <span class="question-mark">?</span>Sized + Serialize,
 {
     <span class="kw">let </span>serializer = Serializer::new(write, <span class="kw">crate</span>::MAX_CONTAINER_DEPTH);
+    value.serialize(serializer)
+}
+
+<span class="doccomment">/// Same as `serialize_into` but use `limit` as max container depth instead of MAX_CONTAINER_DEPTH
+/// Note that `limit` has to be lower than MAX_CONTAINER_DEPTH
+</span><span class="kw">pub fn </span>serialize_into_with_limit&lt;W, T&gt;(write: <span class="kw-2">&amp;mut </span>W, value: <span class="kw-2">&amp;</span>T, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
+<span class="kw">where
+    </span>W: <span class="question-mark">?</span>Sized + std::io::Write,
+    T: <span class="question-mark">?</span>Sized + Serialize,
+{
+    <span class="kw">if </span>limit &gt; <span class="kw">crate</span>::MAX_CONTAINER_DEPTH {
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::NotSupported(<span class="string">&quot;limit exceeds the max allowed depth&quot;</span>));
+    }
+    <span class="kw">let </span>serializer = Serializer::new(write, limit);
     value.serialize(serializer)
 }
 
@@ -642,6 +712,20 @@
 {
     <span class="kw">let </span><span class="kw-2">mut </span>counter = WriteCounter(<span class="number">0</span>);
     serialize_into(<span class="kw-2">&amp;mut </span>counter, value)<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(counter.<span class="number">0</span>)
+}
+
+<span class="doccomment">/// Same as `serialized_size` but use `limit` as max container depth instead of MAX_CONTAINER_DEPTH
+/// Note that `limit` has to be lower than MAX_CONTAINER_DEPTH
+</span><span class="kw">pub fn </span>serialized_size_with_limit&lt;T&gt;(value: <span class="kw-2">&amp;</span>T, limit: usize) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt;
+<span class="kw">where
+    </span>T: <span class="question-mark">?</span>Sized + Serialize,
+{
+    <span class="kw">if </span>limit &gt; <span class="kw">crate</span>::MAX_CONTAINER_DEPTH {
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::NotSupported(<span class="string">&quot;limit exceeds the max allowed depth&quot;</span>));
+    }
+    <span class="kw">let </span><span class="kw-2">mut </span>counter = WriteCounter(<span class="number">0</span>);
+    serialize_into_with_limit(<span class="kw-2">&amp;mut </span>counter, value, limit)<span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>(counter.<span class="number">0</span>)
 }
 

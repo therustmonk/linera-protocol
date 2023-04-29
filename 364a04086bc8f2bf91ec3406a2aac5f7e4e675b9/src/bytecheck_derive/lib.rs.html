@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/bytecheck_derive-0.6.9/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../bytecheck_derive/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/bytecheck_derive-0.6.10/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../bytecheck_derive/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -484,6 +484,53 @@
 <span id="484">484</span>
 <span id="485">485</span>
 <span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Procedural macros for bytecheck.
 
 </span><span class="attribute">#![deny(
@@ -495,7 +542,7 @@
     clippy::all
 )]
 
-</span><span class="kw">use </span>proc_macro2::TokenStream;
+</span><span class="kw">use </span>proc_macro2::{Group, Span, TokenStream, TokenTree};
 <span class="kw">use </span>quote::{quote, quote_spanned};
 <span class="kw">use </span>syn::{
     parse_macro_input, parse_quote, punctuated::Punctuated, spanned::Spanned, AttrStyle, Data,
@@ -515,6 +562,7 @@
 </span><span class="kw">struct </span>Attributes {
     <span class="kw">pub </span>repr: Repr,
     <span class="kw">pub </span>bound: <span class="prelude-ty">Option</span>&lt;LitStr&gt;,
+    <span class="kw">pub </span>bytecheck_crate: <span class="prelude-ty">Option</span>&lt;Path&gt;,
 }
 
 <span class="kw">fn </span>parse_check_bytes_attributes(attributes: <span class="kw-2">&amp;mut </span>Attributes, meta: <span class="kw-2">&amp;</span>Meta) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
@@ -535,6 +583,25 @@
                     <span class="prelude-val">Err</span>(Error::new_spanned(
                         <span class="kw-2">&amp;</span>meta.lit,
                         <span class="string">&quot;bound arguments must be a string&quot;</span>,
+                    ))
+                }
+            } <span class="kw">else if </span>meta.path.is_ident(<span class="string">&quot;crate&quot;</span>) {
+                <span class="kw">if let </span>Lit::Str(<span class="kw-2">ref </span>lit_str) = meta.lit {
+                    <span class="kw">if </span>attributes.bytecheck_crate.is_none() {
+                        <span class="kw">let </span>tokens = respan(syn::parse_str(<span class="kw-2">&amp;</span>lit_str.value())<span class="question-mark">?</span>, lit_str.span());
+                        <span class="kw">let </span>parsed: Path = syn::parse2(tokens)<span class="question-mark">?</span>;
+                        attributes.bytecheck_crate = <span class="prelude-val">Some</span>(parsed);
+                        <span class="prelude-val">Ok</span>(())
+                    } <span class="kw">else </span>{
+                        <span class="prelude-val">Err</span>(Error::new_spanned(
+                            meta,
+                            <span class="string">&quot;check_bytes crate already specified&quot;</span>,
+                        ))
+                    }
+                } <span class="kw">else </span>{
+                    <span class="prelude-val">Err</span>(Error::new_spanned(
+                        <span class="kw-2">&amp;</span>meta.lit,
+                        <span class="string">&quot;crate argument must be a string&quot;</span>,
                     ))
                 }
             } <span class="kw">else </span>{
@@ -685,7 +752,8 @@
                 });
 
                 <span class="macro">quote! </span>{
-                    <span class="kw">impl </span>#impl_generics CheckBytes&lt;__C&gt; <span class="kw">for </span>#name #ty_generics #check_where {
+                    <span class="attribute">#[automatically_derived]
+                    </span><span class="kw">impl </span>#impl_generics CheckBytes&lt;__C&gt; <span class="kw">for </span>#name #ty_generics #check_where {
                         <span class="kw">type </span>Error = StructCheckError;
 
                         <span class="kw">unsafe fn </span>check_bytes&lt;<span class="lifetime">&#39;__bytecheck</span>&gt;(
@@ -727,7 +795,8 @@
                 });
 
                 <span class="macro">quote! </span>{
-                    <span class="kw">impl </span>#impl_generics CheckBytes&lt;__C&gt; <span class="kw">for </span>#name #ty_generics #check_where {
+                    <span class="attribute">#[automatically_derived]
+                    </span><span class="kw">impl </span>#impl_generics CheckBytes&lt;__C&gt; <span class="kw">for </span>#name #ty_generics #check_where {
                         <span class="kw">type </span>Error = TupleStructCheckError;
 
                         <span class="kw">unsafe fn </span>check_bytes&lt;<span class="lifetime">&#39;__bytecheck</span>&gt;(
@@ -743,7 +812,8 @@
             }
             Fields::Unit =&gt; {
                 <span class="macro">quote! </span>{
-                    <span class="kw">impl </span>#impl_generics CheckBytes&lt;__C&gt; <span class="kw">for </span>#name #ty_generics #impl_where_clause {
+                    <span class="attribute">#[automatically_derived]
+                    </span><span class="kw">impl </span>#impl_generics CheckBytes&lt;__C&gt; <span class="kw">for </span>#name #ty_generics #impl_where_clause {
                         <span class="kw">type </span>Error = Infallible;
 
                         <span class="kw">unsafe fn </span>check_bytes&lt;<span class="lifetime">&#39;__bytecheck</span>&gt;(
@@ -829,7 +899,7 @@
 
             <span class="kw">let </span>variant_structs = data.variants.iter().map(|v| {
                 <span class="kw">let </span>variant = <span class="kw-2">&amp;</span>v.ident;
-                <span class="kw">let </span>variant_name = Ident::new(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Variant{}&quot;</span>, variant.to_string()), v.span());
+                <span class="kw">let </span>variant_name = Ident::new(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Variant{variant}&quot;</span>), v.span());
                 <span class="kw">match </span>v.fields {
                     Fields::Named(<span class="kw-2">ref </span>fields) =&gt; {
                         <span class="kw">let </span>fields = fields.named.iter().map(|f| {
@@ -866,7 +936,7 @@
 
             <span class="kw">let </span>check_arms = data.variants.iter().map(|v| {
                 <span class="kw">let </span>variant = <span class="kw-2">&amp;</span>v.ident;
-                <span class="kw">let </span>variant_name = Ident::new(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Variant{}&quot;</span>, variant.to_string()), v.span());
+                <span class="kw">let </span>variant_name = Ident::new(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Variant{variant}&quot;</span>), v.span());
                 <span class="kw">match </span>v.fields {
                     Fields::Named(<span class="kw-2">ref </span>fields) =&gt; {
                         <span class="kw">let </span>checks = fields.named.iter().map(|f| {
@@ -924,13 +994,15 @@
 
                 <span class="kw">struct </span>Discriminant;
 
-                <span class="kw">impl </span>Discriminant {
+                <span class="attribute">#[automatically_derived]
+                </span><span class="kw">impl </span>Discriminant {
                     #(#discriminant_const_defs)*
                 }
 
                 #(#variant_structs)*
 
-                <span class="kw">impl </span>#impl_generics CheckBytes&lt;__C&gt; <span class="kw">for </span>#name #ty_generics #check_where {
+                <span class="attribute">#[automatically_derived]
+                </span><span class="kw">impl </span>#impl_generics CheckBytes&lt;__C&gt; <span class="kw">for </span>#name #ty_generics #check_where {
                     <span class="kw">type </span>Error = EnumCheckError&lt;#repr&gt;;
 
                     <span class="kw">unsafe fn </span>check_bytes&lt;<span class="lifetime">&#39;__bytecheck</span>&gt;(
@@ -955,10 +1027,17 @@
         }
     };
 
+    <span class="comment">// Default to `bytecheck`, rather than `::bytecheck`,
+    // to allow providing it from a reexport, e.g. `use rkyv::bytecheck;`.
+    </span><span class="kw">let </span>bytecheck_crate = attributes
+        .bytecheck_crate
+        .unwrap_or(<span class="macro">parse_quote!</span>(bytecheck));
+
     <span class="prelude-val">Ok</span>(<span class="macro">quote! </span>{
-        <span class="kw">const _</span>: () = {
+        <span class="attribute">#[allow(unused_results)]
+        </span><span class="kw">const _</span>: () = {
             <span class="kw">use </span>::core::{convert::Infallible, marker::PhantomData};
-            <span class="kw">use </span>bytecheck::{
+            <span class="kw">use </span>#bytecheck_crate::{
                 CheckBytes,
                 EnumCheckError,
                 ErrorBox,
@@ -969,6 +1048,21 @@
             #check_bytes_impl
         };
     })
+}
+
+<span class="kw">fn </span>respan(stream: TokenStream, span: Span) -&gt; TokenStream {
+    stream
+        .into_iter()
+        .map(|token| respan_token(token, span))
+        .collect()
+}
+
+<span class="kw">fn </span>respan_token(<span class="kw-2">mut </span>token: TokenTree, span: Span) -&gt; TokenTree {
+    <span class="kw">if let </span>TokenTree::Group(g) = <span class="kw-2">&amp;mut </span>token {
+        <span class="kw-2">*</span>g = Group::new(g.delimiter(), respan(g.stream(), span));
+    }
+    token.set_span(span);
+    token
 }
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="bytecheck_derive" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

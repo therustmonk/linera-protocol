@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/regex-1.7.0/src/exec.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>exec.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../regex/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/regex-1.8.1/src/exec.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>exec.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../regex/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -1653,15 +1653,108 @@
 <span id="1653">1653</span>
 <span id="1654">1654</span>
 <span id="1655">1655</span>
+<span id="1656">1656</span>
+<span id="1657">1657</span>
+<span id="1658">1658</span>
+<span id="1659">1659</span>
+<span id="1660">1660</span>
+<span id="1661">1661</span>
+<span id="1662">1662</span>
+<span id="1663">1663</span>
+<span id="1664">1664</span>
+<span id="1665">1665</span>
+<span id="1666">1666</span>
+<span id="1667">1667</span>
+<span id="1668">1668</span>
+<span id="1669">1669</span>
+<span id="1670">1670</span>
+<span id="1671">1671</span>
+<span id="1672">1672</span>
+<span id="1673">1673</span>
+<span id="1674">1674</span>
+<span id="1675">1675</span>
+<span id="1676">1676</span>
+<span id="1677">1677</span>
+<span id="1678">1678</span>
+<span id="1679">1679</span>
+<span id="1680">1680</span>
+<span id="1681">1681</span>
+<span id="1682">1682</span>
+<span id="1683">1683</span>
+<span id="1684">1684</span>
+<span id="1685">1685</span>
+<span id="1686">1686</span>
+<span id="1687">1687</span>
+<span id="1688">1688</span>
+<span id="1689">1689</span>
+<span id="1690">1690</span>
+<span id="1691">1691</span>
+<span id="1692">1692</span>
+<span id="1693">1693</span>
+<span id="1694">1694</span>
+<span id="1695">1695</span>
+<span id="1696">1696</span>
+<span id="1697">1697</span>
+<span id="1698">1698</span>
+<span id="1699">1699</span>
+<span id="1700">1700</span>
+<span id="1701">1701</span>
+<span id="1702">1702</span>
+<span id="1703">1703</span>
+<span id="1704">1704</span>
+<span id="1705">1705</span>
+<span id="1706">1706</span>
+<span id="1707">1707</span>
+<span id="1708">1708</span>
+<span id="1709">1709</span>
+<span id="1710">1710</span>
+<span id="1711">1711</span>
+<span id="1712">1712</span>
+<span id="1713">1713</span>
+<span id="1714">1714</span>
+<span id="1715">1715</span>
+<span id="1716">1716</span>
+<span id="1717">1717</span>
+<span id="1718">1718</span>
+<span id="1719">1719</span>
+<span id="1720">1720</span>
+<span id="1721">1721</span>
+<span id="1722">1722</span>
+<span id="1723">1723</span>
+<span id="1724">1724</span>
+<span id="1725">1725</span>
+<span id="1726">1726</span>
+<span id="1727">1727</span>
+<span id="1728">1728</span>
+<span id="1729">1729</span>
+<span id="1730">1730</span>
+<span id="1731">1731</span>
+<span id="1732">1732</span>
+<span id="1733">1733</span>
+<span id="1734">1734</span>
+<span id="1735">1735</span>
+<span id="1736">1736</span>
+<span id="1737">1737</span>
+<span id="1738">1738</span>
+<span id="1739">1739</span>
+<span id="1740">1740</span>
+<span id="1741">1741</span>
+<span id="1742">1742</span>
+<span id="1743">1743</span>
+<span id="1744">1744</span>
+<span id="1745">1745</span>
+<span id="1746">1746</span>
+<span id="1747">1747</span>
+<span id="1748">1748</span>
 </pre><pre class="rust"><code><span class="kw">use </span>std::cell::RefCell;
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::panic::AssertUnwindSafe;
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="attribute">#[cfg(feature = <span class="string">&quot;perf-literal&quot;</span>)]
-</span><span class="kw">use </span>aho_corasick::{AhoCorasick, AhoCorasickBuilder, MatchKind};
-<span class="kw">use </span>regex_syntax::hir::literal::Literals;
-<span class="kw">use </span>regex_syntax::hir::Hir;
+</span><span class="kw">use </span>aho_corasick::{AhoCorasick, MatchKind};
+<span class="kw">use </span>regex_syntax::hir::literal;
+<span class="kw">use </span>regex_syntax::hir::{Hir, Look};
 <span class="kw">use </span>regex_syntax::ParserBuilder;
 
 <span class="kw">use </span><span class="kw">crate</span>::backtrack;
@@ -1733,15 +1826,18 @@
     /// not supported.) Note that this program contains an embedded `.*?`
     /// preceding the first capture group, unless the regex is anchored at the
     /// beginning.
+    </span><span class="attribute">#[allow(dead_code)]
     </span>dfa: Program,
     <span class="doccomment">/// The same as above, except the program is reversed (and there is no
     /// preceding `.*?`). This is used by the DFA to find the starting location
     /// of matches.
+    </span><span class="attribute">#[allow(dead_code)]
     </span>dfa_reverse: Program,
     <span class="doccomment">/// A set of suffix literals extracted from the regex.
     ///
     /// Prefix literals are stored on the `Program`, since they are used inside
     /// the matching engines.
+    </span><span class="attribute">#[allow(dead_code)]
     </span>suffixes: LiteralSearcher,
     <span class="doccomment">/// An Aho-Corasick automaton with leftmost-first match semantics.
     ///
@@ -1753,7 +1849,7 @@
     /// if we were to exhaust the ID space, we probably would have long
     /// surpassed the compilation size limit.
     </span><span class="attribute">#[cfg(feature = <span class="string">&quot;perf-literal&quot;</span>)]
-    </span>ac: <span class="prelude-ty">Option</span>&lt;AhoCorasick&lt;u32&gt;&gt;,
+    </span>ac: <span class="prelude-ty">Option</span>&lt;AhoCorasick&gt;,
     <span class="doccomment">/// match_type encodes as much upfront knowledge about how we&#39;re going to
     /// execute a search as possible.
     </span>match_type: MatchType,
@@ -1776,8 +1872,8 @@
 /// literals.
 </span><span class="kw">struct </span>Parsed {
     exprs: Vec&lt;Hir&gt;,
-    prefixes: Literals,
-    suffixes: Literals,
+    prefixes: literal::Seq,
+    suffixes: literal::Seq,
     bytes: bool,
 }
 
@@ -1883,8 +1979,8 @@
     <span class="doccomment">/// Parse the current set of patterns into their AST and extract literals.
     </span><span class="kw">fn </span>parse(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Parsed, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>exprs = Vec::with_capacity(<span class="self">self</span>.options.pats.len());
-        <span class="kw">let </span><span class="kw-2">mut </span>prefixes = <span class="prelude-val">Some</span>(Literals::empty());
-        <span class="kw">let </span><span class="kw-2">mut </span>suffixes = <span class="prelude-val">Some</span>(Literals::empty());
+        <span class="kw">let </span><span class="kw-2">mut </span>prefixes = <span class="prelude-val">Some</span>(literal::Seq::empty());
+        <span class="kw">let </span><span class="kw-2">mut </span>suffixes = <span class="prelude-val">Some</span>(literal::Seq::empty());
         <span class="kw">let </span><span class="kw-2">mut </span>bytes = <span class="bool-val">false</span>;
         <span class="kw">let </span>is_set = <span class="self">self</span>.options.pats.len() &gt; <span class="number">1</span>;
         <span class="comment">// If we&#39;re compiling a regex set and that set has any anchored
@@ -1898,54 +1994,103 @@
                 .swap_greed(<span class="self">self</span>.options.swap_greed)
                 .ignore_whitespace(<span class="self">self</span>.options.ignore_whitespace)
                 .unicode(<span class="self">self</span>.options.unicode)
-                .allow_invalid_utf8(!<span class="self">self</span>.only_utf8)
+                .utf8(<span class="self">self</span>.only_utf8)
                 .nest_limit(<span class="self">self</span>.options.nest_limit)
                 .build();
             <span class="kw">let </span>expr =
                 parser.parse(pat).map_err(|e| Error::Syntax(e.to_string()))<span class="question-mark">?</span>;
-            bytes = bytes || !expr.is_always_utf8();
+            <span class="kw">let </span>props = expr.properties();
+            <span class="comment">// This used to just check whether the HIR matched valid UTF-8
+            // or not, but in regex-syntax 0.7, we changed our definition of
+            // &quot;matches valid UTF-8&quot; to exclude zero-width matches. And in
+            // particular, previously, we considered WordAsciiNegate (that
+            // is &#39;(?-u:\B)&#39;) to be capable of matching invalid UTF-8. Our
+            // matcher engines were built under this assumption and fixing
+            // them is not worth it with the imminent plan to switch over to
+            // regex-automata. So for now, we retain the previous behavior by
+            // just explicitly treating the presence of a negated ASCII word
+            // boundary as forcing use to use a byte oriented automaton.
+            </span>bytes = bytes
+                || !props.is_utf8()
+                || props.look_set().contains(Look::WordAsciiNegate);
 
             <span class="kw">if </span><span class="macro">cfg!</span>(feature = <span class="string">&quot;perf-literal&quot;</span>) {
-                <span class="kw">if </span>!expr.is_anchored_start() &amp;&amp; expr.is_any_anchored_start() {
+                <span class="kw">if </span>!props.look_set_prefix().contains(Look::Start)
+                    &amp;&amp; props.look_set().contains(Look::Start)
+                {
                     <span class="comment">// Partial anchors unfortunately make it hard to use
                     // prefixes, so disable them.
                     </span>prefixes = <span class="prelude-val">None</span>;
-                } <span class="kw">else if </span>is_set &amp;&amp; expr.is_anchored_start() {
+                } <span class="kw">else if </span>is_set
+                    &amp;&amp; props.look_set_prefix_any().contains(Look::Start)
+                {
                     <span class="comment">// Regex sets with anchors do not go well with literal
                     // optimizations.
                     </span>prefixes = <span class="prelude-val">None</span>;
+                } <span class="kw">else if </span>props.look_set_prefix_any().contains_word() {
+                    <span class="comment">// The new literal extractor ignores look-around while
+                    // the old one refused to extract prefixes from regexes
+                    // that began with a \b. These old creaky regex internals
+                    // can&#39;t deal with it, so we drop it.
+                    </span>prefixes = <span class="prelude-val">None</span>;
+                } <span class="kw">else if </span>props.look_set_prefix_any().contains(Look::StartLF) {
+                    <span class="comment">// Similar to the reasoning for word boundaries, this old
+                    // regex engine can&#39;t handle literal prefixes with &#39;(?m:^)&#39;
+                    // at the beginning of a regex.
+                    </span>prefixes = <span class="prelude-val">None</span>;
                 }
-                prefixes = prefixes.and_then(|<span class="kw-2">mut </span>prefixes| {
-                    <span class="kw">if </span>!prefixes.union_prefixes(<span class="kw-2">&amp;</span>expr) {
-                        <span class="prelude-val">None
-                    </span>} <span class="kw">else </span>{
-                        <span class="prelude-val">Some</span>(prefixes)
-                    }
-                });
 
-                <span class="kw">if </span>!expr.is_anchored_end() &amp;&amp; expr.is_any_anchored_end() {
+                <span class="kw">if </span>!props.look_set_suffix().contains(Look::End)
+                    &amp;&amp; props.look_set().contains(Look::End)
+                {
                     <span class="comment">// Partial anchors unfortunately make it hard to use
                     // suffixes, so disable them.
                     </span>suffixes = <span class="prelude-val">None</span>;
-                } <span class="kw">else if </span>is_set &amp;&amp; expr.is_anchored_end() {
+                } <span class="kw">else if </span>is_set
+                    &amp;&amp; props.look_set_suffix_any().contains(Look::End)
+                {
                     <span class="comment">// Regex sets with anchors do not go well with literal
                     // optimizations.
                     </span>suffixes = <span class="prelude-val">None</span>;
+                } <span class="kw">else if </span>props.look_set_suffix_any().contains_word() {
+                    <span class="comment">// See the prefix case for reasoning here.
+                    </span>suffixes = <span class="prelude-val">None</span>;
+                } <span class="kw">else if </span>props.look_set_suffix_any().contains(Look::EndLF) {
+                    <span class="comment">// See the prefix case for reasoning here.
+                    </span>suffixes = <span class="prelude-val">None</span>;
                 }
+
+                <span class="kw">let </span>(<span class="kw-2">mut </span>pres, <span class="kw-2">mut </span>suffs) =
+                    <span class="kw">if </span>prefixes.is_none() &amp;&amp; suffixes.is_none() {
+                        (literal::Seq::infinite(), literal::Seq::infinite())
+                    } <span class="kw">else </span>{
+                        literal_analysis(<span class="kw-2">&amp;</span>expr)
+                    };
+                <span class="comment">// These old creaky regex internals can&#39;t handle cases where
+                // the literal sequences are exact but there are look-around
+                // assertions. So we make sure the sequences are inexact if
+                // there are look-around assertions anywhere. This forces the
+                // regex engines to run instead of assuming that a literal
+                // match implies an overall match.
+                </span><span class="kw">if </span>!props.look_set().is_empty() {
+                    pres.make_inexact();
+                    suffs.make_inexact();
+                }
+                prefixes = prefixes.and_then(|<span class="kw-2">mut </span>prefixes| {
+                    prefixes.union(<span class="kw-2">&amp;mut </span>pres);
+                    <span class="prelude-val">Some</span>(prefixes)
+                });
                 suffixes = suffixes.and_then(|<span class="kw-2">mut </span>suffixes| {
-                    <span class="kw">if </span>!suffixes.union_suffixes(<span class="kw-2">&amp;</span>expr) {
-                        <span class="prelude-val">None
-                    </span>} <span class="kw">else </span>{
-                        <span class="prelude-val">Some</span>(suffixes)
-                    }
+                    suffixes.union(<span class="kw-2">&amp;mut </span>suffs);
+                    <span class="prelude-val">Some</span>(suffixes)
                 });
             }
             exprs.push(expr);
         }
         <span class="prelude-val">Ok</span>(Parsed {
             exprs,
-            prefixes: prefixes.unwrap_or_else(Literals::empty),
-            suffixes: suffixes.unwrap_or_else(Literals::empty),
+            prefixes: prefixes.unwrap_or_else(literal::Seq::empty),
+            suffixes: suffixes.unwrap_or_else(literal::Seq::empty),
             bytes,
         })
     }
@@ -2011,7 +2156,7 @@
     }
 
     <span class="attribute">#[cfg(feature = <span class="string">&quot;perf-literal&quot;</span>)]
-    </span><span class="kw">fn </span>build_aho_corasick(<span class="kw-2">&amp;</span><span class="self">self</span>, parsed: <span class="kw-2">&amp;</span>Parsed) -&gt; <span class="prelude-ty">Option</span>&lt;AhoCorasick&lt;u32&gt;&gt; {
+    </span><span class="kw">fn </span>build_aho_corasick(<span class="kw-2">&amp;</span><span class="self">self</span>, parsed: <span class="kw-2">&amp;</span>Parsed) -&gt; <span class="prelude-ty">Option</span>&lt;AhoCorasick&gt; {
         <span class="kw">if </span>parsed.exprs.len() != <span class="number">1 </span>{
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
@@ -2025,10 +2170,9 @@
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
         <span class="prelude-val">Some</span>(
-            AhoCorasickBuilder::new()
+            AhoCorasick::builder()
                 .match_kind(MatchKind::LeftmostFirst)
-                .auto_configure(<span class="kw-2">&amp;</span>lits)
-                .build_with_size::&lt;u32, <span class="kw">_</span>, <span class="kw">_</span>&gt;(<span class="kw-2">&amp;</span>lits)
+                .build(<span class="kw-2">&amp;</span>lits)
                 <span class="comment">// This should never happen because we&#39;d long exceed the
                 // compilation limit for regexes first.
                 </span>.expect(<span class="string">&quot;AC automaton too big&quot;</span>),
@@ -2114,7 +2258,7 @@
                     <span class="self">self</span>.cache.value(),
                     <span class="bool-val">true</span>,
                     <span class="kw-2">&amp;</span>text[start..],
-                    text.len(),
+                    text.len() - start,
                 ) {
                     dfa::Result::Match(<span class="kw">_</span>) =&gt; <span class="prelude-val">Some</span>(text.len()),
                     dfa::Result::NoMatch(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
@@ -2166,7 +2310,7 @@
                     <span class="self">self</span>.cache.value(),
                     <span class="bool-val">true</span>,
                     <span class="kw-2">&amp;</span>text[start..],
-                    text.len(),
+                    text.len() - start,
                 ) {
                     dfa::Result::Match(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
                     dfa::Result::NoMatch(<span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
@@ -2966,6 +3110,12 @@
     </span><span class="kw">pub fn </span>capture_name_idx(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Arc&lt;HashMap&lt;String, usize&gt;&gt; {
         <span class="kw-2">&amp;</span><span class="self">self</span>.ro.nfa.capture_name_idx
     }
+
+    <span class="doccomment">/// If the number of capture groups in every match is always the same, then
+    /// return that number. Otherwise return `None`.
+    </span><span class="kw">pub fn </span>static_captures_len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
+        <span class="self">self</span>.ro.nfa.static_captures_len
+    }
 }
 
 <span class="kw">impl </span>Clone <span class="kw">for </span>Exec {
@@ -3212,7 +3362,7 @@
     // optimization pipeline, because this is a terribly inflexible way to go
     // about things.
 
-    </span><span class="kw">if </span>!expr.is_alternation_literal() {
+    </span><span class="kw">if </span>!expr.properties().is_alternation_literal() {
         <span class="kw">return </span><span class="prelude-val">None</span>;
     }
     <span class="kw">let </span>alts = <span class="kw">match </span><span class="kw-2">*</span>expr.kind() {
@@ -3220,25 +3370,19 @@
         <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">None</span>, <span class="comment">// one literal isn&#39;t worth it
     </span>};
 
-    <span class="kw">let </span>extendlit = |lit: <span class="kw-2">&amp;</span>Literal, dst: <span class="kw-2">&amp;mut </span>Vec&lt;u8&gt;| <span class="kw">match </span><span class="kw-2">*</span>lit {
-        Literal::Unicode(c) =&gt; {
-            <span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0</span>; <span class="number">4</span>];
-            dst.extend_from_slice(c.encode_utf8(<span class="kw-2">&amp;mut </span>buf).as_bytes());
-        }
-        Literal::Byte(b) =&gt; {
-            dst.push(b);
-        }
-    };
-
     <span class="kw">let </span><span class="kw-2">mut </span>lits = <span class="macro">vec!</span>[];
     <span class="kw">for </span>alt <span class="kw">in </span>alts {
         <span class="kw">let </span><span class="kw-2">mut </span>lit = <span class="macro">vec!</span>[];
         <span class="kw">match </span><span class="kw-2">*</span>alt.kind() {
-            HirKind::Literal(<span class="kw-2">ref </span>x) =&gt; extendlit(x, <span class="kw-2">&amp;mut </span>lit),
+            HirKind::Literal(Literal(<span class="kw-2">ref </span>bytes)) =&gt; {
+                lit.extend_from_slice(bytes)
+            }
             HirKind::Concat(<span class="kw-2">ref </span>exprs) =&gt; {
                 <span class="kw">for </span>e <span class="kw">in </span>exprs {
                     <span class="kw">match </span><span class="kw-2">*</span>e.kind() {
-                        HirKind::Literal(<span class="kw-2">ref </span>x) =&gt; extendlit(x, <span class="kw-2">&amp;mut </span>lit),
+                        HirKind::Literal(Literal(<span class="kw-2">ref </span>bytes)) =&gt; {
+                            lit.extend_from_slice(bytes);
+                        }
                         <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;expected literal, got {:?}&quot;</span>, e),
                     }
                 }
@@ -3248,6 +3392,48 @@
         lits.push(lit);
     }
     <span class="prelude-val">Some</span>(lits)
+}
+
+<span class="attribute">#[cfg(not(feature = <span class="string">&quot;perf-literal&quot;</span>))]
+</span><span class="kw">fn </span>literal_analysis(<span class="kw">_</span>: <span class="kw-2">&amp;</span>Hir) -&gt; (literal::Seq, literal::Seq) {
+    (literal::Seq::infinite(), literal::Seq::infinite())
+}
+
+<span class="attribute">#[cfg(feature = <span class="string">&quot;perf-literal&quot;</span>)]
+</span><span class="kw">fn </span>literal_analysis(expr: <span class="kw-2">&amp;</span>Hir) -&gt; (literal::Seq, literal::Seq) {
+    <span class="kw">const </span>ATTEMPTS: [(usize, usize); <span class="number">3</span>] = [(<span class="number">5</span>, <span class="number">50</span>), (<span class="number">4</span>, <span class="number">30</span>), (<span class="number">3</span>, <span class="number">20</span>)];
+
+    <span class="kw">let </span><span class="kw-2">mut </span>prefixes = literal::Extractor::new()
+        .kind(literal::ExtractKind::Prefix)
+        .extract(expr);
+    <span class="kw">for </span>(keep, limit) <span class="kw">in </span>ATTEMPTS {
+        <span class="kw">let </span>len = <span class="kw">match </span>prefixes.len() {
+            <span class="prelude-val">None </span>=&gt; <span class="kw">break</span>,
+            <span class="prelude-val">Some</span>(len) =&gt; len,
+        };
+        <span class="kw">if </span>len &lt;= limit {
+            <span class="kw">break</span>;
+        }
+        prefixes.keep_first_bytes(keep);
+        prefixes.minimize_by_preference();
+    }
+
+    <span class="kw">let </span><span class="kw-2">mut </span>suffixes = literal::Extractor::new()
+        .kind(literal::ExtractKind::Suffix)
+        .extract(expr);
+    <span class="kw">for </span>(keep, limit) <span class="kw">in </span>ATTEMPTS {
+        <span class="kw">let </span>len = <span class="kw">match </span>suffixes.len() {
+            <span class="prelude-val">None </span>=&gt; <span class="kw">break</span>,
+            <span class="prelude-val">Some</span>(len) =&gt; len,
+        };
+        <span class="kw">if </span>len &lt;= limit {
+            <span class="kw">break</span>;
+        }
+        suffixes.keep_last_bytes(keep);
+        suffixes.minimize_by_preference();
+    }
+
+    (prefixes, suffixes)
 }
 
 <span class="attribute">#[cfg(test)]

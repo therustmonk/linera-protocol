@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/winnow-0.4.1/src/stream/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../winnow/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/winnow-0.4.4/src/stream/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../winnow/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -2452,6 +2452,122 @@
 <span id="2452">2452</span>
 <span id="2453">2453</span>
 <span id="2454">2454</span>
+<span id="2455">2455</span>
+<span id="2456">2456</span>
+<span id="2457">2457</span>
+<span id="2458">2458</span>
+<span id="2459">2459</span>
+<span id="2460">2460</span>
+<span id="2461">2461</span>
+<span id="2462">2462</span>
+<span id="2463">2463</span>
+<span id="2464">2464</span>
+<span id="2465">2465</span>
+<span id="2466">2466</span>
+<span id="2467">2467</span>
+<span id="2468">2468</span>
+<span id="2469">2469</span>
+<span id="2470">2470</span>
+<span id="2471">2471</span>
+<span id="2472">2472</span>
+<span id="2473">2473</span>
+<span id="2474">2474</span>
+<span id="2475">2475</span>
+<span id="2476">2476</span>
+<span id="2477">2477</span>
+<span id="2478">2478</span>
+<span id="2479">2479</span>
+<span id="2480">2480</span>
+<span id="2481">2481</span>
+<span id="2482">2482</span>
+<span id="2483">2483</span>
+<span id="2484">2484</span>
+<span id="2485">2485</span>
+<span id="2486">2486</span>
+<span id="2487">2487</span>
+<span id="2488">2488</span>
+<span id="2489">2489</span>
+<span id="2490">2490</span>
+<span id="2491">2491</span>
+<span id="2492">2492</span>
+<span id="2493">2493</span>
+<span id="2494">2494</span>
+<span id="2495">2495</span>
+<span id="2496">2496</span>
+<span id="2497">2497</span>
+<span id="2498">2498</span>
+<span id="2499">2499</span>
+<span id="2500">2500</span>
+<span id="2501">2501</span>
+<span id="2502">2502</span>
+<span id="2503">2503</span>
+<span id="2504">2504</span>
+<span id="2505">2505</span>
+<span id="2506">2506</span>
+<span id="2507">2507</span>
+<span id="2508">2508</span>
+<span id="2509">2509</span>
+<span id="2510">2510</span>
+<span id="2511">2511</span>
+<span id="2512">2512</span>
+<span id="2513">2513</span>
+<span id="2514">2514</span>
+<span id="2515">2515</span>
+<span id="2516">2516</span>
+<span id="2517">2517</span>
+<span id="2518">2518</span>
+<span id="2519">2519</span>
+<span id="2520">2520</span>
+<span id="2521">2521</span>
+<span id="2522">2522</span>
+<span id="2523">2523</span>
+<span id="2524">2524</span>
+<span id="2525">2525</span>
+<span id="2526">2526</span>
+<span id="2527">2527</span>
+<span id="2528">2528</span>
+<span id="2529">2529</span>
+<span id="2530">2530</span>
+<span id="2531">2531</span>
+<span id="2532">2532</span>
+<span id="2533">2533</span>
+<span id="2534">2534</span>
+<span id="2535">2535</span>
+<span id="2536">2536</span>
+<span id="2537">2537</span>
+<span id="2538">2538</span>
+<span id="2539">2539</span>
+<span id="2540">2540</span>
+<span id="2541">2541</span>
+<span id="2542">2542</span>
+<span id="2543">2543</span>
+<span id="2544">2544</span>
+<span id="2545">2545</span>
+<span id="2546">2546</span>
+<span id="2547">2547</span>
+<span id="2548">2548</span>
+<span id="2549">2549</span>
+<span id="2550">2550</span>
+<span id="2551">2551</span>
+<span id="2552">2552</span>
+<span id="2553">2553</span>
+<span id="2554">2554</span>
+<span id="2555">2555</span>
+<span id="2556">2556</span>
+<span id="2557">2557</span>
+<span id="2558">2558</span>
+<span id="2559">2559</span>
+<span id="2560">2560</span>
+<span id="2561">2561</span>
+<span id="2562">2562</span>
+<span id="2563">2563</span>
+<span id="2564">2564</span>
+<span id="2565">2565</span>
+<span id="2566">2566</span>
+<span id="2567">2567</span>
+<span id="2568">2568</span>
+<span id="2569">2569</span>
+<span id="2570">2570</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Stream capability for combinators to parse
 //!
 //! Stream types include:
@@ -2467,9 +2583,6 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{ErrMode, ErrorKind, Needed, ParseError};
 <span class="kw">use </span><span class="kw">crate</span>::lib::std::iter::{Cloned, Enumerate};
-<span class="kw">use </span><span class="kw">crate</span>::lib::std::ops::{
-    Range, RangeFrom, RangeFull, RangeInclusive, RangeTo, RangeToInclusive,
-};
 <span class="kw">use </span><span class="kw">crate</span>::lib::std::slice::Iter;
 <span class="kw">use </span><span class="kw">crate</span>::lib::std::str::from_utf8;
 <span class="kw">use </span><span class="kw">crate</span>::lib::std::str::CharIndices;
@@ -2599,7 +2712,7 @@
 /// # use std::cell::Cell;
 /// # use winnow::prelude::*;
 /// # use winnow::stream::Stateful;
-/// # use winnow::character::alpha1;
+/// # use winnow::ascii::alpha1;
 /// # type Error = ();
 ///
 /// #[derive(Clone, Debug)]
@@ -2675,15 +2788,15 @@
 /// Here is how it works in practice:
 ///
 /// ```rust
-/// # use winnow::{IResult, error::ErrMode, error::Needed, error::{Error, ErrorKind}, bytes, character, stream::Partial};
+/// # use winnow::{IResult, error::ErrMode, error::Needed, error::{Error, ErrorKind}, token, ascii, stream::Partial};
 /// # use winnow::prelude::*;
 ///
 /// fn take_partial(i: Partial&lt;&amp;[u8]&gt;) -&gt; IResult&lt;Partial&lt;&amp;[u8]&gt;, &amp;[u8]&gt; {
-///   bytes::take(4u8).parse_next(i)
+///   token::take(4u8).parse_next(i)
 /// }
 ///
 /// fn take_complete(i: &amp;[u8]) -&gt; IResult&lt;&amp;[u8], &amp;[u8]&gt; {
-///   bytes::take(4u8).parse_next(i)
+///   token::take(4u8).parse_next(i)
 /// }
 ///
 /// // both parsers will take 4 bytes as expected
@@ -2699,11 +2812,11 @@
 ///
 /// // the alpha0 function recognizes 0 or more alphabetic characters
 /// fn alpha0_partial(i: Partial&lt;&amp;str&gt;) -&gt; IResult&lt;Partial&lt;&amp;str&gt;, &amp;str&gt; {
-///   character::alpha0(i)
+///   ascii::alpha0(i)
 /// }
 ///
 /// fn alpha0_complete(i: &amp;str) -&gt; IResult&lt;&amp;str, &amp;str&gt; {
-///   character::alpha0(i)
+///   ascii::alpha0(i)
 /// }
 ///
 /// // if there&#39;s a clear limit to the recognized characters, both parsers work the same way
@@ -3162,7 +3275,7 @@
     }
 }
 
-<span class="doccomment">/// Iterator for [bit][crate::bits] stream (`(I, usize)`)
+<span class="doccomment">/// Iterator for [bit][crate::binary::bits] stream (`(I, usize)`)
 </span><span class="kw">pub struct </span>BitOffsets&lt;I&gt; {
     i: (I, usize),
     o: usize,
@@ -4201,6 +4314,121 @@
     }
 }
 
+<span class="doccomment">/// A range bounded inclusively for counting parses performed
+</span><span class="attribute">#[derive(PartialEq, Eq)]
+</span><span class="kw">pub struct </span>Range {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) start_inclusive: usize,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) end_inclusive: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+}
+
+<span class="kw">impl </span>Range {
+    <span class="attribute">#[inline(always)]
+    </span><span class="kw">fn </span>raw(start_inclusive: usize, end_inclusive: <span class="prelude-ty">Option</span>&lt;usize&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            start_inclusive,
+            end_inclusive,
+        }
+    }
+}
+
+<span class="kw">impl </span><span class="kw">crate</span>::lib::std::ops::RangeBounds&lt;usize&gt; <span class="kw">for </span>Range {
+    <span class="kw">fn </span>start_bound(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">crate</span>::lib::std::ops::Bound&lt;<span class="kw-2">&amp;</span>usize&gt; {
+        <span class="kw">crate</span>::lib::std::ops::Bound::Included(<span class="kw-2">&amp;</span><span class="self">self</span>.start_inclusive)
+    }
+
+    <span class="kw">fn </span>end_bound(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">crate</span>::lib::std::ops::Bound&lt;<span class="kw-2">&amp;</span>usize&gt; {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(end_inclusive) = <span class="kw-2">&amp;</span><span class="self">self</span>.end_inclusive {
+            <span class="kw">crate</span>::lib::std::ops::Bound::Included(end_inclusive)
+        } <span class="kw">else </span>{
+            <span class="kw">crate</span>::lib::std::ops::Bound::Unbounded
+        }
+    }
+}
+
+<span class="kw">impl </span>From&lt;usize&gt; <span class="kw">for </span>Range {
+    <span class="attribute">#[inline(always)]
+    </span><span class="kw">fn </span>from(fixed: usize) -&gt; <span class="self">Self </span>{
+        (fixed..=fixed).into()
+    }
+}
+
+<span class="kw">impl </span>From&lt;<span class="kw">crate</span>::lib::std::ops::Range&lt;usize&gt;&gt; <span class="kw">for </span>Range {
+    <span class="attribute">#[inline(always)]
+    </span><span class="kw">fn </span>from(range: <span class="kw">crate</span>::lib::std::ops::Range&lt;usize&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>start_inclusive = range.start;
+        <span class="kw">let </span>end_inclusive = <span class="prelude-val">Some</span>(range.end.saturating_sub(<span class="number">1</span>));
+        <span class="self">Self</span>::raw(start_inclusive, end_inclusive)
+    }
+}
+
+<span class="kw">impl </span>From&lt;<span class="kw">crate</span>::lib::std::ops::RangeFull&gt; <span class="kw">for </span>Range {
+    <span class="attribute">#[inline(always)]
+    </span><span class="kw">fn </span>from(<span class="kw">_</span>: <span class="kw">crate</span>::lib::std::ops::RangeFull) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>start_inclusive = <span class="number">0</span>;
+        <span class="kw">let </span>end_inclusive = <span class="prelude-val">None</span>;
+        <span class="self">Self</span>::raw(start_inclusive, end_inclusive)
+    }
+}
+
+<span class="kw">impl </span>From&lt;<span class="kw">crate</span>::lib::std::ops::RangeFrom&lt;usize&gt;&gt; <span class="kw">for </span>Range {
+    <span class="attribute">#[inline(always)]
+    </span><span class="kw">fn </span>from(range: <span class="kw">crate</span>::lib::std::ops::RangeFrom&lt;usize&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>start_inclusive = range.start;
+        <span class="kw">let </span>end_inclusive = <span class="prelude-val">None</span>;
+        <span class="self">Self</span>::raw(start_inclusive, end_inclusive)
+    }
+}
+
+<span class="kw">impl </span>From&lt;<span class="kw">crate</span>::lib::std::ops::RangeTo&lt;usize&gt;&gt; <span class="kw">for </span>Range {
+    <span class="attribute">#[inline(always)]
+    </span><span class="kw">fn </span>from(range: <span class="kw">crate</span>::lib::std::ops::RangeTo&lt;usize&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>start_inclusive = <span class="number">0</span>;
+        <span class="kw">let </span>end_inclusive = <span class="prelude-val">Some</span>(range.end.saturating_sub(<span class="number">1</span>));
+        <span class="self">Self</span>::raw(start_inclusive, end_inclusive)
+    }
+}
+
+<span class="kw">impl </span>From&lt;<span class="kw">crate</span>::lib::std::ops::RangeInclusive&lt;usize&gt;&gt; <span class="kw">for </span>Range {
+    <span class="attribute">#[inline(always)]
+    </span><span class="kw">fn </span>from(range: <span class="kw">crate</span>::lib::std::ops::RangeInclusive&lt;usize&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>start_inclusive = <span class="kw-2">*</span>range.start();
+        <span class="kw">let </span>end_inclusive = <span class="prelude-val">Some</span>(<span class="kw-2">*</span>range.end());
+        <span class="self">Self</span>::raw(start_inclusive, end_inclusive)
+    }
+}
+
+<span class="kw">impl </span>From&lt;<span class="kw">crate</span>::lib::std::ops::RangeToInclusive&lt;usize&gt;&gt; <span class="kw">for </span>Range {
+    <span class="attribute">#[inline(always)]
+    </span><span class="kw">fn </span>from(range: <span class="kw">crate</span>::lib::std::ops::RangeToInclusive&lt;usize&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>start_inclusive = <span class="number">0</span>;
+        <span class="kw">let </span>end_inclusive = <span class="prelude-val">Some</span>(range.end);
+        <span class="self">Self</span>::raw(start_inclusive, end_inclusive)
+    }
+}
+
+<span class="kw">impl </span><span class="kw">crate</span>::lib::std::fmt::Display <span class="kw">for </span>Range {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span><span class="kw">crate</span>::lib::std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="kw">crate</span>::lib::std::fmt::Result {
+        <span class="self">self</span>.start_inclusive.fmt(f)<span class="question-mark">?</span>;
+        <span class="kw">match </span><span class="self">self</span>.end_inclusive {
+            <span class="prelude-val">Some</span>(e) <span class="kw">if </span>e == <span class="self">self</span>.start_inclusive =&gt; {}
+            <span class="prelude-val">Some</span>(e) =&gt; {
+                <span class="string">&quot;..=&quot;</span>.fmt(f)<span class="question-mark">?</span>;
+                e.fmt(f)<span class="question-mark">?</span>;
+            }
+            <span class="prelude-val">None </span>=&gt; {
+                <span class="string">&quot;..&quot;</span>.fmt(f)<span class="question-mark">?</span>;
+            }
+        }
+        <span class="prelude-val">Ok</span>(())
+    }
+}
+
+<span class="kw">impl </span><span class="kw">crate</span>::lib::std::fmt::Debug <span class="kw">for </span>Range {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span><span class="kw">crate</span>::lib::std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="kw">crate</span>::lib::std::fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">&quot;{self}&quot;</span>)
+    }
+}
+
 <span class="doccomment">/// Abstracts something which can extend an `Extend`.
 /// Used to build modified input slices in `escaped_transform`
 </span><span class="kw">pub trait </span>Accumulate&lt;T&gt;: Sized {
@@ -4594,7 +4822,7 @@
 /// ```
 /// # use winnow::prelude::*;
 /// # use winnow::{error::ErrMode, error::ErrorKind, error::Error};
-/// # use winnow::bytes::take_while1;
+/// # use winnow::token::take_while1;
 /// fn hex_digit1(input: &amp;str) -&gt; IResult&lt;&amp;str, &amp;str&gt; {
 ///     take_while1((&#39;a&#39;..=&#39;f&#39;, &#39;A&#39;..=&#39;F&#39;, &#39;0&#39;..=&#39;9&#39;)).parse_next(input)
 /// }
@@ -4650,7 +4878,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;C1: AsChar, C2: AsChar + Clone&gt; ContainsToken&lt;C1&gt; <span class="kw">for </span>Range&lt;C2&gt; {
+<span class="kw">impl</span>&lt;C1: AsChar, C2: AsChar + Clone&gt; ContainsToken&lt;C1&gt; <span class="kw">for </span><span class="kw">crate</span>::lib::std::ops::Range&lt;C2&gt; {
     <span class="attribute">#[inline(always)]
     </span><span class="kw">fn </span>contains_token(<span class="kw-2">&amp;</span><span class="self">self</span>, token: C1) -&gt; bool {
         <span class="kw">let </span>start = <span class="self">self</span>.start.clone().as_char();
@@ -4659,7 +4887,9 @@
     }
 }
 
-<span class="kw">impl</span>&lt;C1: AsChar, C2: AsChar + Clone&gt; ContainsToken&lt;C1&gt; <span class="kw">for </span>RangeInclusive&lt;C2&gt; {
+<span class="kw">impl</span>&lt;C1: AsChar, C2: AsChar + Clone&gt; ContainsToken&lt;C1&gt;
+    <span class="kw">for </span><span class="kw">crate</span>::lib::std::ops::RangeInclusive&lt;C2&gt;
+{
     <span class="attribute">#[inline(always)]
     </span><span class="kw">fn </span>contains_token(<span class="kw-2">&amp;</span><span class="self">self</span>, token: C1) -&gt; bool {
         <span class="kw">let </span>start = <span class="self">self</span>.start().clone().as_char();
@@ -4668,7 +4898,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;C1: AsChar, C2: AsChar + Clone&gt; ContainsToken&lt;C1&gt; <span class="kw">for </span>RangeFrom&lt;C2&gt; {
+<span class="kw">impl</span>&lt;C1: AsChar, C2: AsChar + Clone&gt; ContainsToken&lt;C1&gt; <span class="kw">for </span><span class="kw">crate</span>::lib::std::ops::RangeFrom&lt;C2&gt; {
     <span class="attribute">#[inline(always)]
     </span><span class="kw">fn </span>contains_token(<span class="kw-2">&amp;</span><span class="self">self</span>, token: C1) -&gt; bool {
         <span class="kw">let </span>start = <span class="self">self</span>.start.clone().as_char();
@@ -4676,7 +4906,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;C1: AsChar, C2: AsChar + Clone&gt; ContainsToken&lt;C1&gt; <span class="kw">for </span>RangeTo&lt;C2&gt; {
+<span class="kw">impl</span>&lt;C1: AsChar, C2: AsChar + Clone&gt; ContainsToken&lt;C1&gt; <span class="kw">for </span><span class="kw">crate</span>::lib::std::ops::RangeTo&lt;C2&gt; {
     <span class="attribute">#[inline(always)]
     </span><span class="kw">fn </span>contains_token(<span class="kw-2">&amp;</span><span class="self">self</span>, token: C1) -&gt; bool {
         <span class="kw">let </span>end = <span class="self">self</span>.end.clone().as_char();
@@ -4684,7 +4914,9 @@
     }
 }
 
-<span class="kw">impl</span>&lt;C1: AsChar, C2: AsChar + Clone&gt; ContainsToken&lt;C1&gt; <span class="kw">for </span>RangeToInclusive&lt;C2&gt; {
+<span class="kw">impl</span>&lt;C1: AsChar, C2: AsChar + Clone&gt; ContainsToken&lt;C1&gt;
+    <span class="kw">for </span><span class="kw">crate</span>::lib::std::ops::RangeToInclusive&lt;C2&gt;
+{
     <span class="attribute">#[inline(always)]
     </span><span class="kw">fn </span>contains_token(<span class="kw-2">&amp;</span><span class="self">self</span>, token: C1) -&gt; bool {
         <span class="kw">let </span>end = <span class="self">self</span>.end.clone().as_char();
@@ -4692,7 +4924,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;C1: AsChar&gt; ContainsToken&lt;C1&gt; <span class="kw">for </span>RangeFull {
+<span class="kw">impl</span>&lt;C1: AsChar&gt; ContainsToken&lt;C1&gt; <span class="kw">for </span><span class="kw">crate</span>::lib::std::ops::RangeFull {
     <span class="attribute">#[inline(always)]
     </span><span class="kw">fn </span>contains_token(<span class="kw-2">&amp;</span><span class="self">self</span>, _token: C1) -&gt; bool {
         <span class="bool-val">true

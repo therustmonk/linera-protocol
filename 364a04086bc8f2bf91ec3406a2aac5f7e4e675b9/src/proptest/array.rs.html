@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/proptest-1.0.0/src/array.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>array.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../proptest/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/proptest-1.1.0/src/array.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>array.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../proptest/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -262,39 +262,6 @@
 <span id="262">262</span>
 <span id="263">263</span>
 <span id="264">264</span>
-<span id="265">265</span>
-<span id="266">266</span>
-<span id="267">267</span>
-<span id="268">268</span>
-<span id="269">269</span>
-<span id="270">270</span>
-<span id="271">271</span>
-<span id="272">272</span>
-<span id="273">273</span>
-<span id="274">274</span>
-<span id="275">275</span>
-<span id="276">276</span>
-<span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
-<span id="283">283</span>
-<span id="284">284</span>
-<span id="285">285</span>
-<span id="286">286</span>
-<span id="287">287</span>
-<span id="288">288</span>
-<span id="289">289</span>
-<span id="290">290</span>
-<span id="291">291</span>
-<span id="292">292</span>
-<span id="293">293</span>
-<span id="294">294</span>
-<span id="295">295</span>
-<span id="296">296</span>
-<span id="297">297</span>
 </pre><pre class="rust"><code><span class="comment">//-
 // Copyright 2017 Jason Lingle
 //
@@ -377,8 +344,24 @@
     last_shrinker: <span class="prelude-ty">Option</span>&lt;usize&gt;,
 }
 
+<span class="doccomment">/// Create a strategy to generate fixed-length arrays.
+///
+/// All values within the new strategy are generated using the given
+/// strategy.
+///
+/// See [`UniformArrayStrategy`](struct.UniformArrayStrategy.html) for
+/// example usage.
+</span><span class="kw">pub fn </span>uniform&lt;S: Strategy, <span class="kw">const </span>N: usize&gt;(
+    strategy: S,
+) -&gt; UniformArrayStrategy&lt;S, [S::Value; N]&gt; {
+    UniformArrayStrategy {
+        strategy,
+        _marker: PhantomData,
+    }
+}
+
 <span class="macro">macro_rules! </span>small_array {
-    (<span class="macro-nonterminal">$n</span>:tt <span class="macro-nonterminal">$uni</span>:ident : $(<span class="macro-nonterminal">$ix</span>:expr),<span class="kw-2">*</span>) =&gt; {
+    (<span class="macro-nonterminal">$n</span>:tt <span class="macro-nonterminal">$uni</span>:ident) =&gt; {
         <span class="doccomment">/// Create a strategy to generate fixed-length arrays.
         ///
         /// All values within the new strategy are generated using the given
@@ -387,160 +370,111 @@
         ///
         /// See [`UniformArrayStrategy`](struct.UniformArrayStrategy.html) for
         /// example usage.
-        </span><span class="kw">pub fn </span><span class="macro-nonterminal">$uni</span>&lt;S : Strategy&gt;
-            (strategy: S) -&gt; UniformArrayStrategy&lt;S, [S::Value; <span class="macro-nonterminal">$n</span>]&gt;
-        {
+        </span><span class="kw">pub fn </span><span class="macro-nonterminal">$uni</span>&lt;S: Strategy&gt;(
+            strategy: S,
+        ) -&gt; UniformArrayStrategy&lt;S, [S::Value; <span class="macro-nonterminal">$n</span>]&gt; {
             UniformArrayStrategy {
                 strategy,
-                _marker: PhantomData
+                _marker: PhantomData,
             }
         }
+    };
+}
 
-        <span class="kw">impl</span>&lt;S : Strategy&gt; Strategy <span class="kw">for </span>[S; <span class="macro-nonterminal">$n</span>] {
-            <span class="kw">type </span>Tree = ArrayValueTree&lt;[S::Tree; <span class="macro-nonterminal">$n</span>]&gt;;
-            <span class="kw">type </span>Value = [S::Value; <span class="macro-nonterminal">$n</span>];
+<span class="kw">impl</span>&lt;S: Strategy, <span class="kw">const </span>N: usize&gt; Strategy <span class="kw">for </span>[S; N] {
+    <span class="kw">type </span>Tree = ArrayValueTree&lt;[S::Tree; N]&gt;;
+    <span class="kw">type </span>Value = [S::Value; N];
 
-            <span class="kw">fn </span>new_tree(<span class="kw-2">&amp;</span><span class="self">self</span>, runner: <span class="kw-2">&amp;mut </span>TestRunner) -&gt; NewTree&lt;<span class="self">Self</span>&gt; {
-                <span class="prelude-val">Ok</span>(ArrayValueTree {
-                    tree: [$(<span class="self">self</span>[<span class="macro-nonterminal">$ix</span>].new_tree(runner)<span class="question-mark">?</span>,)<span class="kw-2">*</span>],
-                    shrinker: <span class="number">0</span>,
-                    last_shrinker: <span class="prelude-val">None</span>,
-                })
+    <span class="kw">fn </span>new_tree(<span class="kw-2">&amp;</span><span class="self">self</span>, runner: <span class="kw-2">&amp;mut </span>TestRunner) -&gt; NewTree&lt;<span class="self">Self</span>&gt; {
+        <span class="prelude-val">Ok</span>(ArrayValueTree {
+            tree: unarray::build_array_result(|i| <span class="self">self</span>[i].new_tree(runner))<span class="question-mark">?</span>,
+            shrinker: <span class="number">0</span>,
+            last_shrinker: <span class="prelude-val">None</span>,
+        })
+    }
+}
+<span class="kw">impl</span>&lt;S: Strategy, <span class="kw">const </span>N: usize&gt; Strategy
+    <span class="kw">for </span>UniformArrayStrategy&lt;S, [S::Value; N]&gt;
+{
+    <span class="kw">type </span>Tree = ArrayValueTree&lt;[S::Tree; N]&gt;;
+    <span class="kw">type </span>Value = [S::Value; N];
+
+    <span class="kw">fn </span>new_tree(<span class="kw-2">&amp;</span><span class="self">self</span>, runner: <span class="kw-2">&amp;mut </span>TestRunner) -&gt; NewTree&lt;<span class="self">Self</span>&gt; {
+        <span class="prelude-val">Ok</span>(ArrayValueTree {
+            tree: unarray::build_array_result(|<span class="kw">_</span>| {
+                <span class="self">self</span>.strategy.new_tree(runner)
+            })<span class="question-mark">?</span>,
+            shrinker: <span class="number">0</span>,
+            last_shrinker: <span class="prelude-val">None</span>,
+        })
+    }
+}
+<span class="kw">impl</span>&lt;T: ValueTree, <span class="kw">const </span>N: usize&gt; ValueTree <span class="kw">for </span>ArrayValueTree&lt;[T; N]&gt; {
+    <span class="kw">type </span>Value = [T::Value; N];
+
+    <span class="kw">fn </span>current(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; [T::Value; N] {
+        unarray::build_array(|i| <span class="self">self</span>.tree[i].current())
+    }
+
+    <span class="kw">fn </span>simplify(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
+        <span class="kw">while </span><span class="self">self</span>.shrinker &lt; N {
+            <span class="kw">if </span><span class="self">self</span>.tree[<span class="self">self</span>.shrinker].simplify() {
+                <span class="self">self</span>.last_shrinker = <span class="prelude-val">Some</span>(<span class="self">self</span>.shrinker);
+                <span class="kw">return </span><span class="bool-val">true</span>;
+            } <span class="kw">else </span>{
+                <span class="self">self</span>.shrinker += <span class="number">1</span>;
             }
         }
+        <span class="bool-val">false
+    </span>}
 
-        <span class="kw">impl</span>&lt;S : Strategy&gt; Strategy
-        <span class="kw">for </span>UniformArrayStrategy&lt;S, [S::Value; <span class="macro-nonterminal">$n</span>]&gt; {
-            <span class="kw">type </span>Tree = ArrayValueTree&lt;[S::Tree; <span class="macro-nonterminal">$n</span>]&gt;;
-            <span class="kw">type </span>Value = [S::Value; <span class="macro-nonterminal">$n</span>];
-
-            <span class="kw">fn </span>new_tree(<span class="kw-2">&amp;</span><span class="self">self</span>, runner: <span class="kw-2">&amp;mut </span>TestRunner) -&gt; NewTree&lt;<span class="self">Self</span>&gt; {
-                <span class="prelude-val">Ok</span>(ArrayValueTree {
-                    tree: [$({
-                        <span class="kw">let _ </span>= <span class="macro-nonterminal">$ix</span>;
-                        <span class="self">self</span>.strategy.new_tree(runner)<span class="question-mark">?
-                    </span>},)<span class="kw-2">*</span>],
-                    shrinker: <span class="number">0</span>,
-                    last_shrinker: <span class="prelude-val">None</span>,
-                })
-            }
-        }
-
-        <span class="kw">impl</span>&lt;T : ValueTree&gt; ValueTree <span class="kw">for </span>ArrayValueTree&lt;[T;<span class="macro-nonterminal">$n</span>]&gt; {
-            <span class="kw">type </span>Value = [T::Value;<span class="macro-nonterminal">$n</span>];
-
-            <span class="kw">fn </span>current(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; [T::Value;<span class="macro-nonterminal">$n</span>] {
-                [$(<span class="self">self</span>.tree[<span class="macro-nonterminal">$ix</span>].current(),)<span class="kw-2">*</span>]
-            }
-
-            <span class="kw">fn </span>simplify(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
-                <span class="kw">while </span><span class="self">self</span>.shrinker &lt; <span class="macro-nonterminal">$n </span>{
-                    <span class="kw">if </span><span class="self">self</span>.tree[<span class="self">self</span>.shrinker].simplify() {
-                        <span class="self">self</span>.last_shrinker = <span class="prelude-val">Some</span>(<span class="self">self</span>.shrinker);
-                        <span class="kw">return </span><span class="bool-val">true</span>;
-                    } <span class="kw">else </span>{
-                        <span class="self">self</span>.shrinker += <span class="number">1</span>;
-                    }
-                }
-
+    <span class="kw">fn </span>complicate(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(shrinker) = <span class="self">self</span>.last_shrinker {
+            <span class="self">self</span>.shrinker = shrinker;
+            <span class="kw">if </span><span class="self">self</span>.tree[shrinker].complicate() {
+                <span class="bool-val">true
+            </span>} <span class="kw">else </span>{
+                <span class="self">self</span>.last_shrinker = <span class="prelude-val">None</span>;
                 <span class="bool-val">false
             </span>}
-
-            <span class="kw">fn </span>complicate(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; bool {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(shrinker) = <span class="self">self</span>.last_shrinker {
-                    <span class="self">self</span>.shrinker = shrinker;
-                    <span class="kw">if </span><span class="self">self</span>.tree[shrinker].complicate() {
-                        <span class="bool-val">true
-                    </span>} <span class="kw">else </span>{
-                        <span class="self">self</span>.last_shrinker = <span class="prelude-val">None</span>;
-                        <span class="bool-val">false
-                    </span>}
-                } <span class="kw">else </span>{
-                    <span class="bool-val">false
-                </span>}
-            }
-        }
+        } <span class="kw">else </span>{
+            <span class="bool-val">false
+        </span>}
     }
 }
 
-<span class="macro">small_array!</span>(<span class="number">1 </span>uniform1:
-             <span class="number">0</span>);
-<span class="macro">small_array!</span>(<span class="number">2 </span>uniform2:
-             <span class="number">0</span>, <span class="number">1</span>);
-<span class="macro">small_array!</span>(<span class="number">3 </span>uniform3:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>);
-<span class="macro">small_array!</span>(<span class="number">4 </span>uniform4:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);
-<span class="macro">small_array!</span>(<span class="number">5 </span>uniform5:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>);
-<span class="macro">small_array!</span>(<span class="number">6 </span>uniform6:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);
-<span class="macro">small_array!</span>(<span class="number">7 </span>uniform7:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>);
-<span class="macro">small_array!</span>(<span class="number">8 </span>uniform8:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>);
-<span class="macro">small_array!</span>(<span class="number">9 </span>uniform9:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>);
-<span class="macro">small_array!</span>(<span class="number">10 </span>uniform10:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>);
-<span class="macro">small_array!</span>(<span class="number">11 </span>uniform11:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>);
-<span class="macro">small_array!</span>(<span class="number">12 </span>uniform12:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>);
-<span class="macro">small_array!</span>(<span class="number">13 </span>uniform13:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>);
-<span class="macro">small_array!</span>(<span class="number">14 </span>uniform14:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>);
-<span class="macro">small_array!</span>(<span class="number">15 </span>uniform15:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>);
-<span class="macro">small_array!</span>(<span class="number">16 </span>uniform16:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>);
-<span class="macro">small_array!</span>(<span class="number">17 </span>uniform17:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>);
-<span class="macro">small_array!</span>(<span class="number">18 </span>uniform18:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>);
-<span class="macro">small_array!</span>(<span class="number">19 </span>uniform19:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>,
-             <span class="number">18</span>);
-<span class="macro">small_array!</span>(<span class="number">20 </span>uniform20:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>,
-             <span class="number">18</span>, <span class="number">19</span>);
-<span class="macro">small_array!</span>(<span class="number">21 </span>uniform21:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>,
-             <span class="number">18</span>, <span class="number">19</span>, <span class="number">20</span>);
-<span class="macro">small_array!</span>(<span class="number">22 </span>uniform22:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>,
-             <span class="number">18</span>, <span class="number">19</span>, <span class="number">20</span>, <span class="number">21</span>);
-<span class="macro">small_array!</span>(<span class="number">23 </span>uniform23:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>,
-             <span class="number">18</span>, <span class="number">19</span>, <span class="number">20</span>, <span class="number">21</span>, <span class="number">22</span>);
-<span class="macro">small_array!</span>(<span class="number">24 </span>uniform24:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>,
-             <span class="number">18</span>, <span class="number">19</span>, <span class="number">20</span>, <span class="number">21</span>, <span class="number">22</span>, <span class="number">23</span>);
-<span class="macro">small_array!</span>(<span class="number">25 </span>uniform25:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>,
-             <span class="number">18</span>, <span class="number">19</span>, <span class="number">20</span>, <span class="number">21</span>, <span class="number">22</span>, <span class="number">23</span>, <span class="number">24</span>);
-<span class="macro">small_array!</span>(<span class="number">26 </span>uniform26:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>,
-             <span class="number">18</span>, <span class="number">19</span>, <span class="number">20</span>, <span class="number">21</span>, <span class="number">22</span>, <span class="number">23</span>, <span class="number">24</span>, <span class="number">25</span>);
-<span class="macro">small_array!</span>(<span class="number">27 </span>uniform27:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>,
-             <span class="number">18</span>, <span class="number">19</span>, <span class="number">20</span>, <span class="number">21</span>, <span class="number">22</span>, <span class="number">23</span>, <span class="number">24</span>, <span class="number">25</span>, <span class="number">26</span>);
-<span class="macro">small_array!</span>(<span class="number">28 </span>uniform28:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>,
-             <span class="number">18</span>, <span class="number">19</span>, <span class="number">20</span>, <span class="number">21</span>, <span class="number">22</span>, <span class="number">23</span>, <span class="number">24</span>, <span class="number">25</span>, <span class="number">26</span>, <span class="number">27</span>);
-<span class="macro">small_array!</span>(<span class="number">29 </span>uniform29:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>,
-             <span class="number">18</span>, <span class="number">19</span>, <span class="number">20</span>, <span class="number">21</span>, <span class="number">22</span>, <span class="number">23</span>, <span class="number">24</span>, <span class="number">25</span>, <span class="number">26</span>, <span class="number">27</span>, <span class="number">28</span>);
-<span class="macro">small_array!</span>(<span class="number">30 </span>uniform30:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>,
-             <span class="number">18</span>, <span class="number">19</span>, <span class="number">20</span>, <span class="number">21</span>, <span class="number">22</span>, <span class="number">23</span>, <span class="number">24</span>, <span class="number">25</span>, <span class="number">26</span>, <span class="number">27</span>, <span class="number">28</span>, <span class="number">29</span>);
-<span class="macro">small_array!</span>(<span class="number">31 </span>uniform31:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>,
-             <span class="number">18</span>, <span class="number">19</span>, <span class="number">20</span>, <span class="number">21</span>, <span class="number">22</span>, <span class="number">23</span>, <span class="number">24</span>, <span class="number">25</span>, <span class="number">26</span>, <span class="number">27</span>, <span class="number">28</span>, <span class="number">29</span>, <span class="number">30</span>);
-<span class="macro">small_array!</span>(<span class="number">32 </span>uniform32:
-             <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>,
-             <span class="number">18</span>, <span class="number">19</span>, <span class="number">20</span>, <span class="number">21</span>, <span class="number">22</span>, <span class="number">23</span>, <span class="number">24</span>, <span class="number">25</span>, <span class="number">26</span>, <span class="number">27</span>, <span class="number">28</span>, <span class="number">29</span>, <span class="number">30</span>, <span class="number">31</span>);
+<span class="macro">small_array!</span>(<span class="number">1 </span>uniform1);
+<span class="macro">small_array!</span>(<span class="number">2 </span>uniform2);
+<span class="macro">small_array!</span>(<span class="number">3 </span>uniform3);
+<span class="macro">small_array!</span>(<span class="number">4 </span>uniform4);
+<span class="macro">small_array!</span>(<span class="number">5 </span>uniform5);
+<span class="macro">small_array!</span>(<span class="number">6 </span>uniform6);
+<span class="macro">small_array!</span>(<span class="number">7 </span>uniform7);
+<span class="macro">small_array!</span>(<span class="number">8 </span>uniform8);
+<span class="macro">small_array!</span>(<span class="number">9 </span>uniform9);
+<span class="macro">small_array!</span>(<span class="number">10 </span>uniform10);
+<span class="macro">small_array!</span>(<span class="number">11 </span>uniform11);
+<span class="macro">small_array!</span>(<span class="number">12 </span>uniform12);
+<span class="macro">small_array!</span>(<span class="number">13 </span>uniform13);
+<span class="macro">small_array!</span>(<span class="number">14 </span>uniform14);
+<span class="macro">small_array!</span>(<span class="number">15 </span>uniform15);
+<span class="macro">small_array!</span>(<span class="number">16 </span>uniform16);
+<span class="macro">small_array!</span>(<span class="number">17 </span>uniform17);
+<span class="macro">small_array!</span>(<span class="number">18 </span>uniform18);
+<span class="macro">small_array!</span>(<span class="number">19 </span>uniform19);
+<span class="macro">small_array!</span>(<span class="number">20 </span>uniform20);
+<span class="macro">small_array!</span>(<span class="number">21 </span>uniform21);
+<span class="macro">small_array!</span>(<span class="number">22 </span>uniform22);
+<span class="macro">small_array!</span>(<span class="number">23 </span>uniform23);
+<span class="macro">small_array!</span>(<span class="number">24 </span>uniform24);
+<span class="macro">small_array!</span>(<span class="number">25 </span>uniform25);
+<span class="macro">small_array!</span>(<span class="number">26 </span>uniform26);
+<span class="macro">small_array!</span>(<span class="number">27 </span>uniform27);
+<span class="macro">small_array!</span>(<span class="number">28 </span>uniform28);
+<span class="macro">small_array!</span>(<span class="number">29 </span>uniform29);
+<span class="macro">small_array!</span>(<span class="number">30 </span>uniform30);
+<span class="macro">small_array!</span>(<span class="number">31 </span>uniform31);
+<span class="macro">small_array!</span>(<span class="number">32 </span>uniform32);
 
 <span class="attribute">#[cfg(test)]
 </span><span class="kw">mod </span>test {

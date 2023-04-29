@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/hyper-0.14.23/src/client/connect/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../../hyper/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/hyper-0.14.26/src/client/connect/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../../hyper/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -410,6 +410,227 @@
 <span id="410">410</span>
 <span id="411">411</span>
 <span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
+<span id="617">617</span>
+<span id="618">618</span>
+<span id="619">619</span>
+<span id="620">620</span>
+<span id="621">621</span>
+<span id="622">622</span>
+<span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Connectors used by the `Client`.
 //!
 //! This module contains:
@@ -492,8 +713,13 @@
 //! [`AsyncWrite`]: tokio::io::AsyncWrite
 //! [`Connection`]: Connection
 </span><span class="kw">use </span>std::fmt;
+<span class="kw">use </span>std::fmt::{Debug, Formatter};
+<span class="kw">use </span>std::sync::atomic::{AtomicBool, Ordering};
+<span class="kw">use </span>std::ops::Deref;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>::http::Extensions;
+<span class="kw">use </span>tokio::sync::watch;
 
 <span class="macro">cfg_feature! </span>{
     <span class="attribute">#![feature = <span class="string">&quot;tcp&quot;</span>]
@@ -525,6 +751,142 @@
     <span class="kw">pub</span>(<span class="kw">super</span>) alpn: Alpn,
     <span class="kw">pub</span>(<span class="kw">super</span>) is_proxied: bool,
     <span class="kw">pub</span>(<span class="kw">super</span>) extra: <span class="prelude-ty">Option</span>&lt;Extra&gt;,
+    <span class="kw">pub</span>(<span class="kw">super</span>) poisoned: PoisonPill,
+}
+
+<span class="attribute">#[derive(Clone)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>PoisonPill {
+    poisoned: Arc&lt;AtomicBool&gt;,
+}
+
+<span class="kw">impl </span>Debug <span class="kw">for </span>PoisonPill {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+        <span class="comment">// print the address of the pill—this makes debugging issues much easier
+        </span><span class="macro">write!</span>(f, <span class="string">&quot;PoisonPill@{:p} {{ poisoned: {} }}&quot;</span>, <span class="self">self</span>.poisoned, <span class="self">self</span>.poisoned.load(Ordering::Relaxed))
+    }
+}
+
+<span class="kw">impl </span>PoisonPill {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>healthy() -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            poisoned: Arc::new(AtomicBool::new(<span class="bool-val">false</span>)),
+        }
+    }
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>poison(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="self">self</span>.poisoned.store(<span class="bool-val">true</span>, Ordering::Relaxed)
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>poisoned(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.poisoned.load(Ordering::Relaxed)
+    }
+}
+
+<span class="doccomment">/// [`CaptureConnection`] allows callers to capture [`Connected`] information
+///
+/// To capture a connection for a request, use [`capture_connection`].
+</span><span class="attribute">#[derive(Debug, Clone)]
+</span><span class="kw">pub struct </span>CaptureConnection {
+    rx: watch::Receiver&lt;<span class="prelude-ty">Option</span>&lt;Connected&gt;&gt;,
+}
+
+<span class="doccomment">/// Capture the connection for a given request
+///
+/// When making a request with Hyper, the underlying connection must implement the [`Connection`] trait.
+/// [`capture_connection`] allows a caller to capture the returned [`Connected`] structure as soon
+/// as the connection is established.
+///
+/// *Note*: If establishing a connection fails, [`CaptureConnection::connection_metadata`] will always return none.
+///
+/// # Examples
+///
+/// **Synchronous access**:
+/// The [`CaptureConnection::connection_metadata`] method allows callers to check if a connection has been
+/// established. This is ideal for situations where you are certain the connection has already
+/// been established (e.g. after the response future has already completed).
+/// ```rust
+/// use hyper::client::connect::{capture_connection, CaptureConnection};
+/// let mut request = http::Request::builder()
+///   .uri(&quot;http://foo.com&quot;)
+///   .body(())
+///   .unwrap();
+///
+/// let captured_connection = capture_connection(&amp;mut request);
+/// // some time later after the request has been sent...
+/// let connection_info = captured_connection.connection_metadata();
+/// println!(&quot;we are connected! {:?}&quot;, connection_info.as_ref());
+/// ```
+///
+/// **Asynchronous access**:
+/// The [`CaptureConnection::wait_for_connection_metadata`] method returns a future resolves as soon as the
+/// connection is available.
+///
+/// ```rust
+/// # #[cfg(feature  = &quot;runtime&quot;)]
+/// # async fn example() {
+/// use hyper::client::connect::{capture_connection, CaptureConnection};
+/// let mut request = http::Request::builder()
+///   .uri(&quot;http://foo.com&quot;)
+///   .body(hyper::Body::empty())
+///   .unwrap();
+///
+/// let mut captured = capture_connection(&amp;mut request);
+/// tokio::task::spawn(async move {
+///     let connection_info = captured.wait_for_connection_metadata().await;
+///     println!(&quot;we are connected! {:?}&quot;, connection_info.as_ref());
+/// });
+///
+/// let client = hyper::Client::new();
+/// client.request(request).await.expect(&quot;request failed&quot;);
+/// # }
+/// ```
+</span><span class="kw">pub fn </span>capture_connection&lt;B&gt;(request: <span class="kw-2">&amp;mut </span><span class="kw">crate</span>::http::Request&lt;B&gt;) -&gt; CaptureConnection {
+    <span class="kw">let </span>(tx, rx) = CaptureConnection::new();
+    request.extensions_mut().insert(tx);
+    rx
+}
+
+<span class="doccomment">/// TxSide for [`CaptureConnection`]
+///
+/// This is inserted into `Extensions` to allow Hyper to back channel connection info
+</span><span class="attribute">#[derive(Clone)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>CaptureConnectionExtension {
+    tx: Arc&lt;watch::Sender&lt;<span class="prelude-ty">Option</span>&lt;Connected&gt;&gt;&gt;,
+}
+
+<span class="kw">impl </span>CaptureConnectionExtension {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, connected: <span class="kw-2">&amp;</span>Connected) {
+        <span class="self">self</span>.tx.send_replace(<span class="prelude-val">Some</span>(connected.clone()));
+    }
+}
+
+<span class="kw">impl </span>CaptureConnection {
+    <span class="doccomment">/// Internal API to create the tx and rx half of [`CaptureConnection`]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new() -&gt; (CaptureConnectionExtension, <span class="self">Self</span>) {
+        <span class="kw">let </span>(tx, rx) = watch::channel(<span class="prelude-val">None</span>);
+        (
+            CaptureConnectionExtension { tx: Arc::new(tx) },
+            CaptureConnection { rx },
+        )
+    }
+
+    <span class="doccomment">/// Retrieve the connection metadata, if available
+    </span><span class="kw">pub fn </span>connection_metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Deref&lt;Target = <span class="prelude-ty">Option</span>&lt;Connected&gt;&gt; + <span class="lifetime">&#39;_ </span>{
+        <span class="self">self</span>.rx.borrow()
+    }
+
+    <span class="doccomment">/// Wait for the connection to be established
+    ///
+    /// If a connection was established, this will always return `Some(...)`. If the request never
+    /// successfully connected (e.g. DNS resolution failure), this method will never return.
+    </span><span class="kw">pub async fn </span>wait_for_connection_metadata(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+    ) -&gt; <span class="kw">impl </span>Deref&lt;Target = <span class="prelude-ty">Option</span>&lt;Connected&gt;&gt; + <span class="lifetime">&#39;_ </span>{
+        <span class="kw">if </span><span class="self">self</span>.rx.borrow().is_some() {
+            <span class="kw">return </span><span class="self">self</span>.rx.borrow();
+        }
+        <span class="kw">let _ </span>= <span class="self">self</span>.rx.changed().<span class="kw">await</span>;
+        <span class="self">self</span>.rx.borrow()
+    }
 }
 
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>Extra(Box&lt;<span class="kw">dyn </span>ExtraInner&gt;);
@@ -542,6 +904,7 @@
             alpn: Alpn::None,
             is_proxied: <span class="bool-val">false</span>,
             extra: <span class="prelude-val">None</span>,
+            poisoned: PoisonPill::healthy(),
         }
     }
 
@@ -601,14 +964,24 @@
         <span class="self">self</span>.alpn == Alpn::H2
     }
 
+    <span class="doccomment">/// Poison this connection
+    ///
+    /// A poisoned connection will not be reused for subsequent requests by the pool
+    </span><span class="kw">pub fn </span>poison(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="self">self</span>.poisoned.poison();
+        <span class="macro">tracing::debug!</span>(
+            poison_pill = <span class="question-mark">?</span><span class="self">self</span>.poisoned, <span class="string">&quot;connection was poisoned&quot;
+        </span>);
+    }
+
     <span class="comment">// Don&#39;t public expose that `Connected` is `Clone`, unsure if we want to
     // keep that contract...
-    </span><span class="attribute">#[cfg(feature = <span class="string">&quot;http2&quot;</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Connected {
         Connected {
             alpn: <span class="self">self</span>.alpn.clone(),
             is_proxied: <span class="self">self</span>.is_proxied,
             extra: <span class="self">self</span>.extra.clone(),
+            poisoned: <span class="self">self</span>.poisoned.clone(),
         }
     }
 }
@@ -763,6 +1136,7 @@
 <span class="attribute">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span><span class="kw">super</span>::Connected;
+    <span class="kw">use </span><span class="kw">crate</span>::client::connect::CaptureConnection;
 
     <span class="attribute">#[derive(Clone, Debug, PartialEq)]
     </span><span class="kw">struct </span>Ex1(usize);
@@ -820,6 +1194,74 @@
 
         <span class="macro">assert_eq!</span>(ex2.get::&lt;Ex1&gt;(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>Ex1(<span class="number">99</span>)));
         <span class="macro">assert_eq!</span>(ex2.get::&lt;Ex2&gt;(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>Ex2(<span class="string">&quot;hiccup&quot;</span>)));
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>test_sync_capture_connection() {
+        <span class="kw">let </span>(tx, rx) = CaptureConnection::new();
+        <span class="macro">assert!</span>(
+            rx.connection_metadata().is_none(),
+            <span class="string">&quot;connection has not been set&quot;
+        </span>);
+        tx.set(<span class="kw-2">&amp;</span>Connected::new().proxy(<span class="bool-val">true</span>));
+        <span class="macro">assert_eq!</span>(
+            rx.connection_metadata()
+                .as_ref()
+                .expect(<span class="string">&quot;connected should be set&quot;</span>)
+                .is_proxied(),
+            <span class="bool-val">true
+        </span>);
+
+        <span class="comment">// ensure it can be called multiple times
+        </span><span class="macro">assert_eq!</span>(
+            rx.connection_metadata()
+                .as_ref()
+                .expect(<span class="string">&quot;connected should be set&quot;</span>)
+                .is_proxied(),
+            <span class="bool-val">true
+        </span>);
+    }
+
+    <span class="attribute">#[tokio::test]
+    </span><span class="kw">async fn </span>async_capture_connection() {
+        <span class="kw">let </span>(tx, <span class="kw-2">mut </span>rx) = CaptureConnection::new();
+        <span class="macro">assert!</span>(
+            rx.connection_metadata().is_none(),
+            <span class="string">&quot;connection has not been set&quot;
+        </span>);
+        <span class="kw">let </span>test_task = tokio::spawn(<span class="kw">async move </span>{
+            <span class="macro">assert_eq!</span>(
+                rx.wait_for_connection_metadata()
+                    .<span class="kw">await
+                    </span>.as_ref()
+                    .expect(<span class="string">&quot;connection should be set&quot;</span>)
+                    .is_proxied(),
+                <span class="bool-val">true
+            </span>);
+            <span class="comment">// can be awaited multiple times
+            </span><span class="macro">assert!</span>(
+                rx.wait_for_connection_metadata().<span class="kw">await</span>.is_some(),
+                <span class="string">&quot;should be awaitable multiple times&quot;
+            </span>);
+
+            <span class="macro">assert_eq!</span>(rx.connection_metadata().is_some(), <span class="bool-val">true</span>);
+        });
+        <span class="comment">// can&#39;t be finished, we haven&#39;t set the connection yet
+        </span><span class="macro">assert_eq!</span>(test_task.is_finished(), <span class="bool-val">false</span>);
+        tx.set(<span class="kw-2">&amp;</span>Connected::new().proxy(<span class="bool-val">true</span>));
+
+        <span class="macro">assert!</span>(test_task.<span class="kw">await</span>.is_ok());
+    }
+
+    <span class="attribute">#[tokio::test]
+    </span><span class="kw">async fn </span>capture_connection_sender_side_dropped() {
+        <span class="kw">let </span>(tx, <span class="kw-2">mut </span>rx) = CaptureConnection::new();
+        <span class="macro">assert!</span>(
+            rx.connection_metadata().is_none(),
+            <span class="string">&quot;connection has not been set&quot;
+        </span>);
+        drop(tx);
+        <span class="macro">assert!</span>(rx.wait_for_connection_metadata().<span class="kw">await</span>.is_none());
     }
 }
 </code></pre></div>

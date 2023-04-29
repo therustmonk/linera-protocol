@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/proptest-1.0.0/src/num.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>num.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../proptest/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/proptest-1.1.0/src/num.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>num.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../proptest/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -1369,6 +1369,23 @@
 <span id="1369">1369</span>
 <span id="1370">1370</span>
 <span id="1371">1371</span>
+<span id="1372">1372</span>
+<span id="1373">1373</span>
+<span id="1374">1374</span>
+<span id="1375">1375</span>
+<span id="1376">1376</span>
+<span id="1377">1377</span>
+<span id="1378">1378</span>
+<span id="1379">1379</span>
+<span id="1380">1380</span>
+<span id="1381">1381</span>
+<span id="1382">1382</span>
+<span id="1383">1383</span>
+<span id="1384">1384</span>
+<span id="1385">1385</span>
+<span id="1386">1386</span>
+<span id="1387">1387</span>
+<span id="1388">1388</span>
 </pre><pre class="rust"><code><span class="comment">//-
 // Copyright 2017, 2018 Jason Lingle
 //
@@ -1383,16 +1400,18 @@
 //!
 //! All strategies in this module shrink by binary searching towards 0.
 
-</span><span class="kw">use </span><span class="kw">crate</span>::test_runner::TestRunner;
-<span class="kw">use </span>core::ops::Range;
+</span><span class="kw">mod </span>float_samplers;
+
+<span class="kw">use </span><span class="kw">crate</span>::test_runner::TestRunner;
 <span class="kw">use </span>rand::distributions::uniform::{SampleUniform, Uniform};
 <span class="kw">use </span>rand::distributions::{Distribution, Standard};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>sample_uniform&lt;X: SampleUniform&gt;(
     run: <span class="kw-2">&amp;mut </span>TestRunner,
-    range: Range&lt;X&gt;,
+    start: X,
+    end: X,
 ) -&gt; X {
-    Uniform::new(range.start, range.end).sample(run.rng())
+    Uniform::new(start, end).sample(run.rng())
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>sample_uniform_incl&lt;X: SampleUniform&gt;(
@@ -1426,6 +1445,9 @@
 
 <span class="macro">macro_rules! </span>numeric_api {
     (<span class="macro-nonterminal">$typ</span>:ident, <span class="macro-nonterminal">$epsilon</span>:expr) =&gt; {
+        <span class="macro">numeric_api!</span>(<span class="macro-nonterminal">$typ</span>, <span class="macro-nonterminal">$typ</span>, <span class="macro-nonterminal">$epsilon</span>);
+    };
+    (<span class="macro-nonterminal">$typ</span>:ident, <span class="macro-nonterminal">$sample_typ</span>:ty, <span class="macro-nonterminal">$epsilon</span>:expr) =&gt; {
         <span class="kw">impl </span>Strategy <span class="kw">for </span>::core::ops::Range&lt;<span class="macro-nonterminal">$typ</span>&gt; {
             <span class="kw">type </span>Tree = BinarySearch;
             <span class="kw">type </span>Value = <span class="macro-nonterminal">$typ</span>;
@@ -1433,7 +1455,12 @@
             <span class="kw">fn </span>new_tree(<span class="kw-2">&amp;</span><span class="self">self</span>, runner: <span class="kw-2">&amp;mut </span>TestRunner) -&gt; NewTree&lt;<span class="self">Self</span>&gt; {
                 <span class="prelude-val">Ok</span>(BinarySearch::new_clamped(
                     <span class="self">self</span>.start,
-                    <span class="macro-nonterminal">$crate::num::sample_uniform</span>(runner, <span class="self">self</span>.clone()),
+                    <span class="macro-nonterminal">$crate::num::sample_uniform</span>::&lt;<span class="macro-nonterminal">$sample_typ</span>&gt;(
+                        runner,
+                        <span class="self">self</span>.start.into(),
+                        <span class="self">self</span>.end.into(),
+                    )
+                    .into(),
                     <span class="self">self</span>.end - <span class="macro-nonterminal">$epsilon</span>,
                 ))
             }
@@ -1446,11 +1473,12 @@
             <span class="kw">fn </span>new_tree(<span class="kw-2">&amp;</span><span class="self">self</span>, runner: <span class="kw-2">&amp;mut </span>TestRunner) -&gt; NewTree&lt;<span class="self">Self</span>&gt; {
                 <span class="prelude-val">Ok</span>(BinarySearch::new_clamped(
                     <span class="kw-2">*</span><span class="self">self</span>.start(),
-                    <span class="macro-nonterminal">$crate::num::sample_uniform_incl</span>(
+                    <span class="macro-nonterminal">$crate::num::sample_uniform_incl</span>::&lt;<span class="macro-nonterminal">$sample_typ</span>&gt;(
                         runner,
-                        <span class="kw-2">*</span><span class="self">self</span>.start(),
-                        <span class="kw-2">*</span><span class="self">self</span>.end(),
-                    ),
+                        (<span class="kw-2">*</span><span class="self">self</span>.start()).into(),
+                        (<span class="kw-2">*</span><span class="self">self</span>.end()).into(),
+                    )
+                    .into(),
                     <span class="kw-2">*</span><span class="self">self</span>.end(),
                 ))
             }
@@ -1463,11 +1491,12 @@
             <span class="kw">fn </span>new_tree(<span class="kw-2">&amp;</span><span class="self">self</span>, runner: <span class="kw-2">&amp;mut </span>TestRunner) -&gt; NewTree&lt;<span class="self">Self</span>&gt; {
                 <span class="prelude-val">Ok</span>(BinarySearch::new_clamped(
                     <span class="self">self</span>.start,
-                    <span class="macro-nonterminal">$crate::num::sample_uniform_incl</span>(
+                    <span class="macro-nonterminal">$crate::num::sample_uniform_incl</span>::&lt;<span class="macro-nonterminal">$sample_typ</span>&gt;(
                         runner,
-                        <span class="self">self</span>.start,
-                        ::core::<span class="macro-nonterminal">$typ::MAX</span>,
-                    ),
+                        <span class="self">self</span>.start.into(),
+                        ::core::<span class="macro-nonterminal">$typ::MAX</span>.into(),
+                    )
+                    .into(),
                     ::core::<span class="macro-nonterminal">$typ::MAX</span>,
                 ))
             }
@@ -1480,10 +1509,12 @@
             <span class="kw">fn </span>new_tree(<span class="kw-2">&amp;</span><span class="self">self</span>, runner: <span class="kw-2">&amp;mut </span>TestRunner) -&gt; NewTree&lt;<span class="self">Self</span>&gt; {
                 <span class="prelude-val">Ok</span>(BinarySearch::new_clamped(
                     ::core::<span class="macro-nonterminal">$typ::MIN</span>,
-                    <span class="macro-nonterminal">$crate::num::sample_uniform</span>(
+                    <span class="macro-nonterminal">$crate::num::sample_uniform</span>::&lt;<span class="macro-nonterminal">$sample_typ</span>&gt;(
                         runner,
-                        ::core::<span class="macro-nonterminal">$typ::MIN</span>..<span class="self">self</span>.end,
-                    ),
+                        ::core::<span class="macro-nonterminal">$typ::MIN</span>.into(),
+                        <span class="self">self</span>.end.into(),
+                    )
+                    .into(),
                     <span class="self">self</span>.end,
                 ))
             }
@@ -1496,11 +1527,12 @@
             <span class="kw">fn </span>new_tree(<span class="kw-2">&amp;</span><span class="self">self</span>, runner: <span class="kw-2">&amp;mut </span>TestRunner) -&gt; NewTree&lt;<span class="self">Self</span>&gt; {
                 <span class="prelude-val">Ok</span>(BinarySearch::new_clamped(
                     ::core::<span class="macro-nonterminal">$typ::MIN</span>,
-                    <span class="macro-nonterminal">$crate::num::sample_uniform_incl</span>(
+                    <span class="macro-nonterminal">$crate::num::sample_uniform_incl</span>::&lt;<span class="macro-nonterminal">$sample_typ</span>&gt;(
                         runner,
-                        ::core::<span class="macro-nonterminal">$typ::MIN</span>,
-                        <span class="self">self</span>.end,
-                    ),
+                        ::core::<span class="macro-nonterminal">$typ::MIN</span>.into(),
+                        <span class="self">self</span>.end.into(),
+                    )
+                    .into(),
                     <span class="self">self</span>.end,
                 ))
             }
@@ -2035,9 +2067,11 @@
 }
 
 <span class="macro">macro_rules! </span>float_bin_search {
-    (<span class="macro-nonterminal">$typ</span>:ident) =&gt; {
+    (<span class="macro-nonterminal">$typ</span>:ident, <span class="macro-nonterminal">$sample_typ</span>:ident) =&gt; {
         <span class="attribute">#[allow(missing_docs)]
         </span><span class="kw">pub mod </span><span class="macro-nonterminal">$typ </span>{
+            <span class="kw">use </span><span class="kw">super</span>::float_samplers::<span class="macro-nonterminal">$sample_typ</span>;
+
             <span class="kw">use </span>core::ops;
             <span class="attribute">#[cfg(not(feature = <span class="string">&quot;std&quot;</span>))]
             </span><span class="kw">use </span>num_traits::float::FloatCore;
@@ -2213,13 +2247,13 @@
                 }
             }
 
-            <span class="macro">numeric_api!</span>(<span class="macro-nonterminal">$typ</span>, <span class="number">0.0</span>);
+            <span class="macro">numeric_api!</span>(<span class="macro-nonterminal">$typ</span>, <span class="macro-nonterminal">$sample_typ</span>, <span class="number">0.0</span>);
         }
     };
 }
 
-<span class="macro">float_bin_search!</span>(f32);
-<span class="macro">float_bin_search!</span>(f64);
+<span class="macro">float_bin_search!</span>(f32, F32U);
+<span class="macro">float_bin_search!</span>(f64, F64U);
 
 <span class="attribute">#[cfg(test)]
 </span><span class="kw">mod </span>test {

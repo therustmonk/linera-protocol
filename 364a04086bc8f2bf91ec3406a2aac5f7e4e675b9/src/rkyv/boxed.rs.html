@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rkyv-0.7.39/src/boxed.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>boxed.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rkyv-0.7.41/src/boxed.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>boxed.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" href="
     data:image/svg+xml,%3Csvg xmlns=&#x27;http://www.w3.org/2000/svg&#x27;
     viewBox=&#x27;0 0 26.458 26.458&#x27;%3E%3Cpath d=&#x27;M0 0v26.458h26.458V0zm9.175 3.772l8.107 8.106
     2.702-2.702 2.702 13.512-13.512-2.702 2.703-2.702-8.107-8.107z&#x27;/%3E%3C/svg%3E
@@ -245,6 +245,65 @@
 <span id="236">236</span>
 <span id="237">237</span>
 <span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
 </pre><pre class="rust"><code><span class="doccomment">//! An archived version of `Box`.
 
 </span><span class="kw">use crate</span>::{
@@ -303,6 +362,30 @@
             pos: value.serialize_unsized(serializer)<span class="question-mark">?</span>,
             metadata_resolver: value.serialize_metadata(serializer)<span class="question-mark">?</span>,
         })
+    }
+
+    <span class="doccomment">/// Resolves an archived box from a [`BoxResolver`] which contains
+    /// the raw [`&lt;T as ArchivePointee&gt;::ArchivedMetadata`] directly.
+    ///
+    /// # Safety
+    ///
+    /// - `pos` must be the position of `out` within the archive
+    /// - `resolver` must be obtained by following the safety documentation of
+    /// [`BoxResolver::from_raw_parts`].
+    ///
+    /// [`&lt;T as ArchivePointee&gt;::ArchivedMetadata`]: ArchivePointee::ArchivedMetadata
+    </span><span class="kw">pub unsafe fn </span>resolve_from_raw_parts(
+        pos: usize,
+        resolver: BoxResolver&lt;&lt;T <span class="kw">as </span>ArchivePointee&gt;::ArchivedMetadata&gt;,
+        out: <span class="kw-2">*mut </span><span class="self">Self</span>,
+    ) {
+        <span class="kw">let </span>(fp, fo) = <span class="macro">out_field!</span>(out.<span class="number">0</span>);
+        RelPtr::resolve_emplace_from_raw_parts(
+            pos + fp,
+            resolver.pos,
+            resolver.metadata_resolver,
+            fo,
+        );
     }
 
     <span class="attribute">#[doc(hidden)]
@@ -437,9 +520,44 @@
 }
 
 <span class="doccomment">/// The resolver for `Box`.
-</span><span class="kw">pub struct </span>BoxResolver&lt;T&gt; {
+</span><span class="kw">pub struct </span>BoxResolver&lt;M&gt; {
     pos: usize,
-    metadata_resolver: T,
+    metadata_resolver: M,
+}
+
+<span class="kw">impl</span>&lt;M&gt; BoxResolver&lt;M&gt; {
+    <span class="doccomment">/// Create a a new [`BoxResolver&lt;M&gt;`] from raw parts. Note that `M` here is ***not*** the same
+    /// `T` which should be serialized/contained in the resulting [`ArchivedBox&lt;T&gt;`], and is rather
+    /// a type that can be used to resolve any needed [`ArchivePointee::ArchivedMetadata`]
+    /// for the serialized pointed-to value.
+    ///
+    /// In most cases, you won&#39;t need to create a [`BoxResolver`] yourself and can instead obtain it through
+    /// [`ArchivedBox::serialize_from_ref`] or [`ArchivedBox::serialize_copy_from_slice`].
+    ///
+    /// # Safety
+    ///
+    /// Technically no unsafety can happen directly from calling this function, however, passing this as a resolver to
+    /// [`ArchivedBox`]&#39;s resolving functions absolutely can. In general this should be treated as a semi-private type, as
+    /// constructing a valid resolver is quite fraught. Please make sure you understand what the implications are before doing it.
+    ///
+    /// - `pos`: You must ensure that you serialized and resolved (i.e. [`Serializer::serialize_value`])
+    /// a `T` which will be pointed to by the final [`ArchivedBox&lt;T&gt;`] that this resolver will help resolve
+    /// at the given `pos` within the archive.
+    ///
+    /// - `metadata_resolver`: You must also ensure that the given `metadata_resolver` can be used to successfully produce
+    /// valid [`&lt;T as ArchivePointee&gt;::ArchivedMetadata`] for that serialized `T`. This means it must either be:
+    ///     - The necessary [`&lt;T as ArchivePointee&gt;::ArchivedMetadata`] itself, in which case you may use the created
+    /// `BoxResolver&lt;&lt;T as ArchivePointee&gt;::ArchivedMetadata&gt;` as a resolver in [`ArchivedBox::resolve_from_raw_parts`]
+    ///     - An [`ArchiveUnsized::MetadataResolver`] obtained from some `value: &amp;U` where `U: ArchiveUnsized&lt;Archived = T&gt;`, in which case you
+    /// must pass that same `value: &amp;U` into [`ArchivedBox::resolve_from_ref`] along with this [`BoxResolver`].
+    ///
+    /// [`&lt;T as ArchivePointee&gt;::ArchivedMetadata`]: ArchivePointee::ArchivedMetadata
+    </span><span class="kw">pub unsafe fn </span>from_raw_parts(pos: usize, metadata_resolver: M) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            pos,
+            metadata_resolver,
+        }
+    }
 }
 
 <span class="attribute">#[cfg(feature = <span class="string">&quot;validation&quot;</span>)]

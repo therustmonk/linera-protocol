@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/base64-0.20.0/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../base64/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/base64-0.21.0/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../base64/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -125,60 +125,121 @@
 <span id="125">125</span>
 <span id="126">126</span>
 <span id="127">127</span>
-</pre><pre class="rust"><code><span class="doccomment">//!
-//! # Alphabets
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+</pre><pre class="rust"><code><span class="doccomment">//! # Getting started
+//!
+//! 1. Perhaps one of the preconfigured engines in [engine::general_purpose] will suit, e.g.
+//! [engine::general_purpose::STANDARD_NO_PAD].
+//!     - These are re-exported in [prelude] with a `BASE64_` prefix for those who prefer to
+//!       `use base64::prelude::*` or equivalent, e.g. [prelude::BASE64_STANDARD_NO_PAD]
+//! 1. If not, choose which alphabet you want. Most usage will want [alphabet::STANDARD] or [alphabet::URL_SAFE].
+//! 1. Choose which [Engine] implementation you want. For the moment there is only one: [engine::GeneralPurpose].
+//! 1. Configure the engine appropriately using the engine&#39;s `Config` type.
+//!     - This is where you&#39;ll select whether to add padding (when encoding) or expect it (when
+//!     decoding). If given the choice, prefer no padding.
+//! 1. Build the engine using the selected alphabet and config.
+//!
+//! For more detail, see below.
+//!
+//! ## Alphabets
 //!
 //! An [alphabet::Alphabet] defines what ASCII symbols are used to encode to or decode from.
 //!
 //! Constants in [alphabet] like [alphabet::STANDARD] or [alphabet::URL_SAFE] provide commonly used
-//! alphabets, but you can also build your own custom `Alphabet` if needed.
+//! alphabets, but you can also build your own custom [alphabet::Alphabet] if needed.
 //!
-//! # Engines
+//! ## Engines
 //!
 //! Once you have an `Alphabet`, you can pick which `Engine` you want. A few parts of the public
 //! API provide a default, but otherwise the user must provide an `Engine` to use.
 //!
-//! See [engine::Engine] for more on what engine to choose, or use [engine::DEFAULT_ENGINE] if you
-//! just want plain old standard base64 and don&#39;t have other requirements.
+//! See [Engine] for more.
 //!
 //! ## Config
 //!
 //! In addition to an `Alphabet`, constructing an `Engine` also requires an [engine::Config]. Each
-//! `Engine` has a corresponding `Config` implementation.
-//!
-//! [encode()] and [decode()] use the standard alphabet and default engine in an RFC 4648 standard
-//! setup.
+//! `Engine` has a corresponding `Config` implementation since different `Engine`s may offer different
+//! levels of configurability.
 //!
 //! # Encoding
 //!
-//! Several different encoding functions are available to you depending on your desire for
+//! Several different encoding methods on [Engine] are available to you depending on your desire for
 //! convenience vs performance.
 //!
-//! | Function                | Output                       | Allocates                      |
-//! | ----------------------- | ---------------------------- | ------------------------------ |
-//! | `encode`                | Returns a new `String`       | Always                         |
-//! | `encode_engine`         | Returns a new `String`       | Always                         |
-//! | `encode_engine_string`     | Appends to provided `String` | Only if `String` needs to grow |
-//! | `encode_engine_slice`   | Writes to provided `&amp;[u8]`   | Never - fastest                |
+//! | Method                   | Output                       | Allocates                      |
+//! | ------------------------ | ---------------------------- | ------------------------------ |
+//! | [Engine::encode]         | Returns a new `String`       | Always                         |
+//! | [Engine::encode_string]  | Appends to provided `String` | Only if `String` needs to grow |
+//! | [Engine::encode_slice]   | Writes to provided `&amp;[u8]`   | Never - fastest                |
 //!
-//! All of the encoding functions that take an `Engine` will pad as per the engine&#39;s config.
+//! All of the encoding methods will pad as per the engine&#39;s config.
 //!
 //! # Decoding
 //!
-//! Just as for encoding, there are different decoding functions available.
+//! Just as for encoding, there are different decoding methods available.
 //!
-//! | Function                | Output                        | Allocates                      |
-//! | ----------------------- | ----------------------------- | ------------------------------ |
-//! | `decode`                | Returns a new `Vec&lt;u8&gt;`       | Always                         |
-//! | `decode_engine`         | Returns a new `Vec&lt;u8&gt;`       | Always                         |
-//! | `decode_engine_vec`     | Appends to provided `Vec&lt;u8&gt;` | Only if `Vec` needs to grow    |
-//! | `decode_engine_slice`   | Writes to provided `&amp;[u8]`    | Never - fastest                |
+//! | Method                   | Output                        | Allocates                      |
+//! | ------------------------ | ----------------------------- | ------------------------------ |
+//! | [Engine::decode]         | Returns a new `Vec&lt;u8&gt;`       | Always                         |
+//! | [Engine::decode_vec]     | Appends to provided `Vec&lt;u8&gt;` | Only if `Vec` needs to grow    |
+//! | [Engine::decode_slice]   | Writes to provided `&amp;[u8]`    | Never - fastest                |
 //!
 //! Unlike encoding, where all possible input is valid, decoding can fail (see [DecodeError]).
 //!
-//! Input can be invalid because it has invalid characters or invalid padding. (No padding at all is
-//! valid, but excess padding is not.) Whitespace in the input is invalid, just like any other
-//! non-base64 byte.
+//! Input can be invalid because it has invalid characters or invalid padding. The nature of how
+//! padding is checked depends on the engine&#39;s config.
+//! Whitespace in the input is invalid, just like any other non-base64 byte.
 //!
 //! # `Read` and `Write`
 //!
@@ -195,11 +256,47 @@
 //!
 //! See [display] for how to transparently base64 data via a `Display` implementation.
 //!
+//! # Examples
+//!
+//! ## Using predefined engines
+//!
+//! ```
+//! use base64::{Engine as _, engine::general_purpose};
+//!
+//! let orig = b&quot;data&quot;;
+//! let encoded: String = general_purpose::STANDARD_NO_PAD.encode(orig);
+//! assert_eq!(&quot;ZGF0YQ&quot;, encoded);
+//! assert_eq!(orig.as_slice(), &amp;general_purpose::STANDARD_NO_PAD.decode(encoded).unwrap());
+//!
+//! // or, URL-safe
+//! let encoded_url = general_purpose::URL_SAFE_NO_PAD.encode(orig);
+//! ```
+//!
+//! ## Custom alphabet, config, and engine
+//!
+//! ```
+//! use base64::{engine, alphabet, Engine as _};
+//!
+//! // bizarro-world base64: +/ as the first symbols instead of the last
+//! let alphabet =
+//!     alphabet::Alphabet::new(&quot;+/ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789&quot;)
+//!     .unwrap();
+//!
+//! // a very weird config that encodes with padding but requires no padding when decoding...?
+//! let crazy_config = engine::GeneralPurposeConfig::new()
+//!     .with_decode_allow_trailing_bits(true)
+//!     .with_encode_padding(true)
+//!     .with_decode_padding_mode(engine::DecodePaddingMode::RequireNone);
+//!
+//! let crazy_engine = engine::GeneralPurpose::new(&amp;alphabet, crazy_config);
+//!
+//! let encoded = crazy_engine.encode(b&quot;abc 123&quot;);
+//!
+//! ```
+//!
 //! # Panics
 //!
 //! If length calculations result in overflowing `usize`, a panic will result.
-//!
-//! The `_slice` flavors of encode or decode will panic if the provided output slice is too small.
 
 </span><span class="attribute">#![cfg_attr(feature = <span class="string">&quot;cargo-clippy&quot;</span>, allow(clippy::cast_lossless))]
 #![deny(
@@ -235,18 +332,25 @@
 </span><span class="kw">pub mod </span>write;
 
 <span class="kw">pub mod </span>engine;
+<span class="kw">pub use </span>engine::Engine;
 
 <span class="kw">pub mod </span>alphabet;
 
 <span class="kw">mod </span>encode;
-<span class="attribute">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>, test))]
+<span class="attribute">#[allow(deprecated)]
+#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>, test))]
 </span><span class="kw">pub use </span><span class="kw">crate</span>::encode::{encode, encode_engine, encode_engine_string};
-<span class="kw">pub use </span><span class="kw">crate</span>::encode::{encode_engine_slice, encoded_len};
+<span class="attribute">#[allow(deprecated)]
+</span><span class="kw">pub use </span><span class="kw">crate</span>::encode::{encode_engine_slice, encoded_len, EncodeSliceError};
 
 <span class="kw">mod </span>decode;
-<span class="attribute">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>, test))]
+<span class="attribute">#[allow(deprecated)]
+#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>, test))]
 </span><span class="kw">pub use </span><span class="kw">crate</span>::decode::{decode, decode_engine, decode_engine_vec};
-<span class="kw">pub use </span><span class="kw">crate</span>::decode::{decode_engine_slice, DecodeError};
+<span class="attribute">#[allow(deprecated)]
+</span><span class="kw">pub use </span><span class="kw">crate</span>::decode::{decode_engine_slice, decoded_len_estimate, DecodeError, DecodeSliceError};
+
+<span class="kw">pub mod </span>prelude;
 
 <span class="attribute">#[cfg(test)]
 </span><span class="kw">mod </span>tests;

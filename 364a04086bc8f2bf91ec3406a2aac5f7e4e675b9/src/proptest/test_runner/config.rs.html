@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/proptest-1.0.0/src/test_runner/config.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>config.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../proptest/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/proptest-1.1.0/src/test_runner/config.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>config.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../proptest/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -488,6 +488,32 @@
 <span id="488">488</span>
 <span id="489">489</span>
 <span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
 </pre><pre class="rust"><code><span class="comment">//-
 // Copyright 2017, 2018, 2019 The proptest developers
 //
@@ -533,7 +559,11 @@
 </span><span class="kw">const </span>TIMEOUT: <span class="kw-2">&amp;</span>str = <span class="string">&quot;PROPTEST_TIMEOUT&quot;</span>;
 <span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
 </span><span class="kw">const </span>VERBOSE: <span class="kw-2">&amp;</span>str = <span class="string">&quot;PROPTEST_VERBOSE&quot;</span>;
-<span class="kw">const </span>RNG_ALGORITHM: <span class="kw-2">&amp;</span>str = <span class="string">&quot;PROPTEST_RNG_ALGORITHM&quot;</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="kw">const </span>RNG_ALGORITHM: <span class="kw-2">&amp;</span>str = <span class="string">&quot;PROPTEST_RNG_ALGORITHM&quot;</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="kw">const </span>DISABLE_FAILURE_PERSISTENCE: <span class="kw-2">&amp;</span>str =
+    <span class="string">&quot;PROPTEST_DISABLE_FAILURE_PERSISTENCE&quot;</span>;
 
 <span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
 </span><span class="kw">fn </span>contextualize_config(<span class="kw-2">mut </span>result: Config) -&gt; Config {
@@ -614,6 +644,7 @@
                 <span class="string">&quot;RngAlgorithm&quot;</span>,
                 RNG_ALGORITHM,
             ),
+            DISABLE_FAILURE_PERSISTENCE =&gt; result.failure_persistence = <span class="prelude-val">None</span>,
 
             <span class="kw">_ </span>=&gt; {
                 <span class="kw">if </span>var.starts_with(<span class="string">&quot;PROPTEST_&quot;</span>) {
@@ -672,21 +703,25 @@
     /// This does not include implicitly-replayed persisted failing cases.
     ///
     /// The default is 256, which can be overridden by setting the
-    /// `PROPTEST_CASES` environment variable.
+    /// `PROPTEST_CASES` environment variable. (The variable is only considered
+    /// when the `std` feature is enabled, which it is by default.)
     </span><span class="kw">pub </span>cases: u32,
 
     <span class="doccomment">/// The maximum number of individual inputs that may be rejected before the
     /// test as a whole aborts.
     ///
     /// The default is 65536, which can be overridden by setting the
-    /// `PROPTEST_MAX_LOCAL_REJECTS` environment variable.
+    /// `PROPTEST_MAX_LOCAL_REJECTS` environment variable. (The variable is only
+    /// considered when the `std` feature is enabled, which it is by default.)
     </span><span class="kw">pub </span>max_local_rejects: u32,
 
     <span class="doccomment">/// The maximum number of combined inputs that may be rejected before the
     /// test as a whole aborts.
     ///
     /// The default is 1024, which can be overridden by setting the
-    /// `PROPTEST_MAX_GLOBAL_REJECTS` environment variable.
+    /// `PROPTEST_MAX_GLOBAL_REJECTS` environment variable. (The variable is
+    /// only considered when the `std` feature is enabled, which it is by
+    /// default.)
     </span><span class="kw">pub </span>max_global_rejects: u32,
 
     <span class="doccomment">/// The maximum number of times all `Flatten` combinators will attempt to
@@ -694,7 +729,9 @@
     /// explosion that can happen with nested `Flatten`s.
     ///
     /// The default is 1_000_000, which can be overridden by setting the
-    /// `PROPTEST_MAX_FLAT_MAP_REGENS` environment variable.
+    /// `PROPTEST_MAX_FLAT_MAP_REGENS` environment variable. (The variable is
+    /// only considered when the `std` feature is enabled, which it is by
+    /// default.)
     </span><span class="kw">pub </span>max_flat_map_regens: u32,
 
     <span class="doccomment">/// Indicates whether and how to persist failed test results.
@@ -707,7 +744,11 @@
     /// See the docs of [`FileFailurePersistence`](enum.FileFailurePersistence.html)
     /// and [`MapFailurePersistence`](struct.MapFailurePersistence.html) for more information.
     ///
-    /// The default cannot currently be overridden by an environment variable.
+    /// You can disable failure persistence with the `PROPTEST_DISABLE_FAILURE_PERSISTENCE`
+    /// environment variable but its not currently possible to set the persistence file
+    /// with an environment variable. (The variable is
+    /// only considered when the `std` feature is enabled, which it is by
+    /// default.)
     </span><span class="kw">pub </span>failure_persistence: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>FailurePersistence&gt;&gt;,
 
     <span class="doccomment">/// File location of the current test, relevant for persistence
@@ -742,7 +783,9 @@
     /// This requires the &quot;fork&quot; feature, enabled by default.
     ///
     /// The default is `false`, which can be overridden by setting the
-    /// `PROPTEST_FORK` environment variable.
+    /// `PROPTEST_FORK` environment variable. (The variable is
+    /// only considered when the `std` feature is enabled, which it is by
+    /// default.)
     </span><span class="attribute">#[cfg(feature = <span class="string">&quot;fork&quot;</span>)]
     </span><span class="kw">pub </span>fork: bool,
 
@@ -761,7 +804,9 @@
     /// aborted.
     ///
     /// The default is `0` (i.e., no timeout), which can be overridden by
-    /// setting the `PROPTEST_TIMEOUT` environment variable.
+    /// setting the `PROPTEST_TIMEOUT` environment variable. (The variable is
+    /// only considered when the `std` feature is enabled, which it is by
+    /// default.)
     </span><span class="attribute">#[cfg(feature = <span class="string">&quot;timeout&quot;</span>)]
     </span><span class="kw">pub </span>timeout: u32,
 
@@ -774,7 +819,9 @@
     /// (which it is by default).
     ///
     /// The default is `0` (i.e., no limit), which can be overridden by setting
-    /// the `PROPTEST_MAX_SHRINK_TIME` environment variable.
+    /// the `PROPTEST_MAX_SHRINK_TIME` environment variable. (The variable is
+    /// only considered when the `std` feature is enabled, which it is by
+    /// default.)
     </span><span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
     </span><span class="kw">pub </span>max_shrink_time: u32,
 
@@ -790,7 +837,8 @@
     /// proptest to better accommodate its special values.
     ///
     /// The default is `std::u32::MAX`, which can be overridden by setting the
-    /// `PROPTEST_MAX_SHRINK_ITERS` environment variable.
+    /// `PROPTEST_MAX_SHRINK_ITERS` environment variable. (The variable is only
+    /// considered when the `std` feature is enabled, which it is by default.)
     </span><span class="kw">pub </span>max_shrink_iters: u32,
 
     <span class="doccomment">/// A function to create new result caches.
@@ -825,7 +873,8 @@
     /// since on nostd proptest has no way to produce output.
     ///
     /// The default is `0`, which can be overridden by setting the
-    /// `PROPTEST_VERBOSE` environment variable.
+    /// `PROPTEST_VERBOSE` environment variable. (The variable is only considered
+    /// when the `std` feature is enabled, which it is by default.)
     </span><span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
     </span><span class="kw">pub </span>verbose: u32,
 
@@ -836,6 +885,9 @@
     ///
     /// - `xs` — `RngAlgorithm::XorShift`
     /// - `cc` — `RngAlgorithm::ChaCha`
+    ///
+    /// (The variable is only considered when the `std` feature is enabled,
+    /// which it is by default.)
     </span><span class="kw">pub </span>rng_algorithm: RngAlgorithm,
 
     <span class="comment">// Needs to be public so FRU syntax can be used.

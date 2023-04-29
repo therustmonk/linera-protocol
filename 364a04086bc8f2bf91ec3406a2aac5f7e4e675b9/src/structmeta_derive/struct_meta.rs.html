@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/structmeta-derive-0.1.5/src/struct_meta.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>struct_meta.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../structmeta_derive/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/structmeta-derive-0.1.6/src/struct_meta.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>struct_meta.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../structmeta_derive/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -863,46 +863,6 @@
 <span id="863">863</span>
 <span id="864">864</span>
 <span id="865">865</span>
-<span id="866">866</span>
-<span id="867">867</span>
-<span id="868">868</span>
-<span id="869">869</span>
-<span id="870">870</span>
-<span id="871">871</span>
-<span id="872">872</span>
-<span id="873">873</span>
-<span id="874">874</span>
-<span id="875">875</span>
-<span id="876">876</span>
-<span id="877">877</span>
-<span id="878">878</span>
-<span id="879">879</span>
-<span id="880">880</span>
-<span id="881">881</span>
-<span id="882">882</span>
-<span id="883">883</span>
-<span id="884">884</span>
-<span id="885">885</span>
-<span id="886">886</span>
-<span id="887">887</span>
-<span id="888">888</span>
-<span id="889">889</span>
-<span id="890">890</span>
-<span id="891">891</span>
-<span id="892">892</span>
-<span id="893">893</span>
-<span id="894">894</span>
-<span id="895">895</span>
-<span id="896">896</span>
-<span id="897">897</span>
-<span id="898">898</span>
-<span id="899">899</span>
-<span id="900">900</span>
-<span id="901">901</span>
-<span id="902">902</span>
-<span id="903">903</span>
-<span id="904">904</span>
-<span id="905">905</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::syn_utils::<span class="kw-2">*</span>;
 <span class="kw">use </span>proc_macro2::{Span, TokenStream};
 <span class="kw">use </span>quote::{format_ident, quote, quote_spanned};
@@ -914,7 +874,7 @@
     punctuated::Punctuated,
     spanned::Spanned,
     Attribute, Data, DeriveInput, Field, Fields, GenericArgument, Ident, LitStr, PathArguments,
-    PathSegment, <span class="prelude-ty">Result</span>, Token, Type,
+    <span class="prelude-ty">Result</span>, Token, Type,
 };
 
 <span class="kw">pub fn </span>derive_struct_meta(input: DeriveInput) -&gt; <span class="prelude-ty">Result</span>&lt;TokenStream&gt; {
@@ -1731,46 +1691,6 @@
         }
     }
     <span class="prelude-val">None
-</span>}
-
-<span class="kw">fn </span>is_type(ty: <span class="kw-2">&amp;</span>Type, ns: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str]], name: <span class="kw-2">&amp;</span>str) -&gt; bool {
-    <span class="kw">if let </span><span class="prelude-val">Some</span>(a) = get_arguments_of(ty, ns, name) {
-        a.is_empty()
-    } <span class="kw">else </span>{
-        <span class="bool-val">false
-    </span>}
-}
-<span class="kw">fn </span>get_arguments_of&lt;<span class="lifetime">&#39;a</span>&gt;(ty: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Type, ns: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str]], name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>PathArguments&gt; {
-    <span class="kw">if let </span>Type::Path(ty) = ty {
-        <span class="kw">if </span>ty.qself.is_some() {
-            <span class="kw">return </span><span class="prelude-val">None</span>;
-        }
-        <span class="kw">let </span>ss = <span class="kw-2">&amp;</span>ty.path.segments;
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(last) = ty.path.segments.last() {
-            <span class="kw">if </span>last.ident != name {
-                <span class="kw">return </span><span class="prelude-val">None</span>;
-            }
-            <span class="kw">return if </span>ns.iter().any(|ns| is_match_ns(ss, ns)) {
-                <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>last.arguments)
-            } <span class="kw">else </span>{
-                <span class="prelude-val">None
-            </span>};
-        }
-    }
-    <span class="prelude-val">None
-</span>}
-<span class="kw">fn </span>is_match_ns(ss: <span class="kw-2">&amp;</span>Punctuated&lt;PathSegment, <span class="macro">Token!</span>[::]&gt;, ns: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str]) -&gt; bool {
-    <span class="kw">let </span><span class="kw-2">mut </span>i_ss = ss.len() - <span class="number">1</span>;
-    <span class="kw">let </span><span class="kw-2">mut </span>i_ns = ns.len();
-    <span class="kw">while </span>i_ss &gt; <span class="number">0 </span>&amp;&amp; i_ns &gt; <span class="number">0 </span>{
-        i_ns -= <span class="number">1</span>;
-        i_ss -= <span class="number">1</span>;
-        <span class="kw">let </span>s = <span class="kw-2">&amp;</span>ss[i_ss];
-        <span class="kw">if </span>s.ident != ns[i_ns] || !s.arguments.is_empty() {
-            <span class="kw">return </span><span class="bool-val">false</span>;
-        }
-    }
-    i_ss == <span class="number">0
 </span>}
 
 <span class="kw">const </span>NS_STRUCTMETA: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str]] = <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="string">&quot;structmeta&quot;</span>]];

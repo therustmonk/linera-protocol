@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/regex-syntax-0.6.28/src/hir/print.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>print.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../regex_syntax/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/regex-syntax-0.7.1/src/hir/print.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>print.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../regex_syntax/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -365,15 +365,230 @@
 <span id="365">365</span>
 <span id="366">366</span>
 <span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
 </pre><pre class="rust"><code><span class="doccomment">/*!
 This module provides a regular expression printer for `Hir`.
 */
 
-</span><span class="kw">use </span>std::fmt;
+</span><span class="kw">use </span>core::fmt;
 
-<span class="kw">use </span><span class="kw">crate</span>::hir::visitor::{<span class="self">self</span>, Visitor};
-<span class="kw">use </span><span class="kw">crate</span>::hir::{<span class="self">self</span>, Hir, HirKind};
-<span class="kw">use </span><span class="kw">crate</span>::is_meta_character;
+<span class="kw">use crate</span>::{
+    hir::{
+        <span class="self">self</span>,
+        visitor::{<span class="self">self</span>, Visitor},
+        Hir, HirKind,
+    },
+    is_meta_character,
+};
 
 <span class="doccomment">/// A builder for constructing a printer.
 ///
@@ -451,21 +666,54 @@ This module provides a regular expression printer for `Hir`.
 
     <span class="kw">fn </span>visit_pre(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hir: <span class="kw-2">&amp;</span>Hir) -&gt; fmt::Result {
         <span class="kw">match </span><span class="kw-2">*</span>hir.kind() {
-            HirKind::Empty
-            | HirKind::Repetition(<span class="kw">_</span>)
-            | HirKind::Concat(<span class="kw">_</span>)
-            | HirKind::Alternation(<span class="kw">_</span>) =&gt; {}
-            HirKind::Literal(hir::Literal::Unicode(c)) =&gt; {
-                <span class="self">self</span>.write_literal_char(c)<span class="question-mark">?</span>;
-            }
-            HirKind::Literal(hir::Literal::Byte(b)) =&gt; {
-                <span class="self">self</span>.write_literal_byte(b)<span class="question-mark">?</span>;
+            <span class="comment">// Empty is represented by nothing in the concrete syntax, and
+            // repetition operators are strictly suffix oriented.
+            </span>HirKind::Empty | HirKind::Repetition(<span class="kw">_</span>) =&gt; {}
+            HirKind::Literal(hir::Literal(<span class="kw-2">ref </span>bytes)) =&gt; {
+                <span class="comment">// See the comment on the &#39;Concat&#39; and &#39;Alternation&#39; case below
+                // for why we put parens here. Literals are, conceptually,
+                // a special case of concatenation where each element is a
+                // character. The HIR flattens this into a Box&lt;[u8]&gt;, but we
+                // still need to treat it like a concatenation for correct
+                // printing. As a special case, we don&#39;t write parens if there
+                // is only one character. One character means there is no
+                // concat so we don&#39;t need parens. Adding parens would still be
+                // correct, but we drop them here because it tends to create
+                // rather noisy regexes even in simple cases.
+                </span><span class="kw">let </span>result = core::str::from_utf8(bytes);
+                <span class="kw">let </span>len = result.map_or(bytes.len(), |s| s.chars().count());
+                <span class="kw">if </span>len &gt; <span class="number">1 </span>{
+                    <span class="self">self</span>.wtr.write_str(<span class="string">r&quot;(?:&quot;</span>)<span class="question-mark">?</span>;
+                }
+                <span class="kw">match </span>result {
+                    <span class="prelude-val">Ok</span>(string) =&gt; {
+                        <span class="kw">for </span>c <span class="kw">in </span>string.chars() {
+                            <span class="self">self</span>.write_literal_char(c)<span class="question-mark">?</span>;
+                        }
+                    }
+                    <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
+                        <span class="kw">for </span><span class="kw-2">&amp;</span>b <span class="kw">in </span>bytes.iter() {
+                            <span class="self">self</span>.write_literal_byte(b)<span class="question-mark">?</span>;
+                        }
+                    }
+                }
+                <span class="kw">if </span>len &gt; <span class="number">1 </span>{
+                    <span class="self">self</span>.wtr.write_str(<span class="string">r&quot;)&quot;</span>)<span class="question-mark">?</span>;
+                }
             }
             HirKind::Class(hir::Class::Unicode(<span class="kw-2">ref </span>cls)) =&gt; {
+                <span class="kw">if </span>cls.ranges().is_empty() {
+                    <span class="kw">return </span><span class="self">self</span>.wtr.write_str(<span class="string">&quot;[a&amp;&amp;b]&quot;</span>);
+                }
                 <span class="self">self</span>.wtr.write_str(<span class="string">&quot;[&quot;</span>)<span class="question-mark">?</span>;
                 <span class="kw">for </span>range <span class="kw">in </span>cls.iter() {
                     <span class="kw">if </span>range.start() == range.end() {
                         <span class="self">self</span>.write_literal_char(range.start())<span class="question-mark">?</span>;
+                    } <span class="kw">else if </span>u32::from(range.start()) + <span class="number">1
+                        </span>== u32::from(range.end())
+                    {
+                        <span class="self">self</span>.write_literal_char(range.start())<span class="question-mark">?</span>;
+                        <span class="self">self</span>.write_literal_char(range.end())<span class="question-mark">?</span>;
                     } <span class="kw">else </span>{
                         <span class="self">self</span>.write_literal_char(range.start())<span class="question-mark">?</span>;
                         <span class="self">self</span>.wtr.write_str(<span class="string">&quot;-&quot;</span>)<span class="question-mark">?</span>;
@@ -475,10 +723,16 @@ This module provides a regular expression printer for `Hir`.
                 <span class="self">self</span>.wtr.write_str(<span class="string">&quot;]&quot;</span>)<span class="question-mark">?</span>;
             }
             HirKind::Class(hir::Class::Bytes(<span class="kw-2">ref </span>cls)) =&gt; {
+                <span class="kw">if </span>cls.ranges().is_empty() {
+                    <span class="kw">return </span><span class="self">self</span>.wtr.write_str(<span class="string">&quot;[a&amp;&amp;b]&quot;</span>);
+                }
                 <span class="self">self</span>.wtr.write_str(<span class="string">&quot;(?-u:[&quot;</span>)<span class="question-mark">?</span>;
                 <span class="kw">for </span>range <span class="kw">in </span>cls.iter() {
                     <span class="kw">if </span>range.start() == range.end() {
                         <span class="self">self</span>.write_literal_class_byte(range.start())<span class="question-mark">?</span>;
+                    } <span class="kw">else if </span>range.start() + <span class="number">1 </span>== range.end() {
+                        <span class="self">self</span>.write_literal_class_byte(range.start())<span class="question-mark">?</span>;
+                        <span class="self">self</span>.write_literal_class_byte(range.end())<span class="question-mark">?</span>;
                     } <span class="kw">else </span>{
                         <span class="self">self</span>.write_literal_class_byte(range.start())<span class="question-mark">?</span>;
                         <span class="self">self</span>.wtr.write_str(<span class="string">&quot;-&quot;</span>)<span class="question-mark">?</span>;
@@ -487,41 +741,60 @@ This module provides a regular expression printer for `Hir`.
                 }
                 <span class="self">self</span>.wtr.write_str(<span class="string">&quot;])&quot;</span>)<span class="question-mark">?</span>;
             }
-            HirKind::Anchor(hir::Anchor::StartLine) =&gt; {
-                <span class="self">self</span>.wtr.write_str(<span class="string">&quot;(?m:^)&quot;</span>)<span class="question-mark">?</span>;
-            }
-            HirKind::Anchor(hir::Anchor::EndLine) =&gt; {
-                <span class="self">self</span>.wtr.write_str(<span class="string">&quot;(?m:$)&quot;</span>)<span class="question-mark">?</span>;
-            }
-            HirKind::Anchor(hir::Anchor::StartText) =&gt; {
-                <span class="self">self</span>.wtr.write_str(<span class="string">r&quot;\A&quot;</span>)<span class="question-mark">?</span>;
-            }
-            HirKind::Anchor(hir::Anchor::EndText) =&gt; {
-                <span class="self">self</span>.wtr.write_str(<span class="string">r&quot;\z&quot;</span>)<span class="question-mark">?</span>;
-            }
-            HirKind::WordBoundary(hir::WordBoundary::Unicode) =&gt; {
-                <span class="self">self</span>.wtr.write_str(<span class="string">r&quot;\b&quot;</span>)<span class="question-mark">?</span>;
-            }
-            HirKind::WordBoundary(hir::WordBoundary::UnicodeNegate) =&gt; {
-                <span class="self">self</span>.wtr.write_str(<span class="string">r&quot;\B&quot;</span>)<span class="question-mark">?</span>;
-            }
-            HirKind::WordBoundary(hir::WordBoundary::Ascii) =&gt; {
-                <span class="self">self</span>.wtr.write_str(<span class="string">r&quot;(?-u:\b)&quot;</span>)<span class="question-mark">?</span>;
-            }
-            HirKind::WordBoundary(hir::WordBoundary::AsciiNegate) =&gt; {
-                <span class="self">self</span>.wtr.write_str(<span class="string">r&quot;(?-u:\B)&quot;</span>)<span class="question-mark">?</span>;
-            }
-            HirKind::Group(<span class="kw-2">ref </span>x) =&gt; <span class="kw">match </span>x.kind {
-                hir::GroupKind::CaptureIndex(<span class="kw">_</span>) =&gt; {
-                    <span class="self">self</span>.wtr.write_str(<span class="string">&quot;(&quot;</span>)<span class="question-mark">?</span>;
+            HirKind::Look(<span class="kw-2">ref </span>look) =&gt; <span class="kw">match </span><span class="kw-2">*</span>look {
+                hir::Look::Start =&gt; {
+                    <span class="self">self</span>.wtr.write_str(<span class="string">r&quot;\A&quot;</span>)<span class="question-mark">?</span>;
                 }
-                hir::GroupKind::CaptureName { <span class="kw-2">ref </span>name, .. } =&gt; {
-                    <span class="macro">write!</span>(<span class="self">self</span>.wtr, <span class="string">&quot;(?P&lt;{}&gt;&quot;</span>, name)<span class="question-mark">?</span>;
+                hir::Look::End =&gt; {
+                    <span class="self">self</span>.wtr.write_str(<span class="string">r&quot;\z&quot;</span>)<span class="question-mark">?</span>;
                 }
-                hir::GroupKind::NonCapturing =&gt; {
-                    <span class="self">self</span>.wtr.write_str(<span class="string">&quot;(?:&quot;</span>)<span class="question-mark">?</span>;
+                hir::Look::StartLF =&gt; {
+                    <span class="self">self</span>.wtr.write_str(<span class="string">&quot;(?m:^)&quot;</span>)<span class="question-mark">?</span>;
+                }
+                hir::Look::EndLF =&gt; {
+                    <span class="self">self</span>.wtr.write_str(<span class="string">&quot;(?m:$)&quot;</span>)<span class="question-mark">?</span>;
+                }
+                hir::Look::StartCRLF =&gt; {
+                    <span class="self">self</span>.wtr.write_str(<span class="string">&quot;(?mR:^)&quot;</span>)<span class="question-mark">?</span>;
+                }
+                hir::Look::EndCRLF =&gt; {
+                    <span class="self">self</span>.wtr.write_str(<span class="string">&quot;(?mR:$)&quot;</span>)<span class="question-mark">?</span>;
+                }
+                hir::Look::WordAscii =&gt; {
+                    <span class="self">self</span>.wtr.write_str(<span class="string">r&quot;(?-u:\b)&quot;</span>)<span class="question-mark">?</span>;
+                }
+                hir::Look::WordAsciiNegate =&gt; {
+                    <span class="self">self</span>.wtr.write_str(<span class="string">r&quot;(?-u:\B)&quot;</span>)<span class="question-mark">?</span>;
+                }
+                hir::Look::WordUnicode =&gt; {
+                    <span class="self">self</span>.wtr.write_str(<span class="string">r&quot;\b&quot;</span>)<span class="question-mark">?</span>;
+                }
+                hir::Look::WordUnicodeNegate =&gt; {
+                    <span class="self">self</span>.wtr.write_str(<span class="string">r&quot;\B&quot;</span>)<span class="question-mark">?</span>;
                 }
             },
+            HirKind::Capture(hir::Capture { <span class="kw-2">ref </span>name, .. }) =&gt; {
+                <span class="self">self</span>.wtr.write_str(<span class="string">&quot;(&quot;</span>)<span class="question-mark">?</span>;
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>name) = <span class="kw-2">*</span>name {
+                    <span class="macro">write!</span>(<span class="self">self</span>.wtr, <span class="string">&quot;?P&lt;{}&gt;&quot;</span>, name)<span class="question-mark">?</span>;
+                }
+            }
+            <span class="comment">// Why do this? Wrapping concats and alts in non-capturing groups
+            // is not *always* necessary, but is sometimes necessary. For
+            // example, &#39;concat(a, alt(b, c))&#39; should be written as &#39;a(?:b|c)&#39;
+            // and not &#39;ab|c&#39;. The former is clearly the intended meaning, but
+            // the latter is actually &#39;alt(concat(a, b), c)&#39;.
+            //
+            // It would be possible to only group these things in cases where
+            // it&#39;s strictly necessary, but it requires knowing the parent
+            // expression. And since this technique is simpler and always
+            // correct, we take this route. More to the point, it is a non-goal
+            // of an HIR printer to show a nice easy-to-read regex. Indeed,
+            // its construction forbids it from doing so. Therefore, inserting
+            // extra groups where they aren&#39;t necessary is perfectly okay.
+            </span>HirKind::Concat(<span class="kw">_</span>) | HirKind::Alternation(<span class="kw">_</span>) =&gt; {
+                <span class="self">self</span>.wtr.write_str(<span class="string">r&quot;(?:&quot;</span>)<span class="question-mark">?</span>;
+            }
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -532,39 +805,42 @@ This module provides a regular expression printer for `Hir`.
             </span>HirKind::Empty
             | HirKind::Literal(<span class="kw">_</span>)
             | HirKind::Class(<span class="kw">_</span>)
-            | HirKind::Anchor(<span class="kw">_</span>)
-            | HirKind::WordBoundary(<span class="kw">_</span>)
-            | HirKind::Concat(<span class="kw">_</span>)
-            | HirKind::Alternation(<span class="kw">_</span>) =&gt; {}
+            | HirKind::Look(<span class="kw">_</span>) =&gt; {}
             HirKind::Repetition(<span class="kw-2">ref </span>x) =&gt; {
-                <span class="kw">match </span>x.kind {
-                    hir::RepetitionKind::ZeroOrOne =&gt; {
+                <span class="kw">match </span>(x.min, x.max) {
+                    (<span class="number">0</span>, <span class="prelude-val">Some</span>(<span class="number">1</span>)) =&gt; {
                         <span class="self">self</span>.wtr.write_str(<span class="string">&quot;?&quot;</span>)<span class="question-mark">?</span>;
                     }
-                    hir::RepetitionKind::ZeroOrMore =&gt; {
+                    (<span class="number">0</span>, <span class="prelude-val">None</span>) =&gt; {
                         <span class="self">self</span>.wtr.write_str(<span class="string">&quot;*&quot;</span>)<span class="question-mark">?</span>;
                     }
-                    hir::RepetitionKind::OneOrMore =&gt; {
+                    (<span class="number">1</span>, <span class="prelude-val">None</span>) =&gt; {
                         <span class="self">self</span>.wtr.write_str(<span class="string">&quot;+&quot;</span>)<span class="question-mark">?</span>;
                     }
-                    hir::RepetitionKind::Range(<span class="kw-2">ref </span>x) =&gt; <span class="kw">match </span><span class="kw-2">*</span>x {
-                        hir::RepetitionRange::Exactly(m) =&gt; {
-                            <span class="macro">write!</span>(<span class="self">self</span>.wtr, <span class="string">&quot;{{{}}}&quot;</span>, m)<span class="question-mark">?</span>;
-                        }
-                        hir::RepetitionRange::AtLeast(m) =&gt; {
-                            <span class="macro">write!</span>(<span class="self">self</span>.wtr, <span class="string">&quot;{{{},}}&quot;</span>, m)<span class="question-mark">?</span>;
-                        }
-                        hir::RepetitionRange::Bounded(m, n) =&gt; {
-                            <span class="macro">write!</span>(<span class="self">self</span>.wtr, <span class="string">&quot;{{{},{}}}&quot;</span>, m, n)<span class="question-mark">?</span>;
-                        }
-                    },
+                    (<span class="number">1</span>, <span class="prelude-val">Some</span>(<span class="number">1</span>)) =&gt; {
+                        <span class="comment">// &#39;a{1}&#39; and &#39;a{1}?&#39; are exactly equivalent to &#39;a&#39;.
+                        </span><span class="kw">return </span><span class="prelude-val">Ok</span>(());
+                    }
+                    (m, <span class="prelude-val">None</span>) =&gt; {
+                        <span class="macro">write!</span>(<span class="self">self</span>.wtr, <span class="string">&quot;{{{},}}&quot;</span>, m)<span class="question-mark">?</span>;
+                    }
+                    (m, <span class="prelude-val">Some</span>(n)) <span class="kw">if </span>m == n =&gt; {
+                        <span class="macro">write!</span>(<span class="self">self</span>.wtr, <span class="string">&quot;{{{}}}&quot;</span>, m)<span class="question-mark">?</span>;
+                        <span class="comment">// a{m} and a{m}? are always exactly equivalent.
+                        </span><span class="kw">return </span><span class="prelude-val">Ok</span>(());
+                    }
+                    (m, <span class="prelude-val">Some</span>(n)) =&gt; {
+                        <span class="macro">write!</span>(<span class="self">self</span>.wtr, <span class="string">&quot;{{{},{}}}&quot;</span>, m, n)<span class="question-mark">?</span>;
+                    }
                 }
                 <span class="kw">if </span>!x.greedy {
                     <span class="self">self</span>.wtr.write_str(<span class="string">&quot;?&quot;</span>)<span class="question-mark">?</span>;
                 }
             }
-            HirKind::Group(<span class="kw">_</span>) =&gt; {
-                <span class="self">self</span>.wtr.write_str(<span class="string">&quot;)&quot;</span>)<span class="question-mark">?</span>;
+            HirKind::Capture(<span class="kw">_</span>)
+            | HirKind::Concat(<span class="kw">_</span>)
+            | HirKind::Alternation(<span class="kw">_</span>) =&gt; {
+                <span class="self">self</span>.wtr.write_str(<span class="string">r&quot;)&quot;</span>)<span class="question-mark">?</span>;
             }
         }
         <span class="prelude-val">Ok</span>(())
@@ -584,18 +860,16 @@ This module provides a regular expression printer for `Hir`.
     }
 
     <span class="kw">fn </span>write_literal_byte(<span class="kw-2">&amp;mut </span><span class="self">self</span>, b: u8) -&gt; fmt::Result {
-        <span class="kw">let </span>c = b <span class="kw">as </span>char;
-        <span class="kw">if </span>c &lt;= <span class="number">0x7F </span><span class="kw">as </span>char &amp;&amp; !c.is_control() &amp;&amp; !c.is_whitespace() {
-            <span class="self">self</span>.write_literal_char(c)
+        <span class="kw">if </span>b &lt;= <span class="number">0x7F </span>&amp;&amp; !b.is_ascii_control() &amp;&amp; !b.is_ascii_whitespace() {
+            <span class="self">self</span>.write_literal_char(char::try_from(b).unwrap())
         } <span class="kw">else </span>{
             <span class="macro">write!</span>(<span class="self">self</span>.wtr, <span class="string">&quot;(?-u:\\x{:02X})&quot;</span>, b)
         }
     }
 
     <span class="kw">fn </span>write_literal_class_byte(<span class="kw-2">&amp;mut </span><span class="self">self</span>, b: u8) -&gt; fmt::Result {
-        <span class="kw">let </span>c = b <span class="kw">as </span>char;
-        <span class="kw">if </span>c &lt;= <span class="number">0x7F </span><span class="kw">as </span>char &amp;&amp; !c.is_control() &amp;&amp; !c.is_whitespace() {
-            <span class="self">self</span>.write_literal_char(c)
+        <span class="kw">if </span>b &lt;= <span class="number">0x7F </span>&amp;&amp; !b.is_ascii_control() &amp;&amp; !b.is_ascii_whitespace() {
+            <span class="self">self</span>.write_literal_char(char::try_from(b).unwrap())
         } <span class="kw">else </span>{
             <span class="macro">write!</span>(<span class="self">self</span>.wtr, <span class="string">&quot;\\x{:02X}&quot;</span>, b)
         }
@@ -604,15 +878,21 @@ This module provides a regular expression printer for `Hir`.
 
 <span class="attribute">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span><span class="kw">super</span>::Printer;
+    <span class="kw">use </span>alloc::{
+        boxed::Box,
+        string::{String, ToString},
+    };
+
     <span class="kw">use </span><span class="kw">crate</span>::ParserBuilder;
+
+    <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
     <span class="kw">fn </span>roundtrip(given: <span class="kw-2">&amp;</span>str, expected: <span class="kw-2">&amp;</span>str) {
         roundtrip_with(|b| b, given, expected);
     }
 
     <span class="kw">fn </span>roundtrip_bytes(given: <span class="kw-2">&amp;</span>str, expected: <span class="kw-2">&amp;</span>str) {
-        roundtrip_with(|b| b.allow_invalid_utf8(<span class="bool-val">true</span>), given, expected);
+        roundtrip_with(|b| b.utf8(<span class="bool-val">false</span>), given, expected);
     }
 
     <span class="kw">fn </span>roundtrip_with&lt;F&gt;(<span class="kw-2">mut </span>f: F, given: <span class="kw-2">&amp;</span>str, expected: <span class="kw-2">&amp;</span>str)
@@ -644,28 +924,35 @@ This module provides a regular expression printer for `Hir`.
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>print_class() {
-        roundtrip(<span class="string">r&quot;[a]&quot;</span>, <span class="string">r&quot;[a]&quot;</span>);
+        roundtrip(<span class="string">r&quot;[a]&quot;</span>, <span class="string">r&quot;a&quot;</span>);
+        roundtrip(<span class="string">r&quot;[ab]&quot;</span>, <span class="string">r&quot;[ab]&quot;</span>);
         roundtrip(<span class="string">r&quot;[a-z]&quot;</span>, <span class="string">r&quot;[a-z]&quot;</span>);
         roundtrip(<span class="string">r&quot;[a-z--b-c--x-y]&quot;</span>, <span class="string">r&quot;[ad-wz]&quot;</span>);
-        roundtrip(<span class="string">r&quot;[^\x01-\u{10FFFF}]&quot;</span>, <span class="string">&quot;[\u{0}]&quot;</span>);
-        roundtrip(<span class="string">r&quot;[-]&quot;</span>, <span class="string">r&quot;[\-]&quot;</span>);
+        roundtrip(<span class="string">r&quot;[^\x01-\u{10FFFF}]&quot;</span>, <span class="string">&quot;\u{0}&quot;</span>);
+        roundtrip(<span class="string">r&quot;[-]&quot;</span>, <span class="string">r&quot;\-&quot;</span>);
         roundtrip(<span class="string">r&quot;[☃-⛄]&quot;</span>, <span class="string">r&quot;[☃-⛄]&quot;</span>);
 
-        roundtrip(<span class="string">r&quot;(?-u)[a]&quot;</span>, <span class="string">r&quot;(?-u:[a])&quot;</span>);
+        roundtrip(<span class="string">r&quot;(?-u)[a]&quot;</span>, <span class="string">r&quot;a&quot;</span>);
+        roundtrip(<span class="string">r&quot;(?-u)[ab]&quot;</span>, <span class="string">r&quot;(?-u:[ab])&quot;</span>);
         roundtrip(<span class="string">r&quot;(?-u)[a-z]&quot;</span>, <span class="string">r&quot;(?-u:[a-z])&quot;</span>);
         roundtrip_bytes(<span class="string">r&quot;(?-u)[a-\xFF]&quot;</span>, <span class="string">r&quot;(?-u:[a-\xFF])&quot;</span>);
 
         <span class="comment">// The following test that the printer escapes meta characters
         // in character classes.
-        </span>roundtrip(<span class="string">r&quot;[\[]&quot;</span>, <span class="string">r&quot;[\[]&quot;</span>);
+        </span>roundtrip(<span class="string">r&quot;[\[]&quot;</span>, <span class="string">r&quot;\[&quot;</span>);
         roundtrip(<span class="string">r&quot;[Z-_]&quot;</span>, <span class="string">r&quot;[Z-_]&quot;</span>);
         roundtrip(<span class="string">r&quot;[Z-_--Z]&quot;</span>, <span class="string">r&quot;[\[-_]&quot;</span>);
 
         <span class="comment">// The following test that the printer escapes meta characters
         // in byte oriented character classes.
-        </span>roundtrip_bytes(<span class="string">r&quot;(?-u)[\[]&quot;</span>, <span class="string">r&quot;(?-u:[\[])&quot;</span>);
+        </span>roundtrip_bytes(<span class="string">r&quot;(?-u)[\[]&quot;</span>, <span class="string">r&quot;\[&quot;</span>);
         roundtrip_bytes(<span class="string">r&quot;(?-u)[Z-_]&quot;</span>, <span class="string">r&quot;(?-u:[Z-_])&quot;</span>);
         roundtrip_bytes(<span class="string">r&quot;(?-u)[Z-_--Z]&quot;</span>, <span class="string">r&quot;(?-u:[\[-_])&quot;</span>);
+
+        <span class="comment">// This tests that an empty character class is correctly roundtripped.
+        </span><span class="attribute">#[cfg(feature = <span class="string">&quot;unicode-gencat&quot;</span>)]
+        </span>roundtrip(<span class="string">r&quot;\P{any}&quot;</span>, <span class="string">r&quot;[a&amp;&amp;b]&quot;</span>);
+        roundtrip_bytes(<span class="string">r&quot;(?-u)[^\x00-\xFF]&quot;</span>, <span class="string">r&quot;[a&amp;&amp;b]&quot;</span>);
     }
 
     <span class="attribute">#[test]
@@ -698,38 +985,171 @@ This module provides a regular expression printer for `Hir`.
         roundtrip(<span class="string">&quot;a+?&quot;</span>, <span class="string">&quot;a+?&quot;</span>);
         roundtrip(<span class="string">&quot;(?U)a+&quot;</span>, <span class="string">&quot;a+?&quot;</span>);
 
-        roundtrip(<span class="string">&quot;a{1}&quot;</span>, <span class="string">&quot;a{1}&quot;</span>);
-        roundtrip(<span class="string">&quot;a{1,}&quot;</span>, <span class="string">&quot;a{1,}&quot;</span>);
+        roundtrip(<span class="string">&quot;a{1}&quot;</span>, <span class="string">&quot;a&quot;</span>);
+        roundtrip(<span class="string">&quot;a{2}&quot;</span>, <span class="string">&quot;a{2}&quot;</span>);
+        roundtrip(<span class="string">&quot;a{1,}&quot;</span>, <span class="string">&quot;a+&quot;</span>);
         roundtrip(<span class="string">&quot;a{1,5}&quot;</span>, <span class="string">&quot;a{1,5}&quot;</span>);
-        roundtrip(<span class="string">&quot;a{1}?&quot;</span>, <span class="string">&quot;a{1}?&quot;</span>);
-        roundtrip(<span class="string">&quot;a{1,}?&quot;</span>, <span class="string">&quot;a{1,}?&quot;</span>);
+        roundtrip(<span class="string">&quot;a{1}?&quot;</span>, <span class="string">&quot;a&quot;</span>);
+        roundtrip(<span class="string">&quot;a{2}?&quot;</span>, <span class="string">&quot;a{2}&quot;</span>);
+        roundtrip(<span class="string">&quot;a{1,}?&quot;</span>, <span class="string">&quot;a+?&quot;</span>);
         roundtrip(<span class="string">&quot;a{1,5}?&quot;</span>, <span class="string">&quot;a{1,5}?&quot;</span>);
-        roundtrip(<span class="string">&quot;(?U)a{1}&quot;</span>, <span class="string">&quot;a{1}?&quot;</span>);
-        roundtrip(<span class="string">&quot;(?U)a{1,}&quot;</span>, <span class="string">&quot;a{1,}?&quot;</span>);
+        roundtrip(<span class="string">&quot;(?U)a{1}&quot;</span>, <span class="string">&quot;a&quot;</span>);
+        roundtrip(<span class="string">&quot;(?U)a{2}&quot;</span>, <span class="string">&quot;a{2}&quot;</span>);
+        roundtrip(<span class="string">&quot;(?U)a{1,}&quot;</span>, <span class="string">&quot;a+?&quot;</span>);
         roundtrip(<span class="string">&quot;(?U)a{1,5}&quot;</span>, <span class="string">&quot;a{1,5}?&quot;</span>);
+
+        <span class="comment">// Test that various zero-length repetitions always translate to an
+        // empty regex. This is more a property of HIR&#39;s smart constructors
+        // than the printer though.
+        </span>roundtrip(<span class="string">&quot;a{0}&quot;</span>, <span class="string">&quot;&quot;</span>);
+        roundtrip(<span class="string">&quot;(?:ab){0}&quot;</span>, <span class="string">&quot;&quot;</span>);
+        <span class="attribute">#[cfg(feature = <span class="string">&quot;unicode-gencat&quot;</span>)]
+        </span>{
+            roundtrip(<span class="string">r&quot;\p{any}{0}&quot;</span>, <span class="string">&quot;&quot;</span>);
+            roundtrip(<span class="string">r&quot;\P{any}{0}&quot;</span>, <span class="string">&quot;&quot;</span>);
+        }
     }
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>print_group() {
         roundtrip(<span class="string">&quot;()&quot;</span>, <span class="string">&quot;()&quot;</span>);
         roundtrip(<span class="string">&quot;(?P&lt;foo&gt;)&quot;</span>, <span class="string">&quot;(?P&lt;foo&gt;)&quot;</span>);
-        roundtrip(<span class="string">&quot;(?:)&quot;</span>, <span class="string">&quot;(?:)&quot;</span>);
+        roundtrip(<span class="string">&quot;(?:)&quot;</span>, <span class="string">&quot;&quot;</span>);
 
         roundtrip(<span class="string">&quot;(a)&quot;</span>, <span class="string">&quot;(a)&quot;</span>);
         roundtrip(<span class="string">&quot;(?P&lt;foo&gt;a)&quot;</span>, <span class="string">&quot;(?P&lt;foo&gt;a)&quot;</span>);
-        roundtrip(<span class="string">&quot;(?:a)&quot;</span>, <span class="string">&quot;(?:a)&quot;</span>);
+        roundtrip(<span class="string">&quot;(?:a)&quot;</span>, <span class="string">&quot;a&quot;</span>);
 
         roundtrip(<span class="string">&quot;((((a))))&quot;</span>, <span class="string">&quot;((((a))))&quot;</span>);
     }
 
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>print_alternation() {
-        roundtrip(<span class="string">&quot;|&quot;</span>, <span class="string">&quot;|&quot;</span>);
-        roundtrip(<span class="string">&quot;||&quot;</span>, <span class="string">&quot;||&quot;</span>);
+        roundtrip(<span class="string">&quot;|&quot;</span>, <span class="string">&quot;(?:|)&quot;</span>);
+        roundtrip(<span class="string">&quot;||&quot;</span>, <span class="string">&quot;(?:||)&quot;</span>);
 
-        roundtrip(<span class="string">&quot;a|b&quot;</span>, <span class="string">&quot;a|b&quot;</span>);
-        roundtrip(<span class="string">&quot;a|b|c&quot;</span>, <span class="string">&quot;a|b|c&quot;</span>);
-        roundtrip(<span class="string">&quot;foo|bar|quux&quot;</span>, <span class="string">&quot;foo|bar|quux&quot;</span>);
+        roundtrip(<span class="string">&quot;a|b&quot;</span>, <span class="string">&quot;[ab]&quot;</span>);
+        roundtrip(<span class="string">&quot;ab|cd&quot;</span>, <span class="string">&quot;(?:(?:ab)|(?:cd))&quot;</span>);
+        roundtrip(<span class="string">&quot;a|b|c&quot;</span>, <span class="string">&quot;[a-c]&quot;</span>);
+        roundtrip(<span class="string">&quot;ab|cd|ef&quot;</span>, <span class="string">&quot;(?:(?:ab)|(?:cd)|(?:ef))&quot;</span>);
+        roundtrip(<span class="string">&quot;foo|bar|quux&quot;</span>, <span class="string">&quot;(?:(?:foo)|(?:bar)|(?:quux))&quot;</span>);
+    }
+
+    <span class="comment">// This is a regression test that stresses a peculiarity of how the HIR
+    // is both constructed and printed. Namely, it is legal for a repetition
+    // to directly contain a concatenation. This particular construct isn&#39;t
+    // really possible to build from the concrete syntax directly, since you&#39;d
+    // be forced to put the concatenation into (at least) a non-capturing
+    // group. Concurrently, the printer doesn&#39;t consider this case and just
+    // kind of naively prints the child expression and tacks on the repetition
+    // operator.
+    //
+    // As a result, if you attached &#39;+&#39; to a &#39;concat(a, b)&#39;, the printer gives
+    // you &#39;ab+&#39;, but clearly it really should be &#39;(?:ab)+&#39;.
+    //
+    // This bug isn&#39;t easy to surface because most ways of building an HIR
+    // come directly from the concrete syntax, and as mentioned above, it just
+    // isn&#39;t possible to build this kind of HIR from the concrete syntax.
+    // Nevertheless, this is definitely a bug.
+    //
+    // See: https://github.com/rust-lang/regex/issues/731
+    </span><span class="attribute">#[test]
+    </span><span class="kw">fn </span>regression_repetition_concat() {
+        <span class="kw">let </span>expr = Hir::concat(<span class="macro">alloc::vec!</span>[
+            Hir::literal(<span class="string">&quot;x&quot;</span>.as_bytes()),
+            Hir::repetition(hir::Repetition {
+                min: <span class="number">1</span>,
+                max: <span class="prelude-val">None</span>,
+                greedy: <span class="bool-val">true</span>,
+                sub: Box::new(Hir::literal(<span class="string">&quot;ab&quot;</span>.as_bytes())),
+            }),
+            Hir::literal(<span class="string">&quot;y&quot;</span>.as_bytes()),
+        ]);
+        <span class="macro">assert_eq!</span>(<span class="string">r&quot;(?:x(?:ab)+y)&quot;</span>, expr.to_string());
+
+        <span class="kw">let </span>expr = Hir::concat(<span class="macro">alloc::vec!</span>[
+            Hir::look(hir::Look::Start),
+            Hir::repetition(hir::Repetition {
+                min: <span class="number">1</span>,
+                max: <span class="prelude-val">None</span>,
+                greedy: <span class="bool-val">true</span>,
+                sub: Box::new(Hir::concat(<span class="macro">alloc::vec!</span>[
+                    Hir::look(hir::Look::Start),
+                    Hir::look(hir::Look::End),
+                ])),
+            }),
+            Hir::look(hir::Look::End),
+        ]);
+        <span class="macro">assert_eq!</span>(<span class="string">r&quot;(?:\A(?:\A\z)+\z)&quot;</span>, expr.to_string());
+    }
+
+    <span class="comment">// Just like regression_repetition_concat, but with the repetition using
+    // an alternation as a child expression instead.
+    //
+    // See: https://github.com/rust-lang/regex/issues/731
+    </span><span class="attribute">#[test]
+    </span><span class="kw">fn </span>regression_repetition_alternation() {
+        <span class="kw">let </span>expr = Hir::concat(<span class="macro">alloc::vec!</span>[
+            Hir::literal(<span class="string">&quot;ab&quot;</span>.as_bytes()),
+            Hir::repetition(hir::Repetition {
+                min: <span class="number">1</span>,
+                max: <span class="prelude-val">None</span>,
+                greedy: <span class="bool-val">true</span>,
+                sub: Box::new(Hir::alternation(<span class="macro">alloc::vec!</span>[
+                    Hir::literal(<span class="string">&quot;cd&quot;</span>.as_bytes()),
+                    Hir::literal(<span class="string">&quot;ef&quot;</span>.as_bytes()),
+                ])),
+            }),
+            Hir::literal(<span class="string">&quot;gh&quot;</span>.as_bytes()),
+        ]);
+        <span class="macro">assert_eq!</span>(<span class="string">r&quot;(?:(?:ab)(?:(?:cd)|(?:ef))+(?:gh))&quot;</span>, expr.to_string());
+
+        <span class="kw">let </span>expr = Hir::concat(<span class="macro">alloc::vec!</span>[
+            Hir::look(hir::Look::Start),
+            Hir::repetition(hir::Repetition {
+                min: <span class="number">1</span>,
+                max: <span class="prelude-val">None</span>,
+                greedy: <span class="bool-val">true</span>,
+                sub: Box::new(Hir::alternation(<span class="macro">alloc::vec!</span>[
+                    Hir::look(hir::Look::Start),
+                    Hir::look(hir::Look::End),
+                ])),
+            }),
+            Hir::look(hir::Look::End),
+        ]);
+        <span class="macro">assert_eq!</span>(<span class="string">r&quot;(?:\A(?:\A|\z)+\z)&quot;</span>, expr.to_string());
+    }
+
+    <span class="comment">// This regression test is very similar in flavor to
+    // regression_repetition_concat in that the root of the issue lies in a
+    // peculiarity of how the HIR is represented and how the printer writes it
+    // out. Like the other regression, this one is also rooted in the fact that
+    // you can&#39;t produce the peculiar HIR from the concrete syntax. Namely, you
+    // just can&#39;t have a &#39;concat(a, alt(b, c))&#39; because the &#39;alt&#39; will normally
+    // be in (at least) a non-capturing group. Why? Because the &#39;|&#39; has very
+    // low precedence (lower that concatenation), and so something like &#39;ab|c&#39;
+    // is actually &#39;alt(ab, c)&#39;.
+    //
+    // See: https://github.com/rust-lang/regex/issues/516
+    </span><span class="attribute">#[test]
+    </span><span class="kw">fn </span>regression_alternation_concat() {
+        <span class="kw">let </span>expr = Hir::concat(<span class="macro">alloc::vec!</span>[
+            Hir::literal(<span class="string">&quot;ab&quot;</span>.as_bytes()),
+            Hir::alternation(<span class="macro">alloc::vec!</span>[
+                Hir::literal(<span class="string">&quot;mn&quot;</span>.as_bytes()),
+                Hir::literal(<span class="string">&quot;xy&quot;</span>.as_bytes()),
+            ]),
+        ]);
+        <span class="macro">assert_eq!</span>(<span class="string">r&quot;(?:(?:ab)(?:(?:mn)|(?:xy)))&quot;</span>, expr.to_string());
+
+        <span class="kw">let </span>expr = Hir::concat(<span class="macro">alloc::vec!</span>[
+            Hir::look(hir::Look::Start),
+            Hir::alternation(<span class="macro">alloc::vec!</span>[
+                Hir::look(hir::Look::Start),
+                Hir::look(hir::Look::End),
+            ]),
+        ]);
+        <span class="macro">assert_eq!</span>(<span class="string">r&quot;(?:\A(?:\A|\z))&quot;</span>, expr.to_string());
     }
 }
 </code></pre></div>

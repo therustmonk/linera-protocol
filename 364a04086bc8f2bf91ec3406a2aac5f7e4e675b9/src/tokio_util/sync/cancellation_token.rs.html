@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-util-0.7.4/src/sync/cancellation_token.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>cancellation_token.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../tokio_util/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-util-0.7.8/src/sync/cancellation_token.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>cancellation_token.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../tokio_util/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -222,6 +222,109 @@
 <span id="222">222</span>
 <span id="223">223</span>
 <span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
 </pre><pre class="rust"><code><span class="doccomment">//! An asynchronously awaitable `CancellationToken`.
 //! The token allows to signal a cancellation request to one or more tasks.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>guard;
@@ -279,6 +382,9 @@
     inner: Arc&lt;tree_node::TreeNode&gt;,
 }
 
+<span class="kw">impl </span>std::panic::UnwindSafe <span class="kw">for </span>CancellationToken {}
+<span class="kw">impl </span>std::panic::RefUnwindSafe <span class="kw">for </span>CancellationToken {}
+
 <span class="macro">pin_project! </span>{
     <span class="doccomment">/// A Future that is resolved once the corresponding [`CancellationToken`]
     /// is cancelled.
@@ -287,6 +393,23 @@
         cancellation_token: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>CancellationToken,
         <span class="attribute">#[pin]
         </span>future: tokio::sync::futures::Notified&lt;<span class="lifetime">&#39;a</span>&gt;,
+    }
+}
+
+<span class="macro">pin_project! </span>{
+    <span class="doccomment">/// A Future that is resolved once the corresponding [`CancellationToken`]
+    /// is cancelled.
+    ///
+    /// This is the counterpart to [`WaitForCancellationFuture`] that takes
+    /// [`CancellationToken`] by value instead of using a reference.
+    </span><span class="attribute">#[must_use = <span class="string">&quot;futures do nothing unless polled&quot;</span>]
+    </span><span class="kw">pub struct </span>WaitForCancellationFutureOwned {
+        <span class="comment">// Since `future` is the first field, it is dropped before the
+        // cancellation_token field. This ensures that the reference inside the
+        // `Notified` remains valid.
+        </span><span class="attribute">#[pin]
+        </span>future: tokio::sync::futures::Notified&lt;<span class="lifetime">&#39;static</span>&gt;,
+        cancellation_token: CancellationToken,
     }
 }
 
@@ -301,7 +424,9 @@
 }
 
 <span class="kw">impl </span>Clone <span class="kw">for </span>CancellationToken {
-    <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+    <span class="doccomment">/// Creates a clone of the `CancellationToken` which will get cancelled
+    /// whenever the current token gets cancelled, and vice versa.
+    </span><span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         tree_node::increase_handle_refcount(<span class="kw-2">&amp;</span><span class="self">self</span>.inner);
         CancellationToken {
             inner: <span class="self">self</span>.inner.clone(),
@@ -330,7 +455,8 @@
     }
 
     <span class="doccomment">/// Creates a `CancellationToken` which will get cancelled whenever the
-    /// current token gets cancelled.
+    /// current token gets cancelled. Unlike a cloned `CancellationToken`,
+    /// cancelling a child token does not cancel the parent token.
     ///
     /// If the current token is already cancelled, the child token will get
     /// returned in cancelled state.
@@ -407,6 +533,21 @@
         }
     }
 
+    <span class="doccomment">/// Returns a `Future` that gets fulfilled when cancellation is requested.
+    ///
+    /// The future will complete immediately if the token is already cancelled
+    /// when this method is called.
+    ///
+    /// The function takes self by value and returns a future that owns the
+    /// token.
+    ///
+    /// # Cancel safety
+    ///
+    /// This method is cancel safe.
+    </span><span class="kw">pub fn </span>cancelled_owned(<span class="self">self</span>) -&gt; WaitForCancellationFutureOwned {
+        WaitForCancellationFutureOwned::new(<span class="self">self</span>)
+    }
+
     <span class="doccomment">/// Creates a `DropGuard` for this token.
     ///
     /// Returned guard will cancel this token (and all its children) on drop
@@ -443,6 +584,71 @@
             }
 
             this.future.set(this.cancellation_token.inner.notified());
+        }
+    }
+}
+
+<span class="comment">// ===== impl WaitForCancellationFutureOwned =====
+
+</span><span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>WaitForCancellationFutureOwned {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
+        f.debug_struct(<span class="string">&quot;WaitForCancellationFutureOwned&quot;</span>).finish()
+    }
+}
+
+<span class="kw">impl </span>WaitForCancellationFutureOwned {
+    <span class="kw">fn </span>new(cancellation_token: CancellationToken) -&gt; <span class="self">Self </span>{
+        WaitForCancellationFutureOwned {
+            <span class="comment">// cancellation_token holds a heap allocation and is guaranteed to have a
+            // stable deref, thus it would be ok to move the cancellation_token while
+            // the future holds a reference to it.
+            //
+            // # Safety
+            //
+            // cancellation_token is dropped after future due to the field ordering.
+            </span>future: <span class="kw">unsafe </span>{ <span class="self">Self</span>::new_future(<span class="kw-2">&amp;</span>cancellation_token) },
+            cancellation_token,
+        }
+    }
+
+    <span class="doccomment">/// # Safety
+    /// The returned future must be destroyed before the cancellation token is
+    /// destroyed.
+    </span><span class="kw">unsafe fn </span>new_future(
+        cancellation_token: <span class="kw-2">&amp;</span>CancellationToken,
+    ) -&gt; tokio::sync::futures::Notified&lt;<span class="lifetime">&#39;static</span>&gt; {
+        <span class="kw">let </span>inner_ptr = Arc::as_ptr(<span class="kw-2">&amp;</span>cancellation_token.inner);
+        <span class="comment">// SAFETY: The `Arc::as_ptr` method guarantees that `inner_ptr` remains
+        // valid until the strong count of the Arc drops to zero, and the caller
+        // guarantees that they will drop the future before that happens.
+        </span>(<span class="kw-2">*</span>inner_ptr).notified()
+    }
+}
+
+<span class="kw">impl </span>Future <span class="kw">for </span>WaitForCancellationFutureOwned {
+    <span class="kw">type </span>Output = ();
+
+    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;()&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>this = <span class="self">self</span>.project();
+
+        <span class="kw">loop </span>{
+            <span class="kw">if </span>this.cancellation_token.is_cancelled() {
+                <span class="kw">return </span>Poll::Ready(());
+            }
+
+            <span class="comment">// No wakeups can be lost here because there is always a call to
+            // `is_cancelled` between the creation of the future and the call to
+            // `poll`, and the code that sets the cancelled flag does so before
+            // waking the `Notified`.
+            </span><span class="kw">if </span>this.future.as_mut().poll(cx).is_pending() {
+                <span class="kw">return </span>Poll::Pending;
+            }
+
+            <span class="comment">// # Safety
+            //
+            // cancellation_token is dropped after future due to the field ordering.
+            </span>this.future
+                .set(<span class="kw">unsafe </span>{ <span class="self">Self</span>::new_future(this.cancellation_token) });
         }
     }
 }

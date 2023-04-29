@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rkyv-0.7.39/src/impls/core/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="icon" href="
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rkyv-0.7.41/src/impls/core/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="icon" href="
     data:image/svg+xml,%3Csvg xmlns=&#x27;http://www.w3.org/2000/svg&#x27;
     viewBox=&#x27;0 0 26.458 26.458&#x27;%3E%3Cpath d=&#x27;M0 0v26.458h26.458V0zm9.175 3.772l8.107 8.106
     2.702-2.702 2.702 13.512-13.512-2.702 2.703-2.702-8.107-8.107z&#x27;/%3E%3C/svg%3E
@@ -381,6 +381,35 @@
 <span id="372">372</span>
 <span id="373">373</span>
 <span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
 </pre><pre class="rust"><code><span class="attribute">#[cfg(feature = <span class="string">&quot;copy&quot;</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::copy::ArchiveCopyOptimize;
 <span class="kw">use crate</span>::{
@@ -388,7 +417,7 @@
     Archive, ArchivePointee, ArchiveUnsized, Archived, ArchivedMetadata, Deserialize,
     DeserializeUnsized, Fallible, FixedUsize, Serialize, SerializeUnsized,
 };
-<span class="kw">use </span>core::{alloc::Layout, ptr, str};
+<span class="kw">use </span>core::{alloc::Layout, mem::ManuallyDrop, ptr, str};
 <span class="kw">use </span>ptr_meta::Pointee;
 
 <span class="kw">pub mod </span>ops;
@@ -753,6 +782,35 @@
     <span class="attribute">#[inline]
     </span><span class="kw">fn </span>deserialize_metadata(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>D) -&gt; <span class="prelude-ty">Result</span>&lt;&lt;str <span class="kw">as </span>Pointee&gt;::Metadata, D::Error&gt; {
         <span class="prelude-val">Ok</span>(ptr_meta::metadata(<span class="self">self</span>))
+    }
+}
+
+<span class="comment">// `ManuallyDrop`
+
+</span><span class="kw">impl</span>&lt;T: Archive&gt; Archive <span class="kw">for </span>ManuallyDrop&lt;T&gt; {
+    <span class="kw">type </span>Archived = ManuallyDrop&lt;T::Archived&gt;;
+    <span class="kw">type </span>Resolver = T::Resolver;
+
+    <span class="attribute">#[inline]
+    </span><span class="kw">unsafe fn </span>resolve(<span class="kw-2">&amp;</span><span class="self">self</span>, pos: usize, resolver: <span class="self">Self</span>::Resolver, out: <span class="kw-2">*mut </span><span class="self">Self</span>::Archived) {
+        T::resolve(<span class="self">self</span>, pos, resolver, out.cast::&lt;T::Archived&gt;())
+    }
+}
+
+<span class="kw">impl</span>&lt;T: Serialize&lt;S&gt;, S: Fallible + <span class="question-mark">?</span>Sized&gt; Serialize&lt;S&gt; <span class="kw">for </span>ManuallyDrop&lt;T&gt; {
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>serialize(<span class="kw-2">&amp;</span><span class="self">self</span>, serializer: <span class="kw-2">&amp;mut </span>S) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Resolver, S::Error&gt; {
+        T::serialize(<span class="self">self</span>, serializer)
+    }
+}
+
+<span class="kw">impl</span>&lt;T: Archive, D: Fallible + <span class="question-mark">?</span>Sized&gt; Deserialize&lt;ManuallyDrop&lt;T&gt;, D&gt; <span class="kw">for </span>ManuallyDrop&lt;T::Archived&gt;
+<span class="kw">where
+    </span>T::Archived: Deserialize&lt;T, D&gt;,
+{
+    <span class="attribute">#[inline]
+    </span><span class="kw">fn </span>deserialize(<span class="kw-2">&amp;</span><span class="self">self</span>, deserializer: <span class="kw-2">&amp;mut </span>D) -&gt; <span class="prelude-ty">Result</span>&lt;ManuallyDrop&lt;T&gt;, &lt;D <span class="kw">as </span>Fallible&gt;::Error&gt; {
+        T::Archived::deserialize(<span class="self">self</span>, deserializer).map(ManuallyDrop::new)
     }
 }
 </code></pre></div>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rkyv-0.7.39/src/impls/indexmap/index_map.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>index_map.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="icon" href="
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rkyv-0.7.41/src/impls/indexmap/index_map.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>index_map.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="icon" href="
     data:image/svg+xml,%3Csvg xmlns=&#x27;http://www.w3.org/2000/svg&#x27;
     viewBox=&#x27;0 0 26.458 26.458&#x27;%3E%3Cpath d=&#x27;M0 0v26.458h26.458V0zm9.175 3.772l8.107 8.106
     2.702-2.702 2.702 13.512-13.512-2.702 2.703-2.702-8.107-8.107z&#x27;/%3E%3C/svg%3E
@@ -123,15 +123,18 @@
 <span id="114">114</span>
 <span id="115">115</span>
 <span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     collections::index_map::{ArchivedIndexMap, IndexMapResolver},
     ser::{ScratchSpace, Serializer},
     Archive, Deserialize, Fallible, Serialize,
 };
-<span class="kw">use </span>core::hash::Hash;
+<span class="kw">use </span>core::hash::{BuildHasher, Hash};
 <span class="kw">use </span>indexmap::IndexMap;
 
-<span class="kw">impl</span>&lt;K: Archive, V: Archive&gt; Archive <span class="kw">for </span>IndexMap&lt;K, V&gt; {
+<span class="kw">impl</span>&lt;K: Archive, V: Archive, S&gt; Archive <span class="kw">for </span>IndexMap&lt;K, V, S&gt; {
     <span class="kw">type </span>Archived = ArchivedIndexMap&lt;K::Archived, V::Archived&gt;;
     <span class="kw">type </span>Resolver = IndexMapResolver;
 
@@ -140,11 +143,12 @@
     }
 }
 
-<span class="kw">impl</span>&lt;K, V, S&gt; Serialize&lt;S&gt; <span class="kw">for </span>IndexMap&lt;K, V&gt;
+<span class="kw">impl</span>&lt;K, V, S, RandomState&gt; Serialize&lt;S&gt; <span class="kw">for </span>IndexMap&lt;K, V, RandomState&gt;
 <span class="kw">where
     </span>K: Hash + Eq + Serialize&lt;S&gt;,
     V: Serialize&lt;S&gt;,
     S: ScratchSpace + Serializer + <span class="question-mark">?</span>Sized,
+    RandomState: BuildHasher,
 {
     <span class="kw">fn </span>serialize(<span class="kw-2">&amp;</span><span class="self">self</span>, serializer: <span class="kw-2">&amp;mut </span>S) -&gt; <span class="prelude-ty">Result</span>&lt;IndexMapResolver, S::Error&gt; {
         <span class="kw">unsafe </span>{
@@ -157,16 +161,17 @@
     }
 }
 
-<span class="kw">impl</span>&lt;K, V, D&gt; Deserialize&lt;IndexMap&lt;K, V&gt;, D&gt; <span class="kw">for </span>ArchivedIndexMap&lt;K::Archived, V::Archived&gt;
+<span class="kw">impl</span>&lt;K, V, D, S&gt; Deserialize&lt;IndexMap&lt;K, V, S&gt;, D&gt; <span class="kw">for </span>ArchivedIndexMap&lt;K::Archived, V::Archived&gt;
 <span class="kw">where
     </span>K: Archive + Hash + Eq,
     K::Archived: Deserialize&lt;K, D&gt;,
     V: Archive,
     V::Archived: Deserialize&lt;V, D&gt;,
     D: Fallible + <span class="question-mark">?</span>Sized,
+    S: Default + BuildHasher,
 {
-    <span class="kw">fn </span>deserialize(<span class="kw-2">&amp;</span><span class="self">self</span>, deserializer: <span class="kw-2">&amp;mut </span>D) -&gt; <span class="prelude-ty">Result</span>&lt;IndexMap&lt;K, V&gt;, D::Error&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>result = IndexMap::with_capacity(<span class="self">self</span>.len());
+    <span class="kw">fn </span>deserialize(<span class="kw-2">&amp;</span><span class="self">self</span>, deserializer: <span class="kw-2">&amp;mut </span>D) -&gt; <span class="prelude-ty">Result</span>&lt;IndexMap&lt;K, V, S&gt;, D::Error&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>result = IndexMap::with_capacity_and_hasher(<span class="self">self</span>.len(), S::default());
         <span class="kw">for </span>(k, v) <span class="kw">in </span><span class="self">self</span>.iter() {
             result.insert(k.deserialize(deserializer)<span class="question-mark">?</span>, v.deserialize(deserializer)<span class="question-mark">?</span>);
         }
@@ -174,12 +179,13 @@
     }
 }
 
-<span class="kw">impl</span>&lt;UK, K, UV, V&gt; PartialEq&lt;IndexMap&lt;UK, UV&gt;&gt; <span class="kw">for </span>ArchivedIndexMap&lt;K, V&gt;
+<span class="kw">impl</span>&lt;UK, K, UV, V, S&gt; PartialEq&lt;IndexMap&lt;UK, UV, S&gt;&gt; <span class="kw">for </span>ArchivedIndexMap&lt;K, V&gt;
 <span class="kw">where
     </span>K: PartialEq&lt;UK&gt;,
     V: PartialEq&lt;UV&gt;,
+    S: BuildHasher,
 {
-    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>IndexMap&lt;UK, UV&gt;) -&gt; bool {
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>IndexMap&lt;UK, UV, S&gt;) -&gt; bool {
         <span class="self">self</span>.iter()
             .zip(other.iter())
             .all(|((ak, av), (bk, bv))| ak == bk &amp;&amp; av == bv)

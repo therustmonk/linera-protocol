@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/structmeta-0.1.5/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../structmeta/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/structmeta-0.1.6/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../structmeta/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -1013,10 +1013,6 @@
 <span id="1013">1013</span>
 <span id="1014">1014</span>
 <span id="1015">1015</span>
-<span id="1016">1016</span>
-<span id="1017">1017</span>
-<span id="1018">1018</span>
-<span id="1019">1019</span>
 </pre><pre class="rust"><code><span class="doccomment">/*!
 Parse Rust&#39;s attribute arguments by defining a struct.
 
@@ -1037,9 +1033,7 @@ See [`#[derive(StructMeta)]`](macro@StructMeta) documentation for details.
 ///
 /// - [Example](#example)
 /// - [Helper attributes](#helper-attributes)
-///   - [`#[to_tokens(&quot;[&quot;)]`, `#[to_tokens(&quot;]&quot;)]`](#to_tokens-to_tokens)
-///   - [`#[to_tokens(&quot;(&quot;)]`, `#[to_tokens(&quot;)&quot;)]`](#to_tokens-to_tokens-1)
-///   - [`#[to_tokens(&quot;{&quot;)]`, `#[to_tokens(&quot;}&quot;)]`](#to_tokens-to_tokens-2)
+///   - [`#[to_tokens(&quot;[&quot;, &quot;]&quot;, &quot;(&quot;, &quot;)&quot;, &quot;{&quot;, &quot;}&quot;]`](#to_tokens-----)
 ///   - [`#[to_tokens(dump)]`](#to_tokensdump)
 ///
 /// # Example
@@ -1098,19 +1092,19 @@ See [`#[derive(StructMeta)]`](macro@StructMeta) documentation for details.
 ///
 /// # Helper attributes
 ///
-/// |                                                                    | struct | enum | varaint | field |
-/// | ------------------------------------------------------------------ | ------ | ---- | ------- | ----- |
-/// | [`#[to_tokens(&quot;[&quot;)]`, `#[to_tokens(&quot;]&quot;)]`](#to_tokens-to_tokens)   |        |      |         | ✔     |
-/// | [`#[to_tokens(&quot;(&quot;)]`, `#[to_tokens(&quot;)&quot;)]`](#to_tokens-to_tokens-1) |        |      |         | ✔     |
-/// | [`#[to_tokens(&quot;{&quot;)]`, `#[to_tokens(&quot;}&quot;)]`](#to_tokens-to_tokens-2) |        |      |         | ✔     |
-/// | [`#[to_tokens(dump)]`](#to_tokensdump)                             | ✔      | ✔    |         |       |
+/// |                                                             | struct | enum | varaint | field |
+/// | ----------------------------------------------------------- | ------ | ---- | ------- | ----- |
+/// | [`#[to_tokens(&quot;[&quot;)]`, `#[to_tokens(&quot;]&quot;)]`](#to_tokens-----) |        |      |         | ✔     |
+/// | [`#[to_tokens(&quot;(&quot;)]`, `#[to_tokens(&quot;)&quot;)]`](#to_tokens-----) |        |      |         | ✔     |
+/// | [`#[to_tokens(&quot;{&quot;)]`, `#[to_tokens(&quot;}&quot;)]`](#to_tokens-----) |        |      |         | ✔     |
+/// | [`#[to_tokens(dump)]`](#to_tokensdump)                      | ✔      | ✔    |         |       |
 ///
-/// ## `#[to_tokens(&quot;[&quot;)]`, `#[to_tokens(&quot;]&quot;)]`
+/// ## `#[to_tokens(&quot;[&quot;, &quot;]&quot;, &quot;(&quot;, &quot;)&quot;, &quot;{&quot;, &quot;}&quot;]`
 ///
-/// By specifying `#[to_tokens(&quot;[&quot;)]` for a field of type [`struct@syn::token::Bracket`], subsequent tokens will be enclosed in `[]`.
+/// By specifying `#[to_tokens(&quot;[&quot;)]` or `#[to_tokens(&quot;(&quot;)]` or `#[to_tokens(&quot;[&quot;)]` , subsequent tokens will be enclosed in `[]` or `()` or `{}`.
 ///
 /// By default, all subsequent fields are enclosed.
-/// To restrict the enclosing fields, specify `#[to_tokens(&quot;]&quot;)]` for the field after the end of the enclosure.
+/// To restrict the enclosing fields, specify `#[to_tokens(&quot;]&quot;)]` or `#[to_tokens(&quot;)&quot;)]` or `#[to_tokens(&quot;}&quot;)]` for the field after the end of the enclosure.
 ///
 /// ```rust
 /// use syn::{token, LitInt};
@@ -1148,19 +1142,16 @@ See [`#[derive(StructMeta)]`](macro@StructMeta) documentation for details.
 /// }
 /// ```
 ///
-/// ## `#[to_tokens(&quot;(&quot;)]`, `#[to_tokens(&quot;)&quot;)]`
+/// If the field type is `Braket` or `Paren` or `Brace`, the symbol corresponding to the token type must be specified.
 ///
-/// By specifying `#[to_tokens(&quot;(&quot;)]` for a field of type [`struct@syn::token::Paren`], subsequent tokens will be enclosed in `()`.
+/// If the field type is `MacroDelimiter`, any symbol can be used and there is no difference in behavior. (Three types of parentheses are available, no matter which symbol is specified.)
 ///
-/// By default, all subsequent fields are enclosed.
-/// To restrict the enclosing fields, specify `#[to_tokens(&quot;)&quot;)]` for the field after the end of the enclosure.
-///
-/// ## `#[to_tokens(&quot;{&quot;)]`, `#[to_tokens(&quot;}&quot;)]`
-///
-/// By specifying `#[to_tokens(&quot;{&quot;)]` for a field of type [`struct@syn::token::Brace`], subsequent tokens will be enclosed in `{}`.
-///
-/// By default, all subsequent fields are enclosed.
-/// To restrict the enclosing fields, specify `#[to_tokens(&quot;}&quot;)]` for the field after the end of the enclosure.
+/// | field type                     | start                   | end                     |
+/// | ------------------------------ | ----------------------- | ----------------------- |
+/// | [`struct@syn::token::Bracket`] | `&quot;[&quot;`                   | `&quot;]&quot;`                   |
+/// | [`struct@syn::token::Paren`]   | `&quot;(&quot;`                   | `&quot;)&quot;`                   |
+/// | [`struct@syn::token::Brace`]   | `&quot;{&quot;`                   | `&quot;}&quot;`                   |
+/// | [`enum@syn::MacroDelimiter`]   | `&quot;[&quot;` or `&quot;(&quot;` or `&quot;{&quot;` | `&quot;]&quot;` or `&quot;)&quot;` or `&quot;}&quot;` |
 ///
 /// ## `#[to_tokens(dump)]`
 ///
@@ -1173,9 +1164,7 @@ See [`#[derive(StructMeta)]`](macro@StructMeta) documentation for details.
 ///
 /// - [Example](#example)
 /// - [Helper attributes](#helper-attributes)
-///   - [`#[to_tokens(&quot;[&quot;)]`, `#[to_tokens(&quot;]&quot;)]`](#to_tokens-to_tokens)
-///   - [`#[to_tokens(&quot;(&quot;)]`, `#[to_tokens(&quot;)&quot;)]`](#to_tokens-to_tokens-1)
-///   - [`#[to_tokens(&quot;{&quot;)]`, `#[to_tokens(&quot;}&quot;)]`](#to_tokens-to_tokens-2)
+///   - [`#[to_tokens(&quot;[&quot;, &quot;]&quot;, &quot;(&quot;, &quot;)&quot;, &quot;{&quot;, &quot;}&quot;)]`](#to_tokens-----)
 ///   - [`#[parse(peek)]`](#parsepeek)
 ///   - [`#[parse(any)]`](#parseany)
 ///   - [`#[parse(terminated)]`](#parseterminated)
@@ -1248,22 +1237,20 @@ See [`#[derive(StructMeta)]`](macro@StructMeta) documentation for details.
 ///
 /// # Helper attributes
 ///
-/// |                                                                    | struct | enum | varaint | field |
-/// | ------------------------------------------------------------------ | ------ | ---- | ------- | ----- |
-/// | [`#[to_tokens(&quot;[&quot;)]`, `#[to_tokens(&quot;]&quot;)]`](#to_tokens-to_tokens)   |        |      |         | ✔     |
-/// | [`#[to_tokens(&quot;(&quot;)]`, `#[to_tokens(&quot;)&quot;)]`](#to_tokens-to_tokens-1) |        |      |         | ✔     |
-/// | [`#[to_tokens(&quot;{&quot;)]`, `#[to_tokens(&quot;}&quot;)]`](#to_tokens-to_tokens-2) |        |      |         | ✔     |
-/// | [`#[parse(peek)]`](#parsepeek)                                     |        |      |         | ✔     |
-/// | [`#[parse(any)]`](#parseany)                                       |        |      |         | ✔     |
-/// | [`#[parse(terminated)]`](#parseterminated)                         |        |      |         | ✔     |
-/// | [`#[parse(dump)]`](#parsedump)                                     | ✔      | ✔    |         |       |
+/// |                                                                 | struct | enum | varaint | field |
+/// | --------------------------------------------------------------- | ------ | ---- | ------- | ----- |
+/// | [`#[to_tokens(&quot;[&quot;, &quot;]&quot;, &quot;(&quot;, &quot;)&quot;, &quot;{&quot;, &quot;}&quot;)]`](#to_tokens-----) |        |      |         | ✔     |
+/// | [`#[parse(peek)]`](#parsepeek)                                  |        |      |         | ✔     |
+/// | [`#[parse(any)]`](#parseany)                                    |        |      |         | ✔     |
+/// | [`#[parse(terminated)]`](#parseterminated)                      |        |      |         | ✔     |
+/// | [`#[parse(dump)]`](#parsedump)                                  | ✔      | ✔    |         |       |
 ///
-/// ## `#[to_tokens(&quot;[&quot;)]`, `#[to_tokens(&quot;]&quot;)]`
+/// ## `#[to_tokens(&quot;[&quot;, &quot;]&quot;, &quot;(&quot;, &quot;)&quot;, &quot;{&quot;, &quot;}&quot;)]`
 ///
-/// By specifying `#[to_tokens(&quot;[&quot;)]` for a field of type [`struct@syn::token::Bracket`], subsequent tokens will be enclosed in `[]`.
+/// By specifying `#[to_tokens(&quot;[&quot;)]` or `#[to_tokens(&quot;(&quot;)]` or `#[to_tokens(&quot;[&quot;)]` , subsequent tokens will be enclosed in `[]` or `()` or `{}`.
 ///
 /// By default, all subsequent fields are enclosed.
-/// To restrict the enclosing fields, specify `#[to_tokens(&quot;]&quot;)]` for the field after the end of the enclosure.
+/// To restrict the enclosing fields, specify `#[to_tokens(&quot;]&quot;)]` or `#[to_tokens(&quot;)&quot;)]` or `#[to_tokens(&quot;}&quot;)]` for the field after the end of the enclosure.
 ///
 /// ```rust
 /// use syn::{token, LitInt};
@@ -1307,19 +1294,16 @@ See [`#[derive(StructMeta)]`](macro@StructMeta) documentation for details.
 /// }
 /// ```
 ///
-/// ## `#[to_tokens(&quot;(&quot;)]`, `#[to_tokens(&quot;)&quot;)]`
+/// If the field type is `Braket` or `Paren` or `Brace`, the symbol corresponding to the token type must be specified.
 ///
-/// By specifying `#[to_tokens(&quot;(&quot;)]` for a field of type [`struct@syn::token::Paren`], subsequent tokens will be enclosed in `()`.
+/// If the field type is `MacroDelimiter`, any symbol can be used and there is no difference in behavior. (Three types of parentheses are available, no matter which symbol is specified.)
 ///
-/// By default, all subsequent fields are enclosed.
-/// To restrict the enclosing fields, specify `#[to_tokens(&quot;)&quot;)]` for the field after the end of the enclosure.
-///
-/// ## `#[to_tokens(&quot;{&quot;)]`, `#[to_tokens(&quot;}&quot;)]`
-///
-/// By specifying `#[to_tokens(&quot;{&quot;)]` for a field of type [`struct@syn::token::Brace`], subsequent tokens will be enclosed in `{}`.
-///
-/// By default, all subsequent fields are enclosed.
-/// To restrict the enclosing fields, specify `#[to_tokens(&quot;}&quot;)]` for the field after the end of the enclosure.
+/// | field type                     | start                   | end                     |
+/// | ------------------------------ | ----------------------- | ----------------------- |
+/// | [`struct@syn::token::Bracket`] | `&quot;[&quot;`                   | `&quot;]&quot;`                   |
+/// | [`struct@syn::token::Paren`]   | `&quot;(&quot;`                   | `&quot;)&quot;`                   |
+/// | [`struct@syn::token::Brace`]   | `&quot;{&quot;`                   | `&quot;}&quot;`                   |
+/// | [`enum@syn::MacroDelimiter`]   | `&quot;[&quot;` or `&quot;(&quot;` or `&quot;{&quot;` | `&quot;]&quot;` or `&quot;)&quot;` or `&quot;}&quot;` |
 ///
 /// ## `#[parse(peek)]`
 ///
@@ -1998,7 +1982,7 @@ See [`#[derive(StructMeta)]`](macro@StructMeta) documentation for details.
 /// Similarly, if one or more `name(args)` style parameters are defined, arguments with `name(args)` will be parsed as `name(args)` style.
 /// If `name(args)` style parameter is not defined, it will be parsed as unnamed parameter.
 ///
-/// The same is true for `name` style parameter.
+/// The same is true for `name` or `name = value` style parameter.
 ///
 /// ## `#[struct_meta(name_filter = &quot;...&quot;)]`
 ///
@@ -2012,25 +1996,33 @@ See [`#[derive(StructMeta)]`](macro@StructMeta) documentation for details.
 /// use structmeta::StructMeta;
 /// use syn::{parse_quote, Attribute, Expr, LitInt, Result};
 ///
-/// let attr: Attribute = parse_quote!(#[attr(X)]);
+/// let attr_x: Attribute = parse_quote!(#[attr(X)]);
+/// let attr_y: Attribute = parse_quote!(#[attr(Y)]);
 ///
 /// #[derive(StructMeta)]
 /// struct NoFilter {
 ///     #[struct_meta(unnamed)]
 ///     unnamed: Option&lt;Expr&gt;,
+///     #[struct_meta(name = &quot;X&quot;)]
 ///     x: bool,
 /// }
-/// let result: Result&lt;NoFilter&gt; = attr.parse_args();
-/// assert!(result.is_err()); // `X` is parsed as a wrong named parameter.
+/// let result: NoFilter = attr_x.parse_args().unwrap();
+/// assert_eq!(result.unnamed, None);
+/// assert_eq!(result.x, true); // `X` is parsed as a named parameter.
+///
+/// let result: Result&lt;NoFilter&gt; = attr_y.parse_args();
+/// assert!(result.is_err()); // `Y` is parsed as a wrong named parameter.
+///
 ///
 /// #[derive(StructMeta)]
 /// #[struct_meta(name_filter = &quot;snake_case&quot;)]
 /// struct WithFilter {
 ///     #[struct_meta(unnamed)]
 ///     unnamed: Option&lt;Expr&gt;,
+///     #[struct_meta(name = &quot;X&quot;)]
 ///     x: bool,
 /// }
-/// let result: WithFilter = attr.parse_args().unwrap();
+/// let result: WithFilter = attr_x.parse_args().unwrap();
 /// assert_eq!(result.unnamed, Some(parse_quote!(X))); // `X` is parsed as a unnamed parameter.
 /// assert_eq!(result.x, false);
 /// ```

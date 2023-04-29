@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/pest-2.5.6/src/iterators/tokens.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>tokens.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/pest-parser/pest/master/pest-logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../pest/index.html">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/pest-2.6.0/src/iterators/tokens.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>tokens.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/pest-parser/pest/master/pest-logo.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../pest/index.html">
                         <img src="https://raw.githubusercontent.com/pest-parser/pest/master/pest-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
@@ -145,6 +145,34 @@
 <span id="144">144</span>
 <span id="145">145</span>
 <span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
 </pre><pre class="rust"><code><span class="comment">// pest. The Elegant Parser
 // Copyright (c) 2018 Dragoș Tiselice
 //
@@ -174,19 +202,19 @@
     <span class="doccomment">/// # Safety:
     ///
     /// All `QueueableToken`s&#39; `input_pos` must be valid character boundary indices into `input`.
-    </span>queue: Rc&lt;Vec&lt;QueueableToken&lt;R&gt;&gt;&gt;,
+    </span>queue: Rc&lt;Vec&lt;QueueableToken&lt;<span class="lifetime">&#39;i</span>, R&gt;&gt;&gt;,
     input: <span class="kw-2">&amp;</span><span class="lifetime">&#39;i </span>str,
     start: usize,
     end: usize,
 }
 
 <span class="comment">// TODO(safety): QueueableTokens must be valid indices into input.
-</span><span class="kw">pub fn </span>new&lt;R: RuleType&gt;(
-    queue: Rc&lt;Vec&lt;QueueableToken&lt;R&gt;&gt;&gt;,
-    input: <span class="kw-2">&amp;</span>str,
+</span><span class="kw">pub fn </span>new&lt;<span class="lifetime">&#39;i</span>, R: RuleType&gt;(
+    queue: Rc&lt;Vec&lt;QueueableToken&lt;<span class="lifetime">&#39;i</span>, R&gt;&gt;&gt;,
+    input: <span class="kw-2">&amp;</span><span class="lifetime">&#39;i </span>str,
     start: usize,
     end: usize,
-) -&gt; Tokens&lt;<span class="lifetime">&#39;_</span>, R&gt; {
+) -&gt; Tokens&lt;<span class="lifetime">&#39;i</span>, R&gt; {
     <span class="kw">if </span><span class="macro">cfg!</span>(debug_assertions) {
         <span class="kw">for </span>tok <span class="kw">in </span>queue.iter() {
             <span class="kw">match </span><span class="kw-2">*</span>tok {
@@ -239,6 +267,12 @@
     }
 }
 
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;i</span>, R: RuleType&gt; ExactSizeIterator <span class="kw">for </span>Tokens&lt;<span class="lifetime">&#39;i</span>, R&gt; {
+    <span class="kw">fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.end - <span class="self">self</span>.start
+    }
+}
+
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;i</span>, R: RuleType&gt; Iterator <span class="kw">for </span>Tokens&lt;<span class="lifetime">&#39;i</span>, R&gt; {
     <span class="kw">type </span>Item = Token&lt;<span class="lifetime">&#39;i</span>, R&gt;;
 
@@ -252,6 +286,11 @@
         <span class="self">self</span>.start += <span class="number">1</span>;
 
         <span class="prelude-val">Some</span>(token)
+    }
+
+    <span class="kw">fn </span>size_hint(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (usize, <span class="prelude-ty">Option</span>&lt;usize&gt;) {
+        <span class="kw">let </span>len = &lt;<span class="self">Self </span><span class="kw">as </span>ExactSizeIterator&gt;::len(<span class="self">self</span>);
+        (len, <span class="prelude-val">Some</span>(len))
     }
 }
 
@@ -289,6 +328,23 @@
         tokens.reverse();
         <span class="kw">let </span>reverse_tokens = pairs.tokens().rev().collect::&lt;Vec&lt;Token&lt;<span class="lifetime">&#39;_</span>, Rule&gt;&gt;&gt;();
         <span class="macro">assert_eq!</span>(tokens, reverse_tokens);
+    }
+
+    <span class="attribute">#[test]
+    </span><span class="kw">fn </span>exact_size_iter_for_tokens() {
+        <span class="kw">let </span>tokens = AbcParser::parse(Rule::a, <span class="string">&quot;abcde&quot;</span>).unwrap().tokens();
+        <span class="macro">assert_eq!</span>(tokens.len(), tokens.count());
+
+        <span class="kw">let </span>tokens = AbcParser::parse(Rule::a, <span class="string">&quot;我很漂亮e&quot;</span>).unwrap().tokens();
+        <span class="macro">assert_eq!</span>(tokens.len(), tokens.count());
+
+        <span class="kw">let </span>tokens = AbcParser::parse(Rule::a, <span class="string">&quot;abcde&quot;</span>).unwrap().tokens().rev();
+        <span class="macro">assert_eq!</span>(tokens.len(), tokens.count());
+
+        <span class="kw">let </span><span class="kw-2">mut </span>tokens = AbcParser::parse(Rule::a, <span class="string">&quot;abcde&quot;</span>).unwrap().tokens();
+        <span class="kw">let </span>tokens_len = tokens.len();
+        <span class="kw">let _ </span>= tokens.next().unwrap();
+        <span class="macro">assert_eq!</span>(tokens.count() + <span class="number">1</span>, tokens_len);
     }
 }
 </code></pre></div>

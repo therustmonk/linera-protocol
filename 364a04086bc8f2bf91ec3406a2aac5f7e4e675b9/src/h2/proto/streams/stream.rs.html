@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/h2-0.3.15/src/proto/streams/stream.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>stream.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../../h2/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/h2-0.3.18/src/proto/streams/stream.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>stream.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../../normalize.css"><link rel="stylesheet" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../../ayu.css" disabled><link rel="stylesheet" href="../../../../dark.css" disabled><link rel="stylesheet" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../main.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../../h2/index.html"><img class="rust-logo" src="../../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -488,6 +488,37 @@
 <span id="488">488</span>
 <span id="489">489</span>
 <span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
 </pre><pre class="rust"><code><span class="kw">use super</span>::<span class="kw-2">*</span>;
 
 <span class="kw">use </span>std::task::{Context, Waker};
@@ -589,6 +620,9 @@
     <span class="doccomment">/// Frames pending for this stream to read
     </span><span class="kw">pub </span>pending_recv: buffer::Deque,
 
+    <span class="doccomment">/// When the RecvStream drop occurs, no data should be received.
+    </span><span class="kw">pub </span>is_recv: bool,
+
     <span class="doccomment">/// Task tracking receiving frames
     </span><span class="kw">pub </span>recv_task: <span class="prelude-ty">Option</span>&lt;Waker&gt;,
 
@@ -670,6 +704,7 @@
             reset_at: <span class="prelude-val">None</span>,
             next_reset_expire: <span class="prelude-val">None</span>,
             pending_recv: buffer::Deque::new(),
+            is_recv: <span class="bool-val">true</span>,
             recv_task: <span class="prelude-val">None</span>,
             pending_push_promises: store::Queue::new(),
             content_length: ContentLength::Omitted,
@@ -738,7 +773,7 @@
             <span class="comment">// The stream is not in any queue
             </span>!<span class="self">self</span>.is_pending_send &amp;&amp; !<span class="self">self</span>.is_pending_send_capacity &amp;&amp;
             !<span class="self">self</span>.is_pending_accept &amp;&amp; !<span class="self">self</span>.is_pending_window_update &amp;&amp;
-            !<span class="self">self</span>.is_pending_open &amp;&amp; !<span class="self">self</span>.reset_at.is_some()
+            !<span class="self">self</span>.is_pending_open &amp;&amp; <span class="self">self</span>.reset_at.is_none()
     }
 
     <span class="doccomment">/// Returns true when the consumer of the stream has dropped all handles
@@ -750,33 +785,63 @@
         <span class="self">self</span>.ref_count == <span class="number">0 </span>&amp;&amp; !<span class="self">self</span>.state.is_closed()
     }
 
+    <span class="doccomment">/// Current available stream send capacity
+    </span><span class="kw">pub fn </span>capacity(<span class="kw-2">&amp;</span><span class="self">self</span>, max_buffer_size: usize) -&gt; WindowSize {
+        <span class="kw">let </span>available = <span class="self">self</span>.send_flow.available().as_size() <span class="kw">as </span>usize;
+        <span class="kw">let </span>buffered = <span class="self">self</span>.buffered_send_data;
+
+        available.min(max_buffer_size).saturating_sub(buffered) <span class="kw">as </span>WindowSize
+    }
+
     <span class="kw">pub fn </span>assign_capacity(<span class="kw-2">&amp;mut </span><span class="self">self</span>, capacity: WindowSize, max_buffer_size: usize) {
+        <span class="kw">let </span>prev_capacity = <span class="self">self</span>.capacity(max_buffer_size);
         <span class="macro">debug_assert!</span>(capacity &gt; <span class="number">0</span>);
         <span class="self">self</span>.send_flow.assign_capacity(capacity);
 
         <span class="macro">tracing::trace!</span>(
-            <span class="string">&quot;  assigned capacity to stream; available={}; buffered={}; id={:?}; max_buffer_size={}&quot;</span>,
+            <span class="string">&quot;  assigned capacity to stream; available={}; buffered={}; id={:?}; max_buffer_size={} prev={}&quot;</span>,
             <span class="self">self</span>.send_flow.available(),
             <span class="self">self</span>.buffered_send_data,
             <span class="self">self</span>.id,
-            max_buffer_size
+            max_buffer_size,
+            prev_capacity,
         );
 
-        <span class="self">self</span>.notify_if_can_buffer_more(max_buffer_size);
+        <span class="kw">if </span>prev_capacity &lt; <span class="self">self</span>.capacity(max_buffer_size) {
+            <span class="self">self</span>.notify_capacity();
+        }
+    }
+
+    <span class="kw">pub fn </span>send_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>, len: WindowSize, max_buffer_size: usize) {
+        <span class="kw">let </span>prev_capacity = <span class="self">self</span>.capacity(max_buffer_size);
+
+        <span class="self">self</span>.send_flow.send_data(len);
+
+        <span class="comment">// Decrement the stream&#39;s buffered data counter
+        </span><span class="macro">debug_assert!</span>(<span class="self">self</span>.buffered_send_data &gt;= len <span class="kw">as </span>usize);
+        <span class="self">self</span>.buffered_send_data -= len <span class="kw">as </span>usize;
+        <span class="self">self</span>.requested_send_capacity -= len;
+
+        <span class="macro">tracing::trace!</span>(
+            <span class="string">&quot;  sent stream data; available={}; buffered={}; id={:?}; max_buffer_size={} prev={}&quot;</span>,
+            <span class="self">self</span>.send_flow.available(),
+            <span class="self">self</span>.buffered_send_data,
+            <span class="self">self</span>.id,
+            max_buffer_size,
+            prev_capacity,
+        );
+
+        <span class="kw">if </span>prev_capacity &lt; <span class="self">self</span>.capacity(max_buffer_size) {
+            <span class="self">self</span>.notify_capacity();
+        }
     }
 
     <span class="doccomment">/// If the capacity was limited because of the max_send_buffer_size,
     /// then consider waking the send task again...
-    </span><span class="kw">pub fn </span>notify_if_can_buffer_more(<span class="kw-2">&amp;mut </span><span class="self">self</span>, max_buffer_size: usize) {
-        <span class="kw">let </span>available = <span class="self">self</span>.send_flow.available().as_size() <span class="kw">as </span>usize;
-        <span class="kw">let </span>buffered = <span class="self">self</span>.buffered_send_data;
-
-        <span class="comment">// Only notify if the capacity exceeds the amount of buffered data
-        </span><span class="kw">if </span>available.min(max_buffer_size) &gt; buffered {
-            <span class="self">self</span>.send_capacity_inc = <span class="bool-val">true</span>;
-            <span class="macro">tracing::trace!</span>(<span class="string">&quot;  notifying task&quot;</span>);
-            <span class="self">self</span>.notify_send();
-        }
+    </span><span class="kw">pub fn </span>notify_capacity(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.send_capacity_inc = <span class="bool-val">true</span>;
+        <span class="macro">tracing::trace!</span>(<span class="string">&quot;  notifying task&quot;</span>);
+        <span class="self">self</span>.notify_send();
     }
 
     <span class="doccomment">/// Returns `Err` when the decrement cannot be completed due to overflow.
@@ -865,7 +930,7 @@
         <span class="kw">if </span>val {
             <span class="comment">// ensure that stream is not queued for being opened
             // if it&#39;s being put into queue for sending data
-            </span><span class="macro">debug_assert_eq!</span>(stream.is_pending_open, <span class="bool-val">false</span>);
+            </span><span class="macro">debug_assert!</span>(!stream.is_pending_open);
         }
         stream.is_pending_send = val;
     }
@@ -936,7 +1001,7 @@
         <span class="kw">if </span>val {
             <span class="comment">// ensure that stream is not queued for being sent
             // if it&#39;s being put into queue for opening the stream
-            </span><span class="macro">debug_assert_eq!</span>(stream.is_pending_send, <span class="bool-val">false</span>);
+            </span><span class="macro">debug_assert!</span>(!stream.is_pending_send);
         }
         stream.is_pending_open = val;
     }
@@ -972,10 +1037,7 @@
 
 </span><span class="kw">impl </span>ContentLength {
     <span class="kw">pub fn </span>is_head(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
-            ContentLength::Head =&gt; <span class="bool-val">true</span>,
-            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
-        }
+        <span class="macro">matches!</span>(<span class="kw-2">*</span><span class="self">self</span>, <span class="self">Self</span>::Head)
     }
 }
 </code></pre></div>

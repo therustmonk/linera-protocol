@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/bytecheck-0.6.9/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../bytecheck/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/bytecheck-0.6.10/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../bytecheck/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -856,6 +856,15 @@
 <span id="856">856</span>
 <span id="857">857</span>
 <span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
+<span id="867">867</span>
 </pre><pre class="rust"><code><span class="doccomment">//! # bytecheck
 //!
 //! bytecheck is a type validation framework for Rust.
@@ -1011,6 +1020,7 @@
     convert::{Infallible, TryFrom},
     fmt,
     marker::{PhantomData, PhantomPinned},
+    mem::ManuallyDrop,
     num::{
         NonZeroI128, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroI8, NonZeroU128, NonZeroU16,
         NonZeroU32, NonZeroU64, NonZeroU8,
@@ -1137,6 +1147,16 @@
 
     <span class="attribute">#[inline]
     </span><span class="kw">unsafe fn </span>check_bytes&lt;<span class="lifetime">&#39;a</span>&gt;(value: <span class="kw-2">*const </span><span class="self">Self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>C) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+        <span class="prelude-val">Ok</span>(<span class="kw-2">&amp;*</span>value)
+    }
+}
+
+<span class="kw">impl</span>&lt;C: <span class="question-mark">?</span>Sized, T: CheckBytes&lt;C&gt; + <span class="question-mark">?</span>Sized&gt; CheckBytes&lt;C&gt; <span class="kw">for </span>ManuallyDrop&lt;T&gt; {
+    <span class="kw">type </span>Error = T::Error;
+
+    <span class="attribute">#[inline]
+    </span><span class="kw">unsafe fn </span>check_bytes&lt;<span class="lifetime">&#39;a</span>&gt;(value: <span class="kw-2">*const </span><span class="self">Self</span>, c: <span class="kw-2">&amp;mut </span>C) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+        <span class="kw">let _ </span>= T::check_bytes(value <span class="kw">as </span><span class="kw-2">*const </span>T, c)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="kw-2">&amp;*</span>value)
     }
 }
@@ -1348,7 +1368,7 @@
     </span><span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">match </span><span class="self">self </span>{
             SliceCheckError::CheckBytes { index, error } =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;check failed for slice index {}: {}&quot;</span>, index, error)
+                <span class="macro">write!</span>(f, <span class="string">&quot;check failed for slice index {index}: {error}&quot;</span>)
             }
         }
     }
@@ -1392,7 +1412,7 @@
     <span class="attribute">#[inline]
     </span><span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">match </span><span class="self">self </span>{
-            StrCheckError::Utf8Error(e) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;utf8 error: {}&quot;</span>, e),
+            StrCheckError::Utf8Error(e) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;utf8 error: {e}&quot;</span>),
         }
     }
 }
@@ -1440,7 +1460,7 @@
     <span class="attribute">#[inline]
     </span><span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">match </span><span class="self">self </span>{
-            CStrCheckError::Utf8Error(e) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;utf8 error: {}&quot;</span>, e),
+            CStrCheckError::Utf8Error(e) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;utf8 error: {e}&quot;</span>),
             CStrCheckError::MissingNullTerminator =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;missing null terminator&quot;</span>),
         }
     }
@@ -1556,18 +1576,16 @@
                 inner,
             } =&gt; <span class="macro">write!</span>(
                 f,
-                <span class="string">&quot;check failed for enum struct variant {}: {}&quot;</span>,
-                variant_name, inner
-            ),
+                <span class="string">&quot;check failed for enum struct variant {variant_name}: {inner}&quot;
+            </span>),
             EnumCheckError::InvalidTuple {
                 variant_name,
                 inner,
             } =&gt; <span class="macro">write!</span>(
                 f,
-                <span class="string">&quot;check failed for enum tuple variant {}: {}&quot;</span>,
-                variant_name, inner
-            ),
-            EnumCheckError::InvalidTag(tag) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;invalid tag for enum: {}&quot;</span>, tag),
+                <span class="string">&quot;check failed for enum tuple variant {variant_name}: {inner}&quot;
+            </span>),
+            EnumCheckError::InvalidTag(tag) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;invalid tag for enum: {tag}&quot;</span>),
         }
     }
 }

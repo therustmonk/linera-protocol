@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/unicode-bidi-0.3.10/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../unicode_bidi/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/unicode-bidi-0.3.13/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../unicode_bidi/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -1145,6 +1145,61 @@
 <span id="1145">1145</span>
 <span id="1146">1146</span>
 <span id="1147">1147</span>
+<span id="1148">1148</span>
+<span id="1149">1149</span>
+<span id="1150">1150</span>
+<span id="1151">1151</span>
+<span id="1152">1152</span>
+<span id="1153">1153</span>
+<span id="1154">1154</span>
+<span id="1155">1155</span>
+<span id="1156">1156</span>
+<span id="1157">1157</span>
+<span id="1158">1158</span>
+<span id="1159">1159</span>
+<span id="1160">1160</span>
+<span id="1161">1161</span>
+<span id="1162">1162</span>
+<span id="1163">1163</span>
+<span id="1164">1164</span>
+<span id="1165">1165</span>
+<span id="1166">1166</span>
+<span id="1167">1167</span>
+<span id="1168">1168</span>
+<span id="1169">1169</span>
+<span id="1170">1170</span>
+<span id="1171">1171</span>
+<span id="1172">1172</span>
+<span id="1173">1173</span>
+<span id="1174">1174</span>
+<span id="1175">1175</span>
+<span id="1176">1176</span>
+<span id="1177">1177</span>
+<span id="1178">1178</span>
+<span id="1179">1179</span>
+<span id="1180">1180</span>
+<span id="1181">1181</span>
+<span id="1182">1182</span>
+<span id="1183">1183</span>
+<span id="1184">1184</span>
+<span id="1185">1185</span>
+<span id="1186">1186</span>
+<span id="1187">1187</span>
+<span id="1188">1188</span>
+<span id="1189">1189</span>
+<span id="1190">1190</span>
+<span id="1191">1191</span>
+<span id="1192">1192</span>
+<span id="1193">1193</span>
+<span id="1194">1194</span>
+<span id="1195">1195</span>
+<span id="1196">1196</span>
+<span id="1197">1197</span>
+<span id="1198">1198</span>
+<span id="1199">1199</span>
+<span id="1200">1200</span>
+<span id="1201">1201</span>
+<span id="1202">1202</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2015 The Servo Project Developers. See the
 // COPYRIGHT file at the top-level directory of this distribution.
 //
@@ -1212,8 +1267,7 @@
 //!
 //! [tr9]: &lt;http://www.unicode.org/reports/tr9/&gt;
 
-</span><span class="attribute">#![forbid(unsafe_code)]
-#![no_std]
+</span><span class="attribute">#![no_std]
 </span><span class="comment">// We need to link to std to make doc tests work on older Rust versions
 </span><span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
 </span><span class="kw">extern crate </span>std;
@@ -1241,7 +1295,7 @@
 <span class="kw">use </span>alloc::borrow::Cow;
 <span class="kw">use </span>alloc::string::String;
 <span class="kw">use </span>alloc::vec::Vec;
-<span class="kw">use </span>core::cmp::{max, min};
+<span class="kw">use </span>core::cmp;
 <span class="kw">use </span>core::iter::repeat;
 <span class="kw">use </span>core::ops::Range;
 
@@ -1573,6 +1627,14 @@
     ///
     /// the index map will result in `indexMap[visualIndex]==logicalIndex`.
     ///
+    /// This only runs [Rule L2](http://www.unicode.org/reports/tr9/#L2) as it does not have
+    /// information about the actual text.
+    ///
+    /// Furthermore, if `levels` is an array that is aligned with code units, bytes within a codepoint may be
+    /// reversed. You may need to fix up the map to deal with this. Alternatively, only pass in arrays where each `Level`
+    /// is for a single code point.
+    ///
+    ///
     ///   # # Example
     /// ```
     /// use unicode_bidi::BidiInfo;
@@ -1590,18 +1652,31 @@
     /// let levels: Vec&lt;Level&gt; = vec![l0, l0, l0, l1, l1, l1, l2, l2];
     /// let index_map = BidiInfo::reorder_visual(&amp;levels);
     /// assert_eq!(levels.len(), index_map.len());
-    /// assert_eq!(index_map, [0, 1, 2, 5, 4, 3, 6, 7]);
+    /// assert_eq!(index_map, [0, 1, 2, 6, 7, 5, 4, 3]);
     /// ```
     </span><span class="kw">pub fn </span>reorder_visual(levels: <span class="kw-2">&amp;</span>[Level]) -&gt; Vec&lt;usize&gt; {
-        <span class="comment">// Gets the next range
-        </span><span class="kw">fn </span>next_range(levels: <span class="kw-2">&amp;</span>[level::Level], start_index: usize) -&gt; Range&lt;usize&gt; {
+        <span class="comment">// Gets the next range of characters after start_index with a level greater
+        // than or equal to `max`
+        </span><span class="kw">fn </span>next_range(levels: <span class="kw-2">&amp;</span>[level::Level], <span class="kw-2">mut </span>start_index: usize, max: Level) -&gt; Range&lt;usize&gt; {
             <span class="kw">if </span>levels.is_empty() || start_index &gt;= levels.len() {
                 <span class="kw">return </span>start_index..start_index;
             }
+            <span class="kw">while let </span><span class="prelude-val">Some</span>(l) = levels.get(start_index) {
+                <span class="kw">if </span><span class="kw-2">*</span>l &gt;= max {
+                    <span class="kw">break</span>;
+                }
+                start_index += <span class="number">1</span>;
+            }
+
+            <span class="kw">if </span>levels.get(start_index).is_none() {
+                <span class="comment">// If at the end of the array, adding one will
+                // produce an out-of-range end element
+                </span><span class="kw">return </span>start_index..start_index;
+            }
 
             <span class="kw">let </span><span class="kw-2">mut </span>end_index = start_index + <span class="number">1</span>;
-            <span class="kw">while </span>end_index &lt; levels.len() {
-                <span class="kw">if </span>levels[start_index] != levels[end_index] {
+            <span class="kw">while let </span><span class="prelude-val">Some</span>(l) = levels.get(end_index) {
+                <span class="kw">if </span><span class="kw-2">*</span>l &lt; max {
                     <span class="kw">return </span>start_index..end_index;
                 }
                 end_index += <span class="number">1</span>;
@@ -1610,21 +1685,50 @@
             start_index..end_index
         }
 
-        <span class="kw">if </span>levels.is_empty() {
+        <span class="comment">// This implementation is similar to the L2 implementation in `visual_runs()`
+        // but it cannot benefit from a precalculated LevelRun vector so needs to be different.
+
+        </span><span class="kw">if </span>levels.is_empty() {
             <span class="kw">return </span><span class="macro">vec!</span>[];
         }
-        <span class="kw">let </span><span class="kw-2">mut </span>result: Vec&lt;usize&gt; = (<span class="number">0</span>..levels.len()).collect();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>range: Range&lt;usize&gt; = <span class="number">0</span>..<span class="number">0</span>;
-        <span class="kw">loop </span>{
-            range = next_range(levels, range.end);
-            <span class="kw">if </span>levels[range.start].is_rtl() {
+        <span class="comment">// Get the min and max levels
+        </span><span class="kw">let </span>(<span class="kw-2">mut </span>min, <span class="kw-2">mut </span>max) = levels
+            .iter()
+            .fold((levels[<span class="number">0</span>], levels[<span class="number">0</span>]), |(min, max), <span class="kw-2">&amp;</span>l| {
+                (cmp::min(min, l), cmp::max(max, l))
+            });
+
+        <span class="comment">// Initialize an index map
+        </span><span class="kw">let </span><span class="kw-2">mut </span>result: Vec&lt;usize&gt; = (<span class="number">0</span>..levels.len()).collect();
+
+        <span class="kw">if </span>min == max &amp;&amp; min.is_ltr() {
+            <span class="comment">// Everything is LTR and at the same level, do nothing
+            </span><span class="kw">return </span>result;
+        }
+
+        <span class="comment">// Stop at the lowest *odd* level, since everything below that
+        // is LTR and does not need further reordering
+        </span>min = min.new_lowest_ge_rtl().expect(<span class="string">&quot;Level error&quot;</span>);
+
+        <span class="comment">// For each max level, take all contiguous chunks of
+        // levels ≥ max and reverse them
+        //
+        // We can do this check with the original levels instead of checking reorderings because all
+        // prior reorderings will have been for contiguous chunks of levels &gt;&gt; max, which will
+        // be a subset of these chunks anyway.
+        </span><span class="kw">while </span>min &lt;= max {
+            <span class="kw">let </span><span class="kw-2">mut </span>range = <span class="number">0</span>..<span class="number">0</span>;
+            <span class="kw">loop </span>{
+                range = next_range(levels, range.end, max);
                 result[range.clone()].reverse();
+
+                <span class="kw">if </span>range.end &gt;= levels.len() {
+                    <span class="kw">break</span>;
+                }
             }
 
-            <span class="kw">if </span>range.end &gt;= levels.len() {
-                <span class="kw">break</span>;
-            }
+            max.lower(<span class="number">1</span>).expect(<span class="string">&quot;Level error&quot;</span>);
         }
 
         result
@@ -1711,8 +1815,8 @@
                 </span>runs.push(start..i);
                 start = i;
                 run_level = new_level;
-                min_level = min(run_level, min_level);
-                max_level = max(run_level, max_level);
+                min_level = cmp::min(run_level, min_level);
+                max_level = cmp::max(run_level, max_level);
             }
         }
         runs.push(start..line.end);
@@ -1725,7 +1829,13 @@
         // Stop at the lowest *odd* level.
         </span>min_level = min_level.new_lowest_ge_rtl().expect(<span class="string">&quot;Level error&quot;</span>);
 
-        <span class="kw">while </span>max_level &gt;= min_level {
+        <span class="comment">// This loop goes through contiguous chunks of level runs that have a level
+        // ≥ max_level and reverses their contents, reducing max_level by 1 each time.
+        //
+        // It can do this check with the original levels instead of checking reorderings because all
+        // prior reorderings will have been for contiguous chunks of levels &gt;&gt; max, which will
+        // be a subset of these chunks anyway.
+        </span><span class="kw">while </span>max_level &gt;= min_level {
             <span class="comment">// Look for the start of a sequence of consecutive runs of max_level or higher.
             </span><span class="kw">let </span><span class="kw-2">mut </span>seq_start = <span class="number">0</span>;
             <span class="kw">while </span>seq_start &lt; run_count {

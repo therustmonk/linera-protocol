@@ -141,13 +141,15 @@ enforces by that requiring such extractors to be the <em>last</em> argument your
 handler takes.</p>
 <p>For example</p>
 
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>axum::http::{Method, HeaderMap};
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>axum::{extract::State, http::{Method, HeaderMap}};
 
 <span class="kw">async fn </span>handler(
     <span class="comment">// `Method` and `HeaderMap` don&#39;t consume the request body so they can
-    // put anywhere in the argument list
+    // put anywhere in the argument list (but before `body`)
     </span>method: Method,
     headers: HeaderMap,
+    <span class="comment">// `State` is also an extractor so it needs to be before `body`
+    </span>State(state): State&lt;AppState&gt;,
     <span class="comment">// `String` consumes the request body and thus must be the last extractor
     </span>body: String,
 ) {

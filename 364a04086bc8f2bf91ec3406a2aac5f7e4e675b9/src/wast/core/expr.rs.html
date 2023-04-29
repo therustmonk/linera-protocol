@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/wast-50.0.0/src/core/expr.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>expr.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../wast/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/wast-57.0.0/src/core/expr.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>expr.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../wast/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -1887,6 +1887,77 @@
 <span id="1887">1887</span>
 <span id="1888">1888</span>
 <span id="1889">1889</span>
+<span id="1890">1890</span>
+<span id="1891">1891</span>
+<span id="1892">1892</span>
+<span id="1893">1893</span>
+<span id="1894">1894</span>
+<span id="1895">1895</span>
+<span id="1896">1896</span>
+<span id="1897">1897</span>
+<span id="1898">1898</span>
+<span id="1899">1899</span>
+<span id="1900">1900</span>
+<span id="1901">1901</span>
+<span id="1902">1902</span>
+<span id="1903">1903</span>
+<span id="1904">1904</span>
+<span id="1905">1905</span>
+<span id="1906">1906</span>
+<span id="1907">1907</span>
+<span id="1908">1908</span>
+<span id="1909">1909</span>
+<span id="1910">1910</span>
+<span id="1911">1911</span>
+<span id="1912">1912</span>
+<span id="1913">1913</span>
+<span id="1914">1914</span>
+<span id="1915">1915</span>
+<span id="1916">1916</span>
+<span id="1917">1917</span>
+<span id="1918">1918</span>
+<span id="1919">1919</span>
+<span id="1920">1920</span>
+<span id="1921">1921</span>
+<span id="1922">1922</span>
+<span id="1923">1923</span>
+<span id="1924">1924</span>
+<span id="1925">1925</span>
+<span id="1926">1926</span>
+<span id="1927">1927</span>
+<span id="1928">1928</span>
+<span id="1929">1929</span>
+<span id="1930">1930</span>
+<span id="1931">1931</span>
+<span id="1932">1932</span>
+<span id="1933">1933</span>
+<span id="1934">1934</span>
+<span id="1935">1935</span>
+<span id="1936">1936</span>
+<span id="1937">1937</span>
+<span id="1938">1938</span>
+<span id="1939">1939</span>
+<span id="1940">1940</span>
+<span id="1941">1941</span>
+<span id="1942">1942</span>
+<span id="1943">1943</span>
+<span id="1944">1944</span>
+<span id="1945">1945</span>
+<span id="1946">1946</span>
+<span id="1947">1947</span>
+<span id="1948">1948</span>
+<span id="1949">1949</span>
+<span id="1950">1950</span>
+<span id="1951">1951</span>
+<span id="1952">1952</span>
+<span id="1953">1953</span>
+<span id="1954">1954</span>
+<span id="1955">1955</span>
+<span id="1956">1956</span>
+<span id="1957">1957</span>
+<span id="1958">1958</span>
+<span id="1959">1959</span>
+<span id="1960">1960</span>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::core::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::encode::Encode;
 <span class="kw">use </span><span class="kw">crate</span>::kw;
@@ -2457,6 +2528,7 @@
         MemoryInit(MemoryInit&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfc</span>, <span class="number">0x08</span>] : <span class="string">&quot;memory.init&quot;</span>,
         MemoryCopy(MemoryCopy&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfc</span>, <span class="number">0x0a</span>] : <span class="string">&quot;memory.copy&quot;</span>,
         MemoryFill(MemoryArg&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfc</span>, <span class="number">0x0b</span>] : <span class="string">&quot;memory.fill&quot;</span>,
+        MemoryDiscard(MemoryArg&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfc</span>, <span class="number">0x12</span>] : <span class="string">&quot;memory.discard&quot;</span>,
         DataDrop(Index&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfc</span>, <span class="number">0x09</span>] : <span class="string">&quot;data.drop&quot;</span>,
         ElemDrop(Index&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfc</span>, <span class="number">0x0d</span>] : <span class="string">&quot;elem.drop&quot;</span>,
         TableInit(TableInit&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfc</span>, <span class="number">0x0c</span>] : <span class="string">&quot;table.init&quot;</span>,
@@ -2490,13 +2562,16 @@
         ArrayNewDefault(Index&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x1c</span>] : <span class="string">&quot;array.new_default&quot;</span>,
         ArrayNewFixed(ArrayNewFixed&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x1a</span>] : <span class="string">&quot;array.new_fixed&quot;</span>,
         ArrayNewData(ArrayNewData&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x1d</span>] : <span class="string">&quot;array.new_data&quot;</span>,
-        ArrayNewElem(ArrayNewElem&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x10</span>] : <span class="string">&quot;array.new_elem&quot;</span>,
+        ArrayNewElem(ArrayNewElem&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x1f</span>] : <span class="string">&quot;array.new_elem&quot;</span>,
         ArrayGet(Index&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x13</span>] : <span class="string">&quot;array.get&quot;</span>,
         ArrayGetS(Index&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x14</span>] : <span class="string">&quot;array.get_s&quot;</span>,
         ArrayGetU(Index&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x15</span>] : <span class="string">&quot;array.get_u&quot;</span>,
         ArraySet(Index&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x16</span>] : <span class="string">&quot;array.set&quot;</span>,
-        ArrayCopy(ArrayCopy&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x18</span>] : <span class="string">&quot;array.copy&quot;</span>,
         ArrayLen : [<span class="number">0xfb</span>, <span class="number">0x19</span>] : <span class="string">&quot;array.len&quot;</span>,
+        ArrayFill(ArrayFill&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x0f</span>] : <span class="string">&quot;array.fill&quot;</span>,
+        ArrayCopy(ArrayCopy&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x18</span>] : <span class="string">&quot;array.copy&quot;</span>,
+        ArrayInitData(ArrayInit&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x54</span>] : <span class="string">&quot;array.init_data&quot;</span>,
+        ArrayInitElem(ArrayInit&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x55</span>] : <span class="string">&quot;array.init_elem&quot;</span>,
 
         <span class="comment">// gc proposal, i31
         </span>I31New : [<span class="number">0xfb</span>, <span class="number">0x20</span>] : <span class="string">&quot;i31.new&quot;</span>,
@@ -2504,31 +2579,10 @@
         I31GetU : [<span class="number">0xfb</span>, <span class="number">0x22</span>] : <span class="string">&quot;i31.get_u&quot;</span>,
 
         <span class="comment">// gc proposal, concrete casting
-        </span>RefTest(Index&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x44</span>] : <span class="string">&quot;ref.test&quot;</span>,
-        RefCast(Index&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x45</span>] : <span class="string">&quot;ref.cast&quot;</span>,
-        BrOnCast(BrOnCast&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x46</span>] : <span class="string">&quot;br_on_cast&quot;</span>,
-        BrOnCastFail(BrOnCast&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x47</span>] : <span class="string">&quot;br_on_cast_fail&quot;</span>,
-
-        <span class="comment">// gc proposal, heap casting
-        </span>RefIsFunc : [<span class="number">0xfb</span>, <span class="number">0x50</span>] : <span class="string">&quot;ref.is_func&quot;</span>,
-        RefIsData : [<span class="number">0xfb</span>, <span class="number">0x51</span>] : <span class="string">&quot;ref.is_data&quot;</span>,
-        RefIsI31 : [<span class="number">0xfb</span>, <span class="number">0x52</span>] : <span class="string">&quot;ref.is_i31&quot;</span>,
-        RefIsArray : [<span class="number">0xfb</span>, <span class="number">0x53</span>] : <span class="string">&quot;ref.is_array&quot;</span>,
-
-        RefAsFunc : [<span class="number">0xfb</span>, <span class="number">0x58</span>] : <span class="string">&quot;ref.as_func&quot;</span>,
-        RefAsData : [<span class="number">0xfb</span>, <span class="number">0x59</span>] : <span class="string">&quot;ref.as_data&quot;</span>,
-        RefAsI31 : [<span class="number">0xfb</span>, <span class="number">0x5a</span>] : <span class="string">&quot;ref.as_i31&quot;</span>,
-        RefAsArray : [<span class="number">0xfb</span>, <span class="number">0x5b</span>] : <span class="string">&quot;ref.as_array&quot;</span>,
-
-        BrOnFunc(Index&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x60</span>] : <span class="string">&quot;br_on_func&quot;</span>,
-        BrOnData(Index&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x61</span>] : <span class="string">&quot;br_on_data&quot;</span>,
-        BrOnI31(Index&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x62</span>] : <span class="string">&quot;br_on_i31&quot;</span>,
-        BrOnArray(Index&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x66</span>] : <span class="string">&quot;br_on_array&quot;</span>,
-
-        BrOnNonFunc(Index&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x63</span>] : <span class="string">&quot;br_on_non_func&quot;</span>,
-        BrOnNonData(Index&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x64</span>] : <span class="string">&quot;br_on_non_data&quot;</span>,
-        BrOnNonI31(Index&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x65</span>] : <span class="string">&quot;br_on_non_i31&quot;</span>,
-        BrOnNonArray(Index&lt;<span class="lifetime">&#39;a</span>&gt;) : [<span class="number">0xfb</span>, <span class="number">0x67</span>] : <span class="string">&quot;br_on_non_array&quot;</span>,
+        </span>RefTest(RefTest&lt;<span class="lifetime">&#39;a</span>&gt;) : [] : <span class="string">&quot;ref.test&quot;</span>,
+        RefCast(RefCast&lt;<span class="lifetime">&#39;a</span>&gt;) : [] : <span class="string">&quot;ref.cast&quot;</span>,
+        BrOnCast(BrOnCast&lt;<span class="lifetime">&#39;a</span>&gt;) : [] : <span class="string">&quot;br_on_cast&quot;</span>,
+        BrOnCastFail(BrOnCastFail&lt;<span class="lifetime">&#39;a</span>&gt;) : [] : <span class="string">&quot;br_on_cast_fail&quot;</span>,
 
         <span class="comment">// gc proposal extern/any coercion operations
         </span>ExternInternalize : [<span class="number">0xfb</span>, <span class="number">0x70</span>] : <span class="string">&quot;extern.internalize&quot;</span>,
@@ -3033,14 +3087,14 @@
 
         <span class="comment">// Relaxed SIMD proposal
         </span>I8x16RelaxedSwizzle : [<span class="number">0xfd</span>, <span class="number">0x100</span>]: <span class="string">&quot;i8x16.relaxed_swizzle&quot;</span>,
-        I32x4RelaxedTruncSatF32x4S : [<span class="number">0xfd</span>, <span class="number">0x101</span>]: <span class="string">&quot;i32x4.relaxed_trunc_sat_f32x4_s&quot; </span>| <span class="string">&quot;i32x4.relaxed_trunc_f32x4_s&quot;</span>,
-        I32x4RelaxedTruncSatF32x4U : [<span class="number">0xfd</span>, <span class="number">0x102</span>]: <span class="string">&quot;i32x4.relaxed_trunc_sat_f32x4_u&quot; </span>| <span class="string">&quot;i32x4.relaxed_trunc_f32x4_u&quot;</span>,
-        I32x4RelaxedTruncSatF64x2SZero : [<span class="number">0xfd</span>, <span class="number">0x103</span>]: <span class="string">&quot;i32x4.relaxed_trunc_sat_f64x2_s_zero&quot; </span>| <span class="string">&quot;i32x4.relaxed_trunc_f64x2_s_zero&quot;</span>,
-        I32x4RelaxedTruncSatF64x2UZero : [<span class="number">0xfd</span>, <span class="number">0x104</span>]: <span class="string">&quot;i32x4.relaxed_trunc_sat_f64x2_u_zero&quot; </span>| <span class="string">&quot;i32x4.relaxed_trunc_f64x2_u_zero&quot;</span>,
-        F32x4RelaxedFma : [<span class="number">0xfd</span>, <span class="number">0x105</span>]: <span class="string">&quot;f32x4.relaxed_fma&quot;</span>,
-        F32x4RelaxedFnma : [<span class="number">0xfd</span>, <span class="number">0x106</span>]: <span class="string">&quot;f32x4.relaxed_fnma&quot;</span>,
-        F64x2RelaxedFma : [<span class="number">0xfd</span>, <span class="number">0x107</span>]: <span class="string">&quot;f64x2.relaxed_fma&quot;</span>,
-        F64x2RelaxedFnma : [<span class="number">0xfd</span>, <span class="number">0x108</span>]: <span class="string">&quot;f64x2.relaxed_fnma&quot;</span>,
+        I32x4RelaxedTruncF32x4S : [<span class="number">0xfd</span>, <span class="number">0x101</span>]: <span class="string">&quot;i32x4.relaxed_trunc_f32x4_s&quot;</span>,
+        I32x4RelaxedTruncF32x4U : [<span class="number">0xfd</span>, <span class="number">0x102</span>]: <span class="string">&quot;i32x4.relaxed_trunc_f32x4_u&quot;</span>,
+        I32x4RelaxedTruncF64x2SZero : [<span class="number">0xfd</span>, <span class="number">0x103</span>]: <span class="string">&quot;i32x4.relaxed_trunc_f64x2_s_zero&quot;</span>,
+        I32x4RelaxedTruncF64x2UZero : [<span class="number">0xfd</span>, <span class="number">0x104</span>]: <span class="string">&quot;i32x4.relaxed_trunc_f64x2_u_zero&quot;</span>,
+        F32x4RelaxedMadd : [<span class="number">0xfd</span>, <span class="number">0x105</span>]: <span class="string">&quot;f32x4.relaxed_madd&quot;</span>,
+        F32x4RelaxedNmadd : [<span class="number">0xfd</span>, <span class="number">0x106</span>]: <span class="string">&quot;f32x4.relaxed_nmadd&quot;</span>,
+        F64x2RelaxedMadd : [<span class="number">0xfd</span>, <span class="number">0x107</span>]: <span class="string">&quot;f64x2.relaxed_madd&quot;</span>,
+        F64x2RelaxedNmadd : [<span class="number">0xfd</span>, <span class="number">0x108</span>]: <span class="string">&quot;f64x2.relaxed_nmadd&quot;</span>,
         I8x16RelaxedLaneselect : [<span class="number">0xfd</span>, <span class="number">0x109</span>]: <span class="string">&quot;i8x16.relaxed_laneselect&quot;</span>,
         I16x8RelaxedLaneselect : [<span class="number">0xfd</span>, <span class="number">0x10A</span>]: <span class="string">&quot;i16x8.relaxed_laneselect&quot;</span>,
         I32x4RelaxedLaneselect : [<span class="number">0xfd</span>, <span class="number">0x10B</span>]: <span class="string">&quot;i32x4.relaxed_laneselect&quot;</span>,
@@ -3050,9 +3104,8 @@
         F64x2RelaxedMin : [<span class="number">0xfd</span>, <span class="number">0x10F</span>]: <span class="string">&quot;f64x2.relaxed_min&quot;</span>,
         F64x2RelaxedMax : [<span class="number">0xfd</span>, <span class="number">0x110</span>]: <span class="string">&quot;f64x2.relaxed_max&quot;</span>,
         I16x8RelaxedQ15mulrS: [<span class="number">0xfd</span>, <span class="number">0x111</span>]: <span class="string">&quot;i16x8.relaxed_q15mulr_s&quot;</span>,
-        I16x8DotI8x16I7x16S: [<span class="number">0xfd</span>, <span class="number">0x112</span>]: <span class="string">&quot;i16x8.dot_i8x16_i7x16_s&quot;</span>,
-        I32x4DotI8x16I7x16AddS: [<span class="number">0xfd</span>, <span class="number">0x113</span>]: <span class="string">&quot;i32x4.dot_i8x16_i7x16_add_s&quot;</span>,
-        F32x4RelaxedDotBf16x8AddF32x4: [<span class="number">0xfd</span>, <span class="number">0x114</span>]: <span class="string">&quot;f32x4.relaxed_dot_bf16x8_add_f32x4&quot;</span>,
+        I16x8RelaxedDotI8x16I7x16S: [<span class="number">0xfd</span>, <span class="number">0x112</span>]: <span class="string">&quot;i16x8.relaxed_dot_i8x16_i7x16_s&quot;</span>,
+        I32x4RelaxedDotI8x16I7x16AddS: [<span class="number">0xfd</span>, <span class="number">0x113</span>]: <span class="string">&quot;i32x4.relaxed_dot_i8x16_i7x16_add_s&quot;</span>,
     }
 }
 
@@ -3464,6 +3517,21 @@
     }
 }
 
+<span class="doccomment">/// Extra data associated with the `array.fill` instruction
+</span><span class="attribute">#[derive(Debug)]
+</span><span class="kw">pub struct </span>ArrayFill&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// The index of the array type we&#39;re filling.
+    </span><span class="kw">pub </span>array: Index&lt;<span class="lifetime">&#39;a</span>&gt;,
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Parse&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>ArrayFill&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>parse(parser: Parser&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="prelude-val">Ok</span>(ArrayFill {
+            array: parser.parse()<span class="question-mark">?</span>,
+        })
+    }
+}
+
 <span class="doccomment">/// Extra data associated with the `array.copy` instruction
 </span><span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>ArrayCopy&lt;<span class="lifetime">&#39;a</span>&gt; {
@@ -3478,6 +3546,24 @@
         <span class="prelude-val">Ok</span>(ArrayCopy {
             dest_array: parser.parse()<span class="question-mark">?</span>,
             src_array: parser.parse()<span class="question-mark">?</span>,
+        })
+    }
+}
+
+<span class="doccomment">/// Extra data associated with the `array.init_[data/elem]` instruction
+</span><span class="attribute">#[derive(Debug)]
+</span><span class="kw">pub struct </span>ArrayInit&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// The index of the array type we&#39;re initializing.
+    </span><span class="kw">pub </span>array: Index&lt;<span class="lifetime">&#39;a</span>&gt;,
+    <span class="doccomment">/// The index of the data or elem segment we&#39;re reading from.
+    </span><span class="kw">pub </span>segment: Index&lt;<span class="lifetime">&#39;a</span>&gt;,
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Parse&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>ArrayInit&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>parse(parser: Parser&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="prelude-val">Ok</span>(ArrayInit {
+            array: parser.parse()<span class="question-mark">?</span>,
+            segment: parser.parse()<span class="question-mark">?</span>,
         })
     }
 }
@@ -3536,20 +3622,74 @@
     }
 }
 
+<span class="doccomment">/// Extra data associated with the `ref.cast` instruction
+</span><span class="attribute">#[derive(Debug)]
+</span><span class="kw">pub struct </span>RefCast&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// The type to cast to.
+    </span><span class="kw">pub </span>r#type: RefType&lt;<span class="lifetime">&#39;a</span>&gt;,
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Parse&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>RefCast&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>parse(parser: Parser&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="prelude-val">Ok</span>(RefCast {
+            r#type: parser.parse()<span class="question-mark">?</span>,
+        })
+    }
+}
+
+<span class="doccomment">/// Extra data associated with the `ref.test` instruction
+</span><span class="attribute">#[derive(Debug)]
+</span><span class="kw">pub struct </span>RefTest&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// The type to test for.
+    </span><span class="kw">pub </span>r#type: RefType&lt;<span class="lifetime">&#39;a</span>&gt;,
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Parse&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>RefTest&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>parse(parser: Parser&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="prelude-val">Ok</span>(RefTest {
+            r#type: parser.parse()<span class="question-mark">?</span>,
+        })
+    }
+}
+
 <span class="doccomment">/// Extra data associated with the `br_on_cast` instruction
 </span><span class="attribute">#[derive(Debug)]
 </span><span class="kw">pub struct </span>BrOnCast&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="doccomment">/// The label to branch to.
     </span><span class="kw">pub </span>label: Index&lt;<span class="lifetime">&#39;a</span>&gt;,
-    <span class="doccomment">/// The index of the type we&#39;re casting.
-    </span><span class="kw">pub </span>r#type: Index&lt;<span class="lifetime">&#39;a</span>&gt;,
+    <span class="doccomment">/// The type we&#39;re casting from.
+    </span><span class="kw">pub </span>from_type: RefType&lt;<span class="lifetime">&#39;a</span>&gt;,
+    <span class="doccomment">/// The type we&#39;re casting to.
+    </span><span class="kw">pub </span>to_type: RefType&lt;<span class="lifetime">&#39;a</span>&gt;,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Parse&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>BrOnCast&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">fn </span>parse(parser: Parser&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="prelude-val">Ok</span>(BrOnCast {
             label: parser.parse()<span class="question-mark">?</span>,
-            r#type: parser.parse()<span class="question-mark">?</span>,
+            from_type: parser.parse()<span class="question-mark">?</span>,
+            to_type: parser.parse()<span class="question-mark">?</span>,
+        })
+    }
+}
+
+<span class="doccomment">/// Extra data associated with the `br_on_cast_fail` instruction
+</span><span class="attribute">#[derive(Debug)]
+</span><span class="kw">pub struct </span>BrOnCastFail&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="doccomment">/// The label to branch to.
+    </span><span class="kw">pub </span>label: Index&lt;<span class="lifetime">&#39;a</span>&gt;,
+    <span class="doccomment">/// The type we&#39;re casting from.
+    </span><span class="kw">pub </span>from_type: RefType&lt;<span class="lifetime">&#39;a</span>&gt;,
+    <span class="doccomment">/// The type we&#39;re casting to.
+    </span><span class="kw">pub </span>to_type: RefType&lt;<span class="lifetime">&#39;a</span>&gt;,
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Parse&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>BrOnCastFail&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">fn </span>parse(parser: Parser&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="prelude-val">Ok</span>(BrOnCastFail {
+            label: parser.parse()<span class="question-mark">?</span>,
+            from_type: parser.parse()<span class="question-mark">?</span>,
+            to_type: parser.parse()<span class="question-mark">?</span>,
         })
     }
 }
@@ -3761,9 +3901,10 @@
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Parse&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span>SelectTypes&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">fn </span>parse(parser: Parser&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>tys = <span class="prelude-val">None</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>found = <span class="bool-val">false</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>list = Vec::new();
         <span class="kw">while </span>parser.peek2::&lt;kw::result&gt;() {
-            <span class="kw">let </span><span class="kw-2">mut </span>list = Vec::new();
+            found = <span class="bool-val">true</span>;
             parser.parens(|p| {
                 p.parse::&lt;kw::result&gt;()<span class="question-mark">?</span>;
                 <span class="kw">while </span>!p.is_empty() {
@@ -3771,9 +3912,10 @@
                 }
                 <span class="prelude-val">Ok</span>(())
             })<span class="question-mark">?</span>;
-            tys = <span class="prelude-val">Some</span>(list);
         }
-        <span class="prelude-val">Ok</span>(SelectTypes { tys })
+        <span class="prelude-val">Ok</span>(SelectTypes {
+            tys: <span class="kw">if </span>found { <span class="prelude-val">Some</span>(list) } <span class="kw">else </span>{ <span class="prelude-val">None </span>},
+        })
     }
 }
 </code></pre></div>

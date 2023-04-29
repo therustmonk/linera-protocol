@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/regex-syntax-0.6.28/src/error.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>error.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../regex_syntax/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/regex-syntax-0.7.1/src/error.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>error.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../regex_syntax/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -309,32 +309,21 @@
 <span id="309">309</span>
 <span id="310">310</span>
 <span id="311">311</span>
-<span id="312">312</span>
-<span id="313">313</span>
-<span id="314">314</span>
-<span id="315">315</span>
-<span id="316">316</span>
-<span id="317">317</span>
-<span id="318">318</span>
-<span id="319">319</span>
-<span id="320">320</span>
-<span id="321">321</span>
-<span id="322">322</span>
-<span id="323">323</span>
-<span id="324">324</span>
-</pre><pre class="rust"><code><span class="kw">use </span>std::cmp;
-<span class="kw">use </span>std::error;
-<span class="kw">use </span>std::fmt;
-<span class="kw">use </span>std::result;
+</pre><pre class="rust"><code><span class="kw">use </span>alloc::{
+    format,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 
-<span class="kw">use </span><span class="kw">crate</span>::ast;
-<span class="kw">use </span><span class="kw">crate</span>::hir;
-
-<span class="doccomment">/// A type alias for dealing with errors returned by this crate.
-</span><span class="kw">pub type </span><span class="prelude-ty">Result</span>&lt;T&gt; = result::Result&lt;T, Error&gt;;
+<span class="kw">use crate</span>::{ast, hir};
 
 <span class="doccomment">/// This error type encompasses any error that can be returned by this crate.
-</span><span class="attribute">#[derive(Clone, Debug, Eq, PartialEq)]
+///
+/// This error type is marked as `non_exhaustive`. This means that adding a
+/// new variant is not considered a breaking change.
+</span><span class="attribute">#[non_exhaustive]
+#[derive(Clone, Debug, Eq, PartialEq)]
 </span><span class="kw">pub enum </span>Error {
     <span class="doccomment">/// An error that occurred while translating concrete syntax into abstract
     /// syntax (AST).
@@ -342,13 +331,6 @@
     <span class="doccomment">/// An error that occurred while translating abstract syntax into a high
     /// level intermediate representation (HIR).
     </span>Translate(hir::Error),
-    <span class="doccomment">/// Hints that destructuring should not be exhaustive.
-    ///
-    /// This enum may grow additional variants, so this makes sure clients
-    /// don&#39;t count on exhaustive matching. (Otherwise, adding a new variant
-    /// could break existing code.)
-    </span><span class="attribute">#[doc(hidden)]
-    </span>__Nonexhaustive,
 }
 
 <span class="kw">impl </span>From&lt;ast::Error&gt; <span class="kw">for </span>Error {
@@ -363,24 +345,14 @@
     }
 }
 
-<span class="kw">impl </span>error::Error <span class="kw">for </span>Error {
-    <span class="comment">// TODO: Remove this method entirely on the next breaking semver release.
-    </span><span class="attribute">#[allow(deprecated)]
-    </span><span class="kw">fn </span>description(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
-            Error::Parse(<span class="kw-2">ref </span>x) =&gt; x.description(),
-            Error::Translate(<span class="kw-2">ref </span>x) =&gt; x.description(),
-            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
-        }
-    }
-}
+<span class="attribute">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="kw">impl </span>std::error::Error <span class="kw">for </span>Error {}
 
-<span class="kw">impl </span>fmt::Display <span class="kw">for </span>Error {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+<span class="kw">impl </span>core::fmt::Display <span class="kw">for </span>Error {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
         <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
             Error::Parse(<span class="kw-2">ref </span>x) =&gt; x.fmt(f),
             Error::Translate(<span class="kw-2">ref </span>x) =&gt; x.fmt(f),
-            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
         }
     }
 }
@@ -425,8 +397,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;e</span>, E: fmt::Display&gt; fmt::Display <span class="kw">for </span>Formatter&lt;<span class="lifetime">&#39;e</span>, E&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;e</span>, E: core::fmt::Display&gt; core::fmt::Display <span class="kw">for </span>Formatter&lt;<span class="lifetime">&#39;e</span>, E&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; core::fmt::Result {
         <span class="kw">let </span>spans = Spans::from_formatter(<span class="self">self</span>);
         <span class="kw">if </span><span class="self">self</span>.pattern.contains(<span class="string">&#39;\n&#39;</span>) {
             <span class="kw">let </span>divider = repeat_char(<span class="string">&#39;~&#39;</span>, <span class="number">79</span>);
@@ -492,7 +464,7 @@
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;p</span>&gt; Spans&lt;<span class="lifetime">&#39;p</span>&gt; {
     <span class="doccomment">/// Build a sequence of spans from a formatter.
-    </span><span class="kw">fn </span>from_formatter&lt;<span class="lifetime">&#39;e</span>, E: fmt::Display&gt;(
+    </span><span class="kw">fn </span>from_formatter&lt;<span class="lifetime">&#39;e</span>, E: core::fmt::Display&gt;(
         fmter: <span class="kw-2">&amp;</span><span class="lifetime">&#39;p </span>Formatter&lt;<span class="lifetime">&#39;e</span>, E&gt;,
     ) -&gt; Spans&lt;<span class="lifetime">&#39;p</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>line_count = fmter.pattern.lines().count();
@@ -572,7 +544,7 @@
                 pos += <span class="number">1</span>;
             }
             <span class="kw">let </span>note_len = span.end.column.saturating_sub(span.start.column);
-            <span class="kw">for _ in </span><span class="number">0</span>..cmp::max(<span class="number">1</span>, note_len) {
+            <span class="kw">for _ in </span><span class="number">0</span>..core::cmp::max(<span class="number">1</span>, note_len) {
                 notes.push(<span class="string">&#39;^&#39;</span>);
                 pos += <span class="number">1</span>;
             }
@@ -605,11 +577,13 @@
 }
 
 <span class="kw">fn </span>repeat_char(c: char, count: usize) -&gt; String {
-    ::std::iter::repeat(c).take(count).collect()
+    core::iter::repeat(c).take(count).collect()
 }
 
 <span class="attribute">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
+    <span class="kw">use </span>alloc::string::ToString;
+
     <span class="kw">use </span><span class="kw">crate</span>::ast::parse::Parser;
 
     <span class="kw">fn </span>assert_panic_message(pattern: <span class="kw-2">&amp;</span>str, expected_msg: <span class="kw-2">&amp;</span>str) {

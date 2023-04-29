@@ -3,7 +3,7 @@
     // Attributes available to this derive:
     #[struct_meta]
 }
-</code></pre></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Derive <a href="../syn/parse/trait.Parse.html" title="syn::parse::Parse"><code>syn::parse::Parse</code></a> for parsing attribute arguments.</p>
+</code></pre></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Derive <a href="https://docs.rs/syn/1.0.109/syn/parse/trait.Parse.html" title="syn::parse::Parse"><code>syn::parse::Parse</code></a> for parsing attribute arguments.</p>
 <ul>
 <li><a href="#example">Example</a></li>
 <li><a href="#named-parameter">Named parameter</a>
@@ -356,7 +356,7 @@ keys.sort();
 <tr><td><code>unnamed</code></td><td></td><td>✔</td><td>Make the field be treated as an unnamed parameter.</td></tr>
 </tbody></table>
 </div><h2 id="uses-with-proc_macro_derive"><a href="#uses-with-proc_macro_derive">Uses with <code>#[proc_macro_derive]</code></a></h2>
-<p>A type with <code>#[derive(StructMeta)]</code> can be used with <a href="../syn/attr/struct.Attribute.html#method.parse_args" title="syn::Attribute::parse_args"><code>syn::Attribute::parse_args</code></a>.</p>
+<p>A type with <code>#[derive(StructMeta)]</code> can be used with <a href="https://docs.rs/syn/1.0.109/syn/attr/struct.Attribute.html#method.parse_args" title="syn::Attribute::parse_args"><code>syn::Attribute::parse_args</code></a>.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>proc_macro::TokenStream;
 <span class="kw">use </span>quote::quote;
@@ -450,7 +450,7 @@ even if the name is different from what it is defined as.</p>
 <span class="macro">assert_eq!</span>(result.unnamed, <span class="prelude-val">Some</span>(<span class="macro">parse_quote!</span>(y = <span class="number">10</span>)));</code></pre></div>
 <p>Similarly, if one or more <code>name(args)</code> style parameters are defined, arguments with <code>name(args)</code> will be parsed as <code>name(args)</code> style.
 If <code>name(args)</code> style parameter is not defined, it will be parsed as unnamed parameter.</p>
-<p>The same is true for <code>name</code> style parameter.</p>
+<p>The same is true for <code>name</code> or <code>name = value</code> style parameter.</p>
 <h3 id="struct_metaname_filter--"><a href="#struct_metaname_filter--"><code>#[struct_meta(name_filter = &quot;...&quot;)]</code></a></h3>
 <p>By attaching <code>#[struct_meta(name_filter = &quot;...&quot;)]</code> to struct definition, you can restrict the names that can be used as parameter names and treat other identifiers as a value of unnamed parameter.</p>
 <p>The following value can be used.</p>
@@ -461,25 +461,33 @@ If <code>name(args)</code> style parameter is not defined, it will be parsed as 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>structmeta::StructMeta;
 <span class="kw">use </span>syn::{parse_quote, Attribute, Expr, LitInt, <span class="prelude-ty">Result</span>};
 
-<span class="kw">let </span>attr: Attribute = <span class="macro">parse_quote!</span>(<span class="attribute">#[attr(X)]</span>);
+<span class="kw">let </span>attr_x: Attribute = <span class="macro">parse_quote!</span>(<span class="attribute">#[attr(X)]</span>);
+<span class="kw">let </span>attr_y: Attribute = <span class="macro">parse_quote!</span>(<span class="attribute">#[attr(Y)]</span>);
 
 <span class="attribute">#[derive(StructMeta)]
 </span><span class="kw">struct </span>NoFilter {
     <span class="attribute">#[struct_meta(unnamed)]
     </span>unnamed: <span class="prelude-ty">Option</span>&lt;Expr&gt;,
-    x: bool,
+    <span class="attribute">#[struct_meta(name = <span class="string">&quot;X&quot;</span>)]
+    </span>x: bool,
 }
-<span class="kw">let </span>result: <span class="prelude-ty">Result</span>&lt;NoFilter&gt; = attr.parse_args();
-<span class="macro">assert!</span>(result.is_err()); <span class="comment">// `X` is parsed as a wrong named parameter.
+<span class="kw">let </span>result: NoFilter = attr_x.parse_args().unwrap();
+<span class="macro">assert_eq!</span>(result.unnamed, <span class="prelude-val">None</span>);
+<span class="macro">assert_eq!</span>(result.x, <span class="bool-val">true</span>); <span class="comment">// `X` is parsed as a named parameter.
+
+</span><span class="kw">let </span>result: <span class="prelude-ty">Result</span>&lt;NoFilter&gt; = attr_y.parse_args();
+<span class="macro">assert!</span>(result.is_err()); <span class="comment">// `Y` is parsed as a wrong named parameter.
+
 
 </span><span class="attribute">#[derive(StructMeta)]
 #[struct_meta(name_filter = <span class="string">&quot;snake_case&quot;</span>)]
 </span><span class="kw">struct </span>WithFilter {
     <span class="attribute">#[struct_meta(unnamed)]
     </span>unnamed: <span class="prelude-ty">Option</span>&lt;Expr&gt;,
-    x: bool,
+    <span class="attribute">#[struct_meta(name = <span class="string">&quot;X&quot;</span>)]
+    </span>x: bool,
 }
-<span class="kw">let </span>result: WithFilter = attr.parse_args().unwrap();
+<span class="kw">let </span>result: WithFilter = attr_x.parse_args().unwrap();
 <span class="macro">assert_eq!</span>(result.unnamed, <span class="prelude-val">Some</span>(<span class="macro">parse_quote!</span>(X))); <span class="comment">// `X` is parsed as a unnamed parameter.
 </span><span class="macro">assert_eq!</span>(result.x, <span class="bool-val">false</span>);</code></pre></div>
 </div></details></section></div></main><div id="rustdoc-vars" data-root-path="../" data-current-crate="structmeta" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

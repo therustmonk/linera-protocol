@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-1.25.0/src/process/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../tokio/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-1.28.0/src/process/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../tokio/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -1572,6 +1572,88 @@
 <span id="1572">1572</span>
 <span id="1573">1573</span>
 <span id="1574">1574</span>
+<span id="1575">1575</span>
+<span id="1576">1576</span>
+<span id="1577">1577</span>
+<span id="1578">1578</span>
+<span id="1579">1579</span>
+<span id="1580">1580</span>
+<span id="1581">1581</span>
+<span id="1582">1582</span>
+<span id="1583">1583</span>
+<span id="1584">1584</span>
+<span id="1585">1585</span>
+<span id="1586">1586</span>
+<span id="1587">1587</span>
+<span id="1588">1588</span>
+<span id="1589">1589</span>
+<span id="1590">1590</span>
+<span id="1591">1591</span>
+<span id="1592">1592</span>
+<span id="1593">1593</span>
+<span id="1594">1594</span>
+<span id="1595">1595</span>
+<span id="1596">1596</span>
+<span id="1597">1597</span>
+<span id="1598">1598</span>
+<span id="1599">1599</span>
+<span id="1600">1600</span>
+<span id="1601">1601</span>
+<span id="1602">1602</span>
+<span id="1603">1603</span>
+<span id="1604">1604</span>
+<span id="1605">1605</span>
+<span id="1606">1606</span>
+<span id="1607">1607</span>
+<span id="1608">1608</span>
+<span id="1609">1609</span>
+<span id="1610">1610</span>
+<span id="1611">1611</span>
+<span id="1612">1612</span>
+<span id="1613">1613</span>
+<span id="1614">1614</span>
+<span id="1615">1615</span>
+<span id="1616">1616</span>
+<span id="1617">1617</span>
+<span id="1618">1618</span>
+<span id="1619">1619</span>
+<span id="1620">1620</span>
+<span id="1621">1621</span>
+<span id="1622">1622</span>
+<span id="1623">1623</span>
+<span id="1624">1624</span>
+<span id="1625">1625</span>
+<span id="1626">1626</span>
+<span id="1627">1627</span>
+<span id="1628">1628</span>
+<span id="1629">1629</span>
+<span id="1630">1630</span>
+<span id="1631">1631</span>
+<span id="1632">1632</span>
+<span id="1633">1633</span>
+<span id="1634">1634</span>
+<span id="1635">1635</span>
+<span id="1636">1636</span>
+<span id="1637">1637</span>
+<span id="1638">1638</span>
+<span id="1639">1639</span>
+<span id="1640">1640</span>
+<span id="1641">1641</span>
+<span id="1642">1642</span>
+<span id="1643">1643</span>
+<span id="1644">1644</span>
+<span id="1645">1645</span>
+<span id="1646">1646</span>
+<span id="1647">1647</span>
+<span id="1648">1648</span>
+<span id="1649">1649</span>
+<span id="1650">1650</span>
+<span id="1651">1651</span>
+<span id="1652">1652</span>
+<span id="1653">1653</span>
+<span id="1654">1654</span>
+<span id="1655">1655</span>
+<span id="1656">1656</span>
 </pre><pre class="rust"><code><span class="doccomment">//! An implementation of asynchronous process management for Tokio.
 //!
 //! This module provides a [`Command`] struct that imitates the interface of the
@@ -1730,7 +1812,6 @@
 //! ```no_run
 //! use tokio::join;
 //! use tokio::process::Command;
-//! use std::convert::TryInto;
 //! use std::process::Stdio;
 //!
 //! #[tokio::main]
@@ -1791,7 +1872,7 @@
 //! from being spawned.
 //!
 //! The tokio runtime will, on a best-effort basis, attempt to reap and clean up
-//! any process which it has spawned. No additional guarantees are made with regards
+//! any process which it has spawned. No additional guarantees are made with regard to
 //! how quickly or how often this procedure will take place.
 //!
 //! It is recommended to avoid dropping a [`Child`] process handle before it has been
@@ -1819,21 +1900,25 @@
 <span class="kw">use </span><span class="kw">crate</span>::io::{AsyncRead, AsyncWrite, ReadBuf};
 <span class="kw">use </span><span class="kw">crate</span>::process::kill::Kill;
 
-<span class="kw">use </span>std::convert::TryInto;
 <span class="kw">use </span>std::ffi::OsStr;
 <span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::io;
-<span class="attribute">#[cfg(unix)]
-</span><span class="kw">use </span>std::os::unix::process::CommandExt;
-<span class="attribute">#[cfg(windows)]
-</span><span class="kw">use </span>std::os::windows::io::{AsRawHandle, RawHandle};
-<span class="attribute">#[cfg(windows)]
-</span><span class="kw">use </span>std::os::windows::process::CommandExt;
 <span class="kw">use </span>std::path::Path;
 <span class="kw">use </span>std::pin::Pin;
 <span class="kw">use </span>std::process::{Command <span class="kw">as </span>StdCommand, ExitStatus, Output, Stdio};
 <span class="kw">use </span>std::task::Context;
 <span class="kw">use </span>std::task::Poll;
+
+<span class="attribute">#[cfg(unix)]
+</span><span class="kw">use </span>std::os::unix::process::CommandExt;
+<span class="attribute">#[cfg(windows)]
+</span><span class="kw">use </span>std::os::windows::process::CommandExt;
+
+<span class="macro">cfg_windows! </span>{
+    <span class="kw">use </span><span class="kw">crate</span>::os::windows::io::{AsRawHandle, RawHandle};
+    <span class="attribute">#[cfg(not(tokio_no_as_fd))]
+    </span><span class="kw">use </span><span class="kw">crate</span>::os::windows::io::{AsHandle, BorrowedHandle};
+}
 
 <span class="doccomment">/// This structure mimics the API of [`std::process::Command`] found in the standard library, but
 /// replaces functions that create a process with an asynchronous variant. The main provided
@@ -1883,7 +1968,8 @@
     ///
     /// ```no_run
     /// use tokio::process::Command;
-    /// let command = Command::new(&quot;sh&quot;);
+    /// let mut command = Command::new(&quot;sh&quot;);
+    /// # let _ = command.output(); // assert borrow checker
     /// ```
     ///
     /// [rust-lang/rust#37519]: https://github.com/rust-lang/rust/issues/37519
@@ -1902,16 +1988,20 @@
     /// Only one argument can be passed per use. So instead of:
     ///
     /// ```no_run
-    /// tokio::process::Command::new(&quot;sh&quot;)
-    ///   .arg(&quot;-C /path/to/repo&quot;);
+    /// let mut command = tokio::process::Command::new(&quot;sh&quot;);
+    /// command.arg(&quot;-C /path/to/repo&quot;);
+    ///
+    /// # let _ = command.output(); // assert borrow checker
     /// ```
     ///
     /// usage would be:
     ///
     /// ```no_run
-    /// tokio::process::Command::new(&quot;sh&quot;)
-    ///   .arg(&quot;-C&quot;)
-    ///   .arg(&quot;/path/to/repo&quot;);
+    /// let mut command = tokio::process::Command::new(&quot;sh&quot;);
+    /// command.arg(&quot;-C&quot;);
+    /// command.arg(&quot;/path/to/repo&quot;);
+    ///
+    /// # let _ = command.output(); // assert borrow checker
     /// ```
     ///
     /// To pass multiple arguments see [`args`].
@@ -1923,11 +2013,15 @@
     /// Basic usage:
     ///
     /// ```no_run
+    /// # async fn test() { // allow using await
     /// use tokio::process::Command;
     ///
-    /// let command = Command::new(&quot;ls&quot;)
+    /// let output = Command::new(&quot;ls&quot;)
     ///         .arg(&quot;-l&quot;)
-    ///         .arg(&quot;-a&quot;);
+    ///         .arg(&quot;-a&quot;)
+    ///         .output().await.unwrap();
+    /// # }
+    ///
     /// ```
     </span><span class="kw">pub fn </span>arg&lt;S: AsRef&lt;OsStr&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, arg: S) -&gt; <span class="kw-2">&amp;mut </span>Command {
         <span class="self">self</span>.std.arg(arg);
@@ -1945,10 +2039,13 @@
     /// Basic usage:
     ///
     /// ```no_run
+    /// # async fn test() { // allow using await
     /// use tokio::process::Command;
     ///
-    /// let command = Command::new(&quot;ls&quot;)
-    ///         .args(&amp;[&quot;-l&quot;, &quot;-a&quot;]);
+    /// let output = Command::new(&quot;ls&quot;)
+    ///         .args(&amp;[&quot;-l&quot;, &quot;-a&quot;])
+    ///         .output().await.unwrap();
+    /// # }
     /// ```
     </span><span class="kw">pub fn </span>args&lt;I, S&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, args: I) -&gt; <span class="kw-2">&amp;mut </span>Command
     <span class="kw">where
@@ -1969,10 +2066,13 @@
     /// Basic usage:
     ///
     /// ```no_run
+    /// # async fn test() { // allow using await
     /// use tokio::process::Command;
     ///
-    /// let command = Command::new(&quot;ls&quot;)
-    ///         .env(&quot;PATH&quot;, &quot;/bin&quot;);
+    /// let output = Command::new(&quot;ls&quot;)
+    ///         .env(&quot;PATH&quot;, &quot;/bin&quot;)
+    ///         .output().await.unwrap();
+    /// # }
     /// ```
     </span><span class="kw">pub fn </span>env&lt;K, V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K, val: V) -&gt; <span class="kw-2">&amp;mut </span>Command
     <span class="kw">where
@@ -1990,6 +2090,7 @@
     /// Basic usage:
     ///
     /// ```no_run
+    /// # async fn test() { // allow using await
     /// use tokio::process::Command;
     /// use std::process::{Stdio};
     /// use std::env;
@@ -2000,11 +2101,13 @@
     ///         k == &quot;TERM&quot; || k == &quot;TZ&quot; || k == &quot;LANG&quot; || k == &quot;PATH&quot;
     ///     ).collect();
     ///
-    /// let command = Command::new(&quot;printenv&quot;)
+    /// let output = Command::new(&quot;printenv&quot;)
     ///         .stdin(Stdio::null())
     ///         .stdout(Stdio::inherit())
     ///         .env_clear()
-    ///         .envs(&amp;filtered_env);
+    ///         .envs(&amp;filtered_env)
+    ///         .output().await.unwrap();
+    /// # }
     /// ```
     </span><span class="kw">pub fn </span>envs&lt;I, K, V&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, vars: I) -&gt; <span class="kw-2">&amp;mut </span>Command
     <span class="kw">where
@@ -2023,10 +2126,13 @@
     /// Basic usage:
     ///
     /// ```no_run
+    /// # async fn test() { // allow using await
     /// use tokio::process::Command;
     ///
-    /// let command = Command::new(&quot;ls&quot;)
-    ///         .env_remove(&quot;PATH&quot;);
+    /// let output = Command::new(&quot;ls&quot;)
+    ///         .env_remove(&quot;PATH&quot;)
+    ///         .output().await.unwrap();
+    /// # }
     /// ```
     </span><span class="kw">pub fn </span>env_remove&lt;K: AsRef&lt;OsStr&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; <span class="kw-2">&amp;mut </span>Command {
         <span class="self">self</span>.std.env_remove(key);
@@ -2040,10 +2146,13 @@
     /// Basic usage:
     ///
     /// ```no_run
+    /// # async fn test() { // allow using await
     /// use tokio::process::Command;
     ///
-    /// let command = Command::new(&quot;ls&quot;)
-    ///         .env_clear();
+    /// let output = Command::new(&quot;ls&quot;)
+    ///         .env_clear()
+    ///         .output().await.unwrap();
+    /// # }
     /// ```
     </span><span class="kw">pub fn </span>env_clear(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Command {
         <span class="self">self</span>.std.env_clear();
@@ -2067,10 +2176,13 @@
     /// Basic usage:
     ///
     /// ```no_run
+    /// # async fn test() { // allow using await
     /// use tokio::process::Command;
     ///
-    /// let command = Command::new(&quot;ls&quot;)
-    ///         .current_dir(&quot;/bin&quot;);
+    /// let output = Command::new(&quot;ls&quot;)
+    ///         .current_dir(&quot;/bin&quot;)
+    ///         .output().await.unwrap();
+    /// # }
     /// ```
     </span><span class="kw">pub fn </span>current_dir&lt;P: AsRef&lt;Path&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, dir: P) -&gt; <span class="kw-2">&amp;mut </span>Command {
         <span class="self">self</span>.std.current_dir(dir);
@@ -2090,11 +2202,14 @@
     /// Basic usage:
     ///
     /// ```no_run
+    /// # async fn test() { // allow using await
     /// use std::process::{Stdio};
     /// use tokio::process::Command;
     ///
-    /// let command = Command::new(&quot;ls&quot;)
-    ///         .stdin(Stdio::null());
+    /// let output = Command::new(&quot;ls&quot;)
+    ///         .stdin(Stdio::null())
+    ///         .output().await.unwrap();
+    /// # }
     /// ```
     </span><span class="kw">pub fn </span>stdin&lt;T: Into&lt;Stdio&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cfg: T) -&gt; <span class="kw-2">&amp;mut </span>Command {
         <span class="self">self</span>.std.stdin(cfg);
@@ -2114,11 +2229,14 @@
     /// Basic usage:
     ///
     /// ```no_run
+    /// # async fn test() { // allow using await
     /// use tokio::process::Command;
     /// use std::process::Stdio;
     ///
-    /// let command = Command::new(&quot;ls&quot;)
-    ///         .stdout(Stdio::null());
+    /// let output = Command::new(&quot;ls&quot;)
+    ///         .stdout(Stdio::null())
+    ///         .output().await.unwrap();
+    /// # }
     /// ```
     </span><span class="kw">pub fn </span>stdout&lt;T: Into&lt;Stdio&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cfg: T) -&gt; <span class="kw-2">&amp;mut </span>Command {
         <span class="self">self</span>.std.stdout(cfg);
@@ -2138,11 +2256,14 @@
     /// Basic usage:
     ///
     /// ```no_run
+    /// # async fn test() { // allow using await
     /// use tokio::process::Command;
     /// use std::process::{Stdio};
     ///
-    /// let command = Command::new(&quot;ls&quot;)
-    ///         .stderr(Stdio::null());
+    /// let output = Command::new(&quot;ls&quot;)
+    ///         .stderr(Stdio::null())
+    ///         .output().await.unwrap();
+    /// # }
     /// ```
     </span><span class="kw">pub fn </span>stderr&lt;T: Into&lt;Stdio&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cfg: T) -&gt; <span class="kw-2">&amp;mut </span>Command {
         <span class="self">self</span>.std.stderr(cfg);
@@ -2169,7 +2290,7 @@
     /// operation, the resulting zombie process cannot be `.await`ed inside of the
     /// destructor to avoid blocking other tasks. The tokio runtime will, on a
     /// best-effort basis, attempt to reap and clean up such processes in the
-    /// background, but makes no additional guarantees are made with regards
+    /// background, but no additional guarantees are made with regard to
     /// how quickly or how often this procedure will take place.
     ///
     /// If stronger guarantees are required, it is recommended to avoid dropping
@@ -2180,17 +2301,17 @@
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Sets the [process creation flags][1] to be passed to `CreateProcess`.
-    ///
-    /// These will always be ORed with `CREATE_UNICODE_ENVIRONMENT`.
-    ///
-    /// [1]: https://msdn.microsoft.com/en-us/library/windows/desktop/ms684863(v=vs.85).aspx
-    </span><span class="attribute">#[cfg(windows)]
-    #[cfg_attr(docsrs, doc(cfg(windows)))]
-    </span><span class="kw">pub fn </span>creation_flags(<span class="kw-2">&amp;mut </span><span class="self">self</span>, flags: u32) -&gt; <span class="kw-2">&amp;mut </span>Command {
-        <span class="self">self</span>.std.creation_flags(flags);
-        <span class="self">self
-    </span>}
+    <span class="macro">cfg_windows! </span>{
+        <span class="doccomment">/// Sets the [process creation flags][1] to be passed to `CreateProcess`.
+        ///
+        /// These will always be ORed with `CREATE_UNICODE_ENVIRONMENT`.
+        ///
+        /// [1]: https://msdn.microsoft.com/en-us/library/windows/desktop/ms684863(v=vs.85).aspx
+        </span><span class="kw">pub fn </span>creation_flags(<span class="kw-2">&amp;mut </span><span class="self">self</span>, flags: u32) -&gt; <span class="kw-2">&amp;mut </span>Command {
+            <span class="self">self</span>.std.creation_flags(flags);
+            <span class="self">self
+        </span>}
+    }
 
     <span class="doccomment">/// Sets the child process&#39;s user ID. This translates to a
     /// `setuid` call in the child process. Failure in the `setuid`
@@ -2281,10 +2402,13 @@
     /// [`tokio::process::Command`]: crate::process::Command
     ///
     /// ```no_run
+    /// # async fn test() { // allow using await
     /// use tokio::process::Command;
     ///
-    /// let command = Command::new(&quot;ls&quot;)
-    ///         .process_group(0);
+    /// let output = Command::new(&quot;ls&quot;)
+    ///         .process_group(0)
+    ///         .output().await.unwrap();
+    /// # }
     /// ```
     </span><span class="attribute">#[cfg(unix)]
     #[cfg(tokio_unstable)]
@@ -2346,7 +2470,7 @@
     /// from being spawned.
     ///
     /// The tokio runtime will, on a best-effort basis, attempt to reap and clean up
-    /// any process which it has spawned. No additional guarantees are made with regards
+    /// any process which it has spawned. No additional guarantees are made with regard to
     /// how quickly or how often this procedure will take place.
     ///
     /// It is recommended to avoid dropping a [`Child`] process handle before it has been
@@ -2617,13 +2741,14 @@
         }
     }
 
-    <span class="doccomment">/// Extracts the raw handle of the process associated with this child while
-    /// it is still running. Returns `None` if the child has exited.
-    </span><span class="attribute">#[cfg(windows)]
-    </span><span class="kw">pub fn </span>raw_handle(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;RawHandle&gt; {
-        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.child {
-            FusedChild::Child(c) =&gt; <span class="prelude-val">Some</span>(c.inner.as_raw_handle()),
-            FusedChild::Done(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
+    <span class="macro">cfg_windows! </span>{
+        <span class="doccomment">/// Extracts the raw handle of the process associated with this child while
+        /// it is still running. Returns `None` if the child has exited.
+        </span><span class="kw">pub fn </span>raw_handle(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;RawHandle&gt; {
+            <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.child {
+                FusedChild::Child(c) =&gt; <span class="prelude-val">Some</span>(c.inner.as_raw_handle()),
+                FusedChild::Done(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
+            }
         }
     }
 
@@ -2858,7 +2983,7 @@
 }
 
 <span class="kw">impl </span>ChildStdout {
-    <span class="doccomment">/// Creates an asynchronous `ChildStderr` from a synchronous one.
+    <span class="doccomment">/// Creates an asynchronous `ChildStdout` from a synchronous one.
     ///
     /// # Errors
     ///
@@ -2963,6 +3088,8 @@
 
 <span class="attribute">#[cfg(unix)]
 </span><span class="kw">mod </span>sys {
+    <span class="attribute">#[cfg(not(tokio_no_as_fd))]
+    </span><span class="kw">use </span>std::os::unix::io::{AsFd, BorrowedFd};
     <span class="kw">use </span>std::os::unix::io::{AsRawFd, RawFd};
 
     <span class="kw">use super</span>::{ChildStderr, ChildStdin, ChildStdout};
@@ -2973,9 +3100,23 @@
         }
     }
 
+    <span class="attribute">#[cfg(not(tokio_no_as_fd))]
+    </span><span class="kw">impl </span>AsFd <span class="kw">for </span>ChildStdin {
+        <span class="kw">fn </span>as_fd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedFd&lt;<span class="lifetime">&#39;_</span>&gt; {
+            <span class="kw">unsafe </span>{ BorrowedFd::borrow_raw(<span class="self">self</span>.as_raw_fd()) }
+        }
+    }
+
     <span class="kw">impl </span>AsRawFd <span class="kw">for </span>ChildStdout {
         <span class="kw">fn </span>as_raw_fd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RawFd {
             <span class="self">self</span>.inner.as_raw_fd()
+        }
+    }
+
+    <span class="attribute">#[cfg(not(tokio_no_as_fd))]
+    </span><span class="kw">impl </span>AsFd <span class="kw">for </span>ChildStdout {
+        <span class="kw">fn </span>as_fd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedFd&lt;<span class="lifetime">&#39;_</span>&gt; {
+            <span class="kw">unsafe </span>{ BorrowedFd::borrow_raw(<span class="self">self</span>.as_raw_fd()) }
         }
     }
 
@@ -2984,17 +3125,26 @@
             <span class="self">self</span>.inner.as_raw_fd()
         }
     }
+
+    <span class="attribute">#[cfg(not(tokio_no_as_fd))]
+    </span><span class="kw">impl </span>AsFd <span class="kw">for </span>ChildStderr {
+        <span class="kw">fn </span>as_fd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedFd&lt;<span class="lifetime">&#39;_</span>&gt; {
+            <span class="kw">unsafe </span>{ BorrowedFd::borrow_raw(<span class="self">self</span>.as_raw_fd()) }
+        }
+    }
 }
 
-<span class="attribute">#[cfg(windows)]
-</span><span class="kw">mod </span>sys {
-    <span class="kw">use </span>std::os::windows::io::{AsRawHandle, RawHandle};
-
-    <span class="kw">use super</span>::{ChildStderr, ChildStdin, ChildStdout};
-
+<span class="macro">cfg_windows! </span>{
     <span class="kw">impl </span>AsRawHandle <span class="kw">for </span>ChildStdin {
         <span class="kw">fn </span>as_raw_handle(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RawHandle {
             <span class="self">self</span>.inner.as_raw_handle()
+        }
+    }
+
+    <span class="attribute">#[cfg(not(tokio_no_as_fd))]
+    </span><span class="kw">impl </span>AsHandle <span class="kw">for </span>ChildStdin {
+        <span class="kw">fn </span>as_handle(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedHandle&lt;<span class="lifetime">&#39;_</span>&gt; {
+            <span class="kw">unsafe </span>{ BorrowedHandle::borrow_raw(<span class="self">self</span>.as_raw_handle()) }
         }
     }
 
@@ -3004,9 +3154,23 @@
         }
     }
 
+    <span class="attribute">#[cfg(not(tokio_no_as_fd))]
+    </span><span class="kw">impl </span>AsHandle <span class="kw">for </span>ChildStdout {
+        <span class="kw">fn </span>as_handle(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedHandle&lt;<span class="lifetime">&#39;_</span>&gt; {
+            <span class="kw">unsafe </span>{ BorrowedHandle::borrow_raw(<span class="self">self</span>.as_raw_handle()) }
+        }
+    }
+
     <span class="kw">impl </span>AsRawHandle <span class="kw">for </span>ChildStderr {
         <span class="kw">fn </span>as_raw_handle(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RawHandle {
             <span class="self">self</span>.inner.as_raw_handle()
+        }
+    }
+
+    <span class="attribute">#[cfg(not(tokio_no_as_fd))]
+    </span><span class="kw">impl </span>AsHandle <span class="kw">for </span>ChildStderr {
+        <span class="kw">fn </span>as_handle(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedHandle&lt;<span class="lifetime">&#39;_</span>&gt; {
+            <span class="kw">unsafe </span>{ BorrowedHandle::borrow_raw(<span class="self">self</span>.as_raw_handle()) }
         }
     }
 }

@@ -729,7 +729,7 @@
         <span class="kw">if </span>deserializer.is_human_readable() {
             <span class="kw">let </span>s = String::deserialize(deserializer)<span class="question-mark">?</span>;
             <span class="kw">let </span>value = hex::decode(s).map_err(|err| serde::de::Error::custom(err.to_string()))<span class="question-mark">?</span>;
-            <span class="kw">let </span>sig = dalek::Signature::from_bytes(<span class="kw-2">&amp;</span>value)
+            <span class="kw">let </span>sig = dalek::Signature::try_from(value.as_slice())
                 .map_err(|err| serde::de::Error::custom(err.to_string()))<span class="question-mark">?</span>;
             <span class="prelude-val">Ok</span>(Signature(sig))
         } <span class="kw">else </span>{

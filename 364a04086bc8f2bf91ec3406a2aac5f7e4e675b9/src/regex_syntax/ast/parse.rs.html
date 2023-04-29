@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/regex-syntax-0.6.28/src/ast/parse.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>parse.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../regex_syntax/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/regex-syntax-0.7.1/src/ast/parse.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>parse.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../../normalize.css"><link rel="stylesheet" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../../ayu.css" disabled><link rel="stylesheet" href="../../../dark.css" disabled><link rel="stylesheet" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../regex_syntax/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -5928,21 +5928,230 @@
 <span id="5928">5928</span>
 <span id="5929">5929</span>
 <span id="5930">5930</span>
+<span id="5931">5931</span>
+<span id="5932">5932</span>
+<span id="5933">5933</span>
+<span id="5934">5934</span>
+<span id="5935">5935</span>
+<span id="5936">5936</span>
+<span id="5937">5937</span>
+<span id="5938">5938</span>
+<span id="5939">5939</span>
+<span id="5940">5940</span>
+<span id="5941">5941</span>
+<span id="5942">5942</span>
+<span id="5943">5943</span>
+<span id="5944">5944</span>
+<span id="5945">5945</span>
+<span id="5946">5946</span>
+<span id="5947">5947</span>
+<span id="5948">5948</span>
+<span id="5949">5949</span>
+<span id="5950">5950</span>
+<span id="5951">5951</span>
+<span id="5952">5952</span>
+<span id="5953">5953</span>
+<span id="5954">5954</span>
+<span id="5955">5955</span>
+<span id="5956">5956</span>
+<span id="5957">5957</span>
+<span id="5958">5958</span>
+<span id="5959">5959</span>
+<span id="5960">5960</span>
+<span id="5961">5961</span>
+<span id="5962">5962</span>
+<span id="5963">5963</span>
+<span id="5964">5964</span>
+<span id="5965">5965</span>
+<span id="5966">5966</span>
+<span id="5967">5967</span>
+<span id="5968">5968</span>
+<span id="5969">5969</span>
+<span id="5970">5970</span>
+<span id="5971">5971</span>
+<span id="5972">5972</span>
+<span id="5973">5973</span>
+<span id="5974">5974</span>
+<span id="5975">5975</span>
+<span id="5976">5976</span>
+<span id="5977">5977</span>
+<span id="5978">5978</span>
+<span id="5979">5979</span>
+<span id="5980">5980</span>
+<span id="5981">5981</span>
+<span id="5982">5982</span>
+<span id="5983">5983</span>
+<span id="5984">5984</span>
+<span id="5985">5985</span>
+<span id="5986">5986</span>
+<span id="5987">5987</span>
+<span id="5988">5988</span>
+<span id="5989">5989</span>
+<span id="5990">5990</span>
+<span id="5991">5991</span>
+<span id="5992">5992</span>
+<span id="5993">5993</span>
+<span id="5994">5994</span>
+<span id="5995">5995</span>
+<span id="5996">5996</span>
+<span id="5997">5997</span>
+<span id="5998">5998</span>
+<span id="5999">5999</span>
+<span id="6000">6000</span>
+<span id="6001">6001</span>
+<span id="6002">6002</span>
+<span id="6003">6003</span>
+<span id="6004">6004</span>
+<span id="6005">6005</span>
+<span id="6006">6006</span>
+<span id="6007">6007</span>
+<span id="6008">6008</span>
+<span id="6009">6009</span>
+<span id="6010">6010</span>
+<span id="6011">6011</span>
+<span id="6012">6012</span>
+<span id="6013">6013</span>
+<span id="6014">6014</span>
+<span id="6015">6015</span>
+<span id="6016">6016</span>
+<span id="6017">6017</span>
+<span id="6018">6018</span>
+<span id="6019">6019</span>
+<span id="6020">6020</span>
+<span id="6021">6021</span>
+<span id="6022">6022</span>
+<span id="6023">6023</span>
+<span id="6024">6024</span>
+<span id="6025">6025</span>
+<span id="6026">6026</span>
+<span id="6027">6027</span>
+<span id="6028">6028</span>
+<span id="6029">6029</span>
+<span id="6030">6030</span>
+<span id="6031">6031</span>
+<span id="6032">6032</span>
+<span id="6033">6033</span>
+<span id="6034">6034</span>
+<span id="6035">6035</span>
+<span id="6036">6036</span>
+<span id="6037">6037</span>
+<span id="6038">6038</span>
+<span id="6039">6039</span>
+<span id="6040">6040</span>
+<span id="6041">6041</span>
+<span id="6042">6042</span>
+<span id="6043">6043</span>
+<span id="6044">6044</span>
+<span id="6045">6045</span>
+<span id="6046">6046</span>
+<span id="6047">6047</span>
+<span id="6048">6048</span>
+<span id="6049">6049</span>
+<span id="6050">6050</span>
+<span id="6051">6051</span>
+<span id="6052">6052</span>
+<span id="6053">6053</span>
+<span id="6054">6054</span>
+<span id="6055">6055</span>
+<span id="6056">6056</span>
+<span id="6057">6057</span>
+<span id="6058">6058</span>
+<span id="6059">6059</span>
+<span id="6060">6060</span>
+<span id="6061">6061</span>
+<span id="6062">6062</span>
+<span id="6063">6063</span>
+<span id="6064">6064</span>
+<span id="6065">6065</span>
+<span id="6066">6066</span>
+<span id="6067">6067</span>
+<span id="6068">6068</span>
+<span id="6069">6069</span>
+<span id="6070">6070</span>
+<span id="6071">6071</span>
+<span id="6072">6072</span>
+<span id="6073">6073</span>
+<span id="6074">6074</span>
+<span id="6075">6075</span>
+<span id="6076">6076</span>
+<span id="6077">6077</span>
+<span id="6078">6078</span>
+<span id="6079">6079</span>
+<span id="6080">6080</span>
+<span id="6081">6081</span>
+<span id="6082">6082</span>
+<span id="6083">6083</span>
+<span id="6084">6084</span>
+<span id="6085">6085</span>
+<span id="6086">6086</span>
+<span id="6087">6087</span>
+<span id="6088">6088</span>
+<span id="6089">6089</span>
+<span id="6090">6090</span>
+<span id="6091">6091</span>
+<span id="6092">6092</span>
+<span id="6093">6093</span>
+<span id="6094">6094</span>
+<span id="6095">6095</span>
+<span id="6096">6096</span>
+<span id="6097">6097</span>
+<span id="6098">6098</span>
+<span id="6099">6099</span>
+<span id="6100">6100</span>
+<span id="6101">6101</span>
+<span id="6102">6102</span>
+<span id="6103">6103</span>
+<span id="6104">6104</span>
+<span id="6105">6105</span>
+<span id="6106">6106</span>
+<span id="6107">6107</span>
+<span id="6108">6108</span>
+<span id="6109">6109</span>
+<span id="6110">6110</span>
+<span id="6111">6111</span>
+<span id="6112">6112</span>
+<span id="6113">6113</span>
+<span id="6114">6114</span>
+<span id="6115">6115</span>
+<span id="6116">6116</span>
+<span id="6117">6117</span>
+<span id="6118">6118</span>
+<span id="6119">6119</span>
+<span id="6120">6120</span>
+<span id="6121">6121</span>
+<span id="6122">6122</span>
+<span id="6123">6123</span>
+<span id="6124">6124</span>
+<span id="6125">6125</span>
+<span id="6126">6126</span>
+<span id="6127">6127</span>
+<span id="6128">6128</span>
+<span id="6129">6129</span>
+<span id="6130">6130</span>
 </pre><pre class="rust"><code><span class="doccomment">/*!
 This module provides a regular expression parser.
 */
 
-</span><span class="kw">use </span>std::borrow::Borrow;
-<span class="kw">use </span>std::cell::{Cell, RefCell};
-<span class="kw">use </span>std::mem;
-<span class="kw">use </span>std::result;
+</span><span class="kw">use </span>core::{
+    borrow::Borrow,
+    cell::{Cell, RefCell},
+    mem,
+};
 
-<span class="kw">use </span><span class="kw">crate</span>::ast::{<span class="self">self</span>, Ast, Position, Span};
-<span class="kw">use </span><span class="kw">crate</span>::either::Either;
+<span class="kw">use </span>alloc::{
+    boxed::Box,
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 
-<span class="kw">use </span><span class="kw">crate</span>::is_meta_character;
+<span class="kw">use crate</span>::{
+    ast::{<span class="self">self</span>, Ast, Position, Span},
+    either::Either,
+    is_escapeable_character, is_meta_character,
+};
 
-<span class="kw">type </span><span class="prelude-ty">Result</span>&lt;T&gt; = result::Result&lt;T, ast::Error&gt;;
+<span class="kw">type </span><span class="prelude-ty">Result</span>&lt;T&gt; = core::result::Result&lt;T, ast::Error&gt;;
 
 <span class="doccomment">/// A primitive is an expression with no sub-expressions. This includes
 /// literals, assertions and non-set character classes. This representation
@@ -6030,11 +6239,11 @@ This module provides a regular expression parser.
 /// If `first` is true, then `c` is treated as the first character in the
 /// group name (which must be alphabetic or underscore).
 </span><span class="kw">fn </span>is_capture_char(c: char, first: bool) -&gt; bool {
-    c == <span class="string">&#39;_&#39;
-        </span>|| (!first
-            &amp;&amp; ((<span class="string">&#39;0&#39; </span>&lt;= c &amp;&amp; c &lt;= <span class="string">&#39;9&#39;</span>) || c == <span class="string">&#39;.&#39; </span>|| c == <span class="string">&#39;[&#39; </span>|| c == <span class="string">&#39;]&#39;</span>))
-        || (<span class="string">&#39;A&#39; </span>&lt;= c &amp;&amp; c &lt;= <span class="string">&#39;Z&#39;</span>)
-        || (<span class="string">&#39;a&#39; </span>&lt;= c &amp;&amp; c &lt;= <span class="string">&#39;z&#39;</span>)
+    <span class="kw">if </span>first {
+        c == <span class="string">&#39;_&#39; </span>|| c.is_alphabetic()
+    } <span class="kw">else </span>{
+        c == <span class="string">&#39;_&#39; </span>|| c == <span class="string">&#39;.&#39; </span>|| c == <span class="string">&#39;[&#39; </span>|| c == <span class="string">&#39;]&#39; </span>|| c.is_alphanumeric()
+    }
 }
 
 <span class="doccomment">/// A builder for a regular expression parser.
@@ -6092,7 +6301,7 @@ This module provides a regular expression parser.
     /// constant stack space and moving the call stack to the heap), other
     /// crates may.
     ///
-    /// This limit is not checked until the entire Ast is parsed. Therefore,
+    /// This limit is not checked until the entire AST is parsed. Therefore,
     /// if callers want to put a limit on the amount of heap space used, then
     /// they should impose a limit on the length, in bytes, of the concrete
     /// pattern string. In particular, this is viable since this parser
@@ -6150,8 +6359,7 @@ This module provides a regular expression parser.
 /// abstract syntax tree. The size of the tree is proportional to the length
 /// of the regular expression pattern.
 ///
-/// A `Parser` can be configured in more detail via a
-/// [`ParserBuilder`](struct.ParserBuilder.html).
+/// A `Parser` can be configured in more detail via a [`ParserBuilder`].
 </span><span class="attribute">#[derive(Clone, Debug)]
 </span><span class="kw">pub struct </span>Parser {
     <span class="doccomment">/// The current position of the parser.
@@ -6257,8 +6465,7 @@ This module provides a regular expression parser.
     /// The parser can be run with either the `parse` or `parse_with_comments`
     /// methods. The parse methods return an abstract syntax tree.
     ///
-    /// To set configuration options on the parser, use
-    /// [`ParserBuilder`](struct.ParserBuilder.html).
+    /// To set configuration options on the parser, use [`ParserBuilder`].
     </span><span class="kw">pub fn </span>new() -&gt; Parser {
         ParserBuilder::new().build()
     }
@@ -7125,12 +7332,16 @@ This module provides a regular expression parser.
             ));
         }
         <span class="kw">let </span>inner_span = <span class="self">self</span>.span();
-        <span class="kw">if </span><span class="self">self</span>.bump_if(<span class="string">&quot;?P&lt;&quot;</span>) {
+        <span class="kw">let </span><span class="kw-2">mut </span>starts_with_p = <span class="bool-val">true</span>;
+        <span class="kw">if </span><span class="self">self</span>.bump_if(<span class="string">&quot;?P&lt;&quot;</span>) || {
+            starts_with_p = <span class="bool-val">false</span>;
+            <span class="self">self</span>.bump_if(<span class="string">&quot;?&lt;&quot;</span>)
+        } {
             <span class="kw">let </span>capture_index = <span class="self">self</span>.next_capture_index(open_span)<span class="question-mark">?</span>;
-            <span class="kw">let </span>cap = <span class="self">self</span>.parse_capture_name(capture_index)<span class="question-mark">?</span>;
+            <span class="kw">let </span>name = <span class="self">self</span>.parse_capture_name(capture_index)<span class="question-mark">?</span>;
             <span class="prelude-val">Ok</span>(Either::Right(ast::Group {
                 span: open_span,
-                kind: ast::GroupKind::CaptureName(cap),
+                kind: ast::GroupKind::CaptureName { starts_with_p, name },
                 ast: Box::new(Ast::Empty(<span class="self">self</span>.span())),
             }))
         } <span class="kw">else if </span><span class="self">self</span>.bump_if(<span class="string">&quot;?&quot;</span>) {
@@ -7300,6 +7511,7 @@ This module provides a regular expression parser.
             <span class="string">&#39;s&#39; </span>=&gt; <span class="prelude-val">Ok</span>(ast::Flag::DotMatchesNewLine),
             <span class="string">&#39;U&#39; </span>=&gt; <span class="prelude-val">Ok</span>(ast::Flag::SwapGreed),
             <span class="string">&#39;u&#39; </span>=&gt; <span class="prelude-val">Ok</span>(ast::Flag::Unicode),
+            <span class="string">&#39;R&#39; </span>=&gt; <span class="prelude-val">Ok</span>(ast::Flag::CRLF),
             <span class="string">&#39;x&#39; </span>=&gt; <span class="prelude-val">Ok</span>(ast::Flag::IgnoreWhitespace),
             <span class="kw">_ </span>=&gt; {
                 <span class="prelude-val">Err</span>(<span class="self">self
@@ -7413,7 +7625,14 @@ This module provides a regular expression parser.
         <span class="kw">if </span>is_meta_character(c) {
             <span class="kw">return </span><span class="prelude-val">Ok</span>(Primitive::Literal(ast::Literal {
                 span,
-                kind: ast::LiteralKind::Punctuation,
+                kind: ast::LiteralKind::Meta,
+                c,
+            }));
+        }
+        <span class="kw">if </span>is_escapeable_character(c) {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Primitive::Literal(ast::Literal {
+                span,
+                kind: ast::LiteralKind::Superfluous,
                 c,
             }));
         }
@@ -7431,9 +7650,6 @@ This module provides a regular expression parser.
             <span class="string">&#39;n&#39; </span>=&gt; special(ast::SpecialLiteralKind::LineFeed, <span class="string">&#39;\n&#39;</span>),
             <span class="string">&#39;r&#39; </span>=&gt; special(ast::SpecialLiteralKind::CarriageReturn, <span class="string">&#39;\r&#39;</span>),
             <span class="string">&#39;v&#39; </span>=&gt; special(ast::SpecialLiteralKind::VerticalTab, <span class="string">&#39;\x0B&#39;</span>),
-            <span class="string">&#39; &#39; </span><span class="kw">if </span><span class="self">self</span>.ignore_whitespace() =&gt; {
-                special(ast::SpecialLiteralKind::Space, <span class="string">&#39; &#39;</span>)
-            }
             <span class="string">&#39;A&#39; </span>=&gt; <span class="prelude-val">Ok</span>(Primitive::Assertion(ast::Assertion {
                 span,
                 kind: ast::AssertionKind::StartText,
@@ -7463,9 +7679,6 @@ This module provides a regular expression parser.
     /// Assuming the preconditions are met, this routine can never fail.
     </span><span class="attribute">#[inline(never)]
     </span><span class="kw">fn </span>parse_octal(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ast::Literal {
-        <span class="kw">use </span>std::char;
-        <span class="kw">use </span>std::u32;
-
         <span class="macro">assert!</span>(<span class="self">self</span>.parser().octal);
         <span class="macro">assert!</span>(<span class="string">&#39;0&#39; </span>&lt;= <span class="self">self</span>.char() &amp;&amp; <span class="self">self</span>.char() &lt;= <span class="string">&#39;7&#39;</span>);
         <span class="kw">let </span>start = <span class="self">self</span>.pos();
@@ -7530,9 +7743,6 @@ This module provides a regular expression parser.
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         kind: ast::HexLiteralKind,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ast::Literal&gt; {
-        <span class="kw">use </span>std::char;
-        <span class="kw">use </span>std::u32;
-
         <span class="kw">let </span><span class="kw-2">mut </span>scratch = <span class="self">self</span>.parser().scratch.borrow_mut();
         scratch.clear();
 
@@ -7576,9 +7786,6 @@ This module provides a regular expression parser.
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         kind: ast::HexLiteralKind,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ast::Literal&gt; {
-        <span class="kw">use </span>std::char;
-        <span class="kw">use </span>std::u32;
-
         <span class="kw">let </span><span class="kw-2">mut </span>scratch = <span class="self">self</span>.parser().scratch.borrow_mut();
         scratch.clear();
 
@@ -8076,7 +8283,7 @@ This module provides a regular expression parser.
         <span class="kw">let </span>new = <span class="self">self</span>.depth.checked_add(<span class="number">1</span>).ok_or_else(|| {
             <span class="self">self</span>.p.error(
                 span.clone(),
-                ast::ErrorKind::NestLimitExceeded(::std::u32::MAX),
+                ast::ErrorKind::NestLimitExceeded(u32::MAX),
             )
         })<span class="question-mark">?</span>;
         <span class="kw">let </span>limit = <span class="self">self</span>.p.parser().nest_limit;
@@ -8227,10 +8434,13 @@ This module provides a regular expression parser.
 
 <span class="attribute">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span>std::ops::Range;
+    <span class="kw">use </span>core::ops::Range;
 
-    <span class="kw">use super</span>::{Parser, ParserBuilder, ParserI, Primitive};
+    <span class="kw">use </span>alloc::format;
+
     <span class="kw">use </span><span class="kw">crate</span>::ast::{<span class="self">self</span>, Ast, Position, Span};
+
+    <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
     <span class="comment">// Our own assert_eq, which has slightly better formatting (but honestly
     // still kind of crappy).
@@ -8344,13 +8554,9 @@ This module provides a regular expression parser.
         lit_with(c, span(start..start + c.len_utf8()))
     }
 
-    <span class="doccomment">/// Create a punctuation literal starting at the given position.
-    </span><span class="kw">fn </span>punct_lit(c: char, span: Span) -&gt; Ast {
-        Ast::Literal(ast::Literal {
-            span,
-            kind: ast::LiteralKind::Punctuation,
-            c,
-        })
+    <span class="doccomment">/// Create a meta literal starting at the given position.
+    </span><span class="kw">fn </span>meta_lit(c: char, span: Span) -&gt; Ast {
+        Ast::Literal(ast::Literal { span, kind: ast::LiteralKind::Meta, c })
     }
 
     <span class="doccomment">/// Create a verbatim literal with the given span.
@@ -8634,24 +8840,24 @@ bar
             <span class="prelude-val">Ok</span>(concat(
                 <span class="number">0</span>..<span class="number">36</span>,
                 <span class="macro">vec!</span>[
-                    punct_lit(<span class="string">&#39;\\&#39;</span>, span(<span class="number">0</span>..<span class="number">2</span>)),
-                    punct_lit(<span class="string">&#39;.&#39;</span>, span(<span class="number">2</span>..<span class="number">4</span>)),
-                    punct_lit(<span class="string">&#39;+&#39;</span>, span(<span class="number">4</span>..<span class="number">6</span>)),
-                    punct_lit(<span class="string">&#39;*&#39;</span>, span(<span class="number">6</span>..<span class="number">8</span>)),
-                    punct_lit(<span class="string">&#39;?&#39;</span>, span(<span class="number">8</span>..<span class="number">10</span>)),
-                    punct_lit(<span class="string">&#39;(&#39;</span>, span(<span class="number">10</span>..<span class="number">12</span>)),
-                    punct_lit(<span class="string">&#39;)&#39;</span>, span(<span class="number">12</span>..<span class="number">14</span>)),
-                    punct_lit(<span class="string">&#39;|&#39;</span>, span(<span class="number">14</span>..<span class="number">16</span>)),
-                    punct_lit(<span class="string">&#39;[&#39;</span>, span(<span class="number">16</span>..<span class="number">18</span>)),
-                    punct_lit(<span class="string">&#39;]&#39;</span>, span(<span class="number">18</span>..<span class="number">20</span>)),
-                    punct_lit(<span class="string">&#39;{&#39;</span>, span(<span class="number">20</span>..<span class="number">22</span>)),
-                    punct_lit(<span class="string">&#39;}&#39;</span>, span(<span class="number">22</span>..<span class="number">24</span>)),
-                    punct_lit(<span class="string">&#39;^&#39;</span>, span(<span class="number">24</span>..<span class="number">26</span>)),
-                    punct_lit(<span class="string">&#39;$&#39;</span>, span(<span class="number">26</span>..<span class="number">28</span>)),
-                    punct_lit(<span class="string">&#39;#&#39;</span>, span(<span class="number">28</span>..<span class="number">30</span>)),
-                    punct_lit(<span class="string">&#39;&amp;&#39;</span>, span(<span class="number">30</span>..<span class="number">32</span>)),
-                    punct_lit(<span class="string">&#39;-&#39;</span>, span(<span class="number">32</span>..<span class="number">34</span>)),
-                    punct_lit(<span class="string">&#39;~&#39;</span>, span(<span class="number">34</span>..<span class="number">36</span>)),
+                    meta_lit(<span class="string">&#39;\\&#39;</span>, span(<span class="number">0</span>..<span class="number">2</span>)),
+                    meta_lit(<span class="string">&#39;.&#39;</span>, span(<span class="number">2</span>..<span class="number">4</span>)),
+                    meta_lit(<span class="string">&#39;+&#39;</span>, span(<span class="number">4</span>..<span class="number">6</span>)),
+                    meta_lit(<span class="string">&#39;*&#39;</span>, span(<span class="number">6</span>..<span class="number">8</span>)),
+                    meta_lit(<span class="string">&#39;?&#39;</span>, span(<span class="number">8</span>..<span class="number">10</span>)),
+                    meta_lit(<span class="string">&#39;(&#39;</span>, span(<span class="number">10</span>..<span class="number">12</span>)),
+                    meta_lit(<span class="string">&#39;)&#39;</span>, span(<span class="number">12</span>..<span class="number">14</span>)),
+                    meta_lit(<span class="string">&#39;|&#39;</span>, span(<span class="number">14</span>..<span class="number">16</span>)),
+                    meta_lit(<span class="string">&#39;[&#39;</span>, span(<span class="number">16</span>..<span class="number">18</span>)),
+                    meta_lit(<span class="string">&#39;]&#39;</span>, span(<span class="number">18</span>..<span class="number">20</span>)),
+                    meta_lit(<span class="string">&#39;{&#39;</span>, span(<span class="number">20</span>..<span class="number">22</span>)),
+                    meta_lit(<span class="string">&#39;}&#39;</span>, span(<span class="number">22</span>..<span class="number">24</span>)),
+                    meta_lit(<span class="string">&#39;^&#39;</span>, span(<span class="number">24</span>..<span class="number">26</span>)),
+                    meta_lit(<span class="string">&#39;$&#39;</span>, span(<span class="number">26</span>..<span class="number">28</span>)),
+                    meta_lit(<span class="string">&#39;#&#39;</span>, span(<span class="number">28</span>..<span class="number">30</span>)),
+                    meta_lit(<span class="string">&#39;&amp;&#39;</span>, span(<span class="number">30</span>..<span class="number">32</span>)),
+                    meta_lit(<span class="string">&#39;-&#39;</span>, span(<span class="number">32</span>..<span class="number">34</span>)),
+                    meta_lit(<span class="string">&#39;~&#39;</span>, span(<span class="number">34</span>..<span class="number">36</span>)),
                 ]
             ))
         );
@@ -8729,11 +8935,14 @@ bar
                     flag_set(pat, <span class="number">0</span>..<span class="number">4</span>, ast::Flag::IgnoreWhitespace, <span class="bool-val">false</span>),
                     Ast::Group(ast::Group {
                         span: span_range(pat, <span class="number">4</span>..pat.len()),
-                        kind: ast::GroupKind::CaptureName(ast::CaptureName {
-                            span: span_range(pat, <span class="number">9</span>..<span class="number">12</span>),
-                            name: s(<span class="string">&quot;foo&quot;</span>),
-                            index: <span class="number">1</span>,
-                        }),
+                        kind: ast::GroupKind::CaptureName {
+                            starts_with_p: <span class="bool-val">true</span>,
+                            name: ast::CaptureName {
+                                span: span_range(pat, <span class="number">9</span>..<span class="number">12</span>),
+                                name: s(<span class="string">&quot;foo&quot;</span>),
+                                index: <span class="number">1</span>,
+                            }
+                        },
                         ast: Box::new(lit_with(<span class="string">&#39;a&#39;</span>, span_range(pat, <span class="number">14</span>..<span class="number">15</span>))),
                     }),
                 ]
@@ -8800,22 +9009,11 @@ bar
                     flag_set(pat, <span class="number">0</span>..<span class="number">4</span>, ast::Flag::IgnoreWhitespace, <span class="bool-val">false</span>),
                     Ast::Literal(ast::Literal {
                         span: span_range(pat, <span class="number">4</span>..<span class="number">6</span>),
-                        kind: ast::LiteralKind::Special(
-                            ast::SpecialLiteralKind::Space
-                        ),
+                        kind: ast::LiteralKind::Superfluous,
                         c: <span class="string">&#39; &#39;</span>,
                     }),
                 ]
             ))
-        );
-        <span class="comment">// ... but only when `x` mode is enabled.
-        </span><span class="kw">let </span>pat = <span class="string">r&quot;\ &quot;</span>;
-        <span class="macro">assert_eq!</span>(
-            parser(pat).parse().unwrap_err(),
-            TestError {
-                span: span_range(pat, <span class="number">0</span>..<span class="number">2</span>),
-                kind: ast::ErrorKind::EscapeUnrecognized,
-            }
         );
     }
 
@@ -9749,14 +9947,32 @@ bar
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>parse_capture_name() {
         <span class="macro">assert_eq!</span>(
+            parser(<span class="string">&quot;(?&lt;a&gt;z)&quot;</span>).parse(),
+            <span class="prelude-val">Ok</span>(Ast::Group(ast::Group {
+                span: span(<span class="number">0</span>..<span class="number">7</span>),
+                kind: ast::GroupKind::CaptureName {
+                    starts_with_p: <span class="bool-val">false</span>,
+                    name: ast::CaptureName {
+                        span: span(<span class="number">3</span>..<span class="number">4</span>),
+                        name: s(<span class="string">&quot;a&quot;</span>),
+                        index: <span class="number">1</span>,
+                    }
+                },
+                ast: Box::new(lit(<span class="string">&#39;z&#39;</span>, <span class="number">5</span>)),
+            }))
+        );
+        <span class="macro">assert_eq!</span>(
             parser(<span class="string">&quot;(?P&lt;a&gt;z)&quot;</span>).parse(),
             <span class="prelude-val">Ok</span>(Ast::Group(ast::Group {
                 span: span(<span class="number">0</span>..<span class="number">8</span>),
-                kind: ast::GroupKind::CaptureName(ast::CaptureName {
-                    span: span(<span class="number">4</span>..<span class="number">5</span>),
-                    name: s(<span class="string">&quot;a&quot;</span>),
-                    index: <span class="number">1</span>,
-                }),
+                kind: ast::GroupKind::CaptureName {
+                    starts_with_p: <span class="bool-val">true</span>,
+                    name: ast::CaptureName {
+                        span: span(<span class="number">4</span>..<span class="number">5</span>),
+                        name: s(<span class="string">&quot;a&quot;</span>),
+                        index: <span class="number">1</span>,
+                    }
+                },
                 ast: Box::new(lit(<span class="string">&#39;z&#39;</span>, <span class="number">6</span>)),
             }))
         );
@@ -9764,11 +9980,14 @@ bar
             parser(<span class="string">&quot;(?P&lt;abc&gt;z)&quot;</span>).parse(),
             <span class="prelude-val">Ok</span>(Ast::Group(ast::Group {
                 span: span(<span class="number">0</span>..<span class="number">10</span>),
-                kind: ast::GroupKind::CaptureName(ast::CaptureName {
-                    span: span(<span class="number">4</span>..<span class="number">7</span>),
-                    name: s(<span class="string">&quot;abc&quot;</span>),
-                    index: <span class="number">1</span>,
-                }),
+                kind: ast::GroupKind::CaptureName {
+                    starts_with_p: <span class="bool-val">true</span>,
+                    name: ast::CaptureName {
+                        span: span(<span class="number">4</span>..<span class="number">7</span>),
+                        name: s(<span class="string">&quot;abc&quot;</span>),
+                        index: <span class="number">1</span>,
+                    }
+                },
                 ast: Box::new(lit(<span class="string">&#39;z&#39;</span>, <span class="number">8</span>)),
             }))
         );
@@ -9777,11 +9996,14 @@ bar
             parser(<span class="string">&quot;(?P&lt;a_1&gt;z)&quot;</span>).parse(),
             <span class="prelude-val">Ok</span>(Ast::Group(ast::Group {
                 span: span(<span class="number">0</span>..<span class="number">10</span>),
-                kind: ast::GroupKind::CaptureName(ast::CaptureName {
-                    span: span(<span class="number">4</span>..<span class="number">7</span>),
-                    name: s(<span class="string">&quot;a_1&quot;</span>),
-                    index: <span class="number">1</span>,
-                }),
+                kind: ast::GroupKind::CaptureName {
+                    starts_with_p: <span class="bool-val">true</span>,
+                    name: ast::CaptureName {
+                        span: span(<span class="number">4</span>..<span class="number">7</span>),
+                        name: s(<span class="string">&quot;a_1&quot;</span>),
+                        index: <span class="number">1</span>,
+                    }
+                },
                 ast: Box::new(lit(<span class="string">&#39;z&#39;</span>, <span class="number">8</span>)),
             }))
         );
@@ -9790,11 +10012,14 @@ bar
             parser(<span class="string">&quot;(?P&lt;a.1&gt;z)&quot;</span>).parse(),
             <span class="prelude-val">Ok</span>(Ast::Group(ast::Group {
                 span: span(<span class="number">0</span>..<span class="number">10</span>),
-                kind: ast::GroupKind::CaptureName(ast::CaptureName {
-                    span: span(<span class="number">4</span>..<span class="number">7</span>),
-                    name: s(<span class="string">&quot;a.1&quot;</span>),
-                    index: <span class="number">1</span>,
-                }),
+                kind: ast::GroupKind::CaptureName {
+                    starts_with_p: <span class="bool-val">true</span>,
+                    name: ast::CaptureName {
+                        span: span(<span class="number">4</span>..<span class="number">7</span>),
+                        name: s(<span class="string">&quot;a.1&quot;</span>),
+                        index: <span class="number">1</span>,
+                    }
+                },
                 ast: Box::new(lit(<span class="string">&#39;z&#39;</span>, <span class="number">8</span>)),
             }))
         );
@@ -9803,12 +10028,64 @@ bar
             parser(<span class="string">&quot;(?P&lt;a[1]&gt;z)&quot;</span>).parse(),
             <span class="prelude-val">Ok</span>(Ast::Group(ast::Group {
                 span: span(<span class="number">0</span>..<span class="number">11</span>),
-                kind: ast::GroupKind::CaptureName(ast::CaptureName {
-                    span: span(<span class="number">4</span>..<span class="number">8</span>),
-                    name: s(<span class="string">&quot;a[1]&quot;</span>),
-                    index: <span class="number">1</span>,
-                }),
+                kind: ast::GroupKind::CaptureName {
+                    starts_with_p: <span class="bool-val">true</span>,
+                    name: ast::CaptureName {
+                        span: span(<span class="number">4</span>..<span class="number">8</span>),
+                        name: s(<span class="string">&quot;a[1]&quot;</span>),
+                        index: <span class="number">1</span>,
+                    }
+                },
                 ast: Box::new(lit(<span class="string">&#39;z&#39;</span>, <span class="number">9</span>)),
+            }))
+        );
+
+        <span class="macro">assert_eq!</span>(
+            parser(<span class="string">&quot;(?P&lt;a¾&gt;)&quot;</span>).parse(),
+            <span class="prelude-val">Ok</span>(Ast::Group(ast::Group {
+                span: Span::new(
+                    Position::new(<span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>),
+                    Position::new(<span class="number">9</span>, <span class="number">1</span>, <span class="number">9</span>),
+                ),
+                kind: ast::GroupKind::CaptureName {
+                    starts_with_p: <span class="bool-val">true</span>,
+                    name: ast::CaptureName {
+                        span: Span::new(
+                            Position::new(<span class="number">4</span>, <span class="number">1</span>, <span class="number">5</span>),
+                            Position::new(<span class="number">7</span>, <span class="number">1</span>, <span class="number">7</span>),
+                        ),
+                        name: s(<span class="string">&quot;a¾&quot;</span>),
+                        index: <span class="number">1</span>,
+                    }
+                },
+                ast: Box::new(Ast::Empty(Span::new(
+                    Position::new(<span class="number">8</span>, <span class="number">1</span>, <span class="number">8</span>),
+                    Position::new(<span class="number">8</span>, <span class="number">1</span>, <span class="number">8</span>),
+                ))),
+            }))
+        );
+        <span class="macro">assert_eq!</span>(
+            parser(<span class="string">&quot;(?P&lt;名字&gt;)&quot;</span>).parse(),
+            <span class="prelude-val">Ok</span>(Ast::Group(ast::Group {
+                span: Span::new(
+                    Position::new(<span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>),
+                    Position::new(<span class="number">12</span>, <span class="number">1</span>, <span class="number">9</span>),
+                ),
+                kind: ast::GroupKind::CaptureName {
+                    starts_with_p: <span class="bool-val">true</span>,
+                    name: ast::CaptureName {
+                        span: Span::new(
+                            Position::new(<span class="number">4</span>, <span class="number">1</span>, <span class="number">5</span>),
+                            Position::new(<span class="number">10</span>, <span class="number">1</span>, <span class="number">7</span>),
+                        ),
+                        name: s(<span class="string">&quot;名字&quot;</span>),
+                        index: <span class="number">1</span>,
+                    }
+                },
+                ast: Box::new(Ast::Empty(Span::new(
+                    Position::new(<span class="number">11</span>, <span class="number">1</span>, <span class="number">8</span>),
+                    Position::new(<span class="number">11</span>, <span class="number">1</span>, <span class="number">8</span>),
+                ))),
             }))
         );
 
@@ -9868,6 +10145,60 @@ bar
                 kind: ast::ErrorKind::GroupNameDuplicate {
                     original: span(<span class="number">4</span>..<span class="number">5</span>),
                 },
+            }
+        );
+        <span class="macro">assert_eq!</span>(
+            parser(<span class="string">&quot;(?P&lt;5&gt;)&quot;</span>).parse().unwrap_err(),
+            TestError {
+                span: span(<span class="number">4</span>..<span class="number">5</span>),
+                kind: ast::ErrorKind::GroupNameInvalid,
+            }
+        );
+        <span class="macro">assert_eq!</span>(
+            parser(<span class="string">&quot;(?P&lt;5a&gt;)&quot;</span>).parse().unwrap_err(),
+            TestError {
+                span: span(<span class="number">4</span>..<span class="number">5</span>),
+                kind: ast::ErrorKind::GroupNameInvalid,
+            }
+        );
+        <span class="macro">assert_eq!</span>(
+            parser(<span class="string">&quot;(?P&lt;¾&gt;)&quot;</span>).parse().unwrap_err(),
+            TestError {
+                span: Span::new(
+                    Position::new(<span class="number">4</span>, <span class="number">1</span>, <span class="number">5</span>),
+                    Position::new(<span class="number">6</span>, <span class="number">1</span>, <span class="number">6</span>),
+                ),
+                kind: ast::ErrorKind::GroupNameInvalid,
+            }
+        );
+        <span class="macro">assert_eq!</span>(
+            parser(<span class="string">&quot;(?P&lt;¾a&gt;)&quot;</span>).parse().unwrap_err(),
+            TestError {
+                span: Span::new(
+                    Position::new(<span class="number">4</span>, <span class="number">1</span>, <span class="number">5</span>),
+                    Position::new(<span class="number">6</span>, <span class="number">1</span>, <span class="number">6</span>),
+                ),
+                kind: ast::ErrorKind::GroupNameInvalid,
+            }
+        );
+        <span class="macro">assert_eq!</span>(
+            parser(<span class="string">&quot;(?P&lt;☃&gt;)&quot;</span>).parse().unwrap_err(),
+            TestError {
+                span: Span::new(
+                    Position::new(<span class="number">4</span>, <span class="number">1</span>, <span class="number">5</span>),
+                    Position::new(<span class="number">7</span>, <span class="number">1</span>, <span class="number">6</span>),
+                ),
+                kind: ast::ErrorKind::GroupNameInvalid,
+            }
+        );
+        <span class="macro">assert_eq!</span>(
+            parser(<span class="string">&quot;(?P&lt;a☃&gt;)&quot;</span>).parse().unwrap_err(),
+            TestError {
+                span: Span::new(
+                    Position::new(<span class="number">5</span>, <span class="number">1</span>, <span class="number">6</span>),
+                    Position::new(<span class="number">8</span>, <span class="number">1</span>, <span class="number">7</span>),
+                ),
+                kind: ast::ErrorKind::GroupNameInvalid,
             }
         );
     }
@@ -9976,6 +10307,34 @@ bar
                 ],
             })
         );
+        <span class="macro">assert_eq!</span>(
+            parser(<span class="string">&quot;i-sR:&quot;</span>).parse_flags(),
+            <span class="prelude-val">Ok</span>(ast::Flags {
+                span: span(<span class="number">0</span>..<span class="number">4</span>),
+                items: <span class="macro">vec!</span>[
+                    ast::FlagsItem {
+                        span: span(<span class="number">0</span>..<span class="number">1</span>),
+                        kind: ast::FlagsItemKind::Flag(
+                            ast::Flag::CaseInsensitive
+                        ),
+                    },
+                    ast::FlagsItem {
+                        span: span(<span class="number">1</span>..<span class="number">2</span>),
+                        kind: ast::FlagsItemKind::Negation,
+                    },
+                    ast::FlagsItem {
+                        span: span(<span class="number">2</span>..<span class="number">3</span>),
+                        kind: ast::FlagsItemKind::Flag(
+                            ast::Flag::DotMatchesNewLine
+                        ),
+                    },
+                    ast::FlagsItem {
+                        span: span(<span class="number">3</span>..<span class="number">4</span>),
+                        kind: ast::FlagsItemKind::Flag(ast::Flag::CRLF),
+                    },
+                ],
+            })
+        );
 
         <span class="macro">assert_eq!</span>(
             parser(<span class="string">&quot;isU&quot;</span>).parse_flags().unwrap_err(),
@@ -10037,6 +10396,7 @@ bar
         <span class="macro">assert_eq!</span>(parser(<span class="string">&quot;s&quot;</span>).parse_flag(), <span class="prelude-val">Ok</span>(ast::Flag::DotMatchesNewLine));
         <span class="macro">assert_eq!</span>(parser(<span class="string">&quot;U&quot;</span>).parse_flag(), <span class="prelude-val">Ok</span>(ast::Flag::SwapGreed));
         <span class="macro">assert_eq!</span>(parser(<span class="string">&quot;u&quot;</span>).parse_flag(), <span class="prelude-val">Ok</span>(ast::Flag::Unicode));
+        <span class="macro">assert_eq!</span>(parser(<span class="string">&quot;R&quot;</span>).parse_flag(), <span class="prelude-val">Ok</span>(ast::Flag::CRLF));
         <span class="macro">assert_eq!</span>(parser(<span class="string">&quot;x&quot;</span>).parse_flag(), <span class="prelude-val">Ok</span>(ast::Flag::IgnoreWhitespace));
 
         <span class="macro">assert_eq!</span>(
@@ -10108,7 +10468,7 @@ bar
             parser(<span class="string">r&quot;\|&quot;</span>).parse_primitive(),
             <span class="prelude-val">Ok</span>(Primitive::Literal(ast::Literal {
                 span: span(<span class="number">0</span>..<span class="number">2</span>),
-                kind: ast::LiteralKind::Punctuation,
+                kind: ast::LiteralKind::Meta,
                 c: <span class="string">&#39;|&#39;</span>,
             }))
         );
@@ -10159,11 +10519,26 @@ bar
             }))
         );
 
-        <span class="macro">assert_eq!</span>(
-            parser(<span class="string">r&quot;\&quot;</span>).parse_escape().unwrap_err(),
+        <span class="comment">// We also support superfluous escapes in most cases now too.
+        </span><span class="kw">for </span>c <span class="kw">in </span>[<span class="string">&#39;!&#39;</span>, <span class="string">&#39;@&#39;</span>, <span class="string">&#39;%&#39;</span>, <span class="string">&#39;&quot;&#39;</span>, <span class="string">&#39;\&#39;&#39;</span>, <span class="string">&#39;/&#39;</span>, <span class="string">&#39; &#39;</span>] {
+            <span class="kw">let </span>pat = <span class="macro">format!</span>(<span class="string">r&quot;\{}&quot;</span>, c);
+            <span class="macro">assert_eq!</span>(
+                parser(<span class="kw-2">&amp;</span>pat).parse_primitive(),
+                <span class="prelude-val">Ok</span>(Primitive::Literal(ast::Literal {
+                    span: span(<span class="number">0</span>..<span class="number">2</span>),
+                    kind: ast::LiteralKind::Superfluous,
+                    c,
+                }))
+            );
+        }
+
+        <span class="comment">// Some superfluous escapes, namely [0-9A-Za-z], are still banned. This
+        // gives flexibility for future evolution.
+        </span><span class="macro">assert_eq!</span>(
+            parser(<span class="string">r&quot;\e&quot;</span>).parse_escape().unwrap_err(),
             TestError {
-                span: span(<span class="number">0</span>..<span class="number">1</span>),
-                kind: ast::ErrorKind::EscapeUnexpectedEof,
+                span: span(<span class="number">0</span>..<span class="number">2</span>),
+                kind: ast::ErrorKind::EscapeUnrecognized,
             }
         );
         <span class="macro">assert_eq!</span>(
@@ -10171,6 +10546,31 @@ bar
             TestError {
                 span: span(<span class="number">0</span>..<span class="number">2</span>),
                 kind: ast::ErrorKind::EscapeUnrecognized,
+            }
+        );
+        <span class="comment">// But also, &lt; and &gt; are banned, so that we may evolve them into
+        // start/end word boundary assertions. (Not sure if we will...)
+        </span><span class="macro">assert_eq!</span>(
+            parser(<span class="string">r&quot;\&lt;&quot;</span>).parse_escape().unwrap_err(),
+            TestError {
+                span: span(<span class="number">0</span>..<span class="number">2</span>),
+                kind: ast::ErrorKind::EscapeUnrecognized,
+            }
+        );
+        <span class="macro">assert_eq!</span>(
+            parser(<span class="string">r&quot;\&gt;&quot;</span>).parse_escape().unwrap_err(),
+            TestError {
+                span: span(<span class="number">0</span>..<span class="number">2</span>),
+                kind: ast::ErrorKind::EscapeUnrecognized,
+            }
+        );
+
+        <span class="comment">// An unfinished escape is illegal.
+        </span><span class="macro">assert_eq!</span>(
+            parser(<span class="string">r&quot;\&quot;</span>).parse_escape().unwrap_err(),
+            TestError {
+                span: span(<span class="number">0</span>..<span class="number">1</span>),
+                kind: ast::ErrorKind::EscapeUnexpectedEof,
             }
         );
     }
@@ -10202,7 +10602,7 @@ bar
                 <span class="prelude-val">Ok</span>(Primitive::Literal(ast::Literal {
                     span: span(<span class="number">0</span>..pat.len()),
                     kind: ast::LiteralKind::Octal,
-                    c: ::std::char::from_u32(i).unwrap(),
+                    c: char::from_u32(i).unwrap(),
                 }))
             );
         }
@@ -10277,7 +10677,7 @@ bar
                 <span class="prelude-val">Ok</span>(Primitive::Literal(ast::Literal {
                     span: span(<span class="number">0</span>..pat.len()),
                     kind: ast::LiteralKind::HexFixed(ast::HexLiteralKind::X),
-                    c: ::std::char::from_u32(i).unwrap(),
+                    c: char::from_u32(i).unwrap(),
                 }))
             );
         }
@@ -10308,7 +10708,7 @@ bar
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>parse_hex_four() {
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">65536 </span>{
-            <span class="kw">let </span>c = <span class="kw">match </span>::std::char::from_u32(i) {
+            <span class="kw">let </span>c = <span class="kw">match </span>char::from_u32(i) {
                 <span class="prelude-val">None </span>=&gt; <span class="kw">continue</span>,
                 <span class="prelude-val">Some</span>(c) =&gt; c,
             };
@@ -10372,7 +10772,7 @@ bar
     <span class="attribute">#[test]
     </span><span class="kw">fn </span>parse_hex_eight() {
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">65536 </span>{
-            <span class="kw">let </span>c = <span class="kw">match </span>::std::char::from_u32(i) {
+            <span class="kw">let </span>c = <span class="kw">match </span>char::from_u32(i) {
                 <span class="prelude-val">None </span>=&gt; <span class="kw">continue</span>,
                 <span class="prelude-val">Some</span>(c) =&gt; c,
             };
@@ -10769,7 +11169,7 @@ bar
                         lit(span(<span class="number">1</span>..<span class="number">2</span>), <span class="string">&#39;a&#39;</span>),
                         ast::ClassSetItem::Literal(ast::Literal {
                             span: span(<span class="number">2</span>..<span class="number">4</span>),
-                            kind: ast::LiteralKind::Punctuation,
+                            kind: ast::LiteralKind::Meta,
                             c: <span class="string">&#39;]&#39;</span>,
                         }),
                     ]
@@ -10787,7 +11187,7 @@ bar
                         lit(span(<span class="number">1</span>..<span class="number">2</span>), <span class="string">&#39;a&#39;</span>),
                         ast::ClassSetItem::Literal(ast::Literal {
                             span: span(<span class="number">2</span>..<span class="number">4</span>),
-                            kind: ast::LiteralKind::Punctuation,
+                            kind: ast::LiteralKind::Meta,
                             c: <span class="string">&#39;-&#39;</span>,
                         }),
                         lit(span(<span class="number">4</span>..<span class="number">5</span>), <span class="string">&#39;z&#39;</span>),
@@ -10979,7 +11379,7 @@ bar
                     span(<span class="number">1</span>..<span class="number">6</span>),
                     itemset(ast::ClassSetItem::Literal(ast::Literal {
                         span: span(<span class="number">1</span>..<span class="number">3</span>),
-                        kind: ast::LiteralKind::Punctuation,
+                        kind: ast::LiteralKind::Meta,
                         c: <span class="string">&#39;^&#39;</span>,
                     })),
                     itemset(lit(span(<span class="number">5</span>..<span class="number">6</span>), <span class="string">&#39;^&#39;</span>)),
@@ -10995,7 +11395,7 @@ bar
                     span(<span class="number">1</span>..<span class="number">6</span>),
                     itemset(ast::ClassSetItem::Literal(ast::Literal {
                         span: span(<span class="number">1</span>..<span class="number">3</span>),
-                        kind: ast::LiteralKind::Punctuation,
+                        kind: ast::LiteralKind::Meta,
                         c: <span class="string">&#39;&amp;&#39;</span>,
                     })),
                     itemset(lit(span(<span class="number">5</span>..<span class="number">6</span>), <span class="string">&#39;&amp;&#39;</span>)),
@@ -11060,7 +11460,7 @@ bar
                         lit(span(<span class="number">1</span>..<span class="number">2</span>), <span class="string">&#39;]&#39;</span>),
                         ast::ClassSetItem::Literal(ast::Literal {
                             span: span(<span class="number">2</span>..<span class="number">4</span>),
-                            kind: ast::LiteralKind::Punctuation,
+                            kind: ast::LiteralKind::Meta,
                             c: <span class="string">&#39;[&#39;</span>,
                         }),
                     ]
@@ -11078,7 +11478,7 @@ bar
                         kind: itemset(ast::ClassSetItem::Literal(
                             ast::Literal {
                                 span: span(<span class="number">1</span>..<span class="number">3</span>),
-                                kind: ast::LiteralKind::Punctuation,
+                                kind: ast::LiteralKind::Meta,
                                 c: <span class="string">&#39;[&#39;</span>,
                             }
                         )),
