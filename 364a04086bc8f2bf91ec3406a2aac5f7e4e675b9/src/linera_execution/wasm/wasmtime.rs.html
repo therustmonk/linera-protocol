@@ -457,17 +457,17 @@
 </span><span class="comment">// Export the system interface used by a user contract.
 </span><span class="macro">wit_bindgen_host_wasmtime_rust::export!</span>({
     custom_error: <span class="bool-val">true</span>,
-    paths: [<span class="string">&quot;../linera-sdk/writable_system.wit&quot;</span>],
+    paths: [<span class="string">&quot;writable_system.wit&quot;</span>],
 });
 
 <span class="comment">// Export the system interface used by a user service.
-</span><span class="macro">wit_bindgen_host_wasmtime_rust::export!</span>(<span class="string">&quot;../linera-sdk/queryable_system.wit&quot;</span>);
+</span><span class="macro">wit_bindgen_host_wasmtime_rust::export!</span>(<span class="string">&quot;queryable_system.wit&quot;</span>);
 
 <span class="comment">// Import the interface implemented by a user contract.
-</span><span class="macro">wit_bindgen_host_wasmtime_rust::import!</span>(<span class="string">&quot;../linera-sdk/contract.wit&quot;</span>);
+</span><span class="macro">wit_bindgen_host_wasmtime_rust::import!</span>(<span class="string">&quot;contract.wit&quot;</span>);
 
 <span class="comment">// Import the interface implemented by a user service.
-</span><span class="macro">wit_bindgen_host_wasmtime_rust::import!</span>(<span class="string">&quot;../linera-sdk/service.wit&quot;</span>);
+</span><span class="macro">wit_bindgen_host_wasmtime_rust::import!</span>(<span class="string">&quot;service.wit&quot;</span>);
 
 <span class="attribute">#[path = <span class="string">&quot;conversions_from_wit.rs&quot;</span>]
 </span><span class="kw">mod </span>conversions_from_wit;

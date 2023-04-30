@@ -301,8 +301,6 @@
 <span id="301">301</span>
 <span id="302">302</span>
 <span id="303">303</span>
-<span id="304">304</span>
-<span id="305">305</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -568,7 +566,7 @@
     <span class="kw">fn </span>build_applications() -&gt; <span class="prelude-ty">Result</span>&lt;(), std::io::Error&gt; {
         <span class="macro">tracing::info!</span>(<span class="string">&quot;Building example applications with cargo&quot;</span>);
         <span class="kw">let </span>output = std::process::Command::new(<span class="string">&quot;cargo&quot;</span>)
-            .current_dir(<span class="string">&quot;../linera-examples&quot;</span>)
+            .current_dir(<span class="string">&quot;../examples&quot;</span>)
             .args([<span class="string">&quot;build&quot;</span>, <span class="string">&quot;--release&quot;</span>, <span class="string">&quot;--target&quot;</span>, <span class="string">&quot;wasm32-unknown-unknown&quot;</span>])
             .output()<span class="question-mark">?</span>;
         <span class="kw">if </span>!output.status.success() {
@@ -587,10 +585,8 @@
         <span class="kw">static </span>INSTANCE: OnceCell&lt;()&gt; = OnceCell::new();
         INSTANCE.get_or_try_init(build_applications)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>((
-            <span class="macro">format!</span>(
-                <span class="string">&quot;../linera-examples/target/wasm32-unknown-unknown/release/{name}_contract.wasm&quot;
-            </span>),
-            <span class="macro">format!</span>(<span class="string">&quot;../linera-examples/target/wasm32-unknown-unknown/release/{name}_service.wasm&quot;</span>),
+            <span class="macro">format!</span>(<span class="string">&quot;../examples/target/wasm32-unknown-unknown/release/{name}_contract.wasm&quot;</span>),
+            <span class="macro">format!</span>(<span class="string">&quot;../examples/target/wasm32-unknown-unknown/release/{name}_service.wasm&quot;</span>),
         ))
     }
 

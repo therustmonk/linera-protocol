@@ -93,12 +93,14 @@
 <span id="93">93</span>
 <span id="94">94</span>
 <span id="95">95</span>
+<span id="96">96</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="doccomment">//! This module aims to help the mapping of complex data-structures onto a key-value
-//! store. The central notion is a [`views::View`] which can be loaded from storage, modified in
-//! memory, then committed (i.e. the changes are atomically persisted in storage).
+</span><span class="doccomment">//! This module is used in the Linera protocol to map complex data-structures onto a
+//! key-value store. The central notion is a [`views::View`](crate::views::View) which can
+//! be loaded from storage, modified in memory, then committed (i.e. the changes are
+//! atomically persisted in storage).
 
 </span><span class="attribute">#![deny(missing_docs)]
 
