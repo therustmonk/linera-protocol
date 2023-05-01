@@ -642,6 +642,15 @@
 <span id="642">642</span>
 <span id="643">643</span>
 <span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -683,6 +692,7 @@
 };
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;
+<span class="kw">use </span>rand::Rng;
 <span class="kw">use </span>std::{
     fmt::Debug,
     net::{AddrParseError, SocketAddr},
@@ -783,6 +793,7 @@
                 cross_chain_config.max_retries,
                 Duration::from_millis(cross_chain_config.retry_delay_ms),
                 Duration::from_millis(cross_chain_config.sender_delay_ms),
+                cross_chain_config.sender_failure_rate,
                 shard_id,
                 cross_chain_receiver,
             )
@@ -883,18 +894,25 @@
     }
 
     <span class="attribute">#[instrument(skip_all, fields(nickname, %this_shard))]
+    #[allow(clippy::too_many_arguments)]
     </span><span class="kw">async fn </span>forward_cross_chain_queries(
         nickname: String,
         network: ValidatorInternalNetworkConfig,
         cross_chain_max_retries: u32,
         cross_chain_retry_delay: Duration,
         cross_chain_sender_delay: Duration,
+        cross_chain_sender_failure_rate: f32,
         this_shard: ShardId,
         <span class="kw-2">mut </span>receiver: mpsc::Receiver&lt;(linera_core::data_types::CrossChainRequest, ShardId)&gt;,
     ) {
         <span class="kw">let </span>pool = ConnectionPool::default();
 
         <span class="kw">while let </span><span class="prelude-val">Some</span>((cross_chain_request, shard_id)) = receiver.next().<span class="kw">await </span>{
+            <span class="kw">if </span>rand::thread_rng().gen::&lt;f32&gt;() &lt; cross_chain_sender_failure_rate {
+                <span class="macro">warn!</span>(<span class="string">&quot;Dropped 1 cross-message intentionally.&quot;</span>);
+                <span class="kw">continue</span>;
+            }
+
             <span class="kw">let </span>shard = network.shard(shard_id);
             <span class="kw">let </span>remote_address = <span class="macro">format!</span>(<span class="string">&quot;http://{}&quot;</span>, shard.address());
 

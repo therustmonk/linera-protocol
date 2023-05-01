@@ -2223,7 +2223,7 @@
     }
 
     <span class="doccomment">/// Attempts to update all validators about the local chain.
-    </span><span class="kw">pub async fn </span>update_validators_about_local_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    </span><span class="kw">pub async fn </span>update_validators(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>committee = <span class="self">self</span>.local_committee().<span class="kw">await</span><span class="question-mark">?</span>;
         committee.quorum_threshold = committee.total_votes;
         <span class="self">self</span>.communicate_chain_updates(
@@ -2259,7 +2259,7 @@
     </span>}
 
     <span class="doccomment">/// Attempts to synchronize with validators and re-compute our balance.
-    </span><span class="kw">pub async fn </span>synchronize_and_recompute_balance(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Balance&gt; {
+    </span><span class="kw">pub async fn </span>synchronize_from_validators(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Balance&gt; {
         <span class="self">self</span>.find_received_certificates().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.local_balance().<span class="kw">await

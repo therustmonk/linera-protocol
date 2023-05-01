@@ -1298,6 +1298,8 @@
 <span id="1298">1298</span>
 <span id="1299">1299</span>
 <span id="1300">1300</span>
+<span id="1301">1301</span>
+<span id="1302">1302</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1327,6 +1329,7 @@
 };
 <span class="kw">use </span>linera_rpc::node_provider::NodeProvider;
 <span class="kw">use </span>linera_service::{
+    chain_listener::ChainListenerConfig,
     config::{CommitteeConfig, Export, GenesisConfig, Import, UserChain, WalletState},
     node_service::NodeService,
     project::Project,
@@ -1513,10 +1516,7 @@
         <span class="kw">for </span>chain_id <span class="kw">in </span><span class="self">self</span>.wallet_state.chain_ids() {
             <span class="kw">let </span><span class="kw-2">mut </span>chain_client = <span class="self">self</span>.make_chain_client(storage.clone(), chain_id);
             chain_client.process_inbox().<span class="kw">await</span>.unwrap();
-            chain_client
-                .update_validators_about_local_chain()
-                .<span class="kw">await
-                </span>.unwrap();
+            chain_client.update_validators().<span class="kw">await</span>.unwrap();
             <span class="self">self</span>.update_wallet_from_client(<span class="kw-2">&amp;mut </span>chain_client).<span class="kw">await</span>;
         }
     }
@@ -1775,7 +1775,7 @@
         <span class="macro">info!</span>(<span class="string">&quot;{}&quot;</span>, <span class="string">&quot;Bytecode published successfully!&quot;</span>.green().bold());
 
         <span class="macro">info!</span>(<span class="string">&quot;Synchronizing...&quot;</span>);
-        chain_client.synchronize_and_recompute_balance().<span class="kw">await</span><span class="question-mark">?</span>;
+        chain_client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
         chain_client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(bytecode_id)
     }
@@ -1972,6 +1972,9 @@
         <span class="doccomment">/// Chain id
         </span>chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
 
+        <span class="attribute">#[structopt(flatten)]
+        </span>config: ChainListenerConfig,
+
         <span class="doccomment">/// The port on which to run the server
         </span><span class="attribute">#[structopt(long = <span class="string">&quot;port&quot;</span>, default_value = <span class="string">&quot;8080&quot;</span>)]
         </span>port: NonZeroU16,
@@ -2146,10 +2149,7 @@
                 <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, chain_id);
                 <span class="macro">info!</span>(<span class="string">&quot;Synchronize chain information&quot;</span>);
                 <span class="kw">let </span>time_start = Instant::now();
-                <span class="kw">let </span>balance = chain_client
-                    .synchronize_and_recompute_balance()
-                    .<span class="kw">await
-                    </span>.unwrap();
+                <span class="kw">let </span>balance = chain_client.synchronize_from_validators().<span class="kw">await</span>.unwrap();
                 <span class="kw">let </span>time_total = time_start.elapsed().as_micros();
                 <span class="macro">info!</span>(<span class="string">&quot;Chain balance synchronized after {} us&quot;</span>, time_total);
                 <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, balance);
@@ -2332,9 +2332,13 @@
                 <span class="comment">// Not saving the wallet because `connect()` has no effect on `chain_client`.
             </span>}
 
-            Service { chain_id, port } =&gt; {
+            Service {
+                chain_id,
+                config,
+                port,
+            } =&gt; {
                 <span class="kw">let </span>chain_client = context.make_chain_client(storage, chain_id);
-                <span class="kw">let </span>service = NodeService::new(chain_client, port);
+                <span class="kw">let </span>service = NodeService::new(chain_client, config, port);
                 service
                     .run(context, |context, client| {
                         Box::pin(<span class="kw">async </span>{
@@ -2379,7 +2383,7 @@
                 };
 
                 <span class="macro">info!</span>(<span class="string">&quot;Synchronizing...&quot;</span>);
-                chain_client.synchronize_and_recompute_balance().<span class="kw">await</span><span class="question-mark">?</span>;
+                chain_client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
                 chain_client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
 
                 <span class="macro">info!</span>(<span class="string">&quot;Creating application...&quot;</span>);

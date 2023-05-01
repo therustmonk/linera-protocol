@@ -207,6 +207,10 @@
 <span id="207">207</span>
 <span id="208">208</span>
 <span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -232,6 +236,10 @@
     <span class="doccomment">/// Introduce a delay before sending every cross-chain message (e.g. for testing purpose).
     </span><span class="attribute">#[structopt(long = <span class="string">&quot;cross-chain-sender-delay-ms&quot;</span>, default_value = <span class="string">&quot;0&quot;</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) sender_delay_ms: u64,
+
+    <span class="doccomment">/// Drop cross-chain messages randomly at the given rate (0 &lt;= rate &lt; 1) (meant for testing).
+    </span><span class="attribute">#[structopt(long = <span class="string">&quot;cross-chain-sender-failure-rate&quot;</span>, default_value = <span class="string">&quot;0.0&quot;</span>)]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) sender_failure_rate: f32,
 }
 
 <span class="attribute">#[derive(Clone, Debug, StructOpt)]

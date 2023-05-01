@@ -575,10 +575,39 @@
 <span id="575">575</span>
 <span id="576">576</span>
 <span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="kw">use </span><span class="kw">crate</span>::chain_leader::ChainLeader;
+</span><span class="kw">use </span><span class="kw">crate</span>::chain_listener::{ChainListener, ChainListenerConfig};
 <span class="kw">use </span>async_graphql::{
     futures_util::Stream,
     http::GraphiQLSource,
@@ -593,7 +622,7 @@
     response::IntoResponse,
     Extension, Router, Server,
 };
-<span class="kw">use </span>futures::lock::Mutex;
+<span class="kw">use </span>futures::{future, lock::Mutex};
 <span class="kw">use </span>linera_base::{
     crypto::{CryptoHash, PublicKey},
     data_types::Amount,
@@ -711,6 +740,7 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;CryptoHash, Error&gt; {
         <span class="kw">let </span>operation = Operation::System(system_operation);
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
+        client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
         client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(client.execute_operation(operation).<span class="kw">await</span><span class="question-mark">?</span>.value.hash())
     }
@@ -733,6 +763,8 @@
         user_data: <span class="prelude-ty">Option</span>&lt;UserData&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;CryptoHash, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
+        client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
+        client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>certificate = client
             .transfer(owner, amount, recipient, user_data.unwrap_or_default())
             .<span class="kw">await</span><span class="question-mark">?</span>;
@@ -751,6 +783,8 @@
         user_data: <span class="prelude-ty">Option</span>&lt;UserData&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;CryptoHash, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
+        client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
+        client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>certificate = client
             .claim(
                 owner,
@@ -767,6 +801,8 @@
     /// This will automatically subscribe to the future committees created by `admin_id`.
     </span><span class="kw">async fn </span>open_chain(<span class="kw-2">&amp;</span><span class="self">self</span>, public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;ChainId, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
+        client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
+        client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>(effect_id, <span class="kw">_</span>) = client.open_chain(public_key).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(ChainId::child(effect_id))
     }
@@ -774,6 +810,8 @@
     <span class="doccomment">/// Closes the chain.
     </span><span class="kw">async fn </span>close_chain(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CryptoHash, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
+        client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
+        client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>certificate = client.close_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(certificate.value.hash())
     }
@@ -845,6 +883,8 @@
         service: Bytecode,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;BytecodeId, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
+        client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
+        client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>(bytecode_id, <span class="kw">_</span>) = client.publish_bytecode(contract, service).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(bytecode_id)
     }
@@ -857,6 +897,8 @@
         required_application_ids: Vec&lt;UserApplicationId&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ApplicationId, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
+        client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
+        client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>(application_id, <span class="kw">_</span>) = client
             .create_application(
                 bytecode_id,
@@ -992,6 +1034,7 @@
 /// The node service is primarily used to explore the state of a chain in GraphQL.
 </span><span class="kw">pub struct </span>NodeService&lt;P, S&gt; {
     client: Arc&lt;Mutex&lt;ChainClient&lt;P, S&gt;&gt;&gt;,
+    config: ChainListenerConfig,
     port: NonZeroU16,
 }
 
@@ -999,6 +1042,7 @@
     <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             client: <span class="self">self</span>.client.clone(),
+            config: <span class="self">self</span>.config.clone(),
             port: <span class="self">self</span>.port,
         }
     }
@@ -1011,9 +1055,13 @@
     ViewError: From&lt;S::ContextError&gt;,
 {
     <span class="doccomment">/// Creates a new instance of the node service given a client chain and a port.
-    </span><span class="kw">pub fn </span>new(client: ChainClient&lt;P, S&gt;, port: NonZeroU16) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(client: ChainClient&lt;P, S&gt;, config: ChainListenerConfig, port: NonZeroU16) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>client = Arc::new(Mutex::new(client));
-        <span class="self">Self </span>{ client, port }
+        <span class="self">Self </span>{
+            client,
+            config,
+            port,
+        }
     }
 
     <span class="kw">fn </span>schema(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Schema&lt;QueryRoot&lt;P, S&gt;, MutationRoot&lt;P, S&gt;, SubscriptionRoot&lt;P, S&gt;&gt; {
@@ -1053,13 +1101,22 @@
 
         <span class="macro">info!</span>(<span class="string">&quot;GraphiQL IDE: http://localhost:{}&quot;</span>, port);
 
-        <span class="kw">let </span>sync_fut = ChainLeader::new(<span class="self">self</span>.client.clone()).run(context, wallet_updater);
+        <span class="kw">let </span>sync_fut = Box::pin(
+            ChainListener::new(<span class="self">self</span>.config, <span class="self">self</span>.client.clone()).run(context, wallet_updater),
+        );
         <span class="kw">let </span>serve_fut =
             Server::bind(<span class="kw-2">&amp;</span>SocketAddr::from(([<span class="number">127</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>], port))).serve(app.into_make_service());
 
-        <span class="kw">let </span>(serve_response, sync_response) = <span class="macro">futures::join!</span>(serve_fut, sync_fut);
-        serve_response<span class="question-mark">?</span>;
-        sync_response<span class="question-mark">?</span>;
+        <span class="kw">match </span>future::select(sync_fut, serve_fut).<span class="kw">await </span>{
+            future::Either::Left((value, <span class="kw">_</span>)) =&gt; {
+                value<span class="question-mark">?</span>;
+                <span class="macro">error!</span>(<span class="string">&quot;Chain listener was terminated.&quot;</span>);
+            }
+            future::Either::Right((value, <span class="kw">_</span>)) =&gt; {
+                value<span class="question-mark">?</span>;
+                <span class="macro">error!</span>(<span class="string">&quot;Node service was terminated.&quot;</span>);
+            }
+        }
 
         <span class="prelude-val">Ok</span>(())
     }
@@ -1103,6 +1160,7 @@
             .collect();
 
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
+        client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
         client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>hash = client.execute_operations(operations).<span class="kw">await</span><span class="question-mark">?</span>.value.hash();
         <span class="prelude-val">Ok</span>(async_graphql::Response::new(hash.to_value()))

@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"struct":[["ChainLeader","A `ChainLeader` is a process that listens to notifications from validators and reacts appropriately."]]};

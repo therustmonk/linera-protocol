@@ -250,6 +250,9 @@
 <span id="250">250</span>
 <span id="251">251</span>
 <span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -442,9 +445,12 @@
     <span class="doccomment">/// Returns true if the cross-chain request has messages lower or equal than `height`.
     </span><span class="kw">pub fn </span>has_messages_lower_or_equal_than(<span class="kw-2">&amp;</span><span class="self">self</span>, height: BlockHeight) -&gt; bool {
         <span class="kw">match </span><span class="self">self </span>{
-            CrossChainRequest::UpdateRecipient { height_map, .. } =&gt; height_map
-                .iter()
-                .any(|(<span class="kw">_</span>, heights)| <span class="macro">matches!</span>(heights.get(<span class="number">0</span>), <span class="prelude-val">Some</span>(h) <span class="kw">if </span><span class="kw-2">*</span>h &lt;= height)),
+            CrossChainRequest::UpdateRecipient { height_map, .. } =&gt; {
+                height_map.iter().any(|(<span class="kw">_</span>, heights)| {
+                    <span class="macro">debug_assert!</span>(heights.windows(<span class="number">2</span>).all(|w| w[<span class="number">0</span>] &lt;= w[<span class="number">1</span>]));
+                    <span class="macro">matches!</span>(heights.get(<span class="number">0</span>), <span class="prelude-val">Some</span>(h) <span class="kw">if </span><span class="kw-2">*</span>h &lt;= height)
+                })
+            }
             <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         }
     }

@@ -1596,7 +1596,7 @@
                     .push(notifier);
             } <span class="kw">else </span>{
                 <span class="comment">// No need to wait. Also, cross-chain requests may not trigger the
-                // notifier later if we register it.
+                // notifier later, even if we register it.
                 </span><span class="kw">if let </span><span class="prelude-val">Err</span>(()) = notifier.send(()) {
                     <span class="macro">warn!</span>(<span class="string">&quot;Failed to notify message delivery to caller&quot;</span>);
                 }

@@ -515,29 +515,16 @@
 <span id="515">515</span>
 <span id="516">516</span>
 <span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="kw">use </span>std::{io, time::Duration};
-
-<span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>futures::{channel::mpsc, sink::SinkExt, stream::StreamExt};
-<span class="kw">use </span>tokio::time;
-<span class="kw">use </span>tracing::{debug, error, info, instrument, warn};
-
-<span class="kw">use </span>linera_base::identifiers::ChainId;
-<span class="kw">use </span>linera_chain::data_types::{BlockProposal, Certificate, HashedValue, LiteCertificate};
-<span class="kw">use </span>linera_core::{
-    data_types::{ChainInfoQuery, ChainInfoResponse},
-    node::{NodeError, NotificationStream, ValidatorNode},
-    worker::{NetworkActions, ValidatorWorker, WorkerError, WorkerState},
-};
-<span class="kw">use </span>linera_storage::Store;
-<span class="kw">use </span>linera_views::views::ViewError;
-<span class="kw">use </span>tokio::sync::oneshot;
-
-<span class="kw">use crate</span>::{
+</span><span class="kw">use crate</span>::{
     codec,
     config::{
         CrossChainConfig, ShardId, ValidatorInternalNetworkPreConfig,
@@ -547,6 +534,21 @@
     transport::{MessageHandler, ServerHandle, TransportProtocol},
     RpcMessage,
 };
+<span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>futures::{channel::mpsc, sink::SinkExt, stream::StreamExt};
+<span class="kw">use </span>linera_base::identifiers::ChainId;
+<span class="kw">use </span>linera_chain::data_types::{BlockProposal, Certificate, HashedValue, LiteCertificate};
+<span class="kw">use </span>linera_core::{
+    data_types::{ChainInfoQuery, ChainInfoResponse},
+    node::{NodeError, NotificationStream, ValidatorNode},
+    worker::{NetworkActions, ValidatorWorker, WorkerError, WorkerState},
+};
+<span class="kw">use </span>linera_storage::Store;
+<span class="kw">use </span>linera_views::views::ViewError;
+<span class="kw">use </span>rand::Rng;
+<span class="kw">use </span>std::{io, time::Duration};
+<span class="kw">use </span>tokio::{sync::oneshot, time};
+<span class="kw">use </span>tracing::{debug, error, info, instrument, warn};
 
 <span class="attribute">#[derive(Clone)]
 </span><span class="kw">pub struct </span>Server&lt;S&gt; {
@@ -597,12 +599,14 @@
     </span>S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
     ViewError: From&lt;S::ContextError&gt;,
 {
-    <span class="kw">async fn </span>forward_cross_chain_queries(
+    <span class="attribute">#[allow(clippy::too_many_arguments)]
+    </span><span class="kw">async fn </span>forward_cross_chain_queries(
         nickname: String,
         network: ValidatorInternalNetworkPreConfig&lt;TransportProtocol&gt;,
         cross_chain_max_retries: u32,
         cross_chain_retry_delay: Duration,
         cross_chain_sender_delay: Duration,
+        cross_chain_sender_failure_rate: f32,
         this_shard: ShardId,
         <span class="kw-2">mut </span>receiver: mpsc::Receiver&lt;(RpcMessage, ShardId)&gt;,
     ) {
@@ -613,6 +617,11 @@
             </span>.expect(<span class="string">&quot;Initialization should not fail&quot;</span>);
 
         <span class="kw">while let </span><span class="prelude-val">Some</span>((message, shard_id)) = receiver.next().<span class="kw">await </span>{
+            <span class="kw">if </span>rand::thread_rng().gen::&lt;f32&gt;() &lt; cross_chain_sender_failure_rate {
+                <span class="macro">warn!</span>(<span class="string">&quot;Dropped 1 cross-message intentionally.&quot;</span>);
+                <span class="kw">continue</span>;
+            }
+
             <span class="kw">let </span>shard = network.shard(shard_id);
             <span class="kw">let </span>remote_address = <span class="macro">format!</span>(<span class="string">&quot;{}:{}&quot;</span>, shard.host, shard.port);
 
@@ -668,6 +677,7 @@
             <span class="self">self</span>.cross_chain_config.max_retries,
             Duration::from_millis(<span class="self">self</span>.cross_chain_config.retry_delay_ms),
             Duration::from_millis(<span class="self">self</span>.cross_chain_config.sender_delay_ms),
+            <span class="self">self</span>.cross_chain_config.sender_failure_rate,
             <span class="self">self</span>.shard_id,
             cross_chain_receiver,
         ));
