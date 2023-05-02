@@ -79,9 +79,6 @@ var sourcesIndex = JSON.parse('{\
 "ct_logs":["",[],["lib.rs"]],\
 "curve25519_dalek":["",[["backend",[["serial",[["curve_models",[],["mod.rs"]],["scalar_mul",[],["mod.rs","pippenger.rs","precomputed_straus.rs","straus.rs","variable_base.rs","vartime_double_base.rs"]],["u64",[],["constants.rs","field.rs","mod.rs","scalar.rs"]]],["mod.rs"]]],["mod.rs"]]],["constants.rs","edwards.rs","field.rs","lib.rs","macros.rs","montgomery.rs","prelude.rs","ristretto.rs","scalar.rs","traits.rs","window.rs"]],\
 "custom_debug_derive":["",[],["lib.rs"]],\
-"darling":["",[],["lib.rs","macros_public.rs"]],\
-"darling_core":["",[["ast",[],["data.rs","generics.rs","mod.rs"]],["codegen",[],["attr_extractor.rs","default_expr.rs","error.rs","field.rs","from_attributes_impl.rs","from_derive_impl.rs","from_field.rs","from_meta_impl.rs","from_type_param.rs","from_variant_impl.rs","mod.rs","outer_from_impl.rs","postfix_transform.rs","trait_impl.rs","variant.rs","variant_data.rs"]],["error",[],["kind.rs","mod.rs"]],["options",[],["core.rs","forward_attrs.rs","from_attributes.rs","from_derive.rs","from_field.rs","from_meta.rs","from_type_param.rs","from_variant.rs","input_field.rs","input_variant.rs","mod.rs","outer_from.rs","shape.rs"]],["usage",[],["generics_ext.rs","ident_set.rs","lifetimes.rs","mod.rs","options.rs","type_params.rs"]],["util",[],["flag.rs","ident_string.rs","ignored.rs","mod.rs","over_ride.rs","parse_attribute.rs","path_list.rs","path_to_string.rs","shape.rs","spanned_value.rs","with_original.rs"]]],["derive.rs","from_attributes.rs","from_derive_input.rs","from_field.rs","from_generic_param.rs","from_generics.rs","from_meta.rs","from_type_param.rs","from_variant.rs","lib.rs","macros_private.rs","macros_public.rs"]],\
-"darling_macro":["",[],["lib.rs"]],\
 "dashmap":["",[["mapref",[],["entry.rs","mod.rs","multiple.rs","one.rs"]],["setref",[],["mod.rs","multiple.rs","one.rs"]]],["iter.rs","iter_set.rs","lib.rs","lock.rs","read_only.rs","set.rs","t.rs","try_result.rs","util.rs"]],\
 "derive_more":["",[],["add_assign_like.rs","add_helpers.rs","add_like.rs","as_mut.rs","as_ref.rs","constructor.rs","deref.rs","deref_mut.rs","display.rs","error.rs","from.rs","from_str.rs","index.rs","index_mut.rs","into.rs","into_iterator.rs","is_variant.rs","lib.rs","mul_assign_like.rs","mul_helpers.rs","mul_like.rs","not_like.rs","parsing.rs","sum_like.rs","try_into.rs","unwrap.rs","utils.rs"]],\
 "digest":["",[["core_api",[],["ct_variable.rs","rt_variable.rs","wrapper.rs","xof_reader.rs"]]],["core_api.rs","digest.rs","lib.rs"]],\
@@ -136,7 +133,6 @@ var sourcesIndex = JSON.parse('{\
 "hyper_timeout":["",[],["lib.rs","stream.rs"]],\
 "iana_time_zone":["",[],["ffi_utils.rs","lib.rs","tz_linux.rs"]],\
 "id_arena":["",[],["lib.rs"]],\
-"ident_case":["",[],["lib.rs"]],\
 "idna":["",[],["lib.rs","punycode.rs","uts46.rs"]],\
 "indexmap":["",[["map",[["core",[],["raw.rs"]]],["core.rs"]]],["arbitrary.rs","equivalent.rs","lib.rs","macros.rs","map.rs","mutable_keys.rs","serde.rs","serde_seq.rs","set.rs","util.rs"]],\
 "inflector":["",[["cases",[["camelcase",[],["mod.rs"]],["case",[],["mod.rs"]],["classcase",[],["mod.rs"]],["kebabcase",[],["mod.rs"]],["pascalcase",[],["mod.rs"]],["screamingsnakecase",[],["mod.rs"]],["sentencecase",[],["mod.rs"]],["snakecase",[],["mod.rs"]],["tablecase",[],["mod.rs"]],["titlecase",[],["mod.rs"]],["traincase",[],["mod.rs"]]],["mod.rs"]],["numbers",[["deordinalize",[],["mod.rs"]],["ordinalize",[],["mod.rs"]]],["mod.rs"]],["string",[["constants",[],["mod.rs"]],["deconstantize",[],["mod.rs"]],["demodulize",[],["mod.rs"]],["pluralize",[],["mod.rs"]],["singularize",[],["mod.rs"]]],["mod.rs"]],["suffix",[["foreignkey",[],["mod.rs"]]],["mod.rs"]]],["lib.rs"]],\
@@ -210,6 +206,7 @@ var sourcesIndex = JSON.parse('{\
 "once_cell":["",[],["imp_std.rs","lib.rs","race.rs"]],\
 "opaque_debug":["",[],["lib.rs"]],\
 "openssl_probe":["",[],["lib.rs"]],\
+"option_ext":["",[],["impl.rs","lib.rs"]],\
 "parking_lot":["",[],["condvar.rs","deadlock.rs","elision.rs","fair_mutex.rs","lib.rs","mutex.rs","once.rs","raw_fair_mutex.rs","raw_mutex.rs","raw_rwlock.rs","remutex.rs","rwlock.rs","util.rs"]],\
 "parking_lot_core":["",[["thread_parker",[],["linux.rs","mod.rs"]]],["lib.rs","parking_lot.rs","spinwait.rs","util.rs","word_lock.rs"]],\
 "parse_duration":["",[],["lib.rs","parse.rs"]],\

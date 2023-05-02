@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"trait":[["OptionExt","Extension trait providing additional methods for `Option`."]]};
