@@ -306,12 +306,14 @@
 <span id="306">306</span>
 <span id="307">307</span>
 <span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use crate</span>::{
     batch::Batch,
-    common::{Context, HasherOutput, MIN_VIEW_TAG},
+    common::{from_bytes_opt, Context, HasherOutput, MIN_VIEW_TAG},
     views::{HashableView, Hasher, View, ViewError},
 };
 <span class="kw">use </span>async_lock::Mutex;
@@ -356,10 +358,12 @@
     }
 
     <span class="kw">async fn </span>load(context: C) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ViewError&gt; {
-        <span class="kw">let </span>key = context.base_tag(KeyTag::Store <span class="kw">as </span>u8);
-        <span class="kw">let </span>stored_count = context.read_key(<span class="kw-2">&amp;</span>key).<span class="kw">await</span><span class="question-mark">?</span>.unwrap_or_default();
-        <span class="kw">let </span>key = context.base_tag(KeyTag::Hash <span class="kw">as </span>u8);
-        <span class="kw">let </span>hash = context.read_key(<span class="kw-2">&amp;</span>key).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>key1 = context.base_tag(KeyTag::Store <span class="kw">as </span>u8);
+        <span class="kw">let </span>key2 = context.base_tag(KeyTag::Hash <span class="kw">as </span>u8);
+        <span class="kw">let </span>keys = <span class="macro">vec!</span>[key1, key2];
+        <span class="kw">let </span>values_bytes = context.read_multi_key_bytes(keys).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>stored_count = from_bytes_opt(values_bytes[<span class="number">0</span>].clone())<span class="question-mark">?</span>.unwrap_or_default();
+        <span class="kw">let </span>hash = from_bytes_opt(values_bytes[<span class="number">1</span>].clone())<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             context,
             was_cleared: <span class="bool-val">false</span>,
