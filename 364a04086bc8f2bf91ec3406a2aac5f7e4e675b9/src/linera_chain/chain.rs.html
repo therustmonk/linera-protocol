@@ -557,6 +557,8 @@
 <span id="557">557</span>
 <span id="558">558</span>
 <span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -753,17 +755,17 @@
 
     <span class="kw">pub async fn </span>next_block_height_to_receive(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        origin: Origin,
+        origin: <span class="kw-2">&amp;</span>Origin,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;BlockHeight, ChainError&gt; {
-        <span class="kw">let </span>inbox = <span class="self">self</span>.inboxes.load_entry(<span class="kw-2">&amp;</span>origin).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>inbox = <span class="self">self</span>.inboxes.load_entry(origin).<span class="kw">await</span><span class="question-mark">?</span>;
         inbox.next_block_height_to_receive()
     }
 
     <span class="kw">pub async fn </span>last_anticipated_block_height(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        origin: Origin,
+        origin: <span class="kw-2">&amp;</span>Origin,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;BlockHeight&gt;, ChainError&gt; {
-        <span class="kw">let </span>inbox = <span class="self">self</span>.inboxes.load_entry(<span class="kw-2">&amp;</span>origin).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>inbox = <span class="self">self</span>.inboxes.load_entry(origin).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">match </span>inbox.removed_events.back().<span class="kw">await</span><span class="question-mark">? </span>{
             <span class="prelude-val">Some</span>(event) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(event.height)),
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
@@ -783,7 +785,7 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt; {
         <span class="kw">let </span>chain_id = <span class="self">self</span>.chain_id();
         <span class="macro">ensure!</span>(
-            height &gt;= <span class="self">self</span>.next_block_height_to_receive(origin.clone()).<span class="kw">await</span><span class="question-mark">?</span>,
+            height &gt;= <span class="self">self</span>.next_block_height_to_receive(origin).<span class="kw">await</span><span class="question-mark">?</span>,
             ChainError::InternalError(<span class="string">&quot;Trying to receive blocks in the wrong order&quot;</span>.to_string())
         );
         <span class="macro">tracing::trace!</span>(
@@ -844,8 +846,10 @@
         </span><span class="macro">ensure!</span>(
             !events.is_empty(),
             ChainError::InternalError(<span class="macro">format!</span>(
-                <span class="string">&quot;The block received by {:?} from {:?} at height {:?} was entirely ignored. This should not happen&quot;</span>,
-                chain_id, origin, height))
+                <span class="string">&quot;The block received by {:?} from {:?} at height {:?} was entirely ignored. \
+                This should not happen&quot;</span>,
+                chain_id, origin, height
+            ))
         );
         <span class="comment">// Process the inbox events and update the inbox state.
         </span><span class="kw">let </span>inbox = <span class="self">self</span>.inboxes.load_entry_mut(origin).<span class="kw">await</span><span class="question-mark">?</span>;

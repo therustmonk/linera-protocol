@@ -358,7 +358,6 @@
 <span id="358">358</span>
 <span id="359">359</span>
 <span id="360">360</span>
-<span id="361">361</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -434,13 +433,13 @@
     </span><span class="kw">async fn </span>read_value(<span class="kw-2">&amp;</span><span class="self">self</span>, hash: CryptoHash) -&gt; <span class="prelude-ty">Result</span>&lt;HashedValue, ViewError&gt;;
 
     <span class="doccomment">/// Writes the given value.
-    </span><span class="kw">async fn </span>write_value(<span class="kw-2">&amp;</span><span class="self">self</span>, value: HashedValue) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;;
+    </span><span class="kw">async fn </span>write_value(<span class="kw-2">&amp;</span><span class="self">self</span>, value: <span class="kw-2">&amp;</span>HashedValue) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;;
 
     <span class="doccomment">/// Reads the certificate with the given hash.
     </span><span class="kw">async fn </span>read_certificate(<span class="kw-2">&amp;</span><span class="self">self</span>, hash: CryptoHash) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ViewError&gt;;
 
     <span class="doccomment">/// Writes the given certificate.
-    </span><span class="kw">async fn </span>write_certificate(<span class="kw-2">&amp;</span><span class="self">self</span>, certificate: Certificate) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;;
+    </span><span class="kw">async fn </span>write_certificate(<span class="kw-2">&amp;</span><span class="self">self</span>, certificate: <span class="kw-2">&amp;</span>Certificate) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;;
 
     <span class="doccomment">/// Loads the view of a chain state and checks that it is active.
     </span><span class="kw">async fn </span>load_active_chain(
@@ -633,12 +632,12 @@
         <span class="prelude-val">Ok</span>(value.with_hash_unchecked(hash))
     }
 
-    <span class="kw">async fn </span>write_value(<span class="kw-2">&amp;</span><span class="self">self</span>, value: HashedValue) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; {
+    <span class="kw">async fn </span>write_value(<span class="kw-2">&amp;</span><span class="self">self</span>, value: <span class="kw-2">&amp;</span>HashedValue) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; {
         <span class="kw">let </span>id = value.block().chain_id.to_string();
         <span class="macro">increment_counter!</span>(WRITE_VALUE_COUNTER, <span class="kw-2">&amp;</span>[(<span class="string">&quot;chain_id&quot;</span>, id)]);
         <span class="kw">let </span>value_key = bcs::to_bytes(<span class="kw-2">&amp;</span>BaseKey::Value(value.hash()))<span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>batch = Batch::new();
-        batch.put_key_value(value_key.to_vec(), <span class="kw-2">&amp;</span>value)<span class="question-mark">?</span>;
+        batch.put_key_value(value_key.to_vec(), value)<span class="question-mark">?</span>;
         <span class="self">self</span>.client.client.write_batch(batch, <span class="kw-2">&amp;</span>[]).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
@@ -666,16 +665,15 @@
             .ok_or(ViewError::InconsistentEntries)<span class="question-mark">?</span>)
     }
 
-    <span class="kw">async fn </span>write_certificate(<span class="kw-2">&amp;</span><span class="self">self</span>, certificate: Certificate) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; {
+    <span class="kw">async fn </span>write_certificate(<span class="kw-2">&amp;</span><span class="self">self</span>, certificate: <span class="kw-2">&amp;</span>Certificate) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; {
         <span class="kw">let </span>id = certificate.value.block().chain_id.to_string();
         <span class="macro">increment_counter!</span>(WRITE_CERTIFICATE_COUNTER, <span class="kw-2">&amp;</span>[(<span class="string">&quot;chain_id&quot;</span>, id)]);
         <span class="kw">let </span>hash = certificate.value.hash();
         <span class="kw">let </span>cert_key = bcs::to_bytes(<span class="kw-2">&amp;</span>BaseKey::Certificate(hash))<span class="question-mark">?</span>;
         <span class="kw">let </span>value_key = bcs::to_bytes(<span class="kw-2">&amp;</span>BaseKey::Value(hash))<span class="question-mark">?</span>;
-        <span class="kw">let </span>(cert, value) = certificate.split();
         <span class="kw">let </span><span class="kw-2">mut </span>batch = Batch::new();
-        batch.put_key_value(cert_key.to_vec(), <span class="kw-2">&amp;</span>cert)<span class="question-mark">?</span>;
-        batch.put_key_value(value_key.to_vec(), <span class="kw-2">&amp;</span>value)<span class="question-mark">?</span>;
+        batch.put_key_value(cert_key.to_vec(), <span class="kw-2">&amp;</span>certificate.lite_certificate())<span class="question-mark">?</span>;
+        batch.put_key_value(value_key.to_vec(), <span class="kw-2">&amp;</span>certificate.value)<span class="question-mark">?</span>;
         <span class="self">self</span>.client.client.write_batch(batch, <span class="kw-2">&amp;</span>[]).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }

@@ -264,7 +264,7 @@
     identifiers::{ChainDescription, ChainId},
 };
 <span class="kw">use </span>linera_chain::{
-    data_types::{Certificate, ChainAndHeight, HashedValue, Medium, Message, Origin},
+    data_types::{Certificate, ChainAndHeight, HashedValue, Medium, Message},
     ChainManagerInfo, ChainStateView,
 };
 <span class="kw">use </span>linera_execution::{
@@ -424,11 +424,11 @@
         recipient: ChainId,
         certificates: Vec&lt;Certificate&gt;,
     },
-    <span class="doccomment">/// Acknowledge the height of the highest confirmed block communicated with `UpdateRecipient`.
+    <span class="doccomment">/// Acknowledge the height of the highest confirmed blocks communicated with `UpdateRecipient`.
     </span>ConfirmUpdatedRecipient {
-        origin: Origin,
+        sender: ChainId,
         recipient: ChainId,
-        height: BlockHeight,
+        latest_heights: Vec&lt;(Medium, BlockHeight)&gt;,
     },
 }
 
@@ -438,7 +438,7 @@
         <span class="kw">use </span>CrossChainRequest::<span class="kw-2">*</span>;
         <span class="kw">match </span><span class="self">self </span>{
             UpdateRecipient { recipient, .. } =&gt; <span class="kw-2">*</span>recipient,
-            ConfirmUpdatedRecipient { origin, .. } =&gt; origin.sender,
+            ConfirmUpdatedRecipient { sender, .. } =&gt; <span class="kw-2">*</span>sender,
         }
     }
 

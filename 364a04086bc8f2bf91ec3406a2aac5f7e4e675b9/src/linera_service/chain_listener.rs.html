@@ -127,7 +127,7 @@
     S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
     ViewError: From&lt;S::ContextError&gt;,
 {
-    <span class="doccomment">/// Creates a new instance of the node service given a client chain.
+    <span class="doccomment">/// Creates a new chain listener given a client chain.
     </span><span class="kw">pub fn </span>new(config: ChainListenerConfig, client: Arc&lt;Mutex&lt;ChainClient&lt;P, S&gt;&gt;&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ config, client }
     }

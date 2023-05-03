@@ -909,7 +909,7 @@
 
         <span class="kw">while let </span><span class="prelude-val">Some</span>((cross_chain_request, shard_id)) = receiver.next().<span class="kw">await </span>{
             <span class="kw">if </span>rand::thread_rng().gen::&lt;f32&gt;() &lt; cross_chain_sender_failure_rate {
-                <span class="macro">warn!</span>(<span class="string">&quot;Dropped 1 cross-message intentionally.&quot;</span>);
+                <span class="macro">warn!</span>(<span class="string">&quot;Dropped 1 cross-chain message intentionally.&quot;</span>);
                 <span class="kw">continue</span>;
             }
 

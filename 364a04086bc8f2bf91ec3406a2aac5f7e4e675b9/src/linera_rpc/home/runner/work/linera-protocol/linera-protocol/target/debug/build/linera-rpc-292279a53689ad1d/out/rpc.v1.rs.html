@@ -1625,6 +1625,14 @@
 <span id="1625">1625</span>
 <span id="1626">1626</span>
 <span id="1627">1627</span>
+<span id="1628">1628</span>
+<span id="1629">1629</span>
+<span id="1630">1630</span>
+<span id="1631">1631</span>
+<span id="1632">1632</span>
+<span id="1633">1633</span>
+<span id="1634">1634</span>
+<span id="1635">1635</span>
 </pre><pre class="rust"><code><span class="doccomment">/// A request for client to subscribe to notifications for a given `ChainId`
 </span><span class="attribute">#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -1734,15 +1742,23 @@
     <span class="attribute">#[prost(message, repeated, tag = <span class="string">&quot;2&quot;</span>)]
     </span><span class="kw">pub </span>heights: ::prost::alloc::vec::Vec&lt;BlockHeight&gt;,
 }
-<span class="doccomment">/// Acknowledge the height of the highest confirmed block communicated with `UpdateRecipient`.
+<span class="doccomment">/// Acknowledge the height of the highest confirmed blocks communicated with `UpdateRecipient`.
 </span><span class="attribute">#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>ConfirmUpdatedRecipient {
     <span class="attribute">#[prost(message, optional, tag = <span class="string">&quot;1&quot;</span>)]
-    </span><span class="kw">pub </span>origin: ::core::option::Option&lt;Origin&gt;,
+    </span><span class="kw">pub </span>sender: ::core::option::Option&lt;ChainId&gt;,
     <span class="attribute">#[prost(message, optional, tag = <span class="string">&quot;2&quot;</span>)]
     </span><span class="kw">pub </span>recipient: ::core::option::Option&lt;ChainId&gt;,
-    <span class="attribute">#[prost(message, optional, tag = <span class="string">&quot;3&quot;</span>)]
+    <span class="attribute">#[prost(message, repeated, tag = <span class="string">&quot;3&quot;</span>)]
+    </span><span class="kw">pub </span>latest_heights: ::prost::alloc::vec::Vec&lt;ConfirmUpdatedRecipientEntry&gt;,
+}
+<span class="attribute">#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+</span><span class="kw">pub struct </span>ConfirmUpdatedRecipientEntry {
+    <span class="attribute">#[prost(message, optional, tag = <span class="string">&quot;1&quot;</span>)]
+    </span><span class="kw">pub </span>medium: ::core::option::Option&lt;Medium&gt;,
+    <span class="attribute">#[prost(message, optional, tag = <span class="string">&quot;2&quot;</span>)]
     </span><span class="kw">pub </span>height: ::core::option::Option&lt;BlockHeight&gt;,
 }
 <span class="doccomment">/// Message to obtain information on a chain.
