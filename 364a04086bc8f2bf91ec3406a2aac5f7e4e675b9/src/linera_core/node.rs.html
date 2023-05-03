@@ -721,6 +721,9 @@
 <span id="721">721</span>
 <span id="722">722</span>
 <span id="723">723</span>
+<span id="724">724</span>
+<span id="725">725</span>
+<span id="726">726</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1133,7 +1136,10 @@
         </span>info
     }
 
-    <span class="kw">async fn </span>local_chain_info(<span class="kw-2">&amp;mut </span><span class="self">self</span>, chain_id: ChainId) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfo, NodeError&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>local_chain_info(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        chain_id: ChainId,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfo, NodeError&gt; {
         <span class="kw">let </span>query = ChainInfoQuery::new(chain_id);
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.handle_chain_info_query(query).<span class="kw">await</span><span class="question-mark">?</span>.info)
     }

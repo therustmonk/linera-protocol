@@ -1300,6 +1300,8 @@
 <span id="1300">1300</span>
 <span id="1301">1301</span>
 <span id="1302">1302</span>
+<span id="1303">1303</span>
+<span id="1304">1304</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1308,7 +1310,7 @@
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>chrono::{DateTime, Utc};
 <span class="kw">use </span>colored::Colorize;
-<span class="kw">use </span>futures::StreamExt;
+<span class="kw">use </span>futures::{lock::Mutex, StreamExt};
 <span class="kw">use </span>linera_base::{
     crypto::{KeyPair, PublicKey},
     data_types::{Amount, Balance, BlockHeight, Timestamp},
@@ -1341,6 +1343,7 @@
     env, fs,
     num::NonZeroU16,
     path::PathBuf,
+    sync::Arc,
     time::{Duration, Instant},
 };
 <span class="kw">use </span>structopt::StructOpt;
@@ -2318,18 +2321,19 @@
             }
 
             Watch { chain_id, raw } =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, chain_id);
+                <span class="kw">let </span>chain_client = context.make_chain_client(storage, chain_id);
                 <span class="kw">let </span>chain_id = chain_client.chain_id();
                 <span class="macro">debug!</span>(<span class="string">&quot;Watching for notifications for chain {:?}&quot;</span>, chain_id);
                 <span class="kw">let </span><span class="kw-2">mut </span>tracker = NotificationTracker::default();
-                <span class="kw">let </span><span class="kw-2">mut </span>notification_stream = chain_client.listen().<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span><span class="kw-2">mut </span>notification_stream =
+                    ChainClient::listen(Arc::new(Mutex::new(chain_client))).<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="kw">while let </span><span class="prelude-val">Some</span>(notification) = notification_stream.next().<span class="kw">await </span>{
                     <span class="kw">if </span>raw || tracker.insert(notification.clone()) {
                         <span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, notification);
                     }
                 }
                 <span class="macro">warn!</span>(<span class="string">&quot;Notification stream ended.&quot;</span>);
-                <span class="comment">// Not saving the wallet because `connect()` has no effect on `chain_client`.
+                <span class="comment">// Not saving the wallet because `listen()` does not create blocks.
             </span>}
 
             Service {

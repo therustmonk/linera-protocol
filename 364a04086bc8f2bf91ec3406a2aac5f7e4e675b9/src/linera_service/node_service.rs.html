@@ -724,7 +724,7 @@
 {
     <span class="doccomment">/// Subscribes to notifications from the current chain.
     </span><span class="kw">async fn </span>notifications(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Stream&lt;Item = Notification&gt;, Error&gt; {
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.client.lock().<span class="kw">await</span>.listen().<span class="kw">await</span><span class="question-mark">?</span>)
+        <span class="prelude-val">Ok</span>(ChainClient::listen(<span class="self">self</span>.client.clone()).<span class="kw">await</span><span class="question-mark">?</span>)
     }
 }
 
