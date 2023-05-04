@@ -1223,6 +1223,7 @@
 <span id="1223">1223</span>
 <span id="1224">1224</span>
 <span id="1225">1225</span>
+<span id="1226">1226</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -2253,6 +2254,7 @@
             info.requested_sent_certificates = certs;
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(start) = query.request_received_log_excluding_first_nth {
+            <span class="kw">let </span>start = usize::try_from(start).map_err(|<span class="kw">_</span>| ArithmeticError::Overflow)<span class="question-mark">?</span>;
             info.requested_received_log = chain.received_log.read(start..).<span class="kw">await</span><span class="question-mark">?</span>;
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(hash) = query.request_blob {

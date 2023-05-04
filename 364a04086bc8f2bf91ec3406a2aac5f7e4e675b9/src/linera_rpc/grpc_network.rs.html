@@ -651,6 +651,11 @@
 <span id="651">651</span>
 <span id="652">652</span>
 <span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -854,7 +859,14 @@
         <span class="kw">let </span><span class="kw-2">mut </span>client = NotifierServiceClient::new(channel);
 
         <span class="kw">while let </span><span class="prelude-val">Some</span>(notification) = receiver.next().<span class="kw">await </span>{
-            <span class="kw">let </span>request = Request::new(notification.clone().into());
+            <span class="kw">let </span>notification: grpc::Notification = <span class="kw">match </span>notification.clone().try_into() {
+                <span class="prelude-val">Ok</span>(notification) =&gt; notification,
+                <span class="prelude-val">Err</span>(error) =&gt; {
+                    <span class="macro">warn!</span>(%error, nickname, <span class="string">&quot;could not deserialize notification&quot;</span>);
+                    <span class="kw">continue</span>;
+                }
+            };
+            <span class="kw">let </span>request = Request::new(notification.clone());
             <span class="kw">if let </span><span class="prelude-val">Err</span>(error) = client.notify(request).<span class="kw">await </span>{
                 <span class="macro">error!</span>(
                     %error,
@@ -1137,13 +1149,13 @@
                 error: <span class="string">&quot;missing body from response&quot;</span>.to_string(),
             })<span class="question-mark">? </span>{
             Inner::ChainInfoResponse(response) =&gt; {
-                <span class="prelude-val">Ok</span>(response.try_into().map_err(|<span class="kw">_</span>| NodeError::GrpcError {
-                    error: <span class="string">&quot;failed to marshal response&quot;</span>.to_string(),
+                <span class="prelude-val">Ok</span>(response.try_into().map_err(|err| NodeError::GrpcError {
+                    error: <span class="macro">format!</span>(<span class="string">&quot;failed to marshal response: {}&quot;</span>, err),
                 })<span class="question-mark">?</span>)
             }
             Inner::Error(error) =&gt; {
-                <span class="prelude-val">Err</span>(bcs::from_bytes(<span class="kw-2">&amp;</span>error).map_err(|<span class="kw">_</span>| NodeError::GrpcError {
-                    error: <span class="string">&quot;failed to marshal error message&quot;</span>.to_string(),
+                <span class="prelude-val">Err</span>(bincode::deserialize(<span class="kw-2">&amp;</span>error).map_err(|err| NodeError::GrpcError {
+                    error: <span class="macro">format!</span>(<span class="string">&quot;failed to marshal error message: {}&quot;</span>, err),
                 })<span class="question-mark">?</span>)
             }
         }
@@ -1164,11 +1176,9 @@
                 )));
             }
             Inner::Error(error) =&gt; {
-                <span class="macro">error!</span>(
-                    error = <span class="question-mark">?</span>bcs::from_bytes::&lt;NodeError&gt;(<span class="kw-2">&amp;</span>error)
-                        .map_err(|e| ProtoConversionError::BcsError(e))<span class="question-mark">?</span>,
-                    <span class="string">&quot;received error response&quot;</span>,
-                )
+                <span class="kw">let </span>error = bincode::deserialize::&lt;NodeError&gt;(<span class="kw-2">&amp;</span>error)
+                    .map_err(ProtoConversionError::BincodeError)<span class="question-mark">?</span>;
+                <span class="macro">error!</span>(<span class="question-mark">?</span>error, <span class="string">&quot;received error response&quot;</span>)
             }
         }
     }};
@@ -1282,7 +1292,7 @@
 
 <span class="kw">impl </span>Proxyable <span class="kw">for </span>CertificateWithDependencies {
     <span class="kw">fn </span>chain_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;ChainId&gt; {
-        <span class="self">self</span>.chain_id.clone()<span class="question-mark">?</span>.try_into().ok()
+        <span class="self">self</span>.certificate.as_ref()<span class="question-mark">?</span>.chain_id.clone()<span class="question-mark">?</span>.try_into().ok()
     }
 }
 

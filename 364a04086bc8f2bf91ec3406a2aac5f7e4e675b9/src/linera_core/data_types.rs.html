@@ -312,7 +312,7 @@
     <span class="doccomment">/// Query a range of certificates sent from the chain.
     </span><span class="kw">pub </span>request_sent_certificates_in_range: <span class="prelude-ty">Option</span>&lt;BlockHeightRange&gt;,
     <span class="doccomment">/// Query new certificate sender chain IDs and block heights received from the chain.
-    </span><span class="kw">pub </span>request_received_log_excluding_first_nth: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+    </span><span class="kw">pub </span>request_received_log_excluding_first_nth: <span class="prelude-ty">Option</span>&lt;u64&gt;,
     <span class="doccomment">/// Query values from the chain manager, not just votes.
     </span><span class="kw">pub </span>request_manager_values: bool,
     <span class="doccomment">/// Query a value that contains a binary blob (e.g. bytecode) required by this chain.
@@ -353,7 +353,7 @@
         <span class="self">self
     </span>}
 
-    <span class="kw">pub fn </span>with_received_log_excluding_first_nth(<span class="kw-2">mut </span><span class="self">self</span>, n: usize) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>with_received_log_excluding_first_nth(<span class="kw-2">mut </span><span class="self">self</span>, n: u64) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.request_received_log_excluding_first_nth = <span class="prelude-val">Some</span>(n);
         <span class="self">self
     </span>}
