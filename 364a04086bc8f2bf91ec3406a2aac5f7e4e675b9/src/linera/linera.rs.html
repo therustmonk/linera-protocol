@@ -1303,6 +1303,21 @@
 <span id="1303">1303</span>
 <span id="1304">1304</span>
 <span id="1305">1305</span>
+<span id="1306">1306</span>
+<span id="1307">1307</span>
+<span id="1308">1308</span>
+<span id="1309">1309</span>
+<span id="1310">1310</span>
+<span id="1311">1311</span>
+<span id="1312">1312</span>
+<span id="1313">1313</span>
+<span id="1314">1314</span>
+<span id="1315">1315</span>
+<span id="1316">1316</span>
+<span id="1317">1317</span>
+<span id="1318">1318</span>
+<span id="1319">1319</span>
+<span id="1320">1320</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -2050,6 +2065,10 @@
         <span class="doccomment">/// The path to the genesis configuration for a Linera deployment.
         </span><span class="attribute">#[structopt(long = <span class="string">&quot;genesis&quot;</span>)]
         </span>genesis_config_path: PathBuf,
+
+        <span class="comment">// Other chains to follow.
+        </span><span class="attribute">#[structopt(long)]
+        </span>with_other_chains: Vec&lt;ChainId&gt;,
     },
 }
 
@@ -2580,9 +2599,20 @@
 
                 WalletCommand::Init {
                     genesis_config_path,
+                    with_other_chains,
                 } =&gt; {
                     <span class="kw">let </span>genesis_config = GenesisConfig::read(genesis_config_path)<span class="question-mark">?</span>;
-                    <span class="kw">let </span>context = ClientContext::create(<span class="kw-2">&amp;</span>options, genesis_config, <span class="macro">vec!</span>[])<span class="question-mark">?</span>;
+                    <span class="kw">let </span>chains = with_other_chains
+                        .iter()
+                        .filter_map(|chain_id| {
+                            <span class="kw">let </span>(description, <span class="kw">_</span>, <span class="kw">_</span>, timestamp) = genesis_config
+                                .chains
+                                .iter()
+                                .find(|(desc, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>)| ChainId::from(<span class="kw-2">*</span>desc) == <span class="kw-2">*</span>chain_id)<span class="question-mark">?</span>;
+                            <span class="prelude-val">Some</span>(UserChain::make_initial(<span class="kw-2">*</span>description, <span class="kw-2">*</span>timestamp))
+                        })
+                        .collect();
+                    <span class="kw">let </span>context = ClientContext::create(<span class="kw-2">&amp;</span>options, genesis_config, chains)<span class="question-mark">?</span>;
                     context.save_wallet();
                     <span class="prelude-val">Ok</span>(())
                 }

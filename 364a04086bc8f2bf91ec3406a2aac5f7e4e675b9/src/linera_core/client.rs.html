@@ -1434,6 +1434,33 @@
 <span id="1434">1434</span>
 <span id="1435">1435</span>
 <span id="1436">1436</span>
+<span id="1437">1437</span>
+<span id="1438">1438</span>
+<span id="1439">1439</span>
+<span id="1440">1440</span>
+<span id="1441">1441</span>
+<span id="1442">1442</span>
+<span id="1443">1443</span>
+<span id="1444">1444</span>
+<span id="1445">1445</span>
+<span id="1446">1446</span>
+<span id="1447">1447</span>
+<span id="1448">1448</span>
+<span id="1449">1449</span>
+<span id="1450">1450</span>
+<span id="1451">1451</span>
+<span id="1452">1452</span>
+<span id="1453">1453</span>
+<span id="1454">1454</span>
+<span id="1455">1455</span>
+<span id="1456">1456</span>
+<span id="1457">1457</span>
+<span id="1458">1458</span>
+<span id="1459">1459</span>
+<span id="1460">1460</span>
+<span id="1461">1461</span>
+<span id="1462">1462</span>
+<span id="1463">1463</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1445,10 +1472,11 @@
     worker::{Notification, Reason, WorkerState},
 };
 <span class="kw">use </span>anyhow::{anyhow, bail, ensure, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span>async_stream::stream;
 <span class="kw">use </span>futures::{
     future,
     lock::Mutex,
-    stream::{select_all, FuturesUnordered, StreamExt},
+    stream::{FuturesUnordered, StreamExt},
 };
 <span class="kw">use </span>linera_base::{
     crypto::{CryptoHash, KeyPair, PublicKey},
@@ -1469,10 +1497,12 @@
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;
 <span class="kw">use </span>std::{
-    collections::{BTreeMap, HashMap},
+    collections::{hash_map, BTreeMap, HashMap},
+    pin::Pin,
     sync::Arc,
     time::Duration,
 };
+<span class="kw">use </span>tokio_stream::Stream;
 <span class="kw">use </span>tracing::{debug, error, info};
 
 <span class="attribute">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
@@ -1529,10 +1559,10 @@
 
     <span class="kw">fn </span>make_node(<span class="kw-2">&amp;</span><span class="self">self</span>, address: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Node, NodeError&gt;;
 
-    <span class="kw">fn </span>make_nodes(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        committee: <span class="kw-2">&amp;</span>Committee,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(ValidatorName, <span class="self">Self</span>::Node)&gt;, NodeError&gt; {
+    <span class="kw">fn </span>make_nodes&lt;I&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, committee: <span class="kw-2">&amp;</span>Committee) -&gt; <span class="prelude-ty">Result</span>&lt;I, NodeError&gt;
+    <span class="kw">where
+        </span>I: FromIterator&lt;(ValidatorName, <span class="self">Self</span>::Node)&gt;,
+    {
         committee
             .validators
             .iter()
@@ -1817,7 +1847,6 @@
 
     <span class="kw">async fn </span>process_notification&lt;A&gt;(
         this: Arc&lt;Mutex&lt;<span class="self">Self</span>&gt;&gt;,
-        chain_id: ChainId,
         name: ValidatorName,
         node: A,
         <span class="kw-2">mut </span>local_node: LocalNodeClient&lt;S&gt;,
@@ -1826,11 +1855,11 @@
     <span class="kw">where
         </span>A: ValidatorNode + Send + Sync + <span class="lifetime">&#39;static </span>+ Clone,
     {
-        <span class="kw">match </span><span class="kw-2">&amp;</span>notification.reason {
+        <span class="kw">match </span>notification.reason {
             Reason::NewMessage { origin, height } =&gt; {
                 <span class="kw">if </span><span class="self">Self</span>::get_local_next_block_height(this.clone(), origin.sender, <span class="kw-2">&amp;mut </span>local_node)
                     .<span class="kw">await
-                    </span>&gt; <span class="prelude-val">Some</span>(<span class="kw-2">*</span>height)
+                    </span>&gt; <span class="prelude-val">Some</span>(height)
                 {
                     <span class="macro">debug!</span>(<span class="string">&quot;Accepting redundant notification for new message&quot;</span>);
                     <span class="kw">return </span><span class="bool-val">true</span>;
@@ -1841,17 +1870,17 @@
                     <span class="macro">error!</span>(<span class="string">&quot;Fail to process notification: {e}&quot;</span>);
                     <span class="kw">return </span><span class="bool-val">false</span>;
                 }
-                <span class="kw">if </span><span class="self">Self</span>::get_local_next_block_height(this.clone(), origin.sender, <span class="kw-2">&amp;mut </span>local_node)
-                    .<span class="kw">await
-                    </span>&lt;= <span class="prelude-val">Some</span>(<span class="kw-2">*</span>height)
+                <span class="kw">if </span><span class="self">Self</span>::get_local_next_block_height(this, origin.sender, <span class="kw-2">&amp;mut </span>local_node).<span class="kw">await
+                    </span>&lt;= <span class="prelude-val">Some</span>(height)
                 {
                     <span class="macro">error!</span>(<span class="string">&quot;Fail to synchronize new message after notification&quot;</span>);
                     <span class="kw">return </span><span class="bool-val">false</span>;
                 }
             }
             Reason::NewBlock { height } =&gt; {
+                <span class="kw">let </span>chain_id = notification.chain_id;
                 <span class="kw">if </span><span class="self">Self</span>::get_local_next_block_height(this.clone(), chain_id, <span class="kw-2">&amp;mut </span>local_node).<span class="kw">await
-                    </span>&gt; <span class="prelude-val">Some</span>(<span class="kw-2">*</span>height)
+                    </span>&gt; <span class="prelude-val">Some</span>(height)
                 {
                     <span class="macro">debug!</span>(<span class="string">&quot;Accepting redundant notification for new block&quot;</span>);
                     <span class="kw">return </span><span class="bool-val">true</span>;
@@ -1861,13 +1890,8 @@
                     .<span class="kw">await
                 </span>{
                     <span class="prelude-val">Ok</span>(()) =&gt; {
-                        <span class="kw">if </span><span class="self">Self</span>::get_local_next_block_height(
-                            this.clone(),
-                            chain_id,
-                            <span class="kw-2">&amp;mut </span>local_node,
-                        )
-                        .<span class="kw">await
-                            </span>&lt;= <span class="prelude-val">Some</span>(<span class="kw-2">*</span>height)
+                        <span class="kw">if </span><span class="self">Self</span>::get_local_next_block_height(this, chain_id, <span class="kw-2">&amp;mut </span>local_node).<span class="kw">await
+                            </span>&lt;= <span class="prelude-val">Some</span>(height)
                         {
                             <span class="macro">error!</span>(<span class="string">&quot;Fail to synchronize new block after notification&quot;</span>);
                             <span class="kw">return </span><span class="bool-val">false</span>;
@@ -1885,41 +1909,71 @@
     </span>}
 
     <span class="doccomment">/// Listens to notifications about the current chain from all validators.
-    </span><span class="comment">// TODO(#687): handle reconfigurations, loss of connection, etc.
+    </span><span class="comment">// TODO(#687): handle loss of connection, etc.
     </span><span class="kw">pub async fn </span>listen(this: Arc&lt;Mutex&lt;<span class="self">Self</span>&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;NotificationStream&gt;
+    <span class="kw">where
+        </span>P: Send + <span class="lifetime">&#39;static</span>,
+    {
+        <span class="kw">let </span><span class="kw-2">mut </span>streams = HashMap::new();
+        <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="self">Self</span>::update_streams(<span class="kw-2">&amp;</span>this, <span class="kw-2">&amp;mut </span>streams).<span class="kw">await </span>{
+            <span class="macro">error!</span>(<span class="string">&quot;Failed to update committee: {}&quot;</span>, err);
+        }
+        <span class="kw">let </span>stream = <span class="macro">stream! </span>{
+            <span class="kw">while let </span>(<span class="prelude-val">Some</span>(notification), <span class="kw">_</span>, <span class="kw">_</span>) =
+                future::select_all(streams.values_mut().map(StreamExt::next)).<span class="kw">await
+            </span>{
+                <span class="kw">if </span><span class="macro">matches!</span>(notification.reason, Reason::NewBlock { .. }) {
+                    <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="self">Self</span>::update_streams(<span class="kw-2">&amp;</span>this, <span class="kw-2">&amp;mut </span>streams).<span class="kw">await </span>{
+                        <span class="macro">error!</span>(<span class="string">&quot;Failed to update committee: {}&quot;</span>, err);
+                    }
+                }
+                <span class="kw">yield </span>notification;
+            }
+        };
+        <span class="prelude-val">Ok</span>(Box::pin(stream))
+    }
+
+    <span class="kw">async fn </span>update_streams(
+        this: <span class="kw-2">&amp;</span>Arc&lt;Mutex&lt;<span class="self">Self</span>&gt;&gt;,
+        streams: <span class="kw-2">&amp;mut </span>HashMap&lt;ValidatorName, Pin&lt;Box&lt;<span class="kw">dyn </span>Stream&lt;Item = Notification&gt; + Send&gt;&gt;&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), NodeError&gt;
     <span class="kw">where
         </span>P: Send + <span class="lifetime">&#39;static</span>,
     {
         <span class="kw">let </span>(chain_id, nodes, local_node) = {
             <span class="kw">let </span><span class="kw-2">mut </span>guard = this.lock().<span class="kw">await</span>;
             <span class="kw">let </span>committee = guard.local_committee().<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="kw">let </span>nodes = guard.validator_node_provider.make_nodes(<span class="kw-2">&amp;</span>committee)<span class="question-mark">?</span>;
+            <span class="kw">let </span>nodes: HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt; = guard.validator_node_provider.make_nodes(<span class="kw-2">&amp;</span>committee)<span class="question-mark">?</span>;
             (guard.chain_id, nodes, guard.node_client.clone())
         };
-        <span class="kw">let </span><span class="kw-2">mut </span>streams = Vec::new();
-        <span class="kw">for </span>(name, <span class="kw-2">mut </span>node) <span class="kw">in </span>nodes {
-            <span class="kw">let </span>this = this.clone();
-            <span class="kw">let </span>local_node = local_node.clone();
-            <span class="kw">match </span>node.subscribe(<span class="macro">vec!</span>[chain_id]).<span class="kw">await </span>{
+        <span class="comment">// Drop notification streams from removed validators.
+        </span>streams.retain(|name, <span class="kw">_</span>| nodes.contains_key(name));
+        <span class="comment">// Add notification streams from added validators.
+        </span><span class="kw">for </span>(name, <span class="kw-2">mut </span>node) <span class="kw">in </span>nodes {
+            <span class="kw">let </span>hash_map::Entry::Vacant(entry) = streams.entry(name) <span class="kw">else </span>{
+                            <span class="kw">continue</span>;
+                        };
+            <span class="kw">let </span>stream = <span class="kw">match </span>node.subscribe(<span class="macro">vec!</span>[chain_id]).<span class="kw">await </span>{
                 <span class="prelude-val">Err</span>(e) =&gt; {
                     <span class="macro">info!</span>(<span class="string">&quot;Could not connect to validator {name}: {e:?}&quot;</span>);
+                    <span class="kw">continue</span>;
                 }
-                <span class="prelude-val">Ok</span>(stream) =&gt; {
-                    <span class="kw">let </span>stream = stream.filter(<span class="kw">move </span>|notification| {
-                        Box::pin(<span class="self">Self</span>::process_notification(
-                            this.clone(),
-                            chain_id,
-                            name,
-                            node.clone(),
-                            local_node.clone(),
-                            notification.clone(),
-                        ))
-                    });
-                    streams.push(stream);
-                }
-            }
+                <span class="prelude-val">Ok</span>(stream) =&gt; stream,
+            };
+            <span class="kw">let </span>this = this.clone();
+            <span class="kw">let </span>local_node = local_node.clone();
+            <span class="kw">let </span>stream = stream.filter(<span class="kw">move </span>|notification| {
+                Box::pin(<span class="self">Self</span>::process_notification(
+                    this.clone(),
+                    name,
+                    node.clone(),
+                    local_node.clone(),
+                    notification.clone(),
+                ))
+            });
+            entry.insert(Box::pin(stream));
         }
-        <span class="prelude-val">Ok</span>(Box::pin(select_all(streams)))
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Prepares the chain for the next operation.
@@ -1967,7 +2021,7 @@
         <span class="kw">let </span>storage_client = <span class="self">self</span>.node_client.storage_client().<span class="kw">await</span>;
         <span class="kw">let </span>cross_chain_delay = <span class="self">self</span>.cross_chain_delay;
         <span class="kw">let </span>cross_chain_retries = <span class="self">self</span>.cross_chain_retries;
-        <span class="kw">let </span>nodes = <span class="self">self</span>.validator_node_provider.make_nodes(committee)<span class="question-mark">?</span>;
+        <span class="kw">let </span>nodes: Vec&lt;<span class="kw">_</span>&gt; = <span class="self">self</span>.validator_node_provider.make_nodes(committee)<span class="question-mark">?</span>;
         <span class="kw">let </span>result = communicate_with_quorum(
             <span class="kw-2">&amp;</span>nodes,
             committee,
@@ -2073,7 +2127,7 @@
         }
         <span class="comment">// Recover history from the network. We assume that the committee that signed the
         // certificate is still active.
-        </span><span class="kw">let </span>nodes = <span class="self">self</span>.validator_node_provider.make_nodes(remote_committee)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>nodes: Vec&lt;<span class="kw">_</span>&gt; = <span class="self">self</span>.validator_node_provider.make_nodes(remote_committee)<span class="question-mark">?</span>;
         <span class="self">self</span>.node_client
             .download_certificates(nodes.clone(), block.chain_id, block.height)
             .<span class="kw">await</span><span class="question-mark">?</span>;
@@ -2218,7 +2272,7 @@
         <span class="comment">// Use network information from the local chain.
         </span><span class="kw">let </span>chain_id = <span class="self">self</span>.chain_id;
         <span class="kw">let </span>local_committee = <span class="self">self</span>.local_committee().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>nodes = <span class="self">self</span>.validator_node_provider.make_nodes(<span class="kw-2">&amp;</span>local_committee)<span class="question-mark">?</span>;
+        <span class="kw">let </span>nodes: Vec&lt;<span class="kw">_</span>&gt; = <span class="self">self</span>.validator_node_provider.make_nodes(<span class="kw-2">&amp;</span>local_committee)<span class="question-mark">?</span>;
         <span class="comment">// Synchronize the state of the admin chain from the network.
         </span><span class="self">self</span>.node_client
             .synchronize_chain_state(nodes.clone(), <span class="self">self</span>.admin_id)
