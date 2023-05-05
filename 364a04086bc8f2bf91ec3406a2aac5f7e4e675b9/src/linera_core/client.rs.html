@@ -1434,7 +1434,6 @@
 <span id="1434">1434</span>
 <span id="1435">1435</span>
 <span id="1436">1436</span>
-<span id="1437">1437</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -2661,17 +2660,12 @@
     <span class="doccomment">/// Opens a new chain with a derived UID.
     </span><span class="kw">pub async fn </span>open_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>, public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;(EffectId, Certificate)&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>effect_id = EffectId {
-            chain_id: <span class="self">self</span>.chain_id,
-            height: <span class="self">self</span>.next_block_height,
-            index: <span class="number">0</span>,
-        };
         <span class="kw">let </span>(epoch, committees) = <span class="self">self</span>.epoch_and_committees(<span class="self">self</span>.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>epoch = epoch.ok_or(NodeError::InactiveLocalChain(<span class="self">self</span>.chain_id))<span class="question-mark">?</span>;
+        <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>certificate = <span class="self">self
             </span>.execute_block(
-                <span class="comment">// Cannot add incoming messages to preserve the effect id.
-                </span><span class="macro">vec!</span>[],
+                messages,
                 <span class="macro">vec!</span>[Operation::System(SystemOperation::OpenChain {
                     public_key,
                     committees,
@@ -2680,9 +2674,11 @@
                 })],
             )
             .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">if </span>!certificate.value.has_effect(<span class="kw-2">&amp;</span>effect_id) {
-            <span class="macro">bail!</span>(<span class="string">&quot;Failed to open a new chain&quot;</span>);
-        }
+        <span class="comment">// The second last effect created the new chain.
+        </span><span class="kw">let </span>effect_id = certificate
+            .value
+            .nth_last_effect_id(<span class="number">2</span>)
+            .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;Failed to open a new chain&quot;</span>))<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>((effect_id, certificate))
     }
 
@@ -2699,21 +2695,22 @@
         service: Bytecode,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(BytecodeId, Certificate)&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>id = BytecodeId(EffectId {
-            chain_id: <span class="self">self</span>.chain_id,
-            height: <span class="self">self</span>.next_block_height,
-            index: <span class="number">0</span>,
-        });
+        <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>certificate = <span class="self">self
             </span>.execute_block(
-                <span class="comment">// Cannot add incoming messages to preserve the effect id.
-                </span><span class="macro">vec!</span>[],
+                messages,
                 <span class="macro">vec!</span>[Operation::System(SystemOperation::PublishBytecode {
                     contract,
                     service,
                 })],
             )
             .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="comment">// The last effect published the bytecode.
+        </span><span class="kw">let </span>effect_id = certificate
+            .value
+            .nth_last_effect_id(<span class="number">1</span>)
+            .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;Failed to publish bytecode&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>id = BytecodeId(effect_id);
         <span class="prelude-val">Ok</span>((id, certificate))
     }
 
@@ -2726,18 +2723,10 @@
         required_application_ids: Vec&lt;UserApplicationId&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(UserApplicationId, Certificate)&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>id = UserApplicationId {
-            bytecode_id,
-            creation: EffectId {
-                chain_id: <span class="self">self</span>.chain_id,
-                height: <span class="self">self</span>.next_block_height,
-                index: <span class="number">0</span>,
-            },
-        };
+        <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>certificate = <span class="self">self
             </span>.execute_block(
-                <span class="comment">// Cannot add incoming messages to preserve the effect id.
-                </span><span class="macro">vec!</span>[],
+                messages,
                 <span class="macro">vec!</span>[Operation::System(SystemOperation::CreateApplication {
                     bytecode_id,
                     parameters,
@@ -2746,6 +2735,15 @@
                 })],
             )
             .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="comment">// The last effect created the application.
+        </span><span class="kw">let </span>creation = certificate
+            .value
+            .nth_last_effect_id(<span class="number">1</span>)
+            .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;Failed to create application&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw">let </span>id = UserApplicationId {
+            bytecode_id,
+            creation,
+        };
         <span class="prelude-val">Ok</span>((id, certificate))
     }
 

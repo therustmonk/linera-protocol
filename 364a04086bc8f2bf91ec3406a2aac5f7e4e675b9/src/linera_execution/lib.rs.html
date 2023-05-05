@@ -693,6 +693,8 @@
 <span id="693">693</span>
 <span id="694">694</span>
 <span id="695">695</span>
+<span id="696">696</span>
+<span id="697">697</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -914,6 +916,8 @@
     </span><span class="kw">pub </span>height: BlockHeight,
     <span class="doccomment">/// The current index of the operation.
     </span><span class="kw">pub </span>index: u32,
+    <span class="doccomment">/// The index of the next effect to be created.
+    </span><span class="kw">pub </span>next_effect_index: u32,
 }
 
 <span class="attribute">#[derive(Clone, Copy, Debug)]
@@ -1167,12 +1171,12 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;OperationContext&gt; <span class="kw">for </span>EffectId {
-    <span class="kw">fn </span>from(context: OperationContext) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            chain_id: context.chain_id,
-            height: context.height,
-            index: context.index,
+<span class="kw">impl </span>OperationContext {
+    <span class="kw">fn </span>next_effect_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; EffectId {
+        EffectId {
+            chain_id: <span class="self">self</span>.chain_id,
+            height: <span class="self">self</span>.height,
+            index: <span class="self">self</span>.next_effect_index,
         }
     }
 }

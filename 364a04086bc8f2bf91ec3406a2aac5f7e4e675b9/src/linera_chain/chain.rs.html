@@ -559,6 +559,9 @@
 <span id="559">559</span>
 <span id="560">560</span>
 <span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -968,11 +971,14 @@
         <span class="comment">// Second, execute the operations in the block and remember the recipients to notify.
         </span><span class="kw">for </span>(index, operation) <span class="kw">in </span>block.operations.iter().enumerate() {
             <span class="kw">let </span>index = u32::try_from(index).map_err(|<span class="kw">_</span>| ArithmeticError::Overflow)<span class="question-mark">?</span>;
+            <span class="kw">let </span>next_effect_index =
+                u32::try_from(effects.len()).map_err(|<span class="kw">_</span>| ArithmeticError::Overflow)<span class="question-mark">?</span>;
             <span class="kw">let </span>context = OperationContext {
                 chain_id,
                 height: block.height,
                 index,
                 authenticated_signer: block.authenticated_signer,
+                next_effect_index,
             };
             <span class="kw">let </span>results = <span class="self">self
                 </span>.execution_state

@@ -877,6 +877,15 @@
 <span id="877">877</span>
 <span id="878">878</span>
 <span id="879">879</span>
+<span id="880">880</span>
+<span id="881">881</span>
+<span id="882">882</span>
+<span id="883">883</span>
+<span id="884">884</span>
+<span id="885">885</span>
+<span id="886">886</span>
+<span id="887">887</span>
+<span id="888">888</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1072,6 +1081,8 @@
     },
     <span class="doccomment">/// Notifies that a new application bytecode was published.
     </span>BytecodePublished { operation_index: u32 },
+    <span class="doccomment">/// Notifies that a new application was created.
+    </span>ApplicationCreated,
     <span class="doccomment">/// Shares the locations of published bytecodes.
     </span>BytecodeLocations {
         locations: Vec&lt;(BytecodeId, BytecodeLocation)&gt;,
@@ -1111,6 +1122,7 @@
             | SystemEffect::SetCommittees { .. }
             | SystemEffect::Subscribe { .. }
             | SystemEffect::Unsubscribe { .. }
+            | SystemEffect::ApplicationCreated { .. }
             | SystemEffect::Notify { .. } =&gt; Box::new(iter::empty()),
         }
     }
@@ -1322,7 +1334,7 @@
                 admin_id,
                 epoch,
             } =&gt; {
-                <span class="kw">let </span>child_id = ChainId::child((<span class="kw-2">*</span>context).into());
+                <span class="kw">let </span>child_id = ChainId::child(context.next_effect_id());
                 <span class="macro">ensure!</span>(
                     <span class="self">self</span>.admin_id.get().as_ref() == <span class="prelude-val">Some</span>(admin_id),
                     SystemExecutionError::InvalidNewChainAdminId(child_id)
@@ -1575,11 +1587,17 @@
             } =&gt; {
                 <span class="kw">let </span>id = UserApplicationId {
                     bytecode_id: <span class="kw-2">*</span>bytecode_id,
-                    creation: (<span class="kw-2">*</span>context).into(),
+                    creation: context.next_effect_id(),
                 };
                 <span class="self">self</span>.registry
                     .create_application(id, parameters.clone(), required_application_ids.clone())
                     .<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="comment">// Send an effect to ourself to increment the effect ID.
+                </span>result.effects.push((
+                    Destination::Recipient(context.chain_id),
+                    <span class="bool-val">false</span>,
+                    SystemEffect::ApplicationCreated,
+                ));
                 new_application = <span class="prelude-val">Some</span>((id, initialization_argument.clone()));
             }
         }
@@ -1694,7 +1712,7 @@
                     <span class="self">self</span>.registry.register_published_bytecode(<span class="kw-2">*</span>id, <span class="kw-2">*</span>location)<span class="question-mark">?</span>;
                 }
             }
-            Notify { .. } =&gt; (),
+            ApplicationCreated { .. } | Notify { .. } =&gt; (),
             OpenChain { .. } =&gt; {
                 <span class="comment">// This special effect is executed immediately when cross-chain requests are received.
             </span>}
