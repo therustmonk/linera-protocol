@@ -999,7 +999,7 @@
         <span class="attribute">#[async_trait::async_trait]
         </span><span class="kw">impl </span>#generics linera_views::views::View&lt;#first_generic&gt; <span class="kw">for </span>#struct_name #generics
         <span class="kw">where
-            </span>#first_generic: Context + Send + Sync + Clone + <span class="lifetime">&#39;static</span>,
+            </span>#first_generic: linera_views::common::Context + Send + Sync + Clone + <span class="lifetime">&#39;static</span>,
             linera_views::views::ViewError: From&lt;#first_generic::Error&gt;,
         {
             <span class="kw">fn </span>context(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>#first_generic {
@@ -1056,7 +1056,7 @@
         <span class="attribute">#[async_trait::async_trait]
         </span><span class="kw">impl </span>#generics linera_views::views::RootView&lt;#first_generic&gt; <span class="kw">for </span>#struct_name #generics
         <span class="kw">where
-            </span>#first_generic: Context + Send + Sync + Clone + <span class="lifetime">&#39;static</span>,
+            </span>#first_generic: linera_views::common::Context + Send + Sync + Clone + <span class="lifetime">&#39;static</span>,
             linera_views::views::ViewError: From&lt;#first_generic::Error&gt;,
         {
             <span class="kw">async fn </span>save(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), linera_views::views::ViewError&gt; {
@@ -1108,7 +1108,7 @@
         <span class="attribute">#[async_trait::async_trait]
         </span><span class="kw">impl </span>#generics linera_views::views::HashableView&lt;#first_generic&gt; <span class="kw">for </span>#struct_name #generics
         <span class="kw">where
-            </span>#first_generic: Context + Send + Sync + Clone + <span class="lifetime">&#39;static</span>,
+            </span>#first_generic: linera_views::common::Context + Send + Sync + Clone + <span class="lifetime">&#39;static</span>,
             linera_views::views::ViewError: From&lt;#first_generic::Error&gt;,
         {
             <span class="kw">type </span>Hasher = linera_views::sha3::Sha3_256;
@@ -1145,7 +1145,7 @@
         <span class="attribute">#[async_trait::async_trait]
         </span><span class="kw">impl </span>#generics linera_views::views::CryptoHashView&lt;#first_generic&gt; <span class="kw">for </span>#struct_name #generics
         <span class="kw">where
-            </span>#first_generic: Context + Send + Sync + Clone + <span class="lifetime">&#39;static</span>,
+            </span>#first_generic: linera_views::common::Context + Send + Sync + Clone + <span class="lifetime">&#39;static</span>,
             linera_views::views::ViewError: From&lt;#first_generic::Error&gt;,
         {
             <span class="kw">async fn </span>crypto_hash(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;linera_base::crypto::CryptoHash, linera_views::views::ViewError&gt; {
@@ -1512,7 +1512,7 @@
             <span class="attribute">#[async_trait::async_trait]
             </span><span class="kw">impl</span>&lt;C&gt; linera_views::views::View&lt;C&gt; <span class="kw">for </span>TestView&lt;C&gt;
             <span class="kw">where
-                </span>C: Context + Send + Sync + Clone + <span class="lifetime">&#39;static</span>,
+                </span>C: linera_views::common::Context + Send + Sync + Clone + <span class="lifetime">&#39;static</span>,
                 linera_views::views::ViewError: From&lt;C::Error&gt;,
             {
                 <span class="kw">fn </span>context(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>C {
@@ -1582,7 +1582,7 @@
             <span class="attribute">#[async_trait::async_trait]
             </span><span class="kw">impl</span>&lt;C&gt; linera_views::views::HashableView&lt;C&gt; <span class="kw">for </span>TestView&lt;C&gt;
             <span class="kw">where
-                </span>C: Context + Send + Sync + Clone + <span class="lifetime">&#39;static</span>,
+                </span>C: linera_views::common::Context + Send + Sync + Clone + <span class="lifetime">&#39;static</span>,
                 linera_views::views::ViewError: From&lt;C::Error&gt;,
             {
                 <span class="kw">type </span>Hasher = linera_views::sha3::Sha3_256;
@@ -1631,7 +1631,7 @@
             <span class="attribute">#[async_trait::async_trait]
             </span><span class="kw">impl</span>&lt;C&gt; linera_views::views::RootView&lt;C&gt; <span class="kw">for </span>TestView&lt;C&gt;
             <span class="kw">where
-                </span>C: Context + Send + Sync + Clone + <span class="lifetime">&#39;static</span>,
+                </span>C: linera_views::common::Context + Send + Sync + Clone + <span class="lifetime">&#39;static</span>,
                 linera_views::views::ViewError: From&lt;C::Error&gt;,
             {
                 <span class="kw">async fn </span>save(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), linera_views::views::ViewError&gt; {
@@ -1682,7 +1682,7 @@
             <span class="attribute">#[async_trait::async_trait]
             </span><span class="kw">impl</span>&lt;C&gt; linera_views::views::CryptoHashView&lt;C&gt; <span class="kw">for </span>TestView&lt;C&gt;
             <span class="kw">where
-                </span>C: Context + Send + Sync + Clone + <span class="lifetime">&#39;static</span>,
+                </span>C: linera_views::common::Context + Send + Sync + Clone + <span class="lifetime">&#39;static</span>,
                 linera_views::views::ViewError: From&lt;C::Error&gt;,
             {
                 <span class="kw">async fn </span>crypto_hash(
