@@ -387,6 +387,10 @@
 <span id="387">387</span>
 <span id="388">388</span>
 <span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -395,7 +399,6 @@
 //! This allows manipulating a test microchain.
 
 </span><span class="kw">use super</span>::{BlockBuilder, TestValidator};
-<span class="kw">use crate</span>::{FromBcsBytes, ToBcsBytes};
 <span class="kw">use </span>cargo_toml::Manifest;
 <span class="kw">use </span>linera_base::{
     crypto::{KeyPair, PublicKey},
@@ -408,6 +411,8 @@
     system::{SystemChannel, SystemEffect, SystemOperation},
     Bytecode, Effect, Query, Response,
 };
+<span class="kw">use </span>serde::de::DeserializeOwned;
+<span class="kw">use </span>serde_json::json;
 <span class="kw">use </span>std::{path::PathBuf, sync::Arc};
 <span class="kw">use </span>tokio::{fs, sync::Mutex};
 
@@ -749,11 +754,14 @@
     </span><span class="kw">pub async fn </span>query&lt;Output&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         application_id: ApplicationId,
-        query: <span class="kw">impl </span>ToBcsBytes,
+        query: <span class="kw">impl </span>AsRef&lt;str&gt;,
     ) -&gt; Output
     <span class="kw">where
-        </span>Output: FromBcsBytes,
+        </span>Output: DeserializeOwned,
     {
+        <span class="kw">let </span>query_bytes = serde_json::to_vec(<span class="kw-2">&amp;</span><span class="macro">json!</span>({ <span class="string">&quot;query&quot;</span>: query.as_ref() }))
+            .expect(<span class="string">&quot;Failed to serialize query&quot;</span>);
+
         <span class="kw">let </span>response = <span class="self">self
             </span>.validator
             .worker()
@@ -762,7 +770,7 @@
                 <span class="self">self</span>.id(),
                 <span class="kw-2">&amp;</span>Query::User {
                     application_id,
-                    bytes: query.to_bcs_bytes().expect(<span class="string">&quot;Failed to serialize query&quot;</span>),
+                    bytes: query_bytes,
                 },
             )
             .<span class="kw">await
@@ -770,7 +778,7 @@
 
         <span class="kw">match </span>response {
             Response::User(bytes) =&gt; {
-                Output::from_bcs_bytes(<span class="kw-2">&amp;</span>bytes).expect(<span class="string">&quot;Failed to deserialize query response&quot;</span>)
+                serde_json::from_slice(<span class="kw-2">&amp;</span>bytes).expect(<span class="string">&quot;Failed to deserialize query response&quot;</span>)
             }
             Response::System(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;User query returned a system response&quot;</span>),
         }
