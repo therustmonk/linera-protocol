@@ -100,95 +100,19 @@
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
-<span id="103">103</span>
-<span id="104">104</span>
-<span id="105">105</span>
-<span id="106">106</span>
-<span id="107">107</span>
-<span id="108">108</span>
-<span id="109">109</span>
-<span id="110">110</span>
-<span id="111">111</span>
-<span id="112">112</span>
-<span id="113">113</span>
-<span id="114">114</span>
-<span id="115">115</span>
-<span id="116">116</span>
-<span id="117">117</span>
-<span id="118">118</span>
-<span id="119">119</span>
-<span id="120">120</span>
-<span id="121">121</span>
-<span id="122">122</span>
-<span id="123">123</span>
-<span id="124">124</span>
-<span id="125">125</span>
-<span id="126">126</span>
-<span id="127">127</span>
-<span id="128">128</span>
-<span id="129">129</span>
-<span id="130">130</span>
-<span id="131">131</span>
-<span id="132">132</span>
-<span id="133">133</span>
-<span id="134">134</span>
-<span id="135">135</span>
-<span id="136">136</span>
-<span id="137">137</span>
-<span id="138">138</span>
-<span id="139">139</span>
-<span id="140">140</span>
-<span id="141">141</span>
-<span id="142">142</span>
-<span id="143">143</span>
-<span id="144">144</span>
-<span id="145">145</span>
-<span id="146">146</span>
-<span id="147">147</span>
-<span id="148">148</span>
-<span id="149">149</span>
-<span id="150">150</span>
-<span id="151">151</span>
-<span id="152">152</span>
-<span id="153">153</span>
-<span id="154">154</span>
-<span id="155">155</span>
-<span id="156">156</span>
-<span id="157">157</span>
-<span id="158">158</span>
-<span id="159">159</span>
-<span id="160">160</span>
-<span id="161">161</span>
-<span id="162">162</span>
-<span id="163">163</span>
-<span id="164">164</span>
-<span id="165">165</span>
-<span id="166">166</span>
-<span id="167">167</span>
-<span id="168">168</span>
-<span id="169">169</span>
-<span id="170">170</span>
-<span id="171">171</span>
-<span id="172">172</span>
-<span id="173">173</span>
-<span id="174">174</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="doccomment">//! Functions and types to interface with the system API available to application services.
 
 </span><span class="kw">use </span><span class="kw">super</span>::queryable_system <span class="kw">as </span>system;
-<span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span><span class="kw">crate</span>::views::ViewStorageContext;
 <span class="kw">use </span>futures::future;
 <span class="kw">use </span>linera_base::{
     data_types::{Balance, Timestamp},
     identifiers::{ApplicationId, ChainId},
 };
-<span class="kw">use </span>linera_views::{
-    batch::Batch,
-    common::{ContextFromDb, KeyValueStoreClient},
-    views::{View, ViewError},
-};
+<span class="kw">use </span>linera_views::views::{View, ViewError};
 <span class="kw">use </span>serde::de::DeserializeOwned;
 <span class="kw">use </span>std::{fmt, future::Future, task::Poll};
 
@@ -214,76 +138,8 @@
     }
 }
 
-<span class="doccomment">/// A type to interface in a read-only manner with the key value storage provided to applications.
-</span><span class="attribute">#[derive(Default, Clone)]
-</span><span class="kw">pub struct </span>ReadOnlyKeyValueStore;
-
-<span class="kw">impl </span>ReadOnlyKeyValueStore {
-    <span class="kw">async fn </span>find_keys_by_prefix_load(<span class="kw-2">&amp;</span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Vec&lt;u8&gt;&gt;, ViewError&gt; {
-        <span class="kw">let </span>future = system::FindKeys::new(key_prefix);
-        future::poll_fn(|_context| future.poll().into()).<span class="kw">await
-    </span>}
-
-    <span class="kw">async fn </span>find_key_values_by_prefix_load(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        key_prefix: <span class="kw-2">&amp;</span>[u8],
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt;, ViewError&gt; {
-        <span class="kw">let </span>future = system::FindKeyValues::new(key_prefix);
-        future::poll_fn(|_context| future.poll().into()).<span class="kw">await
-    </span>}
-}
-
-<span class="attribute">#[async_trait]
-</span><span class="kw">impl </span>KeyValueStoreClient <span class="kw">for </span>ReadOnlyKeyValueStore {
-    <span class="kw">type </span>Error = ViewError;
-    <span class="kw">type </span>Keys = Vec&lt;Vec&lt;u8&gt;&gt;;
-    <span class="kw">type </span>KeyValues = Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt;;
-
-    <span class="kw">async fn </span>read_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, ViewError&gt; {
-        <span class="kw">let </span>future = system::ReadKeyBytes::new(key);
-        future::poll_fn(|_context| future.poll().into()).<span class="kw">await
-    </span>}
-
-    <span class="kw">async fn </span>read_multi_key_bytes(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        keys: Vec&lt;Vec&lt;u8&gt;&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt;, <span class="self">Self</span>::Error&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>results = Vec::new();
-        <span class="kw">for </span>key <span class="kw">in </span>keys {
-            <span class="kw">let </span>value = <span class="self">self</span>.read_key_bytes(<span class="kw-2">&amp;</span>key).<span class="kw">await</span><span class="question-mark">?</span>;
-            results.push(value);
-        }
-        <span class="prelude-val">Ok</span>(results)
-    }
-
-    <span class="kw">async fn </span>find_keys_by_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Keys, ViewError&gt; {
-        <span class="kw">let </span>keys = <span class="self">self</span>.find_keys_by_prefix_load(key_prefix).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(keys)
-    }
-
-    <span class="kw">async fn </span>find_key_values_by_prefix(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        key_prefix: <span class="kw-2">&amp;</span>[u8],
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::KeyValues, ViewError&gt; {
-        <span class="kw">let </span>key_values = <span class="self">self</span>.find_key_values_by_prefix_load(key_prefix).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(key_values)
-    }
-
-    <span class="kw">async fn </span>write_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, _batch: Batch, _base_key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; {
-        <span class="macro">unreachable!</span>();
-    }
-
-    <span class="kw">async fn </span>clear_journal(<span class="kw-2">&amp;</span><span class="self">self</span>, _base_key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt; {
-        <span class="macro">unreachable!</span>();
-    }
-}
-
-<span class="doccomment">/// Implementation of [`linera_views::common::Context`] that uses the [`ReadOnlyKeyValueStore`] to
-/// allow views to read data from the storage layer provided to Linera applications.
-</span><span class="kw">pub type </span>ReadOnlyViewStorageContext = ContextFromDb&lt;(), ReadOnlyKeyValueStore&gt;;
-
 <span class="doccomment">/// Loads the service state, without locking it for writes.
-</span><span class="kw">pub async fn </span>lock_and_load_view&lt;State: View&lt;ReadOnlyViewStorageContext&gt;&gt;() -&gt; State {
+</span><span class="kw">pub async fn </span>lock_and_load_view&lt;State: View&lt;ViewStorageContext&gt;&gt;() -&gt; State {
     <span class="kw">let </span>future = system::Lock::new();
     future::poll_fn(|_context| -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), ViewError&gt;&gt; { future.poll().into() })
         .<span class="kw">await
@@ -298,8 +154,8 @@
 }
 
 <span class="doccomment">/// Helper function to load the service state or create a new one if it doesn&#39;t exist.
-</span><span class="kw">pub async fn </span>load_view_using&lt;State: View&lt;ReadOnlyViewStorageContext&gt;&gt;() -&gt; State {
-    <span class="kw">let </span>context = ReadOnlyViewStorageContext::default();
+</span><span class="kw">pub async fn </span>load_view_using&lt;State: View&lt;ViewStorageContext&gt;&gt;() -&gt; State {
+    <span class="kw">let </span>context = ViewStorageContext::default();
     State::load(context)
         .<span class="kw">await
         </span>.expect(<span class="string">&quot;Failed to load application state&quot;</span>)

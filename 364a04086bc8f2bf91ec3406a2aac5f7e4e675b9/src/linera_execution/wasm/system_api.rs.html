@@ -410,32 +410,6 @@
 <span id="410">410</span>
 <span id="411">411</span>
 <span id="412">412</span>
-<span id="413">413</span>
-<span id="414">414</span>
-<span id="415">415</span>
-<span id="416">416</span>
-<span id="417">417</span>
-<span id="418">418</span>
-<span id="419">419</span>
-<span id="420">420</span>
-<span id="421">421</span>
-<span id="422">422</span>
-<span id="423">423</span>
-<span id="424">424</span>
-<span id="425">425</span>
-<span id="426">426</span>
-<span id="427">427</span>
-<span id="428">428</span>
-<span id="429">429</span>
-<span id="430">430</span>
-<span id="431">431</span>
-<span id="432">432</span>
-<span id="433">433</span>
-<span id="434">434</span>
-<span id="435">435</span>
-<span id="436">436</span>
-<span id="437">437</span>
-<span id="438">438</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -458,11 +432,6 @@
             <span class="kw">type </span>Error = ExecutionError;
 
             <span class="kw">type </span>Lock = HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;(), ExecutionError&gt;&gt;;
-            <span class="kw">type </span>ReadKeyBytes = HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, ExecutionError&gt;&gt;;
-            <span class="kw">type </span>FindKeys = HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;Vec&lt;Vec&lt;u8&gt;&gt;, ExecutionError&gt;&gt;;
-            <span class="kw">type </span>FindKeyValues =
-                HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt;, ExecutionError&gt;&gt;;
-            <span class="kw">type </span>WriteBatch = HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;(), ExecutionError&gt;&gt;;
 
             <span class="kw">fn </span>error_to_trap(<span class="kw-2">&amp;mut </span><span class="self">self</span>, error: <span class="self">Self</span>::Error) -&gt; <span class="macro-nonterminal">$trap </span>{
                 error.into()
@@ -520,105 +489,12 @@
                 future: <span class="kw-2">&amp;</span><span class="self">Self</span>::Lock,
             ) -&gt; <span class="prelude-ty">Result</span>&lt;writable_system::PollLock, <span class="self">Self</span>::Error&gt; {
                 <span class="kw">use </span>writable_system::PollLock;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
+                <span class="kw">match </span>future.poll(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; <span class="prelude-val">Ok</span>(PollLock::Pending),
                     Poll::Ready(<span class="prelude-val">Ok</span>(())) =&gt; <span class="prelude-val">Ok</span>(PollLock::ReadyLocked),
                     Poll::Ready(<span class="prelude-val">Err</span>(ExecutionError::ViewError(ViewError::TryLockError(<span class="kw">_</span>)))) =&gt; {
                         <span class="prelude-val">Ok</span>(PollLock::ReadyNotLocked)
                     }
-                    Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; <span class="prelude-val">Err</span>(error),
-                }
-            }
-
-            <span class="kw">fn </span>read_key_bytes_new(
-                <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-                key: <span class="kw-2">&amp;</span>[u8],
-            ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::ReadKeyBytes, <span class="self">Self</span>::Error&gt; {
-                <span class="prelude-val">Ok</span>(<span class="self">self
-                    </span>.queued_future_factory
-                    .enqueue(<span class="self">self</span>.runtime().read_key_bytes(key.to_owned())))
-            }
-
-            <span class="kw">fn </span>read_key_bytes_poll(
-                <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-                future: <span class="kw-2">&amp;</span><span class="self">Self</span>::ReadKeyBytes,
-            ) -&gt; <span class="prelude-ty">Result</span>&lt;writable_system::PollReadKeyBytes, <span class="self">Self</span>::Error&gt; {
-                <span class="kw">use </span>writable_system::PollReadKeyBytes;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
-                    Poll::Pending =&gt; <span class="prelude-val">Ok</span>(PollReadKeyBytes::Pending),
-                    Poll::Ready(opt_list) =&gt; <span class="prelude-val">Ok</span>(PollReadKeyBytes::Ready(opt_list<span class="question-mark">?</span>)),
-                }
-            }
-
-            <span class="kw">fn </span>find_keys_new(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::FindKeys, <span class="self">Self</span>::Error&gt; {
-                <span class="prelude-val">Ok</span>(<span class="self">self
-                    </span>.queued_future_factory
-                    .enqueue(<span class="self">self</span>.runtime().find_keys_by_prefix(key_prefix.to_owned())))
-            }
-
-            <span class="kw">fn </span>find_keys_poll(
-                <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-                future: <span class="kw-2">&amp;</span><span class="self">Self</span>::FindKeys,
-            ) -&gt; <span class="prelude-ty">Result</span>&lt;writable_system::PollFindKeys, <span class="self">Self</span>::Error&gt; {
-                <span class="kw">use </span>writable_system::PollFindKeys;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
-                    Poll::Pending =&gt; <span class="prelude-val">Ok</span>(PollFindKeys::Pending),
-                    Poll::Ready(keys) =&gt; <span class="prelude-val">Ok</span>(PollFindKeys::Ready(keys<span class="question-mark">?</span>)),
-                }
-            }
-
-            <span class="kw">fn </span>find_key_values_new(
-                <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-                key_prefix: <span class="kw-2">&amp;</span>[u8],
-            ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::FindKeyValues, <span class="self">Self</span>::Error&gt; {
-                <span class="prelude-val">Ok</span>(<span class="self">self</span>.queued_future_factory.enqueue(
-                    <span class="self">self</span>.runtime()
-                        .find_key_values_by_prefix(key_prefix.to_owned()),
-                ))
-            }
-
-            <span class="kw">fn </span>find_key_values_poll(
-                <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-                future: <span class="kw-2">&amp;</span><span class="self">Self</span>::FindKeyValues,
-            ) -&gt; <span class="prelude-ty">Result</span>&lt;writable_system::PollFindKeyValues, <span class="self">Self</span>::Error&gt; {
-                <span class="kw">use </span>writable_system::PollFindKeyValues;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
-                    Poll::Pending =&gt; <span class="prelude-val">Ok</span>(PollFindKeyValues::Pending),
-                    Poll::Ready(key_values) =&gt; <span class="prelude-val">Ok</span>(PollFindKeyValues::Ready(key_values<span class="question-mark">?</span>)),
-                }
-            }
-
-            <span class="kw">fn </span>write_batch_new(
-                <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-                list_oper: Vec&lt;writable_system::WriteOperation&gt;,
-            ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::WriteBatch, <span class="self">Self</span>::Error&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>batch = Batch::new();
-                <span class="kw">for </span>x <span class="kw">in </span>list_oper {
-                    <span class="kw">match </span>x {
-                        writable_system::WriteOperation::Delete(key) =&gt; {
-                            batch.delete_key(key.to_vec())
-                        }
-                        writable_system::WriteOperation::Deleteprefix(key_prefix) =&gt; {
-                            batch.delete_key_prefix(key_prefix.to_vec())
-                        }
-                        writable_system::WriteOperation::Put(key_value) =&gt; {
-                            batch.put_key_value_bytes(key_value.<span class="number">0</span>.to_vec(), key_value.<span class="number">1</span>.to_vec())
-                        }
-                    }
-                }
-                <span class="prelude-val">Ok</span>(<span class="self">self
-                    </span>.queued_future_factory
-                    .enqueue(<span class="self">self</span>.runtime().write_batch_and_unlock(batch)))
-            }
-
-            <span class="kw">fn </span>write_batch_poll(
-                <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-                future: <span class="kw-2">&amp;</span><span class="self">Self</span>::WriteBatch,
-            ) -&gt; <span class="prelude-ty">Result</span>&lt;writable_system::PollUnit, <span class="self">Self</span>::Error&gt; {
-                <span class="kw">use </span>writable_system::PollUnit;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
-                    Poll::Pending =&gt; <span class="prelude-val">Ok</span>(PollUnit::Pending),
-                    Poll::Ready(<span class="prelude-val">Ok</span>(())) =&gt; <span class="prelude-val">Ok</span>(PollUnit::Ready),
                     Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; <span class="prelude-val">Err</span>(error),
                 }
             }
@@ -722,10 +598,6 @@
             <span class="kw">type </span>Load = HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, ExecutionError&gt;&gt;;
             <span class="kw">type </span>Lock = HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;(), ExecutionError&gt;&gt;;
             <span class="kw">type </span>Unlock = HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;(), ExecutionError&gt;&gt;;
-            <span class="kw">type </span>ReadKeyBytes = HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, ExecutionError&gt;&gt;;
-            <span class="kw">type </span>FindKeys = HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;Vec&lt;Vec&lt;u8&gt;&gt;, ExecutionError&gt;&gt;;
-            <span class="kw">type </span>FindKeyValues =
-                HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt;, ExecutionError&gt;&gt;;
             <span class="kw">type </span>TryQueryApplication = HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, ExecutionError&gt;&gt;;
 
             <span class="kw">fn </span>chain_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; queryable_system::ChainId {
@@ -754,7 +626,7 @@
 
             <span class="kw">fn </span>load_poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>, future: <span class="kw-2">&amp;</span><span class="self">Self</span>::Load) -&gt; queryable_system::PollLoad {
                 <span class="kw">use </span>queryable_system::PollLoad;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
+                <span class="kw">match </span>future.poll(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; PollLoad::Pending,
                     Poll::Ready(<span class="prelude-val">Ok</span>(bytes)) =&gt; PollLoad::Ready(<span class="prelude-val">Ok</span>(bytes)),
                     Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; PollLoad::Ready(<span class="prelude-val">Err</span>(error.to_string())),
@@ -767,7 +639,7 @@
 
             <span class="kw">fn </span>lock_poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>, future: <span class="kw-2">&amp;</span><span class="self">Self</span>::Lock) -&gt; queryable_system::PollLock {
                 <span class="kw">use </span>queryable_system::PollLock;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
+                <span class="kw">match </span>future.poll(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; PollLock::Pending,
                     Poll::Ready(<span class="prelude-val">Ok</span>(())) =&gt; PollLock::Ready(<span class="prelude-val">Ok</span>(())),
                     Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; PollLock::Ready(<span class="prelude-val">Err</span>(error.to_string())),
@@ -780,58 +652,10 @@
 
             <span class="kw">fn </span>unlock_poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>, future: <span class="kw-2">&amp;</span><span class="self">Self</span>::Lock) -&gt; queryable_system::PollUnlock {
                 <span class="kw">use </span>queryable_system::PollUnlock;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
+                <span class="kw">match </span>future.poll(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; PollUnlock::Pending,
                     Poll::Ready(<span class="prelude-val">Ok</span>(())) =&gt; PollUnlock::Ready(<span class="prelude-val">Ok</span>(())),
                     Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; PollUnlock::Ready(<span class="prelude-val">Err</span>(error.to_string())),
-                }
-            }
-
-            <span class="kw">fn </span>read_key_bytes_new(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="self">Self</span>::ReadKeyBytes {
-                HostFuture::new(<span class="self">self</span>.runtime().read_key_bytes(key.to_owned()))
-            }
-
-            <span class="kw">fn </span>read_key_bytes_poll(
-                <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-                future: <span class="kw-2">&amp;</span><span class="self">Self</span>::ReadKeyBytes,
-            ) -&gt; queryable_system::PollReadKeyBytes {
-                <span class="kw">use </span>queryable_system::PollReadKeyBytes;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
-                    Poll::Pending =&gt; PollReadKeyBytes::Pending,
-                    Poll::Ready(<span class="prelude-val">Ok</span>(opt_list)) =&gt; PollReadKeyBytes::Ready(<span class="prelude-val">Ok</span>(opt_list)),
-                    Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; PollReadKeyBytes::Ready(<span class="prelude-val">Err</span>(error.to_string())),
-                }
-            }
-
-            <span class="kw">fn </span>find_keys_new(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="self">Self</span>::FindKeys {
-                HostFuture::new(<span class="self">self</span>.runtime().find_keys_by_prefix(key_prefix.to_owned()))
-            }
-
-            <span class="kw">fn </span>find_keys_poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>, future: <span class="kw-2">&amp;</span><span class="self">Self</span>::FindKeys) -&gt; queryable_system::PollFindKeys {
-                <span class="kw">use </span>queryable_system::PollFindKeys;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
-                    Poll::Pending =&gt; PollFindKeys::Pending,
-                    Poll::Ready(<span class="prelude-val">Ok</span>(keys)) =&gt; PollFindKeys::Ready(<span class="prelude-val">Ok</span>(keys)),
-                    Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; PollFindKeys::Ready(<span class="prelude-val">Err</span>(error.to_string())),
-                }
-            }
-
-            <span class="kw">fn </span>find_key_values_new(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="self">Self</span>::FindKeyValues {
-                HostFuture::new(
-                    <span class="self">self</span>.runtime()
-                        .find_key_values_by_prefix(key_prefix.to_owned()),
-                )
-            }
-
-            <span class="kw">fn </span>find_key_values_poll(
-                <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-                future: <span class="kw-2">&amp;</span><span class="self">Self</span>::FindKeyValues,
-            ) -&gt; queryable_system::PollFindKeyValues {
-                <span class="kw">use </span>queryable_system::PollFindKeyValues;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
-                    Poll::Pending =&gt; PollFindKeyValues::Pending,
-                    Poll::Ready(<span class="prelude-val">Ok</span>(key_values)) =&gt; PollFindKeyValues::Ready(<span class="prelude-val">Ok</span>(key_values)),
-                    Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; PollFindKeyValues::Ready(<span class="prelude-val">Err</span>(error.to_string())),
                 }
             }
 
@@ -855,7 +679,7 @@
                 future: <span class="kw-2">&amp;</span><span class="self">Self</span>::TryQueryApplication,
             ) -&gt; queryable_system::PollLoad {
                 <span class="kw">use </span>queryable_system::PollLoad;
-                <span class="kw">match </span>future.poll(<span class="self">self</span>.waker()) {
+                <span class="kw">match </span>future.poll(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; PollLoad::Pending,
                     Poll::Ready(<span class="prelude-val">Ok</span>(result)) =&gt; PollLoad::Ready(<span class="prelude-val">Ok</span>(result)),
                     Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; PollLoad::Ready(<span class="prelude-val">Err</span>(error.to_string())),
@@ -869,6 +693,130 @@
                     queryable_system::LogLevel::Info =&gt; <span class="macro">tracing::info!</span>(<span class="string">&quot;{message}&quot;</span>),
                     queryable_system::LogLevel::Warn =&gt; <span class="macro">tracing::warn!</span>(<span class="string">&quot;{message}&quot;</span>),
                     queryable_system::LogLevel::Error =&gt; <span class="macro">tracing::error!</span>(<span class="string">&quot;{message}&quot;</span>),
+                }
+            }
+        }
+    };
+}
+
+<span class="doccomment">/// Generates an implementation of `ViewSystem` for the provided `view_system_api` type.
+///
+/// Generates the common code for view system API types for all WASM runtimes.
+</span><span class="macro">macro_rules! </span>impl_view_system {
+    (<span class="macro-nonterminal">$view_system_api</span>:ident&lt;<span class="macro-nonterminal">$runtime</span>:lifetime&gt;) =&gt; {
+        <span class="macro">impl_view_system!</span>(
+            @generate <span class="macro-nonterminal">$view_system_api</span>&lt;<span class="macro-nonterminal">$runtime</span>&gt;, wasmtime::Trap, <span class="macro-nonterminal">$runtime</span>, &lt;<span class="macro-nonterminal">$runtime</span>&gt;
+        );
+    };
+
+    (<span class="macro-nonterminal">$view_system_api</span>:ty) =&gt; {
+        <span class="macro">impl_view_system!</span>(@generate <span class="macro-nonterminal">$view_system_api</span>, wasmer::RuntimeError, <span class="lifetime">&#39;static</span>);
+    };
+
+    (@generate <span class="macro-nonterminal">$view_system_api</span>:ty, <span class="macro-nonterminal">$trap</span>:ty, <span class="macro-nonterminal">$runtime</span>:lifetime $(, &lt;<span class="macro-nonterminal">$param</span>:lifetime&gt; )<span class="question-mark">?</span>) =&gt; {
+        <span class="kw">impl</span>$(&lt;<span class="macro-nonterminal">$param</span>&gt;)<span class="question-mark">? </span>ViewSystem <span class="kw">for </span><span class="macro-nonterminal">$view_system_api </span>{
+            <span class="kw">type </span>Error = ExecutionError;
+
+            <span class="kw">type </span>ReadKeyBytes = HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, ExecutionError&gt;&gt;;
+            <span class="kw">type </span>FindKeys = HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;Vec&lt;Vec&lt;u8&gt;&gt;, ExecutionError&gt;&gt;;
+            <span class="kw">type </span>FindKeyValues =
+                HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt;, ExecutionError&gt;&gt;;
+            <span class="kw">type </span>WriteBatch = HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;(), ExecutionError&gt;&gt;;
+
+            <span class="kw">fn </span>error_to_trap(<span class="kw-2">&amp;mut </span><span class="self">self</span>, error: <span class="self">Self</span>::Error) -&gt; <span class="macro-nonterminal">$trap </span>{
+                error.into()
+            }
+
+            <span class="kw">fn </span>read_key_bytes_new(
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+                key: <span class="kw-2">&amp;</span>[u8],
+            ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::ReadKeyBytes, <span class="self">Self</span>::Error&gt; {
+                <span class="prelude-val">Ok</span>(<span class="self">self</span>.new_host_future(<span class="self">self</span>.runtime().read_key_bytes(key.to_owned())))
+            }
+
+            <span class="kw">fn </span>read_key_bytes_poll(
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+                future: <span class="kw-2">&amp;</span><span class="self">Self</span>::ReadKeyBytes,
+            ) -&gt; <span class="prelude-ty">Result</span>&lt;view_system::PollReadKeyBytes, <span class="self">Self</span>::Error&gt; {
+                <span class="kw">use </span>view_system::PollReadKeyBytes;
+                <span class="kw">match </span>future.poll(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.waker()) {
+                    Poll::Pending =&gt; <span class="prelude-val">Ok</span>(PollReadKeyBytes::Pending),
+                    Poll::Ready(<span class="prelude-val">Ok</span>(opt_list)) =&gt; <span class="prelude-val">Ok</span>(PollReadKeyBytes::Ready(opt_list)),
+                    Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; <span class="prelude-val">Err</span>(error),
+                }
+            }
+
+            <span class="kw">fn </span>find_keys_new(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::FindKeys, <span class="self">Self</span>::Error&gt; {
+                <span class="prelude-val">Ok</span>(<span class="self">self</span>.new_host_future(<span class="self">self</span>.runtime().find_keys_by_prefix(key_prefix.to_owned())))
+            }
+
+            <span class="kw">fn </span>find_keys_poll(
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+                future: <span class="kw-2">&amp;</span><span class="self">Self</span>::FindKeys,
+            ) -&gt; <span class="prelude-ty">Result</span>&lt;view_system::PollFindKeys, <span class="self">Self</span>::Error&gt; {
+                <span class="kw">use </span>view_system::PollFindKeys;
+                <span class="kw">match </span>future.poll(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.waker()) {
+                    Poll::Pending =&gt; <span class="prelude-val">Ok</span>(PollFindKeys::Pending),
+                    Poll::Ready(<span class="prelude-val">Ok</span>(keys)) =&gt; <span class="prelude-val">Ok</span>(PollFindKeys::Ready(keys)),
+                    Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; <span class="prelude-val">Err</span>(error),
+                }
+            }
+
+            <span class="kw">fn </span>find_key_values_new(
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+                key_prefix: <span class="kw-2">&amp;</span>[u8],
+            ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::FindKeyValues, <span class="self">Self</span>::Error&gt; {
+                <span class="prelude-val">Ok</span>(HostFuture::new(
+                    <span class="self">self</span>.runtime()
+                        .find_key_values_by_prefix(key_prefix.to_owned()),
+                ))
+            }
+
+            <span class="kw">fn </span>find_key_values_poll(
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+                future: <span class="kw-2">&amp;</span><span class="self">Self</span>::FindKeyValues,
+            ) -&gt; <span class="prelude-ty">Result</span>&lt;view_system::PollFindKeyValues, <span class="self">Self</span>::Error&gt; {
+                <span class="kw">use </span>view_system::PollFindKeyValues;
+                <span class="kw">match </span>future.poll(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.waker()) {
+                    Poll::Pending =&gt; <span class="prelude-val">Ok</span>(PollFindKeyValues::Pending),
+                    Poll::Ready(<span class="prelude-val">Ok</span>(key_values)) =&gt; <span class="prelude-val">Ok</span>(PollFindKeyValues::Ready(key_values)),
+                    Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; <span class="prelude-val">Err</span>(error),
+                }
+            }
+
+            <span class="kw">fn </span>write_batch_new(
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+                list_oper: Vec&lt;view_system::WriteOperation&gt;,
+            ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::WriteBatch, <span class="self">Self</span>::Error&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>batch = Batch::new();
+                <span class="kw">for </span>x <span class="kw">in </span>list_oper {
+                    <span class="kw">match </span>x {
+                        view_system::WriteOperation::Delete(key) =&gt; {
+                            batch.delete_key(key.to_vec())
+                        }
+                        view_system::WriteOperation::Deleteprefix(key_prefix) =&gt; {
+                            batch.delete_key_prefix(key_prefix.to_vec())
+                        }
+                        view_system::WriteOperation::Put(key_value) =&gt; {
+                            batch.put_key_value_bytes(key_value.<span class="number">0</span>.to_vec(), key_value.<span class="number">1</span>.to_vec())
+                        }
+                    }
+                }
+                <span class="prelude-val">Ok</span>(<span class="self">self</span>.new_host_future(
+                    <span class="self">self</span>.runtime_with_writable_storage()<span class="question-mark">?
+                        </span>.write_batch_and_unlock(batch),
+                ))
+            }
+
+            <span class="kw">fn </span>write_batch_poll(
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+                future: <span class="kw-2">&amp;</span><span class="self">Self</span>::WriteBatch,
+            ) -&gt; <span class="prelude-ty">Result</span>&lt;view_system::PollUnit, <span class="self">Self</span>::Error&gt; {
+                <span class="kw">use </span>view_system::PollUnit;
+                <span class="kw">match </span>future.poll(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.waker()) {
+                    Poll::Pending =&gt; <span class="prelude-val">Ok</span>(PollUnit::Pending),
+                    Poll::Ready(<span class="prelude-val">Ok</span>(())) =&gt; <span class="prelude-val">Ok</span>(PollUnit::Ready),
+                    Poll::Ready(<span class="prelude-val">Err</span>(error)) =&gt; <span class="prelude-val">Err</span>(error),
                 }
             }
         }

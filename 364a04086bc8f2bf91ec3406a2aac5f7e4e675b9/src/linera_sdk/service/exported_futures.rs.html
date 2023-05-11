@@ -97,8 +97,6 @@
 <span id="97">97</span>
 <span id="98">98</span>
 <span id="99">99</span>
-<span id="100">100</span>
-<span id="101">101</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -109,10 +107,8 @@
 //! service type that implements [`linera-sdk::Service`].
 
 </span><span class="kw">use crate</span>::{
-    service::{
-        system_api::{<span class="self">self</span>, ReadOnlyViewStorageContext},
-        wit_types,
-    },
+    service::{system_api, wit_types},
+    views::ViewStorageContext,
     ExportedFuture, Service, ServiceLogger, SimpleStateStorage, ViewStateStorage,
 };
 <span class="kw">use </span>linera_views::views::RootView;
@@ -148,7 +144,7 @@
 
 <span class="kw">impl</span>&lt;Application&gt; ServiceStateStorage <span class="kw">for </span>ViewStateStorage&lt;Application&gt;
 <span class="kw">where
-    </span>Application: Service + RootView&lt;ReadOnlyViewStorageContext&gt;,
+    </span>Application: Service + RootView&lt;ViewStorageContext&gt;,
 {
     <span class="kw">fn </span>query_application(
         context: wit_types::QueryContext,

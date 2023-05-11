@@ -302,6 +302,7 @@
 <span id="302">302</span>
 <span id="303">303</span>
 <span id="304">304</span>
+<span id="305">305</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -387,8 +388,7 @@
 </span><span class="attribute">#[cfg(any(feature = <span class="string">&quot;wasmer&quot;</span>, feature = <span class="string">&quot;wasmtime&quot;</span>))]
 #[derive(Debug, Error)]
 </span><span class="kw">pub enum </span>WasmExecutionError {
-    <span class="attribute">#[cfg(any(feature = <span class="string">&quot;wasmer&quot;</span>, feature = <span class="string">&quot;wasmtime&quot;</span>))]
-    #[error(<span class="string">&quot;Failed to load WASM module&quot;</span>)]
+    <span class="attribute">#[error(<span class="string">&quot;Failed to load WASM module&quot;</span>)]
     </span>LoadModule(<span class="attribute">#[from] </span>anyhow::Error),
     <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
     #[error(<span class="string">&quot;Failed to create and configure Wasmtime runtime&quot;</span>)]
@@ -399,6 +399,8 @@
     <span class="attribute">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
     #[error(<span class="string">&quot;Failed to execute WASM module (Wasmtime)&quot;</span>)]
     </span>ExecuteModuleInWasmtime(<span class="attribute">#[from] </span>::wasmtime::Trap),
+    <span class="attribute">#[error(<span class="string">&quot;Attempt to use a system API to write to read-only storage&quot;</span>)]
+    </span>WriteAttemptToReadOnlyStorage,
 }
 
 <span class="attribute">#[async_trait]

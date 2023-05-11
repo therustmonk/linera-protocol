@@ -360,8 +360,6 @@
 <span id="360">360</span>
 <span id="361">361</span>
 <span id="362">362</span>
-<span id="363">363</span>
-<span id="364">364</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -372,10 +370,8 @@
 //! contract type that implements [`Contract`].
 
 </span><span class="kw">use crate</span>::{
-    contract::{
-        system_api::{<span class="self">self</span>, ViewStorageContext},
-        wit_types,
-    },
+    contract::{system_api, wit_types},
+    views::ViewStorageContext,
     ApplicationCallResult, Contract, ContractLogger, ExecutionResult, ExportedFuture,
     SessionCallResult, SessionId, SimpleStateStorage, ViewStateStorage,
 };
