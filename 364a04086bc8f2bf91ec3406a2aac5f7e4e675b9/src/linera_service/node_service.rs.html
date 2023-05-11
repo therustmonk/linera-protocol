@@ -636,6 +636,18 @@
 <span id="636">636</span>
 <span id="637">637</span>
 <span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -786,6 +798,18 @@
     S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
     ViewError: From&lt;S::ContextError&gt;,
 {
+    <span class="doccomment">/// Processes the inbox and returns the lists of certificate hashes that were created, if any.
+    </span><span class="kw">async fn </span>process_inbox(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;CryptoHash&gt;, Error&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
+        client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>certificates = client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>hashes = certificates
+            .into_iter()
+            .map(|cert| cert.value.hash())
+            .collect();
+        <span class="prelude-val">Ok</span>(hashes)
+    }
+
     <span class="doccomment">/// Transfers `amount` units of value from the given owner&#39;s account to the recipient.
     /// If no owner is given, try to take the units out of the unattributed account.
     </span><span class="kw">async fn </span>transfer(
