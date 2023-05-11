@@ -1460,6 +1460,22 @@
 <span id="1460">1460</span>
 <span id="1461">1461</span>
 <span id="1462">1462</span>
+<span id="1463">1463</span>
+<span id="1464">1464</span>
+<span id="1465">1465</span>
+<span id="1466">1466</span>
+<span id="1467">1467</span>
+<span id="1468">1468</span>
+<span id="1469">1469</span>
+<span id="1470">1470</span>
+<span id="1471">1471</span>
+<span id="1472">1472</span>
+<span id="1473">1473</span>
+<span id="1474">1474</span>
+<span id="1475">1475</span>
+<span id="1476">1476</span>
+<span id="1477">1477</span>
+<span id="1478">1478</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -2623,6 +2639,22 @@
         .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
+
+    <span class="doccomment">/// Requests a `RegisterApplications` effect from another chain so the application can be used
+    /// on this one.
+    </span><span class="kw">pub async fn </span>request_application(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        application_id: UserApplicationId,
+        chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+        <span class="kw">let </span>chain_id = chain_id.unwrap_or(application_id.creation.chain_id);
+        <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>operations = <span class="macro">vec!</span>[Operation::System(SystemOperation::RequestApplication {
+            application_id,
+            chain_id,
+        })];
+        <span class="self">self</span>.execute_block(messages, operations).<span class="kw">await
+    </span>}
 
     <span class="doccomment">/// Sends tokens to a chain.
     </span><span class="kw">pub async fn </span>transfer_to_account(

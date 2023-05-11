@@ -886,6 +886,37 @@
 <span id="886">886</span>
 <span id="887">887</span>
 <span id="888">888</span>
+<span id="889">889</span>
+<span id="890">890</span>
+<span id="891">891</span>
+<span id="892">892</span>
+<span id="893">893</span>
+<span id="894">894</span>
+<span id="895">895</span>
+<span id="896">896</span>
+<span id="897">897</span>
+<span id="898">898</span>
+<span id="899">899</span>
+<span id="900">900</span>
+<span id="901">901</span>
+<span id="902">902</span>
+<span id="903">903</span>
+<span id="904">904</span>
+<span id="905">905</span>
+<span id="906">906</span>
+<span id="907">907</span>
+<span id="908">908</span>
+<span id="909">909</span>
+<span id="910">910</span>
+<span id="911">911</span>
+<span id="912">912</span>
+<span id="913">913</span>
+<span id="914">914</span>
+<span id="915">915</span>
+<span id="916">916</span>
+<span id="917">917</span>
+<span id="918">918</span>
+<span id="919">919</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1040,6 +1071,11 @@
         </span>initialization_argument: Vec&lt;u8&gt;,
         required_application_ids: Vec&lt;UserApplicationId&gt;,
     },
+    <span class="doccomment">/// Requests a message from another chain to register a user application on this chain.
+    </span>RequestApplication {
+        chain_id: ChainId,
+        application_id: UserApplicationId,
+    },
 }
 
 <span class="doccomment">/// The effect of a system operation to be performed on a remote chain.
@@ -1094,6 +1130,9 @@
     },
     <span class="doccomment">/// Does nothing. Used to debug the intended recipients of a block.
     </span>Notify { id: ChainId },
+    <span class="doccomment">/// Requests a `RegisterApplication` message from the target chain to register the specified
+    /// application on the sender chain.
+    </span>RequestApplication(UserApplicationId),
 }
 
 <span class="kw">impl </span>SystemEffect {
@@ -1123,7 +1162,8 @@
             | SystemEffect::Subscribe { .. }
             | SystemEffect::Unsubscribe { .. }
             | SystemEffect::ApplicationCreated { .. }
-            | SystemEffect::Notify { .. } =&gt; Box::new(iter::empty()),
+            | SystemEffect::Notify { .. }
+            | SystemEffect::RequestApplication(<span class="kw">_</span>) =&gt; Box::new(iter::empty()),
         }
     }
 }
@@ -1600,6 +1640,14 @@
                 ));
                 new_application = <span class="prelude-val">Some</span>((id, initialization_argument.clone()));
             }
+            RequestApplication {
+                chain_id,
+                application_id,
+            } =&gt; result.effects.push((
+                Destination::Recipient(<span class="kw-2">*</span>chain_id),
+                <span class="bool-val">false</span>,
+                SystemEffect::RequestApplication(<span class="kw-2">*</span>application_id),
+            )),
         }
 
         <span class="prelude-val">Ok</span>((result, new_application))
@@ -1722,6 +1770,20 @@
                         .register_application(application.clone())
                         .<span class="kw">await</span><span class="question-mark">?</span>;
                 }
+            }
+            RequestApplication(application_id) =&gt; {
+                <span class="kw">let </span>applications = <span class="self">self
+                    </span>.registry
+                    .describe_applications_with_dependencies(
+                        <span class="macro">vec!</span>[<span class="kw-2">*</span>application_id],
+                        <span class="kw-2">&amp;</span>Default::default(),
+                    )
+                    .<span class="kw">await</span><span class="question-mark">?</span>;
+                result.effects.push((
+                    Destination::Recipient(context.effect_id.chain_id),
+                    <span class="bool-val">false</span>,
+                    SystemEffect::RegisterApplications { applications },
+                ));
             }
             <span class="kw">_ </span>=&gt; {
                 <span class="macro">tracing::error!</span>(
