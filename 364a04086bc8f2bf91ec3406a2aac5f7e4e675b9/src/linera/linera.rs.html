@@ -1379,6 +1379,39 @@
 <span id="1379">1379</span>
 <span id="1380">1380</span>
 <span id="1381">1381</span>
+<span id="1382">1382</span>
+<span id="1383">1383</span>
+<span id="1384">1384</span>
+<span id="1385">1385</span>
+<span id="1386">1386</span>
+<span id="1387">1387</span>
+<span id="1388">1388</span>
+<span id="1389">1389</span>
+<span id="1390">1390</span>
+<span id="1391">1391</span>
+<span id="1392">1392</span>
+<span id="1393">1393</span>
+<span id="1394">1394</span>
+<span id="1395">1395</span>
+<span id="1396">1396</span>
+<span id="1397">1397</span>
+<span id="1398">1398</span>
+<span id="1399">1399</span>
+<span id="1400">1400</span>
+<span id="1401">1401</span>
+<span id="1402">1402</span>
+<span id="1403">1403</span>
+<span id="1404">1404</span>
+<span id="1405">1405</span>
+<span id="1406">1406</span>
+<span id="1407">1407</span>
+<span id="1408">1408</span>
+<span id="1409">1409</span>
+<span id="1410">1410</span>
+<span id="1411">1411</span>
+<span id="1412">1412</span>
+<span id="1413">1413</span>
+<span id="1414">1414</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1416,6 +1449,7 @@
 };
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;
+<span class="kw">use </span>serde_json::Value;
 <span class="kw">use </span>std::{
     env, fs,
     num::NonZeroU16,
@@ -2095,9 +2129,8 @@
     <span class="doccomment">/// Create an application.
     </span>CreateApplication {
         bytecode_id: BytecodeId,
-        <span class="doccomment">/// The initialization arguments, passed to the contract&#39;s `initialize` method on the chain
-        /// that creates the application. (But not on other chains, when it is registered there.)
-        </span>arguments: String,
+        <span class="attribute">#[structopt(flatten)]
+        </span>arguments: JsonArg,
         creator: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
         <span class="attribute">#[structopt(long)]
         </span>parameters: <span class="prelude-ty">Option</span>&lt;String&gt;,
@@ -2109,9 +2142,8 @@
     </span>PublishAndCreate {
         contract: PathBuf,
         service: PathBuf,
-        <span class="doccomment">/// The initialization arguments, passed to the contract&#39;s `initialize` method on the chain
-        /// that creates the application. (But not on other chains, when it is registered there.)
-        </span>arguments: String,
+        <span class="attribute">#[structopt(flatten)]
+        </span>arguments: JsonArg,
         publisher: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
         <span class="attribute">#[structopt(long)]
         </span>parameters: <span class="prelude-ty">Option</span>&lt;String&gt;,
@@ -2179,6 +2211,40 @@
     ///
     /// Equivalent to running `cargo test` with the appropriate test runner.
     </span>Test { path: <span class="prelude-ty">Option</span>&lt;PathBuf&gt; },
+}
+
+<span class="attribute">#[derive(StructOpt)]
+</span><span class="kw">struct </span>JsonArg {
+    <span class="doccomment">/// JSON file specifying initialization arguments, passed to the contract&#39;s `initialize` method on the chain
+    /// that creates the application. (But not on other chains, when it is registered there.)
+    ///
+    /// Cannot be used with `--json-args`.
+    </span><span class="attribute">#[structopt(long)]
+    </span>file_args: <span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
+    <span class="doccomment">/// JSON file specifying initialization arguments, passed to the contract&#39;s `initialize` method on the chain
+    /// that creates the application. (But not on other chains, when it is registered there.)
+    ///
+    /// Cannot be used with `--file-args`.
+    </span><span class="attribute">#[structopt(long)]
+    </span>json_args: <span class="prelude-ty">Option</span>&lt;String&gt;,
+}
+
+<span class="kw">impl </span>JsonArg {
+    <span class="kw">fn </span>into_bytes(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, anyhow::Error&gt; {
+        <span class="kw">match </span>(<span class="self">self</span>.file_args, <span class="self">self</span>.json_args) {
+            (<span class="prelude-val">Some</span>(<span class="kw">_</span>), <span class="prelude-val">Some</span>(<span class="kw">_</span>)) =&gt; <span class="macro">bail!</span>(<span class="string">&quot;cannot have both a json string and file&quot;</span>),
+            (<span class="prelude-val">Some</span>(file), <span class="prelude-val">None</span>) =&gt; {
+                <span class="kw">let </span>file_contents = fs::read_to_string(file)<span class="question-mark">?</span>;
+                <span class="kw">let </span>as_value: Value = serde_json::from_str(<span class="kw-2">&amp;</span>file_contents)<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(serde_json::to_vec(<span class="kw-2">&amp;</span>as_value)<span class="question-mark">?</span>)
+            }
+            (<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(json)) =&gt; {
+                <span class="kw">let </span>as_value: Value = serde_json::from_str(<span class="kw-2">&amp;</span>json)<span class="question-mark">?</span>;
+                <span class="prelude-val">Ok</span>(serde_json::to_vec(<span class="kw-2">&amp;</span>as_value)<span class="question-mark">?</span>)
+            }
+            (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; <span class="macro">bail!</span>(<span class="string">&quot;json arguments must be provided&quot;</span>),
+        }
+    }
 }
 
 <span class="kw">struct </span>Job(ClientContext, ClientCommand);
@@ -2500,7 +2566,7 @@
                 <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, creator);
 
                 <span class="macro">info!</span>(<span class="string">&quot;Processing arguments...&quot;</span>);
-                <span class="kw">let </span>arguments = hex::decode(<span class="kw-2">&amp;</span>arguments)<span class="question-mark">?</span>;
+                <span class="kw">let </span>arg_as_bytes = arguments.into_bytes()<span class="question-mark">?</span>;
                 <span class="kw">let </span>parameters = <span class="kw">match </span>parameters {
                     <span class="prelude-val">None </span>=&gt; <span class="macro">vec!</span>[],
                     <span class="prelude-val">Some</span>(parameters) =&gt; hex::decode(parameters)<span class="question-mark">?</span>,
@@ -2515,7 +2581,7 @@
                     .create_application(
                         bytecode_id,
                         parameters,
-                        arguments,
+                        arg_as_bytes,
                         required_application_ids.unwrap_or_default(),
                     )
                     .<span class="kw">await
@@ -2540,7 +2606,7 @@
                 <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, publisher);
 
                 <span class="macro">info!</span>(<span class="string">&quot;Processing arguments...&quot;</span>);
-                <span class="kw">let </span>arguments = hex::decode(<span class="kw-2">&amp;</span>arguments)<span class="question-mark">?</span>;
+                <span class="kw">let </span>arg_as_bytes = arguments.into_bytes()<span class="question-mark">?</span>;
                 <span class="kw">let </span>parameters = <span class="kw">match </span>parameters {
                     <span class="prelude-val">None </span>=&gt; <span class="macro">vec!</span>[],
                     <span class="prelude-val">Some</span>(parameters) =&gt; hex::decode(parameters)<span class="question-mark">?</span>,
@@ -2559,7 +2625,7 @@
                     .create_application(
                         bytecode_id,
                         parameters,
-                        arguments,
+                        arg_as_bytes,
                         required_application_ids.unwrap_or_default(),
                     )
                     .<span class="kw">await
