@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["FileLock","Represents the actually locked file"],["FileOptions","A wrapper around the open options type that can be queried for the write permissions"]]};

@@ -359,6 +359,62 @@
 <span id="359">359</span>
 <span id="360">360</span>
 <span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -368,6 +424,7 @@
     modifiers::UTF8_ROUND_CORNERS, presets::UTF8_FULL, Attribute, Cell, Color, ContentArrangement,
     Table,
 };
+<span class="kw">use </span>file_lock::{FileLock, FileOptions};
 <span class="kw">use </span>linera_base::{
     crypto::{CryptoHash, KeyPair, PublicKey},
     data_types::{Balance, BlockHeight, Timestamp},
@@ -381,9 +438,9 @@
 <span class="kw">use </span>serde::{de::DeserializeOwned, Deserialize, Serialize};
 <span class="kw">use </span>std::{
     collections::{BTreeMap, HashMap},
-    fs::{<span class="self">self</span>, OpenOptions},
+    fs::{<span class="self">self</span>, File, OpenOptions},
     io::{BufRead, BufReader, BufWriter, Write},
-    path::Path,
+    path::{Path, PathBuf},
 };
 
 <span class="kw">pub trait </span>Import: DeserializeOwned {
@@ -474,8 +531,16 @@
     }
 }
 
-<span class="attribute">#[derive(Serialize, Deserialize)]
+<span class="doccomment">/// A wrapper around `InnerWalletState` which owns a [`FileLock`] to prevent
+/// two processes accessing it at the same time.
 </span><span class="kw">pub struct </span>WalletState {
+    inner: InnerWallet,
+    wallet_path: PathBuf,
+    _lock: FileLock,
+}
+
+<span class="attribute">#[derive(Serialize, Deserialize)]
+</span><span class="kw">struct </span>InnerWallet {
     chains: BTreeMap&lt;ChainId, UserChain&gt;,
     unassigned_key_pairs: HashMap&lt;PublicKey, KeyPair&gt;,
     default: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
@@ -484,42 +549,45 @@
 
 <span class="kw">impl </span>WalletState {
     <span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, chain_id: ChainId) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>UserChain&gt; {
-        <span class="self">self</span>.chains.get(<span class="kw-2">&amp;</span>chain_id)
+        <span class="self">self</span>.inner.chains.get(<span class="kw-2">&amp;</span>chain_id)
     }
 
     <span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, chain: UserChain) {
-        <span class="kw">if </span><span class="self">self</span>.chains.is_empty() {
-            <span class="self">self</span>.default = <span class="prelude-val">Some</span>(chain.chain_id);
+        <span class="kw">if </span><span class="self">self</span>.inner.chains.is_empty() {
+            <span class="self">self</span>.inner.default = <span class="prelude-val">Some</span>(chain.chain_id);
         }
-        <span class="self">self</span>.chains.insert(chain.chain_id, chain);
+        <span class="self">self</span>.inner.chains.insert(chain.chain_id, chain);
     }
 
     <span class="kw">pub fn </span>default_chain(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;ChainId&gt; {
-        <span class="self">self</span>.default
+        <span class="self">self</span>.inner.default
     }
 
     <span class="kw">pub fn </span>chain_ids(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;ChainId&gt; {
-        <span class="self">self</span>.chains.keys().copied().collect()
+        <span class="self">self</span>.inner.chains.keys().copied().collect()
     }
 
     <span class="kw">pub fn </span>num_chains(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="self">self</span>.chains.len()
+        <span class="self">self</span>.inner.chains.len()
     }
 
     <span class="kw">pub fn </span>last_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>UserChain&gt; {
-        <span class="self">self</span>.chains.values().last()
+        <span class="self">self</span>.inner.chains.values().last()
     }
 
     <span class="kw">pub fn </span>chains_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;mut </span>UserChain&gt; {
-        <span class="self">self</span>.chains.values_mut()
+        <span class="self">self</span>.inner.chains.values_mut()
     }
 
     <span class="kw">pub fn </span>add_unassigned_key_pair(<span class="kw-2">&amp;mut </span><span class="self">self</span>, keypair: KeyPair) {
-        <span class="self">self</span>.unassigned_key_pairs.insert(keypair.public(), keypair);
+        <span class="self">self</span>.inner
+            .unassigned_key_pairs
+            .insert(keypair.public(), keypair);
     }
 
     <span class="kw">pub fn </span>key_pair_for_pk(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>PublicKey) -&gt; <span class="prelude-ty">Option</span>&lt;KeyPair&gt; {
-        <span class="self">self</span>.unassigned_key_pairs
+        <span class="self">self</span>.inner
+            .unassigned_key_pairs
             .get(key)
             .map(|key_pair| key_pair.copy())
     }
@@ -530,9 +598,13 @@
         chain_id: ChainId,
         timestamp: Timestamp,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), anyhow::Error&gt; {
-        <span class="kw">let </span>key_pair = <span class="self">self</span>.unassigned_key_pairs.remove(<span class="kw-2">&amp;</span>key).ok_or_else(|| {
-            <span class="macro">anyhow!</span>(<span class="string">&quot;could not assign chain to key as unassigned key was not found&quot;</span>)
-        })<span class="question-mark">?</span>;
+        <span class="kw">let </span>key_pair = <span class="self">self
+            </span>.inner
+            .unassigned_key_pairs
+            .remove(<span class="kw-2">&amp;</span>key)
+            .ok_or_else(|| {
+                <span class="macro">anyhow!</span>(<span class="string">&quot;could not assign chain to key as unassigned key was not found&quot;</span>)
+            })<span class="question-mark">?</span>;
         <span class="kw">let </span>user_chain = UserChain {
             chain_id,
             key_pair: <span class="prelude-val">Some</span>(key_pair),
@@ -545,10 +617,10 @@
     }
 
     <span class="kw">pub fn </span>set_default_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>, chain_id: ChainId) -&gt; <span class="prelude-ty">Result</span>&lt;(), anyhow::Error&gt; {
-        <span class="kw">if </span>!<span class="self">self</span>.chains.contains_key(<span class="kw-2">&amp;</span>chain_id) {
+        <span class="kw">if </span>!<span class="self">self</span>.inner.chains.contains_key(<span class="kw-2">&amp;</span>chain_id) {
             <span class="macro">bail!</span>(<span class="string">&quot;Chain {} cannot be assigned as the default chain since it does not exist in the wallet.&quot;</span>, <span class="kw-2">&amp;</span>chain_id);
         }
-        <span class="self">self</span>.default = <span class="prelude-val">Some</span>(chain_id);
+        <span class="self">self</span>.inner.default = <span class="prelude-val">Some</span>(chain_id);
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -558,7 +630,7 @@
         S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
         ViewError: From&lt;S::ContextError&gt;,
     {
-        <span class="self">self</span>.chains.insert(
+        <span class="self">self</span>.inner.chains.insert(
             state.chain_id(),
             UserChain {
                 chain_id: state.chain_id(),
@@ -571,41 +643,81 @@
     }
 
     <span class="kw">pub fn </span>genesis_admin_chain(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ChainId {
-        <span class="self">self</span>.genesis_config.admin_id
+        <span class="self">self</span>.inner.genesis_config.admin_id
     }
 
     <span class="kw">pub fn </span>genesis_config(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>GenesisConfig {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.genesis_config
+        <span class="kw-2">&amp;</span><span class="self">self</span>.inner.genesis_config
     }
 
-    <span class="kw">pub fn </span>read(path: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, anyhow::Error&gt; {
-        <span class="kw">let </span>file = OpenOptions::new().read(<span class="bool-val">true</span>).open(path)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(serde_json::from_reader(BufReader::new(file))<span class="question-mark">?</span>)
+    <span class="kw">pub fn </span>from_file(path: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, anyhow::Error&gt; {
+        <span class="kw">let </span>file = FileOptions::new().read(<span class="bool-val">true</span>).write(<span class="bool-val">true</span>);
+        <span class="kw">let </span>block = <span class="bool-val">false</span>;
+        <span class="kw">let </span>file_lock = <span class="kw">match </span>FileLock::lock(path, block, file) {
+            <span class="prelude-val">Ok</span>(lock) =&gt; lock,
+            <span class="prelude-val">Err</span>(err) =&gt; <span class="macro">bail!</span>(<span class="string">&quot;Error getting write lock to wallet: {}&quot;</span>, err),
+        };
+        <span class="kw">let </span>inner = serde_json::from_reader(BufReader::new(<span class="kw-2">&amp;</span>file_lock.file))<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+            inner,
+            wallet_path: path.into(),
+            _lock: file_lock,
+        })
     }
 
     <span class="kw">pub fn </span>create(path: <span class="kw-2">&amp;</span>Path, genesis_config: GenesisConfig) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, anyhow::Error&gt; {
-        <span class="kw">let </span>file = OpenOptions::new()
-            .create(<span class="bool-val">true</span>)
-            .write(<span class="bool-val">true</span>)
-            .read(<span class="bool-val">true</span>)
-            .open(path)<span class="question-mark">?</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>reader = BufReader::new(file);
+        <span class="kw">let </span>file = FileOptions::new().create(<span class="bool-val">true</span>).write(<span class="bool-val">true</span>).read(<span class="bool-val">true</span>);
+        <span class="kw">let </span>block = <span class="bool-val">false</span>;
+        <span class="kw">let </span>file_lock = <span class="kw">match </span>FileLock::lock(path, block, file) {
+            <span class="prelude-val">Ok</span>(lock) =&gt; lock,
+            <span class="prelude-val">Err</span>(err) =&gt; <span class="macro">bail!</span>(<span class="string">&quot;Error getting write lock to wallet: {}&quot;</span>, err),
+        };
+        <span class="kw">let </span><span class="kw-2">mut </span>reader = BufReader::new(<span class="kw-2">&amp;</span>file_lock.file);
         <span class="kw">if </span>reader.fill_buf()<span class="question-mark">?</span>.is_empty() {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+            <span class="kw">let </span>inner = InnerWallet {
                 chains: Default::default(),
                 unassigned_key_pairs: Default::default(),
                 default: <span class="prelude-val">None</span>,
                 genesis_config,
-            });
+            };
+            <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+                inner,
+                wallet_path: path.into(),
+                _lock: file_lock,
+            })
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>inner = serde_json::from_reader(reader)<span class="question-mark">?</span>;
+            <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+                inner,
+                wallet_path: path.into(),
+                _lock: file_lock,
+            })
         }
-        <span class="prelude-val">Ok</span>(serde_json::from_reader(reader)<span class="question-mark">?</span>)
     }
 
-    <span class="kw">pub fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;(), std::io::Error&gt; {
-        <span class="kw">let </span>file = OpenOptions::new().write(<span class="bool-val">true</span>).open(path)<span class="question-mark">?</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>writer = BufWriter::new(file);
-        serde_json::to_writer_pretty(<span class="kw-2">&amp;mut </span>writer, <span class="kw-2">&amp;</span><span class="self">self</span>)<span class="question-mark">?</span>;
-        writer.flush()<span class="question-mark">?</span>;
+    <span class="doccomment">/// Writes the wallet to disk.
+    ///
+    /// The contents of the wallet need to be over-written completely, so
+    /// a temporary file is created as a backup in case a crash occurs while
+    /// writing to disk.
+    ///
+    /// The temporary file is then renamed to the original wallet name. If
+    /// serialization or writing to disk fails, the temporary filed is
+    /// deleted.
+    </span><span class="kw">pub fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), anyhow::Error&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>temp_file_path = <span class="self">self</span>.wallet_path.clone();
+        temp_file_path.set_extension(<span class="string">&quot;json.bak&quot;</span>);
+        <span class="kw">let </span>backup_file = File::create(<span class="kw-2">&amp;</span>temp_file_path)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>temp_file_writer = BufWriter::new(backup_file);
+        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = serde_json::to_writer_pretty(<span class="kw-2">&amp;mut </span>temp_file_writer, <span class="kw-2">&amp;</span><span class="self">self</span>.inner) {
+            fs::remove_file(<span class="kw-2">&amp;</span>temp_file_path)<span class="question-mark">?</span>;
+            <span class="macro">bail!</span>(<span class="string">&quot;failed to serialize the wallet state: {}&quot;</span>, e)
+        }
+        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = temp_file_writer.flush() {
+            fs::remove_file(<span class="kw-2">&amp;</span>temp_file_path)<span class="question-mark">?</span>;
+            <span class="macro">bail!</span>(<span class="string">&quot;failed to write the wallet state: {}&quot;</span>, e);
+        }
+        fs::rename(<span class="kw-2">&amp;</span>temp_file_path, <span class="kw-2">&amp;</span><span class="self">self</span>.wallet_path)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -620,20 +732,20 @@
                 Cell::new(<span class="string">&quot;Latest Block&quot;</span>).add_attribute(Attribute::Bold),
             ]);
         <span class="kw">if let </span><span class="prelude-val">Some</span>(chain_id) = chain_id {
-            <span class="kw">let </span>user_chain = <span class="self">self</span>.chains.get(<span class="kw-2">&amp;</span>chain_id).unwrap();
+            <span class="kw">let </span>user_chain = <span class="self">self</span>.inner.chains.get(<span class="kw-2">&amp;</span>chain_id).unwrap();
             <span class="self">Self</span>::update_table_with_chain(
                 <span class="kw-2">&amp;mut </span>table,
                 chain_id,
                 user_chain,
-                <span class="prelude-val">Some</span>(chain_id) == <span class="self">self</span>.default,
+                <span class="prelude-val">Some</span>(chain_id) == <span class="self">self</span>.inner.default,
             );
         } <span class="kw">else </span>{
-            <span class="kw">for </span>(chain_id, user_chain) <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.chains {
+            <span class="kw">for </span>(chain_id, user_chain) <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.inner.chains {
                 <span class="self">Self</span>::update_table_with_chain(
                     <span class="kw-2">&amp;mut </span>table,
                     <span class="kw-2">*</span>chain_id,
                     user_chain,
-                    <span class="prelude-val">Some</span>(chain_id) == <span class="self">self</span>.default.as_ref(),
+                    <span class="prelude-val">Some</span>(chain_id) == <span class="self">self</span>.inner.default.as_ref(),
                 );
             }
         }

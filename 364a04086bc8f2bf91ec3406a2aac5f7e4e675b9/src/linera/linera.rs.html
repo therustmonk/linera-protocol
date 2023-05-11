@@ -1410,8 +1410,6 @@
 <span id="1410">1410</span>
 <span id="1411">1411</span>
 <span id="1412">1412</span>
-<span id="1413">1413</span>
-<span id="1414">1414</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1481,7 +1479,6 @@
 };
 
 <span class="kw">struct </span>ClientContext {
-    wallet_state_path: PathBuf,
     wallet_state: WalletState,
     max_pending_messages: usize,
     send_timeout: Duration,
@@ -1513,7 +1510,7 @@
         chains
             .into_iter()
             .for_each(|chain| wallet_state.insert(chain));
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span>::configure(options, wallet_state_path, wallet_state))
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span>::configure(options, wallet_state))
     }
 
     <span class="kw">fn </span>from_options(options: <span class="kw-2">&amp;</span>ClientOptions) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, anyhow::Error&gt; {
@@ -1521,16 +1518,16 @@
             <span class="prelude-val">Some</span>(path) =&gt; path.clone(),
             <span class="prelude-val">None </span>=&gt; <span class="self">Self</span>::create_default_wallet_path()<span class="question-mark">?</span>,
         };
-        <span class="kw">let </span>wallet_state = WalletState::read(<span class="kw-2">&amp;</span>wallet_state_path)
-            .with_context(|| <span class="macro">format!</span>(<span class="string">&quot;Unable to read wallet at {:?}:&quot;</span>, <span class="kw-2">&amp;</span>wallet_state_path))<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span>::configure(options, wallet_state_path, wallet_state))
+        <span class="kw">let </span>wallet_state = WalletState::from_file(<span class="kw-2">&amp;</span>wallet_state_path).with_context(|| {
+            <span class="macro">format!</span>(
+                <span class="string">&quot;Unable to read wallet at {:?}:&quot;</span>,
+                <span class="kw-2">&amp;</span>wallet_state_path.canonicalize().unwrap()
+            )
+        })<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span>::configure(options, wallet_state))
     }
 
-    <span class="kw">fn </span>configure(
-        options: <span class="kw-2">&amp;</span>ClientOptions,
-        wallet_state_path: PathBuf,
-        wallet_state: WalletState,
-    ) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>configure(options: <span class="kw-2">&amp;</span>ClientOptions, wallet_state: WalletState) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>send_timeout = Duration::from_micros(options.send_timeout_us);
         <span class="kw">let </span>recv_timeout = Duration::from_micros(options.recv_timeout_us);
         <span class="kw">let </span>cross_chain_delay = Duration::from_micros(options.cross_chain_delay_ms);
@@ -1538,7 +1535,6 @@
         <span class="kw">let </span>notification_retries = options.notification_retries;
 
         ClientContext {
-            wallet_state_path,
             wallet_state,
             max_pending_messages: options.max_pending_messages,
             send_timeout,
@@ -1777,9 +1773,9 @@
         responses
     }
 
-    <span class="kw">fn </span>save_wallet(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+    <span class="kw">fn </span>save_wallet(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.wallet_state
-            .write(<span class="kw-2">&amp;</span><span class="self">self</span>.wallet_state_path)
+            .write()
             .expect(<span class="string">&quot;Unable to write user chains&quot;</span>);
         <span class="macro">info!</span>(<span class="string">&quot;Saved user chain states&quot;</span>);
     }
@@ -2743,7 +2739,7 @@
                 <span class="comment">// Private keys.
                 </span>chains.push(chain);
             }
-            <span class="kw">let </span>context = ClientContext::create(<span class="kw-2">&amp;</span>options, genesis_config.clone(), chains)<span class="question-mark">?</span>;
+            <span class="kw">let </span><span class="kw-2">mut </span>context = ClientContext::create(<span class="kw-2">&amp;</span>options, genesis_config.clone(), chains)<span class="question-mark">?</span>;
             genesis_config.write(genesis_config_path)<span class="question-mark">?</span>;
             context.save_wallet();
             <span class="prelude-val">Ok</span>(())
@@ -2800,7 +2796,7 @@
                             <span class="prelude-val">Some</span>(UserChain::make_initial(<span class="kw-2">*</span>description, <span class="kw-2">*</span>timestamp))
                         })
                         .collect();
-                    <span class="kw">let </span>context = ClientContext::create(<span class="kw-2">&amp;</span>options, genesis_config, chains)<span class="question-mark">?</span>;
+                    <span class="kw">let </span><span class="kw-2">mut </span>context = ClientContext::create(<span class="kw-2">&amp;</span>options, genesis_config, chains)<span class="question-mark">?</span>;
                     context.save_wallet();
                     <span class="prelude-val">Ok</span>(())
                 }
