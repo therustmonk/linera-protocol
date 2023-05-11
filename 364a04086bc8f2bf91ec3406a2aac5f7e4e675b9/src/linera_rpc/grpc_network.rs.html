@@ -656,6 +656,80 @@
 <span id="656">656</span>
 <span id="657">657</span>
 <span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
+<span id="695">695</span>
+<span id="696">696</span>
+<span id="697">697</span>
+<span id="698">698</span>
+<span id="699">699</span>
+<span id="700">700</span>
+<span id="701">701</span>
+<span id="702">702</span>
+<span id="703">703</span>
+<span id="704">704</span>
+<span id="705">705</span>
+<span id="706">706</span>
+<span id="707">707</span>
+<span id="708">708</span>
+<span id="709">709</span>
+<span id="710">710</span>
+<span id="711">711</span>
+<span id="712">712</span>
+<span id="713">713</span>
+<span id="714">714</span>
+<span id="715">715</span>
+<span id="716">716</span>
+<span id="717">717</span>
+<span id="718">718</span>
+<span id="719">719</span>
+<span id="720">720</span>
+<span id="721">721</span>
+<span id="722">722</span>
+<span id="723">723</span>
+<span id="724">724</span>
+<span id="725">725</span>
+<span id="726">726</span>
+<span id="727">727</span>
+<span id="728">728</span>
+<span id="729">729</span>
+<span id="730">730</span>
+<span id="731">731</span>
+<span id="732">732</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -678,7 +752,7 @@
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>futures::{
     channel::{mpsc, mpsc::Receiver, oneshot::Sender},
-    FutureExt, StreamExt,
+    future, stream, FutureExt, StreamExt,
 };
 <span class="kw">use </span>grpc::{
     chain_info_result::Inner,
@@ -700,6 +774,7 @@
 <span class="kw">use </span>rand::Rng;
 <span class="kw">use </span>std::{
     fmt::Debug,
+    iter,
     net::{AddrParseError, SocketAddr},
     str::FromStr,
     time::Duration,
@@ -711,7 +786,7 @@
 };
 <span class="kw">use </span>tonic::{
     transport::{Channel, Server},
-    Request, Response, Status,
+    Code, Request, Response, Status,
 };
 <span class="kw">use </span>tracing::{debug, error, info, instrument, warn};
 
@@ -1104,6 +1179,8 @@
 </span><span class="kw">pub struct </span>GrpcClient {
     address: String,
     client: ValidatorNodeClient&lt;Channel&gt;,
+    notification_retry_delay: Duration,
+    notification_retries: u32,
 }
 
 <span class="kw">impl </span>GrpcClient {
@@ -1111,6 +1188,8 @@
         network: ValidatorPublicNetworkConfig,
         connect_timeout: Duration,
         timeout: Duration,
+        notification_retry_delay: Duration,
+        notification_retries: u32,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, GrpcError&gt; {
         <span class="kw">let </span>address = network.http_address();
         <span class="kw">let </span>channel = Channel::from_shared(address.clone())<span class="question-mark">?
@@ -1118,7 +1197,42 @@
             .timeout(timeout)
             .connect_lazy();
         <span class="kw">let </span>client = ValidatorNodeClient::new(channel);
-        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ address, client })
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+            address,
+            client,
+            notification_retry_delay,
+            notification_retries,
+        })
+    }
+
+    <span class="doccomment">/// Returns whether this gRPC status means the server stream should be reconnected to, or not.
+    /// Logs a warning on unexpected status codes.
+    </span><span class="kw">fn </span>is_retryable(status: <span class="kw-2">&amp;</span>Status) -&gt; bool {
+        <span class="kw">match </span>status.code() {
+            Code::DeadlineExceeded | Code::Aborted | Code::Unavailable | Code::Unknown =&gt; {
+                <span class="macro">info!</span>(<span class="string">&quot;Notification stream interrupted: {}; retrying&quot;</span>, status);
+                <span class="bool-val">true
+            </span>}
+            Code::Ok
+            | Code::Cancelled
+            | Code::NotFound
+            | Code::AlreadyExists
+            | Code::ResourceExhausted =&gt; {
+                <span class="macro">warn!</span>(<span class="string">&quot;Unexpected gRPC status: {}; retrying&quot;</span>, status);
+                <span class="bool-val">true
+            </span>}
+            Code::InvalidArgument
+            | Code::PermissionDenied
+            | Code::FailedPrecondition
+            | Code::OutOfRange
+            | Code::Unimplemented
+            | Code::Internal
+            | Code::DataLoss
+            | Code::Unauthenticated =&gt; {
+                <span class="macro">warn!</span>(<span class="string">&quot;Unexpected gRPC status: {}&quot;</span>, status);
+                <span class="bool-val">false
+            </span>}
+        }
     }
 }
 
@@ -1217,29 +1331,63 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         query: linera_core::data_types::ChainInfoQuery,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;linera_core::data_types::ChainInfoResponse, NodeError&gt; {
-        <span class="macro">debug!</span>(query = <span class="question-mark">?</span>query);
+        <span class="macro">debug!</span>(<span class="question-mark">?</span>query);
         <span class="macro">client_delegate!</span>(<span class="self">self</span>, handle_chain_info_query, query)
     }
 
     <span class="attribute">#[instrument(target = <span class="string">&quot;grpc_client&quot;</span>, skip_all, err, fields(address = <span class="self">self</span>.address))]
     </span><span class="kw">async fn </span>subscribe(<span class="kw-2">&amp;mut </span><span class="self">self</span>, chains: Vec&lt;ChainId&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;NotificationStream, NodeError&gt; {
+        <span class="kw">let </span>notification_retry_delay = <span class="self">self</span>.notification_retry_delay;
+        <span class="kw">let </span>notification_retries = <span class="self">self</span>.notification_retries;
+        <span class="kw">let </span><span class="kw-2">mut </span>delay = Duration::ZERO;
         <span class="kw">let </span>subscription_request = SubscriptionRequest {
             chain_ids: chains.into_iter().map(|chain| chain.into()).collect(),
         };
-        <span class="kw">let </span>notification_stream = <span class="self">self
-            </span>.client
-            .subscribe(Request::new(subscription_request))
-            .<span class="kw">await
-            </span>.map_err(|e| NodeError::GrpcError {
-                error: <span class="macro">format!</span>(<span class="string">&quot;remote request [subscribe] failed with status: {:?}&quot;</span>, e),
-            })<span class="question-mark">?
-            </span>.into_inner();
+        <span class="kw">let </span>client = <span class="self">self</span>.client.clone();
 
-        <span class="prelude-val">Ok</span>(Box::pin(
-            notification_stream
-                .filter_map(|n| <span class="kw">async </span>{ n.ok() })
-                .filter_map(|n| <span class="kw">async </span>{ Notification::try_from(n).ok() }),
-        ))
+        <span class="comment">// A stream of `Result&lt;grpc::Notification, tonic::Status&gt;` that keeps calling
+        // `client.subscribe(request)` endlessly and without delay.
+        </span><span class="kw">let </span>endlessly_retrying_notification_stream = stream::unfold((), <span class="kw">move </span>|()| {
+            <span class="kw">let </span><span class="kw-2">mut </span>client = client.clone();
+            <span class="kw">let </span>subscription_request = subscription_request.clone();
+            <span class="kw">async move </span>{
+                <span class="kw">let </span>stream = <span class="kw">match </span>client.subscribe(subscription_request.clone()).<span class="kw">await </span>{
+                    <span class="prelude-val">Err</span>(err) =&gt; future::Either::Left(stream::iter(iter::once(<span class="prelude-val">Err</span>(err)))),
+                    <span class="prelude-val">Ok</span>(response) =&gt; future::Either::Right(response.into_inner()),
+                };
+                <span class="prelude-val">Some</span>((stream, ()))
+            }
+        })
+        .flatten();
+
+        <span class="comment">// The stream of `Notification`s that inserts increasing delays after retriable errors, and
+        // terminates after unexpected or fatal errors.
+        </span><span class="kw">let </span>notification_stream = endlessly_retrying_notification_stream
+            .map(|result| {
+                Notification::try_from(result<span class="question-mark">?</span>).map_err(|err| {
+                    <span class="kw">let </span>message = <span class="macro">format!</span>(<span class="string">&quot;Could not deserialize notification: {}&quot;</span>, err);
+                    tonic::Status::new(Code::Internal, message)
+                })
+            })
+            .take_while(<span class="kw">move </span>|result| {
+                <span class="kw">let </span><span class="prelude-val">Err</span>(status) = result <span class="kw">else </span>{
+                    delay = Duration::ZERO;
+                    <span class="kw">return </span>future::Either::Left(future::ready(<span class="bool-val">true</span>));
+                };
+                <span class="kw">if </span>!<span class="self">Self</span>::is_retryable(status)
+                    || delay &gt;= notification_retry_delay.saturating_mul(notification_retries)
+                {
+                    <span class="kw">return </span>future::Either::Left(future::ready(<span class="bool-val">false</span>));
+                }
+                delay = delay.saturating_add(notification_retry_delay);
+                future::Either::Right(<span class="kw">async move </span>{
+                    tokio::time::sleep(delay).<span class="kw">await</span>;
+                    <span class="bool-val">true
+                </span>})
+            })
+            .filter_map(|result| future::ready(result.ok()));
+
+        <span class="prelude-val">Ok</span>(Box::pin(notification_stream))
     }
 }
 

@@ -1460,7 +1460,6 @@
 <span id="1460">1460</span>
 <span id="1461">1461</span>
 <span id="1462">1462</span>
-<span id="1463">1463</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1472,11 +1471,10 @@
     worker::{Notification, Reason, WorkerState},
 };
 <span class="kw">use </span>anyhow::{anyhow, bail, ensure, <span class="prelude-ty">Result</span>};
-<span class="kw">use </span>async_stream::stream;
 <span class="kw">use </span>futures::{
     future,
     lock::Mutex,
-    stream::{FuturesUnordered, StreamExt},
+    stream::{<span class="self">self</span>, FuturesUnordered, StreamExt},
 };
 <span class="kw">use </span>linera_base::{
     crypto::{CryptoHash, KeyPair, PublicKey},
@@ -1909,7 +1907,6 @@
     </span>}
 
     <span class="doccomment">/// Listens to notifications about the current chain from all validators.
-    </span><span class="comment">// TODO(#687): handle loss of connection, etc.
     </span><span class="kw">pub async fn </span>listen(this: Arc&lt;Mutex&lt;<span class="self">Self</span>&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;NotificationStream&gt;
     <span class="kw">where
         </span>P: Send + <span class="lifetime">&#39;static</span>,
@@ -1918,18 +1915,19 @@
         <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="self">Self</span>::update_streams(<span class="kw-2">&amp;</span>this, <span class="kw-2">&amp;mut </span>streams).<span class="kw">await </span>{
             <span class="macro">error!</span>(<span class="string">&quot;Failed to update committee: {}&quot;</span>, err);
         }
-        <span class="kw">let </span>stream = <span class="macro">stream! </span>{
-            <span class="kw">while let </span>(<span class="prelude-val">Some</span>(notification), <span class="kw">_</span>, <span class="kw">_</span>) =
-                future::select_all(streams.values_mut().map(StreamExt::next)).<span class="kw">await
-            </span>{
+        <span class="kw">let </span>stream = stream::unfold(streams, <span class="kw">move </span>|<span class="kw-2">mut </span>streams| {
+            <span class="kw">let </span>this = this.clone();
+            <span class="kw">async move </span>{
+                <span class="kw">let </span>nexts = streams.values_mut().map(StreamExt::next);
+                <span class="kw">let </span>notification = future::select_all(nexts).<span class="kw">await</span>.<span class="number">0</span><span class="question-mark">?</span>;
                 <span class="kw">if </span><span class="macro">matches!</span>(notification.reason, Reason::NewBlock { .. }) {
                     <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="self">Self</span>::update_streams(<span class="kw-2">&amp;</span>this, <span class="kw-2">&amp;mut </span>streams).<span class="kw">await </span>{
                         <span class="macro">error!</span>(<span class="string">&quot;Failed to update committee: {}&quot;</span>, err);
                     }
                 }
-                <span class="kw">yield </span>notification;
+                <span class="prelude-val">Some</span>((notification, streams))
             }
-        };
+        });
         <span class="prelude-val">Ok</span>(Box::pin(stream))
     }
 
@@ -1951,8 +1949,8 @@
         <span class="comment">// Add notification streams from added validators.
         </span><span class="kw">for </span>(name, <span class="kw-2">mut </span>node) <span class="kw">in </span>nodes {
             <span class="kw">let </span>hash_map::Entry::Vacant(entry) = streams.entry(name) <span class="kw">else </span>{
-                            <span class="kw">continue</span>;
-                        };
+                <span class="kw">continue</span>;
+            };
             <span class="kw">let </span>stream = <span class="kw">match </span>node.subscribe(<span class="macro">vec!</span>[chain_id]).<span class="kw">await </span>{
                 <span class="prelude-val">Err</span>(e) =&gt; {
                     <span class="macro">info!</span>(<span class="string">&quot;Could not connect to validator {name}: {e:?}&quot;</span>);

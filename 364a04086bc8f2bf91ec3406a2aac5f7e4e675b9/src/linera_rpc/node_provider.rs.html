@@ -115,6 +115,29 @@
 <span id="115">115</span>
 <span id="116">116</span>
 <span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -136,8 +159,18 @@
 }
 
 <span class="kw">impl </span>NodeProvider {
-    <span class="kw">pub fn </span>new(send_timeout: Duration, recv_timeout: Duration) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>grpc = GrpcNodeProvider::new(send_timeout, recv_timeout);
+    <span class="kw">pub fn </span>new(
+        send_timeout: Duration,
+        recv_timeout: Duration,
+        notification_retry_delay: Duration,
+        notification_retries: u32,
+    ) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>grpc = GrpcNodeProvider::new(
+            send_timeout,
+            recv_timeout,
+            notification_retry_delay,
+            notification_retries,
+        );
         <span class="kw">let </span>simple = SimpleNodeProvider::new(send_timeout, recv_timeout);
         <span class="self">Self </span>{ grpc, simple }
     }
@@ -167,13 +200,22 @@
 </span><span class="kw">pub struct </span>GrpcNodeProvider {
     send_timeout: Duration,
     recv_timeout: Duration,
+    notification_retry_delay: Duration,
+    notification_retries: u32,
 }
 
 <span class="kw">impl </span>GrpcNodeProvider {
-    <span class="kw">pub fn </span>new(send_timeout: Duration, recv_timeout: Duration) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(
+        send_timeout: Duration,
+        recv_timeout: Duration,
+        notification_retry_delay: Duration,
+        notification_retries: u32,
+    ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             send_timeout,
             recv_timeout,
+            notification_retry_delay,
+            notification_retries,
         }
     }
 }
@@ -188,15 +230,19 @@
             }
         })<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>client =
-            GrpcClient::new(network, <span class="self">self</span>.send_timeout, <span class="self">self</span>.recv_timeout).map_err(|e| {
-                NodeError::GrpcError {
-                    error: <span class="macro">format!</span>(
-                        <span class="string">&quot;could not initialize gRPC client for address {} : {}&quot;</span>,
-                        address, e
-                    ),
-                }
-            })<span class="question-mark">?</span>;
+        <span class="kw">let </span>client = GrpcClient::new(
+            network,
+            <span class="self">self</span>.send_timeout,
+            <span class="self">self</span>.recv_timeout,
+            <span class="self">self</span>.notification_retry_delay,
+            <span class="self">self</span>.notification_retries,
+        )
+        .map_err(|e| NodeError::GrpcError {
+            error: <span class="macro">format!</span>(
+                <span class="string">&quot;could not initialize gRPC client for address {} : {}&quot;</span>,
+                address, e
+            ),
+        })<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(client)
     }
 }

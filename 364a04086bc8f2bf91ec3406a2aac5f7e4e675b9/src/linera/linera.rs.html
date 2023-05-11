@@ -1325,6 +1325,31 @@
 <span id="1325">1325</span>
 <span id="1326">1326</span>
 <span id="1327">1327</span>
+<span id="1328">1328</span>
+<span id="1329">1329</span>
+<span id="1330">1330</span>
+<span id="1331">1331</span>
+<span id="1332">1332</span>
+<span id="1333">1333</span>
+<span id="1334">1334</span>
+<span id="1335">1335</span>
+<span id="1336">1336</span>
+<span id="1337">1337</span>
+<span id="1338">1338</span>
+<span id="1339">1339</span>
+<span id="1340">1340</span>
+<span id="1341">1341</span>
+<span id="1342">1342</span>
+<span id="1343">1343</span>
+<span id="1344">1344</span>
+<span id="1345">1345</span>
+<span id="1346">1346</span>
+<span id="1347">1347</span>
+<span id="1348">1348</span>
+<span id="1349">1349</span>
+<span id="1350">1350</span>
+<span id="1351">1351</span>
+<span id="1352">1352</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1400,6 +1425,8 @@
     recv_timeout: Duration,
     cross_chain_delay: Duration,
     cross_chain_retries: usize,
+    notification_retry_delay: Duration,
+    notification_retries: u32,
 }
 
 <span class="kw">impl </span>ClientContext {
@@ -1444,6 +1471,8 @@
         <span class="kw">let </span>send_timeout = Duration::from_micros(options.send_timeout_us);
         <span class="kw">let </span>recv_timeout = Duration::from_micros(options.recv_timeout_us);
         <span class="kw">let </span>cross_chain_delay = Duration::from_micros(options.cross_chain_delay_ms);
+        <span class="kw">let </span>notification_retry_delay = Duration::from_micros(options.notification_retry_delay_us);
+        <span class="kw">let </span>notification_retries = options.notification_retries;
 
         ClientContext {
             wallet_state_path,
@@ -1453,6 +1482,8 @@
             recv_timeout,
             cross_chain_delay,
             cross_chain_retries: options.cross_chain_retries,
+            notification_retry_delay,
+            notification_retries,
         }
     }
 
@@ -1485,8 +1516,14 @@
                     ))
                 }
                 NetworkProtocol::Grpc =&gt; Box::new(
-                    GrpcClient::new(config.network.clone(), <span class="self">self</span>.send_timeout, <span class="self">self</span>.recv_timeout)
-                        .unwrap(),
+                    GrpcClient::new(
+                        config.network.clone(),
+                        <span class="self">self</span>.send_timeout,
+                        <span class="self">self</span>.recv_timeout,
+                        <span class="self">self</span>.notification_retry_delay,
+                        <span class="self">self</span>.notification_retries,
+                    )
+                    .unwrap(),
                 ),
             };
 
@@ -1530,7 +1567,12 @@
     }
 
     <span class="kw">fn </span>make_node_provider(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; NodeProvider {
-        NodeProvider::new(<span class="self">self</span>.send_timeout, <span class="self">self</span>.recv_timeout)
+        NodeProvider::new(
+            <span class="self">self</span>.send_timeout,
+            <span class="self">self</span>.recv_timeout,
+            <span class="self">self</span>.notification_retry_delay,
+            <span class="self">self</span>.notification_retries,
+        )
     }
 
     <span class="attribute">#[cfg(feature = <span class="string">&quot;benchmark&quot;</span>)]
@@ -1865,6 +1907,14 @@
     <span class="doccomment">/// Subcommand.
     </span><span class="attribute">#[structopt(subcommand)]
     </span>command: ClientCommand,
+
+    <span class="doccomment">/// Delay increment for retrying to connect to a validator for notifications.
+    </span><span class="attribute">#[structopt(long, default_value = <span class="string">&quot;1000000&quot;</span>)]
+    </span>notification_retry_delay_us: u64,
+
+    <span class="doccomment">/// Number of times to retry connecting to a validator for notifications.
+    </span><span class="attribute">#[structopt(long, default_value = <span class="string">&quot;10&quot;</span>)]
+    </span>notification_retries: u32,
 }
 
 <span class="attribute">#[derive(StructOpt)]
