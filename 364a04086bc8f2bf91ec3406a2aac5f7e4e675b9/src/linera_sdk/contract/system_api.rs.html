@@ -152,7 +152,7 @@
 
 </span><span class="doccomment">//! Functions and types to interface with the system API available to application contracts.
 
-</span><span class="kw">use </span><span class="kw">super</span>::writable_system <span class="kw">as </span>system;
+</span><span class="kw">use </span><span class="kw">super</span>::contract_system_api <span class="kw">as </span>wit;
 <span class="kw">use </span><span class="kw">crate</span>::views::ViewStorageContext;
 <span class="kw">use </span>futures::future;
 <span class="kw">use </span>linera_base::{
@@ -168,7 +168,7 @@
 <span class="kw">where
     </span>State: Default + DeserializeOwned,
 {
-    <span class="kw">let </span>state_bytes = system::load();
+    <span class="kw">let </span>state_bytes = wit::load();
     deserialize_state(state_bytes)
 }
 
@@ -177,7 +177,7 @@
 <span class="kw">where
     </span>State: Default + DeserializeOwned,
 {
-    <span class="kw">let </span>state_bytes = system::load_and_lock()<span class="question-mark">?</span>;
+    <span class="kw">let </span>state_bytes = wit::load_and_lock()<span class="question-mark">?</span>;
     <span class="prelude-val">Some</span>(deserialize_state(state_bytes))
 }
 
@@ -198,12 +198,12 @@
 <span class="kw">where
     </span>State: Serialize,
 {
-    system::store_and_unlock(<span class="kw-2">&amp;</span>bcs::to_bytes(<span class="kw-2">&amp;</span>state).expect(<span class="string">&quot;State serialization failed&quot;</span>));
+    wit::store_and_unlock(<span class="kw-2">&amp;</span>bcs::to_bytes(<span class="kw-2">&amp;</span>state).expect(<span class="string">&quot;State serialization failed&quot;</span>));
 }
 
 <span class="doccomment">/// Loads the application state and locks it for writes.
 </span><span class="kw">pub async fn </span>load_and_lock_view&lt;State: View&lt;ViewStorageContext&gt;&gt;() -&gt; <span class="prelude-ty">Option</span>&lt;State&gt; {
-    <span class="kw">let </span>future = system::Lock::new();
+    <span class="kw">let </span>future = wit::Lock::new();
     <span class="kw">if </span>future::poll_fn(|_context| future.poll().into()).<span class="kw">await </span>{
         <span class="prelude-val">Some</span>(load_view_using::&lt;State&gt;().<span class="kw">await</span>)
     } <span class="kw">else </span>{
@@ -225,27 +225,27 @@
 
 <span class="doccomment">/// Retrieves the current chain ID.
 </span><span class="kw">pub fn </span>current_chain_id() -&gt; ChainId {
-    ChainId(system::chain_id().into())
+    ChainId(wit::chain_id().into())
 }
 
 <span class="doccomment">/// Retrieves the current application ID.
 </span><span class="kw">pub fn </span>current_application_id() -&gt; ApplicationId {
-    system::application_id().into()
+    wit::application_id().into()
 }
 
 <span class="doccomment">/// Retrieves the current application parameters.
 </span><span class="kw">pub fn </span>current_application_parameters() -&gt; Vec&lt;u8&gt; {
-    system::application_parameters()
+    wit::application_parameters()
 }
 
 <span class="doccomment">/// Retrieves the current system balance.
 </span><span class="kw">pub fn </span>current_system_balance() -&gt; Balance {
-    system::read_system_balance().into()
+    wit::read_system_balance().into()
 }
 
 <span class="doccomment">/// Retrieves the current system time.
 </span><span class="kw">pub fn </span>current_system_time() -&gt; Timestamp {
-    system::read_system_timestamp().into()
+    wit::read_system_timestamp().into()
 }
 
 <span class="doccomment">/// Calls another application without persisting the current application&#39;s state.
@@ -260,10 +260,10 @@
 ) -&gt; (Vec&lt;u8&gt;, Vec&lt;SessionId&gt;) {
     <span class="kw">let </span>forwarded_sessions: Vec&lt;<span class="kw">_</span>&gt; = forwarded_sessions
         .into_iter()
-        .map(system::SessionId::from)
+        .map(wit::SessionId::from)
         .collect();
 
-    system::try_call_application(
+    wit::try_call_application(
         authenticated,
         application.into(),
         argument,
@@ -284,17 +284,17 @@
 ) -&gt; (Vec&lt;u8&gt;, Vec&lt;SessionId&gt;) {
     <span class="kw">let </span>forwarded_sessions: Vec&lt;<span class="kw">_</span>&gt; = forwarded_sessions
         .into_iter()
-        .map(system::SessionId::from)
+        .map(wit::SessionId::from)
         .collect();
 
-    system::try_call_session(authenticated, session.into(), argument, <span class="kw-2">&amp;</span>forwarded_sessions).into()
+    wit::try_call_session(authenticated, session.into(), argument, <span class="kw-2">&amp;</span>forwarded_sessions).into()
 }
 
 <span class="doccomment">/// Requests the host to log a message.
 ///
 /// Useful for debugging locally, but may be ignored by validators.
 </span><span class="kw">pub fn </span>log(message: <span class="kw-2">&amp;</span>fmt::Arguments&lt;<span class="lifetime">&#39;_</span>&gt;, level: log::Level) {
-    system::log(<span class="kw-2">&amp;</span>message.to_string(), level.into());
+    wit::log(<span class="kw-2">&amp;</span>message.to_string(), level.into());
 }
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="linera_sdk" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.1 (90743e729 2023-01-10)" ></div></body></html>

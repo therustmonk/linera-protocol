@@ -413,22 +413,22 @@
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="doccomment">/// Generates an implementation of `WritableSystem` for the provided `contract_system_api` type.
+</span><span class="doccomment">/// Generates an implementation of `ContractSystemApi` for the provided `contract_system_api` type.
 ///
 /// Generates the common code for contract system API types for all WASM runtimes.
-</span><span class="macro">macro_rules! </span>impl_writable_system {
+</span><span class="macro">macro_rules! </span>impl_contract_system_api {
     (<span class="macro-nonterminal">$contract_system_api</span>:ident&lt;<span class="macro-nonterminal">$runtime</span>:lifetime&gt;) =&gt; {
-        <span class="macro">impl_writable_system!</span>(
+        <span class="macro">impl_contract_system_api!</span>(
             @generate <span class="macro-nonterminal">$contract_system_api</span>&lt;<span class="macro-nonterminal">$runtime</span>&gt;, wasmtime::Trap, <span class="macro-nonterminal">$runtime</span>, &lt;<span class="macro-nonterminal">$runtime</span>&gt;
         );
     };
 
     (<span class="macro-nonterminal">$contract_system_api</span>:ident) =&gt; {
-        <span class="macro">impl_writable_system!</span>(@generate <span class="macro-nonterminal">$contract_system_api</span>, wasmer::RuntimeError, <span class="lifetime">&#39;static</span>);
+        <span class="macro">impl_contract_system_api!</span>(@generate <span class="macro-nonterminal">$contract_system_api</span>, wasmer::RuntimeError, <span class="lifetime">&#39;static</span>);
     };
 
     (@generate <span class="macro-nonterminal">$contract_system_api</span>:ty, <span class="macro-nonterminal">$trap</span>:ty, <span class="macro-nonterminal">$runtime</span>:lifetime $(, &lt;<span class="macro-nonterminal">$param</span>:lifetime&gt; )<span class="question-mark">?</span>) =&gt; {
-        <span class="kw">impl</span>$(&lt;<span class="macro-nonterminal">$param</span>&gt;)<span class="question-mark">? </span>WritableSystem <span class="kw">for </span><span class="macro-nonterminal">$contract_system_api </span>{
+        <span class="kw">impl</span>$(&lt;<span class="macro-nonterminal">$param</span>&gt;)<span class="question-mark">? </span>contract_system_api::ContractSystemApi <span class="kw">for </span><span class="macro-nonterminal">$contract_system_api </span>{
             <span class="kw">type </span>Error = ExecutionError;
 
             <span class="kw">type </span>Lock = HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;(), ExecutionError&gt;&gt;;
@@ -437,11 +437,11 @@
                 error.into()
             }
 
-            <span class="kw">fn </span>chain_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;writable_system::ChainId, <span class="self">Self</span>::Error&gt; {
+            <span class="kw">fn </span>chain_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;contract_system_api::ChainId, <span class="self">Self</span>::Error&gt; {
                 <span class="prelude-val">Ok</span>(<span class="self">self</span>.runtime().chain_id().into())
             }
 
-            <span class="kw">fn </span>application_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;writable_system::ApplicationId, <span class="self">Self</span>::Error&gt; {
+            <span class="kw">fn </span>application_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;contract_system_api::ApplicationId, <span class="self">Self</span>::Error&gt; {
                 <span class="prelude-val">Ok</span>(<span class="self">self</span>.runtime().application_id().into())
             }
 
@@ -451,11 +451,11 @@
 
             <span class="kw">fn </span>read_system_balance(
                 <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-            ) -&gt; <span class="prelude-ty">Result</span>&lt;writable_system::Balance, <span class="self">Self</span>::Error&gt; {
+            ) -&gt; <span class="prelude-ty">Result</span>&lt;contract_system_api::Balance, <span class="self">Self</span>::Error&gt; {
                 <span class="prelude-val">Ok</span>(<span class="self">self</span>.runtime().read_system_balance().into())
             }
 
-            <span class="kw">fn </span>read_system_timestamp(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;writable_system::Timestamp, <span class="self">Self</span>::Error&gt; {
+            <span class="kw">fn </span>read_system_timestamp(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;contract_system_api::Timestamp, <span class="self">Self</span>::Error&gt; {
                 <span class="prelude-val">Ok</span>(<span class="self">self</span>.runtime().read_system_timestamp().micros())
             }
 
@@ -487,8 +487,8 @@
             <span class="kw">fn </span>lock_poll(
                 <span class="kw-2">&amp;mut </span><span class="self">self</span>,
                 future: <span class="kw-2">&amp;</span><span class="self">Self</span>::Lock,
-            ) -&gt; <span class="prelude-ty">Result</span>&lt;writable_system::PollLock, <span class="self">Self</span>::Error&gt; {
-                <span class="kw">use </span>writable_system::PollLock;
+            ) -&gt; <span class="prelude-ty">Result</span>&lt;contract_system_api::PollLock, <span class="self">Self</span>::Error&gt; {
+                <span class="kw">use </span>contract_system_api::PollLock;
                 <span class="kw">match </span>future.poll(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; <span class="prelude-val">Ok</span>(PollLock::Pending),
                     Poll::Ready(<span class="prelude-val">Ok</span>(())) =&gt; <span class="prelude-val">Ok</span>(PollLock::ReadyLocked),
@@ -502,10 +502,10 @@
             <span class="kw">fn </span>try_call_application(
                 <span class="kw-2">&amp;mut </span><span class="self">self</span>,
                 authenticated: bool,
-                application: writable_system::ApplicationId,
+                application: contract_system_api::ApplicationId,
                 argument: <span class="kw-2">&amp;</span>[u8],
-                forwarded_sessions: <span class="kw-2">&amp;</span>[Le&lt;writable_system::SessionId&gt;],
-            ) -&gt; <span class="prelude-ty">Result</span>&lt;writable_system::CallResult, <span class="self">Self</span>::Error&gt; {
+                forwarded_sessions: <span class="kw-2">&amp;</span>[Le&lt;contract_system_api::SessionId&gt;],
+            ) -&gt; <span class="prelude-ty">Result</span>&lt;contract_system_api::CallResult, <span class="self">Self</span>::Error&gt; {
                 <span class="kw">let </span>forwarded_sessions = forwarded_sessions
                     .iter()
                     .map(Le::get)
@@ -519,16 +519,16 @@
                     <span class="kw-2">&amp;</span>argument,
                     forwarded_sessions,
                 ))
-                .map(writable_system::CallResult::from)
+                .map(contract_system_api::CallResult::from)
             }
 
             <span class="kw">fn </span>try_call_session(
                 <span class="kw-2">&amp;mut </span><span class="self">self</span>,
                 authenticated: bool,
-                session: writable_system::SessionId,
+                session: contract_system_api::SessionId,
                 argument: <span class="kw-2">&amp;</span>[u8],
-                forwarded_sessions: <span class="kw-2">&amp;</span>[Le&lt;writable_system::SessionId&gt;],
-            ) -&gt; <span class="prelude-ty">Result</span>&lt;writable_system::CallResult, <span class="self">Self</span>::Error&gt; {
+                forwarded_sessions: <span class="kw-2">&amp;</span>[Le&lt;contract_system_api::SessionId&gt;],
+            ) -&gt; <span class="prelude-ty">Result</span>&lt;contract_system_api::CallResult, <span class="self">Self</span>::Error&gt; {
                 <span class="kw">let </span>forwarded_sessions = forwarded_sessions
                     .iter()
                     .map(Le::get)
@@ -542,20 +542,20 @@
                     <span class="kw-2">&amp;</span>argument,
                     forwarded_sessions,
                 ))
-                .map(writable_system::CallResult::from)
+                .map(contract_system_api::CallResult::from)
             }
 
             <span class="kw">fn </span>log(
                 <span class="kw-2">&amp;mut </span><span class="self">self</span>,
                 message: <span class="kw-2">&amp;</span>str,
-                level: writable_system::LogLevel,
+                level: contract_system_api::LogLevel,
             ) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt; {
                 <span class="kw">match </span>level {
-                    writable_system::LogLevel::Trace =&gt; <span class="macro">tracing::trace!</span>(<span class="string">&quot;{message}&quot;</span>),
-                    writable_system::LogLevel::Debug =&gt; <span class="macro">tracing::debug!</span>(<span class="string">&quot;{message}&quot;</span>),
-                    writable_system::LogLevel::Info =&gt; <span class="macro">tracing::info!</span>(<span class="string">&quot;{message}&quot;</span>),
-                    writable_system::LogLevel::Warn =&gt; <span class="macro">tracing::warn!</span>(<span class="string">&quot;{message}&quot;</span>),
-                    writable_system::LogLevel::Error =&gt; <span class="macro">tracing::error!</span>(<span class="string">&quot;{message}&quot;</span>),
+                    contract_system_api::LogLevel::Trace =&gt; <span class="macro">tracing::trace!</span>(<span class="string">&quot;{message}&quot;</span>),
+                    contract_system_api::LogLevel::Debug =&gt; <span class="macro">tracing::debug!</span>(<span class="string">&quot;{message}&quot;</span>),
+                    contract_system_api::LogLevel::Info =&gt; <span class="macro">tracing::info!</span>(<span class="string">&quot;{message}&quot;</span>),
+                    contract_system_api::LogLevel::Warn =&gt; <span class="macro">tracing::warn!</span>(<span class="string">&quot;{message}&quot;</span>),
+                    contract_system_api::LogLevel::Error =&gt; <span class="macro">tracing::error!</span>(<span class="string">&quot;{message}&quot;</span>),
                 }
                 <span class="prelude-val">Ok</span>(())
             }
@@ -581,30 +581,30 @@
     };
 }
 
-<span class="doccomment">/// Generates an implementation of `QueryableSystem` for the provided `service_system_api` type.
+<span class="doccomment">/// Generates an implementation of `ServiceSystemApi` for the provided `service_system_api` type.
 ///
 /// Generates the common code for service system API types for all WASM runtimes.
-</span><span class="macro">macro_rules! </span>impl_queryable_system {
+</span><span class="macro">macro_rules! </span>impl_service_system_api {
     (<span class="macro-nonterminal">$service_system_api</span>:ident&lt;<span class="macro-nonterminal">$runtime</span>:lifetime&gt;) =&gt; {
-        <span class="macro">impl_queryable_system!</span>(@generate <span class="macro-nonterminal">$service_system_api</span>&lt;<span class="macro-nonterminal">$runtime</span>&gt;, <span class="macro-nonterminal">$runtime</span>, &lt;<span class="macro-nonterminal">$runtime</span>&gt;);
+        <span class="macro">impl_service_system_api!</span>(@generate <span class="macro-nonterminal">$service_system_api</span>&lt;<span class="macro-nonterminal">$runtime</span>&gt;, <span class="macro-nonterminal">$runtime</span>, &lt;<span class="macro-nonterminal">$runtime</span>&gt;);
     };
 
     (<span class="macro-nonterminal">$service_system_api</span>:ident) =&gt; {
-        <span class="macro">impl_queryable_system!</span>(@generate <span class="macro-nonterminal">$service_system_api</span>, <span class="lifetime">&#39;static</span>);
+        <span class="macro">impl_service_system_api!</span>(@generate <span class="macro-nonterminal">$service_system_api</span>, <span class="lifetime">&#39;static</span>);
     };
 
     (@generate <span class="macro-nonterminal">$service_system_api</span>:ty, <span class="macro-nonterminal">$runtime</span>:lifetime $(, &lt;<span class="macro-nonterminal">$param</span>:lifetime&gt; )<span class="question-mark">?</span>) =&gt; {
-        <span class="kw">impl</span>$(&lt;<span class="macro-nonterminal">$param</span>&gt;)<span class="question-mark">? </span>QueryableSystem <span class="kw">for </span><span class="macro-nonterminal">$service_system_api </span>{
+        <span class="kw">impl</span>$(&lt;<span class="macro-nonterminal">$param</span>&gt;)<span class="question-mark">? </span>service_system_api::ServiceSystemApi <span class="kw">for </span><span class="macro-nonterminal">$service_system_api </span>{
             <span class="kw">type </span>Load = HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, ExecutionError&gt;&gt;;
             <span class="kw">type </span>Lock = HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;(), ExecutionError&gt;&gt;;
             <span class="kw">type </span>Unlock = HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;(), ExecutionError&gt;&gt;;
             <span class="kw">type </span>TryQueryApplication = HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, ExecutionError&gt;&gt;;
 
-            <span class="kw">fn </span>chain_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; queryable_system::ChainId {
+            <span class="kw">fn </span>chain_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; service_system_api::ChainId {
                 <span class="self">self</span>.runtime().chain_id().into()
             }
 
-            <span class="kw">fn </span>application_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; queryable_system::ApplicationId {
+            <span class="kw">fn </span>application_id(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; service_system_api::ApplicationId {
                 <span class="self">self</span>.runtime().application_id().into()
             }
 
@@ -612,11 +612,11 @@
                 <span class="self">self</span>.runtime().application_parameters()
             }
 
-            <span class="kw">fn </span>read_system_balance(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; queryable_system::Balance {
+            <span class="kw">fn </span>read_system_balance(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; service_system_api::Balance {
                 <span class="self">self</span>.runtime().read_system_balance().into()
             }
 
-            <span class="kw">fn </span>read_system_timestamp(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; queryable_system::Timestamp {
+            <span class="kw">fn </span>read_system_timestamp(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; service_system_api::Timestamp {
                 <span class="self">self</span>.runtime().read_system_timestamp().micros()
             }
 
@@ -624,8 +624,8 @@
                 HostFuture::new(<span class="self">self</span>.runtime().try_read_my_state())
             }
 
-            <span class="kw">fn </span>load_poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>, future: <span class="kw-2">&amp;</span><span class="self">Self</span>::Load) -&gt; queryable_system::PollLoad {
-                <span class="kw">use </span>queryable_system::PollLoad;
+            <span class="kw">fn </span>load_poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>, future: <span class="kw-2">&amp;</span><span class="self">Self</span>::Load) -&gt; service_system_api::PollLoad {
+                <span class="kw">use </span>service_system_api::PollLoad;
                 <span class="kw">match </span>future.poll(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; PollLoad::Pending,
                     Poll::Ready(<span class="prelude-val">Ok</span>(bytes)) =&gt; PollLoad::Ready(<span class="prelude-val">Ok</span>(bytes)),
@@ -637,8 +637,8 @@
                 HostFuture::new(<span class="self">self</span>.runtime().lock_view_user_state())
             }
 
-            <span class="kw">fn </span>lock_poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>, future: <span class="kw-2">&amp;</span><span class="self">Self</span>::Lock) -&gt; queryable_system::PollLock {
-                <span class="kw">use </span>queryable_system::PollLock;
+            <span class="kw">fn </span>lock_poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>, future: <span class="kw-2">&amp;</span><span class="self">Self</span>::Lock) -&gt; service_system_api::PollLock {
+                <span class="kw">use </span>service_system_api::PollLock;
                 <span class="kw">match </span>future.poll(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; PollLock::Pending,
                     Poll::Ready(<span class="prelude-val">Ok</span>(())) =&gt; PollLock::Ready(<span class="prelude-val">Ok</span>(())),
@@ -650,8 +650,8 @@
                 HostFuture::new(<span class="self">self</span>.runtime().unlock_view_user_state())
             }
 
-            <span class="kw">fn </span>unlock_poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>, future: <span class="kw-2">&amp;</span><span class="self">Self</span>::Lock) -&gt; queryable_system::PollUnlock {
-                <span class="kw">use </span>queryable_system::PollUnlock;
+            <span class="kw">fn </span>unlock_poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>, future: <span class="kw-2">&amp;</span><span class="self">Self</span>::Lock) -&gt; service_system_api::PollUnlock {
+                <span class="kw">use </span>service_system_api::PollUnlock;
                 <span class="kw">match </span>future.poll(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; PollUnlock::Pending,
                     Poll::Ready(<span class="prelude-val">Ok</span>(())) =&gt; PollUnlock::Ready(<span class="prelude-val">Ok</span>(())),
@@ -661,7 +661,7 @@
 
             <span class="kw">fn </span>try_query_application_new(
                 <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-                application: queryable_system::ApplicationId,
+                application: service_system_api::ApplicationId,
                 argument: <span class="kw-2">&amp;</span>[u8],
             ) -&gt; <span class="self">Self</span>::TryQueryApplication {
                 <span class="kw">let </span>runtime = <span class="self">self</span>.runtime();
@@ -677,8 +677,8 @@
             <span class="kw">fn </span>try_query_application_poll(
                 <span class="kw-2">&amp;mut </span><span class="self">self</span>,
                 future: <span class="kw-2">&amp;</span><span class="self">Self</span>::TryQueryApplication,
-            ) -&gt; queryable_system::PollLoad {
-                <span class="kw">use </span>queryable_system::PollLoad;
+            ) -&gt; service_system_api::PollLoad {
+                <span class="kw">use </span>service_system_api::PollLoad;
                 <span class="kw">match </span>future.poll(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; PollLoad::Pending,
                     Poll::Ready(<span class="prelude-val">Ok</span>(result)) =&gt; PollLoad::Ready(<span class="prelude-val">Ok</span>(result)),
@@ -686,13 +686,13 @@
                 }
             }
 
-            <span class="kw">fn </span>log(<span class="kw-2">&amp;mut </span><span class="self">self</span>, message: <span class="kw-2">&amp;</span>str, level: queryable_system::LogLevel) {
+            <span class="kw">fn </span>log(<span class="kw-2">&amp;mut </span><span class="self">self</span>, message: <span class="kw-2">&amp;</span>str, level: service_system_api::LogLevel) {
                 <span class="kw">match </span>level {
-                    queryable_system::LogLevel::Trace =&gt; <span class="macro">tracing::trace!</span>(<span class="string">&quot;{message}&quot;</span>),
-                    queryable_system::LogLevel::Debug =&gt; <span class="macro">tracing::debug!</span>(<span class="string">&quot;{message}&quot;</span>),
-                    queryable_system::LogLevel::Info =&gt; <span class="macro">tracing::info!</span>(<span class="string">&quot;{message}&quot;</span>),
-                    queryable_system::LogLevel::Warn =&gt; <span class="macro">tracing::warn!</span>(<span class="string">&quot;{message}&quot;</span>),
-                    queryable_system::LogLevel::Error =&gt; <span class="macro">tracing::error!</span>(<span class="string">&quot;{message}&quot;</span>),
+                    service_system_api::LogLevel::Trace =&gt; <span class="macro">tracing::trace!</span>(<span class="string">&quot;{message}&quot;</span>),
+                    service_system_api::LogLevel::Debug =&gt; <span class="macro">tracing::debug!</span>(<span class="string">&quot;{message}&quot;</span>),
+                    service_system_api::LogLevel::Info =&gt; <span class="macro">tracing::info!</span>(<span class="string">&quot;{message}&quot;</span>),
+                    service_system_api::LogLevel::Warn =&gt; <span class="macro">tracing::warn!</span>(<span class="string">&quot;{message}&quot;</span>),
+                    service_system_api::LogLevel::Error =&gt; <span class="macro">tracing::error!</span>(<span class="string">&quot;{message}&quot;</span>),
                 }
             }
         }
@@ -702,19 +702,19 @@
 <span class="doccomment">/// Generates an implementation of `ViewSystem` for the provided `view_system_api` type.
 ///
 /// Generates the common code for view system API types for all WASM runtimes.
-</span><span class="macro">macro_rules! </span>impl_view_system {
+</span><span class="macro">macro_rules! </span>impl_view_system_api {
     (<span class="macro-nonterminal">$view_system_api</span>:ident&lt;<span class="macro-nonterminal">$runtime</span>:lifetime&gt;) =&gt; {
-        <span class="macro">impl_view_system!</span>(
+        <span class="macro">impl_view_system_api!</span>(
             @generate <span class="macro-nonterminal">$view_system_api</span>&lt;<span class="macro-nonterminal">$runtime</span>&gt;, wasmtime::Trap, <span class="macro-nonterminal">$runtime</span>, &lt;<span class="macro-nonterminal">$runtime</span>&gt;
         );
     };
 
     (<span class="macro-nonterminal">$view_system_api</span>:ty) =&gt; {
-        <span class="macro">impl_view_system!</span>(@generate <span class="macro-nonterminal">$view_system_api</span>, wasmer::RuntimeError, <span class="lifetime">&#39;static</span>);
+        <span class="macro">impl_view_system_api!</span>(@generate <span class="macro-nonterminal">$view_system_api</span>, wasmer::RuntimeError, <span class="lifetime">&#39;static</span>);
     };
 
     (@generate <span class="macro-nonterminal">$view_system_api</span>:ty, <span class="macro-nonterminal">$trap</span>:ty, <span class="macro-nonterminal">$runtime</span>:lifetime $(, &lt;<span class="macro-nonterminal">$param</span>:lifetime&gt; )<span class="question-mark">?</span>) =&gt; {
-        <span class="kw">impl</span>$(&lt;<span class="macro-nonterminal">$param</span>&gt;)<span class="question-mark">? </span>ViewSystem <span class="kw">for </span><span class="macro-nonterminal">$view_system_api </span>{
+        <span class="kw">impl</span>$(&lt;<span class="macro-nonterminal">$param</span>&gt;)<span class="question-mark">? </span>view_system_api::ViewSystemApi <span class="kw">for </span><span class="macro-nonterminal">$view_system_api </span>{
             <span class="kw">type </span>Error = ExecutionError;
 
             <span class="kw">type </span>ReadKeyBytes = HostFuture&lt;<span class="macro-nonterminal">$runtime</span>, <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, ExecutionError&gt;&gt;;
@@ -737,8 +737,8 @@
             <span class="kw">fn </span>read_key_bytes_poll(
                 <span class="kw-2">&amp;mut </span><span class="self">self</span>,
                 future: <span class="kw-2">&amp;</span><span class="self">Self</span>::ReadKeyBytes,
-            ) -&gt; <span class="prelude-ty">Result</span>&lt;view_system::PollReadKeyBytes, <span class="self">Self</span>::Error&gt; {
-                <span class="kw">use </span>view_system::PollReadKeyBytes;
+            ) -&gt; <span class="prelude-ty">Result</span>&lt;view_system_api::PollReadKeyBytes, <span class="self">Self</span>::Error&gt; {
+                <span class="kw">use </span>view_system_api::PollReadKeyBytes;
                 <span class="kw">match </span>future.poll(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; <span class="prelude-val">Ok</span>(PollReadKeyBytes::Pending),
                     Poll::Ready(<span class="prelude-val">Ok</span>(opt_list)) =&gt; <span class="prelude-val">Ok</span>(PollReadKeyBytes::Ready(opt_list)),
@@ -753,8 +753,8 @@
             <span class="kw">fn </span>find_keys_poll(
                 <span class="kw-2">&amp;mut </span><span class="self">self</span>,
                 future: <span class="kw-2">&amp;</span><span class="self">Self</span>::FindKeys,
-            ) -&gt; <span class="prelude-ty">Result</span>&lt;view_system::PollFindKeys, <span class="self">Self</span>::Error&gt; {
-                <span class="kw">use </span>view_system::PollFindKeys;
+            ) -&gt; <span class="prelude-ty">Result</span>&lt;view_system_api::PollFindKeys, <span class="self">Self</span>::Error&gt; {
+                <span class="kw">use </span>view_system_api::PollFindKeys;
                 <span class="kw">match </span>future.poll(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; <span class="prelude-val">Ok</span>(PollFindKeys::Pending),
                     Poll::Ready(<span class="prelude-val">Ok</span>(keys)) =&gt; <span class="prelude-val">Ok</span>(PollFindKeys::Ready(keys)),
@@ -775,8 +775,8 @@
             <span class="kw">fn </span>find_key_values_poll(
                 <span class="kw-2">&amp;mut </span><span class="self">self</span>,
                 future: <span class="kw-2">&amp;</span><span class="self">Self</span>::FindKeyValues,
-            ) -&gt; <span class="prelude-ty">Result</span>&lt;view_system::PollFindKeyValues, <span class="self">Self</span>::Error&gt; {
-                <span class="kw">use </span>view_system::PollFindKeyValues;
+            ) -&gt; <span class="prelude-ty">Result</span>&lt;view_system_api::PollFindKeyValues, <span class="self">Self</span>::Error&gt; {
+                <span class="kw">use </span>view_system_api::PollFindKeyValues;
                 <span class="kw">match </span>future.poll(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; <span class="prelude-val">Ok</span>(PollFindKeyValues::Pending),
                     Poll::Ready(<span class="prelude-val">Ok</span>(key_values)) =&gt; <span class="prelude-val">Ok</span>(PollFindKeyValues::Ready(key_values)),
@@ -786,18 +786,18 @@
 
             <span class="kw">fn </span>write_batch_new(
                 <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-                list_oper: Vec&lt;view_system::WriteOperation&gt;,
+                list_oper: Vec&lt;view_system_api::WriteOperation&gt;,
             ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::WriteBatch, <span class="self">Self</span>::Error&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>batch = Batch::new();
                 <span class="kw">for </span>x <span class="kw">in </span>list_oper {
                     <span class="kw">match </span>x {
-                        view_system::WriteOperation::Delete(key) =&gt; {
+                        view_system_api::WriteOperation::Delete(key) =&gt; {
                             batch.delete_key(key.to_vec())
                         }
-                        view_system::WriteOperation::Deleteprefix(key_prefix) =&gt; {
+                        view_system_api::WriteOperation::Deleteprefix(key_prefix) =&gt; {
                             batch.delete_key_prefix(key_prefix.to_vec())
                         }
-                        view_system::WriteOperation::Put(key_value) =&gt; {
+                        view_system_api::WriteOperation::Put(key_value) =&gt; {
                             batch.put_key_value_bytes(key_value.<span class="number">0</span>.to_vec(), key_value.<span class="number">1</span>.to_vec())
                         }
                     }
@@ -811,8 +811,8 @@
             <span class="kw">fn </span>write_batch_poll(
                 <span class="kw-2">&amp;mut </span><span class="self">self</span>,
                 future: <span class="kw-2">&amp;</span><span class="self">Self</span>::WriteBatch,
-            ) -&gt; <span class="prelude-ty">Result</span>&lt;view_system::PollUnit, <span class="self">Self</span>::Error&gt; {
-                <span class="kw">use </span>view_system::PollUnit;
+            ) -&gt; <span class="prelude-ty">Result</span>&lt;view_system_api::PollUnit, <span class="self">Self</span>::Error&gt; {
+                <span class="kw">use </span>view_system_api::PollUnit;
                 <span class="kw">match </span>future.poll(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.waker()) {
                     Poll::Pending =&gt; <span class="prelude-val">Ok</span>(PollUnit::Pending),
                     Poll::Ready(<span class="prelude-val">Ok</span>(())) =&gt; <span class="prelude-val">Ok</span>(PollUnit::Ready),

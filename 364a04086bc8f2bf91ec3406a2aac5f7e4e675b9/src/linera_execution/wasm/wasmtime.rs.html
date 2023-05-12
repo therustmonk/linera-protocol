@@ -514,9 +514,6 @@
 <span id="514">514</span>
 <span id="515">515</span>
 <span id="516">516</span>
-<span id="517">517</span>
-<span id="518">518</span>
-<span id="519">519</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -525,16 +522,16 @@
 </span><span class="comment">// Export the system interface used by a user contract.
 </span><span class="macro">wit_bindgen_host_wasmtime_rust::export!</span>({
     custom_error: <span class="bool-val">true</span>,
-    paths: [<span class="string">&quot;writable_system.wit&quot;</span>],
+    paths: [<span class="string">&quot;contract_system_api.wit&quot;</span>],
 });
 
 <span class="comment">// Export the system interface used by a user service.
-</span><span class="macro">wit_bindgen_host_wasmtime_rust::export!</span>(<span class="string">&quot;queryable_system.wit&quot;</span>);
+</span><span class="macro">wit_bindgen_host_wasmtime_rust::export!</span>(<span class="string">&quot;service_system_api.wit&quot;</span>);
 
 <span class="comment">// Export the system interface used by views.
 </span><span class="macro">wit_bindgen_host_wasmtime_rust::export!</span>({
     custom_error: <span class="bool-val">true</span>,
-    paths: [<span class="string">&quot;view_system.wit&quot;</span>],
+    paths: [<span class="string">&quot;view_system_api.wit&quot;</span>],
 });
 
 <span class="comment">// Import the interface implemented by a user contract.
@@ -551,11 +548,8 @@
 </span><span class="kw">mod </span>guest_futures;
 
 <span class="kw">use </span><span class="self">self</span>::{
-    contract::ContractData,
-    queryable_system::{QueryableSystem, QueryableSystemTables},
-    service::ServiceData,
-    view_system::{ViewSystem, ViewSystemTables},
-    writable_system::{WritableSystem, WritableSystemTables},
+    contract::ContractData, contract_system_api::ContractSystemApiTables, service::ServiceData,
+    service_system_api::ServiceSystemApiTables, view_system_api::ViewSystemApiTables,
 };
 <span class="kw">use super</span>::{
     async_boundary::{HostFuture, WakerForwarder},
@@ -616,8 +610,8 @@
         <span class="kw">let </span>engine = Engine::new(<span class="kw-2">&amp;</span>config).map_err(WasmExecutionError::CreateWasmtimeEngine)<span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>linker = Linker::new(<span class="kw-2">&amp;</span>engine);
 
-        writable_system::add_to_linker(<span class="kw-2">&amp;mut </span>linker, ContractState::system_api)<span class="question-mark">?</span>;
-        view_system::add_to_linker(<span class="kw-2">&amp;mut </span>linker, ContractState::views_api)<span class="question-mark">?</span>;
+        contract_system_api::add_to_linker(<span class="kw-2">&amp;mut </span>linker, ContractState::system_api)<span class="question-mark">?</span>;
+        view_system_api::add_to_linker(<span class="kw-2">&amp;mut </span>linker, ContractState::views_api)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>module = Module::new(<span class="kw-2">&amp;</span>engine, <span class="kw-2">&amp;</span><span class="self">self</span>.contract_bytecode)<span class="question-mark">?</span>;
         <span class="kw">let </span>waker_forwarder = WakerForwarder::default();
@@ -649,8 +643,8 @@
         <span class="kw">let </span>engine = Engine::default();
         <span class="kw">let </span><span class="kw-2">mut </span>linker = Linker::new(<span class="kw-2">&amp;</span>engine);
 
-        queryable_system::add_to_linker(<span class="kw-2">&amp;mut </span>linker, ServiceState::system_api)<span class="question-mark">?</span>;
-        view_system::add_to_linker(<span class="kw-2">&amp;mut </span>linker, ServiceState::views_api)<span class="question-mark">?</span>;
+        service_system_api::add_to_linker(<span class="kw-2">&amp;mut </span>linker, ServiceState::system_api)<span class="question-mark">?</span>;
+        view_system_api::add_to_linker(<span class="kw-2">&amp;mut </span>linker, ServiceState::views_api)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>module = Module::new(<span class="kw-2">&amp;</span>engine, <span class="kw-2">&amp;</span><span class="self">self</span>.service_bytecode)<span class="question-mark">?</span>;
         <span class="kw">let </span>waker_forwarder = WakerForwarder::default();
@@ -675,16 +669,16 @@
 </span><span class="kw">pub struct </span>ContractState&lt;<span class="lifetime">&#39;runtime</span>&gt; {
     data: ContractData,
     system_api: ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;,
-    system_tables: WritableSystemTables&lt;ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
-    views_tables: ViewSystemTables&lt;ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
+    system_tables: ContractSystemApiTables&lt;ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
+    views_tables: ViewSystemApiTables&lt;ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
 }
 
 <span class="doccomment">/// Data stored by the runtime that&#39;s necessary for handling queries to and from the WASM module.
 </span><span class="kw">pub struct </span>ServiceState&lt;<span class="lifetime">&#39;runtime</span>&gt; {
     data: ServiceData,
     system_api: ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;,
-    system_tables: QueryableSystemTables&lt;ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
-    views_tables: ViewSystemTables&lt;ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
+    system_tables: ServiceSystemApiTables&lt;ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
+    views_tables: ViewSystemApiTables&lt;ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;runtime</span>&gt; ContractState&lt;<span class="lifetime">&#39;runtime</span>&gt; {
@@ -700,8 +694,8 @@
         <span class="self">Self </span>{
             data: ContractData::default(),
             system_api: ContractSystemApi::new(waker, runtime, queued_future_factory),
-            system_tables: WritableSystemTables::default(),
-            views_tables: ViewSystemTables::default(),
+            system_tables: ContractSystemApiTables::default(),
+            views_tables: ViewSystemApiTables::default(),
         }
     }
 
@@ -715,7 +709,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
     ) -&gt; (
         <span class="kw-2">&amp;mut </span>ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;,
-        <span class="kw-2">&amp;mut </span>WritableSystemTables&lt;ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
+        <span class="kw-2">&amp;mut </span>ContractSystemApiTables&lt;ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
     ) {
         (<span class="kw-2">&amp;mut </span><span class="self">self</span>.system_api, <span class="kw-2">&amp;mut </span><span class="self">self</span>.system_tables)
     }
@@ -725,7 +719,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
     ) -&gt; (
         <span class="kw-2">&amp;mut </span>ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;,
-        <span class="kw-2">&amp;mut </span>ViewSystemTables&lt;ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
+        <span class="kw-2">&amp;mut </span>ViewSystemApiTables&lt;ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
     ) {
         (<span class="kw-2">&amp;mut </span><span class="self">self</span>.system_api, <span class="kw-2">&amp;mut </span><span class="self">self</span>.views_tables)
     }
@@ -740,8 +734,8 @@
         <span class="self">Self </span>{
             data: ServiceData::default(),
             system_api: ServiceSystemApi::new(waker, runtime),
-            system_tables: QueryableSystemTables::default(),
-            views_tables: ViewSystemTables::default(),
+            system_tables: ServiceSystemApiTables::default(),
+            views_tables: ViewSystemApiTables::default(),
         }
     }
 
@@ -755,7 +749,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
     ) -&gt; (
         <span class="kw-2">&amp;mut </span>ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;,
-        <span class="kw-2">&amp;mut </span>QueryableSystemTables&lt;ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
+        <span class="kw-2">&amp;mut </span>ServiceSystemApiTables&lt;ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
     ) {
         (<span class="kw-2">&amp;mut </span><span class="self">self</span>.system_api, <span class="kw-2">&amp;mut </span><span class="self">self</span>.system_tables)
     }
@@ -765,7 +759,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
     ) -&gt; (
         <span class="kw-2">&amp;mut </span>ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;,
-        <span class="kw-2">&amp;mut </span>ViewSystemTables&lt;ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
+        <span class="kw-2">&amp;mut </span>ViewSystemApiTables&lt;ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;,
     ) {
         (<span class="kw-2">&amp;mut </span><span class="self">self</span>.system_api, <span class="kw-2">&amp;mut </span><span class="self">self</span>.views_tables)
     }
@@ -968,8 +962,8 @@
     }
 }
 
-<span class="macro">impl_writable_system!</span>(ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;);
-<span class="macro">impl_view_system!</span>(ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;);
+<span class="macro">impl_contract_system_api!</span>(ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;);
+<span class="macro">impl_view_system_api!</span>(ContractSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;);
 
 <span class="doccomment">/// Implementation to forward service system calls from the guest WASM module to the host
 /// implementation.
@@ -1012,8 +1006,8 @@
     }
 }
 
-<span class="macro">impl_queryable_system!</span>(ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;);
-<span class="macro">impl_view_system!</span>(ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;);
+<span class="macro">impl_service_system_api!</span>(ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;);
+<span class="macro">impl_view_system_api!</span>(ServiceSystemApi&lt;<span class="lifetime">&#39;runtime</span>&gt;);
 
 <span class="kw">impl </span>From&lt;ExecutionError&gt; <span class="kw">for </span>wasmtime::Trap {
     <span class="kw">fn </span>from(error: ExecutionError) -&gt; <span class="self">Self </span>{

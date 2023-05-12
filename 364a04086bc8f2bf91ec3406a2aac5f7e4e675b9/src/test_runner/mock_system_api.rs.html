@@ -1362,7 +1362,7 @@
 /// from `linera_sdk::test::unit`.
 </span><span class="kw">pub fn </span>add_to_linker(linker: <span class="kw-2">&amp;mut </span>Linker&lt;Resources&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     linker.func_wrap1_async(
-        <span class="string">&quot;writable_system&quot;</span>,
+        <span class="string">&quot;contract_system_api&quot;</span>,
         <span class="string">&quot;chain-id: func() -&gt; record { part1: u64, part2: u64, part3: u64, part4: u64 }&quot;</span>,
         <span class="kw">move </span>|<span class="kw-2">mut </span>caller: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;, return_offset: i32| {
             Box::new(<span class="kw">async move </span>{
@@ -1388,7 +1388,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap1_async(
-        <span class="string">&quot;writable_system&quot;</span>,
+        <span class="string">&quot;contract_system_api&quot;</span>,
         <span class="string">&quot;application-id: func() -&gt; record { \
             bytecode-id: record { \
                 chain-id: record { part1: u64, part2: u64, part3: u64, part4: u64 }, \
@@ -1435,7 +1435,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap1_async(
-        <span class="string">&quot;writable_system&quot;</span>,
+        <span class="string">&quot;contract_system_api&quot;</span>,
         <span class="string">&quot;application-parameters: func() -&gt; list&lt;u8&gt;&quot;</span>,
         <span class="kw">move </span>|<span class="kw-2">mut </span>caller: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;, return_offset: i32| {
             Box::new(<span class="kw">async move </span>{
@@ -1460,7 +1460,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap1_async(
-        <span class="string">&quot;writable_system&quot;</span>,
+        <span class="string">&quot;contract_system_api&quot;</span>,
         <span class="string">&quot;read-system-balance: func() -&gt; record { lower-half: u64, upper-half: u64 }&quot;</span>,
         <span class="kw">move </span>|<span class="kw-2">mut </span>caller: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;, return_offset: i32| {
             Box::new(<span class="kw">async move </span>{
@@ -1486,7 +1486,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap0_async(
-        <span class="string">&quot;writable_system&quot;</span>,
+        <span class="string">&quot;contract_system_api&quot;</span>,
         <span class="string">&quot;read-system-timestamp: func() -&gt; u64&quot;</span>,
         <span class="kw">move </span>|<span class="kw-2">mut </span>caller: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;| {
             Box::new(<span class="kw">async move </span>{
@@ -1509,7 +1509,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap3_async(
-        <span class="string">&quot;writable_system&quot;</span>,
+        <span class="string">&quot;contract_system_api&quot;</span>,
         <span class="string">&quot;log: func(message: string, level: enum { trace, debug, info, warn, error }) -&gt; unit&quot;</span>,
         <span class="kw">move </span>|<span class="kw-2">mut </span>caller: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;,
               message_address: i32,
@@ -1557,7 +1557,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap1_async(
-        <span class="string">&quot;writable_system&quot;</span>,
+        <span class="string">&quot;contract_system_api&quot;</span>,
         <span class="string">&quot;load: func() -&gt; list&lt;u8&gt;&quot;</span>,
         <span class="kw">move </span>|<span class="kw-2">mut </span>caller: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;, return_offset: i32| {
             Box::new(<span class="kw">async move </span>{
@@ -1578,7 +1578,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap1_async(
-        <span class="string">&quot;writable_system&quot;</span>,
+        <span class="string">&quot;contract_system_api&quot;</span>,
         <span class="string">&quot;load-and-lock: func() -&gt; option&lt;list&lt;u8&gt;&gt;&quot;</span>,
         <span class="kw">move </span>|<span class="kw-2">mut </span>caller: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;, return_offset: i32| {
             Box::new(<span class="kw">async move </span>{
@@ -1603,12 +1603,12 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap0_async(
-        <span class="string">&quot;writable_system&quot;</span>,
+        <span class="string">&quot;contract_system_api&quot;</span>,
         <span class="string">&quot;lock::new: func() -&gt; handle&lt;lock&gt;&quot;</span>,
         <span class="kw">move </span>|<span class="kw">_</span>: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;| Box::new(<span class="kw">async move </span>{ <span class="number">0 </span>}),
     )<span class="question-mark">?</span>;
     linker.func_wrap1_async(
-        <span class="string">&quot;writable_system&quot;</span>,
+        <span class="string">&quot;contract_system_api&quot;</span>,
         <span class="string">&quot;lock::poll: func(self: handle&lt;lock&gt;) -&gt; variant { \
             pending(unit), \
             ready-locked(unit), \
@@ -1637,7 +1637,7 @@
     )<span class="question-mark">?</span>;
 
     linker.func_wrap1_async(
-        <span class="string">&quot;queryable_system&quot;</span>,
+        <span class="string">&quot;service_system_api&quot;</span>,
         <span class="string">&quot;chain-id: func() -&gt; record { part1: u64, part2: u64, part3: u64, part4: u64 }&quot;</span>,
         <span class="kw">move </span>|<span class="kw-2">mut </span>caller: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;, return_offset: i32| {
             Box::new(<span class="kw">async move </span>{
@@ -1663,7 +1663,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap1_async(
-        <span class="string">&quot;queryable_system&quot;</span>,
+        <span class="string">&quot;service_system_api&quot;</span>,
         <span class="string">&quot;application-id: func() -&gt; record { \
             bytecode-id: record { \
                 chain-id: record { part1: u64, part2: u64, part3: u64, part4: u64 }, \
@@ -1710,7 +1710,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap1_async(
-        <span class="string">&quot;queryable_system&quot;</span>,
+        <span class="string">&quot;service_system_api&quot;</span>,
         <span class="string">&quot;application-parameters: func() -&gt; list&lt;u8&gt;&quot;</span>,
         <span class="kw">move </span>|<span class="kw-2">mut </span>caller: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;, return_offset: i32| {
             Box::new(<span class="kw">async move </span>{
@@ -1735,7 +1735,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap1_async(
-        <span class="string">&quot;queryable_system&quot;</span>,
+        <span class="string">&quot;service_system_api&quot;</span>,
         <span class="string">&quot;read-system-balance: func() -&gt; record { lower-half: u64, upper-half: u64 }&quot;</span>,
         <span class="kw">move </span>|<span class="kw-2">mut </span>caller: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;, return_offset: i32| {
             Box::new(<span class="kw">async move </span>{
@@ -1761,7 +1761,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap0_async(
-        <span class="string">&quot;queryable_system&quot;</span>,
+        <span class="string">&quot;service_system_api&quot;</span>,
         <span class="string">&quot;read-system-timestamp: func() -&gt; u64&quot;</span>,
         <span class="kw">move </span>|<span class="kw-2">mut </span>caller: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;| {
             Box::new(<span class="kw">async move </span>{
@@ -1784,7 +1784,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap3_async(
-        <span class="string">&quot;queryable_system&quot;</span>,
+        <span class="string">&quot;service_system_api&quot;</span>,
         <span class="string">&quot;log: func(message: string, level: enum { trace, debug, info, warn, error }) -&gt; unit&quot;</span>,
         <span class="kw">move </span>|<span class="kw-2">mut </span>caller: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;,
               message_address: i32,
@@ -1832,12 +1832,12 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap0_async(
-        <span class="string">&quot;queryable_system&quot;</span>,
+        <span class="string">&quot;service_system_api&quot;</span>,
         <span class="string">&quot;load::new: func() -&gt; handle&lt;load&gt;&quot;</span>,
         <span class="kw">move </span>|<span class="kw">_</span>: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;| Box::new(<span class="kw">async move </span>{ <span class="number">0 </span>}),
     )<span class="question-mark">?</span>;
     linker.func_wrap2_async(
-        <span class="string">&quot;queryable_system&quot;</span>,
+        <span class="string">&quot;service_system_api&quot;</span>,
         <span class="string">&quot;load::poll: \
             func(self: handle&lt;load&gt;) -&gt; variant { pending(unit), ready(result&lt;list&lt;u8&gt;, string&gt;) }&quot;</span>,
         <span class="kw">move </span>|<span class="kw-2">mut </span>caller: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;, _handle: i32, return_offset: i32| {
@@ -1861,12 +1861,12 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap0_async(
-        <span class="string">&quot;queryable_system&quot;</span>,
+        <span class="string">&quot;service_system_api&quot;</span>,
         <span class="string">&quot;lock::new: func() -&gt; handle&lt;lock&gt;&quot;</span>,
         <span class="kw">move </span>|<span class="kw">_</span>: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;| Box::new(<span class="kw">async move </span>{ <span class="number">0 </span>}),
     )<span class="question-mark">?</span>;
     linker.func_wrap2_async(
-        <span class="string">&quot;queryable_system&quot;</span>,
+        <span class="string">&quot;service_system_api&quot;</span>,
         <span class="string">&quot;lock::poll: \
             func(self: handle&lt;lock&gt;) -&gt; variant { pending(unit), ready(result&lt;unit, string&gt;) }&quot;</span>,
         <span class="kw">move </span>|<span class="kw-2">mut </span>caller: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;, _handle: i32, return_offset: i32| {
@@ -1913,7 +1913,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap14_async(
-        <span class="string">&quot;queryable_system&quot;</span>,
+        <span class="string">&quot;service_system_api&quot;</span>,
         <span class="string">&quot;try-query-application::new: func(\
             application: record { \
                 bytecode-id: record { \
@@ -1991,7 +1991,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap2_async(
-        <span class="string">&quot;queryable_system&quot;</span>,
+        <span class="string">&quot;service_system_api&quot;</span>,
         <span class="string">&quot;try-query-application::poll: func(self: handle&lt;try-query-application&gt;) -&gt; variant { \
             pending(unit), \
             ready(result&lt;list&lt;u8&gt;, string&gt;) \
@@ -2093,7 +2093,7 @@
     )<span class="question-mark">?</span>;
 
     linker.func_wrap2_async(
-        <span class="string">&quot;view_system&quot;</span>,
+        <span class="string">&quot;view_system_api&quot;</span>,
         <span class="string">&quot;read-key-bytes::new: func(key: list&lt;u8&gt;) -&gt; handle&lt;read-key-bytes&gt;&quot;</span>,
         <span class="kw">move </span>|<span class="kw-2">mut </span>caller: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;, key_address: i32, key_length: i32| {
             Box::new(<span class="kw">async move </span>{
@@ -2105,7 +2105,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap2_async(
-        <span class="string">&quot;view_system&quot;</span>,
+        <span class="string">&quot;view_system_api&quot;</span>,
         <span class="string">&quot;read-key-bytes::poll: func(self: handle&lt;read-key-bytes&gt;) -&gt; variant { \
             pending(unit), \
             ready(option&lt;list&lt;u8&gt;&gt;) \
@@ -2141,7 +2141,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap2_async(
-        <span class="string">&quot;view_system&quot;</span>,
+        <span class="string">&quot;view_system_api&quot;</span>,
         <span class="string">&quot;find-keys::new: func(prefix: list&lt;u8&gt;) -&gt; handle&lt;find-keys&gt;&quot;</span>,
         <span class="kw">move </span>|<span class="kw-2">mut </span>caller: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;, prefix_address: i32, prefix_length: i32| {
             Box::new(<span class="kw">async move </span>{
@@ -2153,7 +2153,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap2_async(
-        <span class="string">&quot;view_system&quot;</span>,
+        <span class="string">&quot;view_system_api&quot;</span>,
         <span class="string">&quot;find-keys::poll: func(self: handle&lt;find-keys&gt;) -&gt; variant { \
             pending(unit), \
             ready(list&lt;list&lt;u8&gt;&gt;) \
@@ -2189,7 +2189,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap2_async(
-        <span class="string">&quot;view_system&quot;</span>,
+        <span class="string">&quot;view_system_api&quot;</span>,
         <span class="string">&quot;find-key-values::new: func(prefix: list&lt;u8&gt;) -&gt; handle&lt;find-key-values&gt;&quot;</span>,
         <span class="kw">move </span>|<span class="kw-2">mut </span>caller: Caller&lt;<span class="lifetime">&#39;_</span>, Resources&gt;, prefix_address: i32, prefix_length: i32| {
             Box::new(<span class="kw">async move </span>{
@@ -2201,7 +2201,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap2_async(
-        <span class="string">&quot;view_system&quot;</span>,
+        <span class="string">&quot;view_system_api&quot;</span>,
         <span class="string">&quot;find-key-values::poll: func(self: handle&lt;find-key-values&gt;) -&gt; variant { \
             pending(unit), \
             ready(list&lt;tuple&lt;list&lt;u8&gt;, list&lt;u8&gt;&gt;&gt;) \
@@ -2238,7 +2238,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap2_async(
-        <span class="string">&quot;view_system&quot;</span>,
+        <span class="string">&quot;view_system_api&quot;</span>,
         <span class="string">&quot;write-batch::new: func(\
             key: list&lt;variant { \
                 delete(list&lt;u8&gt;), \
@@ -2295,7 +2295,7 @@
         },
     )<span class="question-mark">?</span>;
     linker.func_wrap1_async(
-        <span class="string">&quot;view_system&quot;</span>,
+        <span class="string">&quot;view_system_api&quot;</span>,
         <span class="string">&quot;write-batch::poll: func(self: handle&lt;write-batch&gt;) -&gt; variant { \
             pending(unit), \
             ready(unit) \

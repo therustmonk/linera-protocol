@@ -229,7 +229,7 @@
 
 </span><span class="attribute">#![allow(clippy::duplicate_mod)]
 
-</span><span class="kw">use super</span>::{contract, queryable_system, writable_system};
+</span><span class="kw">use super</span>::{contract, contract_system_api, service_system_api};
 <span class="kw">use crate</span>::{
     ApplicationCallResult, ChannelName, Destination, NewSession, RawExecutionResult,
     SessionCallResult, SessionId, UserApplicationId,
@@ -343,8 +343,8 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;writable_system::SessionId&gt; <span class="kw">for </span>SessionId {
-    <span class="kw">fn </span>from(guest: writable_system::SessionId) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;contract_system_api::SessionId&gt; <span class="kw">for </span>SessionId {
+    <span class="kw">fn </span>from(guest: contract_system_api::SessionId) -&gt; <span class="self">Self </span>{
         SessionId {
             application_id: guest.application_id.into(),
             kind: guest.kind,
@@ -353,8 +353,8 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;writable_system::ApplicationId&gt; <span class="kw">for </span>UserApplicationId {
-    <span class="kw">fn </span>from(guest: writable_system::ApplicationId) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;contract_system_api::ApplicationId&gt; <span class="kw">for </span>UserApplicationId {
+    <span class="kw">fn </span>from(guest: contract_system_api::ApplicationId) -&gt; <span class="self">Self </span>{
         UserApplicationId {
             bytecode_id: guest.bytecode_id.into(),
             creation: guest.creation.into(),
@@ -362,14 +362,14 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;writable_system::EffectId&gt; <span class="kw">for </span>BytecodeId {
-    <span class="kw">fn </span>from(guest: writable_system::EffectId) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;contract_system_api::EffectId&gt; <span class="kw">for </span>BytecodeId {
+    <span class="kw">fn </span>from(guest: contract_system_api::EffectId) -&gt; <span class="self">Self </span>{
         BytecodeId(guest.into())
     }
 }
 
-<span class="kw">impl </span>From&lt;writable_system::EffectId&gt; <span class="kw">for </span>EffectId {
-    <span class="kw">fn </span>from(guest: writable_system::EffectId) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;contract_system_api::EffectId&gt; <span class="kw">for </span>EffectId {
+    <span class="kw">fn </span>from(guest: contract_system_api::EffectId) -&gt; <span class="self">Self </span>{
         EffectId {
             chain_id: guest.chain_id.into(),
             height: BlockHeight(guest.height),
@@ -378,14 +378,14 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;writable_system::CryptoHash&gt; <span class="kw">for </span>ChainId {
-    <span class="kw">fn </span>from(guest: writable_system::CryptoHash) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;contract_system_api::CryptoHash&gt; <span class="kw">for </span>ChainId {
+    <span class="kw">fn </span>from(guest: contract_system_api::CryptoHash) -&gt; <span class="self">Self </span>{
         ChainId(guest.into())
     }
 }
 
-<span class="kw">impl </span>From&lt;writable_system::CryptoHash&gt; <span class="kw">for </span>CryptoHash {
-    <span class="kw">fn </span>from(guest: writable_system::CryptoHash) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;contract_system_api::CryptoHash&gt; <span class="kw">for </span>CryptoHash {
+    <span class="kw">fn </span>from(guest: contract_system_api::CryptoHash) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>bytes = [<span class="number">0u8</span>; <span class="number">32</span>];
 
         bytes[<span class="number">0</span>..<span class="number">8</span>].copy_from_slice(<span class="kw-2">&amp;</span>guest.part1.to_le_bytes());
@@ -397,8 +397,8 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;queryable_system::ApplicationId&gt; <span class="kw">for </span>UserApplicationId {
-    <span class="kw">fn </span>from(guest: queryable_system::ApplicationId) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;service_system_api::ApplicationId&gt; <span class="kw">for </span>UserApplicationId {
+    <span class="kw">fn </span>from(guest: service_system_api::ApplicationId) -&gt; <span class="self">Self </span>{
         UserApplicationId {
             bytecode_id: guest.bytecode_id.into(),
             creation: guest.creation.into(),
@@ -406,14 +406,14 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;queryable_system::EffectId&gt; <span class="kw">for </span>BytecodeId {
-    <span class="kw">fn </span>from(guest: queryable_system::EffectId) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;service_system_api::EffectId&gt; <span class="kw">for </span>BytecodeId {
+    <span class="kw">fn </span>from(guest: service_system_api::EffectId) -&gt; <span class="self">Self </span>{
         BytecodeId(guest.into())
     }
 }
 
-<span class="kw">impl </span>From&lt;queryable_system::EffectId&gt; <span class="kw">for </span>EffectId {
-    <span class="kw">fn </span>from(guest: queryable_system::EffectId) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;service_system_api::EffectId&gt; <span class="kw">for </span>EffectId {
+    <span class="kw">fn </span>from(guest: service_system_api::EffectId) -&gt; <span class="self">Self </span>{
         EffectId {
             chain_id: guest.chain_id.into(),
             height: BlockHeight(guest.height),
@@ -422,14 +422,14 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;queryable_system::CryptoHash&gt; <span class="kw">for </span>ChainId {
-    <span class="kw">fn </span>from(guest: queryable_system::CryptoHash) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;service_system_api::CryptoHash&gt; <span class="kw">for </span>ChainId {
+    <span class="kw">fn </span>from(guest: service_system_api::CryptoHash) -&gt; <span class="self">Self </span>{
         ChainId(guest.into())
     }
 }
 
-<span class="kw">impl </span>From&lt;queryable_system::CryptoHash&gt; <span class="kw">for </span>CryptoHash {
-    <span class="kw">fn </span>from(guest: queryable_system::CryptoHash) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;service_system_api::CryptoHash&gt; <span class="kw">for </span>CryptoHash {
+    <span class="kw">fn </span>from(guest: service_system_api::CryptoHash) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>bytes = [<span class="number">0u8</span>; <span class="number">32</span>];
 
         bytes[<span class="number">0</span>..<span class="number">8</span>].copy_from_slice(<span class="kw-2">&amp;</span>guest.part1.to_le_bytes());

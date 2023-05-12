@@ -256,7 +256,7 @@
 
 </span><span class="attribute">#![allow(clippy::duplicate_mod)]
 
-</span><span class="kw">use super</span>::{contract, queryable_system, service, writable_system};
+</span><span class="kw">use super</span>::{contract, contract_system_api, service, service_system_api};
 <span class="kw">use crate</span>::{
     CallResult, CalleeContext, EffectContext, EffectId, OperationContext, QueryContext, SessionId,
     UserApplicationId,
@@ -285,9 +285,9 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;EffectId&gt; <span class="kw">for </span>queryable_system::EffectId {
+<span class="kw">impl </span>From&lt;EffectId&gt; <span class="kw">for </span>service_system_api::EffectId {
     <span class="kw">fn </span>from(host: EffectId) -&gt; <span class="self">Self </span>{
-        queryable_system::EffectId {
+        service_system_api::EffectId {
             chain_id: host.chain_id.into(),
             height: host.height.<span class="number">0</span>,
             index: host.index,
@@ -295,9 +295,9 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;EffectId&gt; <span class="kw">for </span>writable_system::EffectId {
+<span class="kw">impl </span>From&lt;EffectId&gt; <span class="kw">for </span>contract_system_api::EffectId {
     <span class="kw">fn </span>from(host: EffectId) -&gt; <span class="self">Self </span>{
-        writable_system::EffectId {
+        contract_system_api::EffectId {
             chain_id: host.chain_id.into(),
             height: host.height.<span class="number">0</span>,
             index: host.index,
@@ -345,9 +345,9 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;SessionId&gt; <span class="kw">for </span>writable_system::SessionId {
+<span class="kw">impl </span>From&lt;SessionId&gt; <span class="kw">for </span>contract_system_api::SessionId {
     <span class="kw">fn </span>from(host: SessionId) -&gt; <span class="self">Self </span>{
-        writable_system::SessionId {
+        contract_system_api::SessionId {
             application_id: host.application_id.into(),
             kind: host.kind,
             index: host.index,
@@ -364,31 +364,31 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;UserApplicationId&gt; <span class="kw">for </span>queryable_system::ApplicationId {
+<span class="kw">impl </span>From&lt;UserApplicationId&gt; <span class="kw">for </span>service_system_api::ApplicationId {
     <span class="kw">fn </span>from(host: UserApplicationId) -&gt; <span class="self">Self </span>{
-        queryable_system::ApplicationId {
+        service_system_api::ApplicationId {
             bytecode_id: host.bytecode_id.<span class="number">0</span>.into(),
             creation: host.creation.into(),
         }
     }
 }
 
-<span class="kw">impl </span>From&lt;UserApplicationId&gt; <span class="kw">for </span>writable_system::ApplicationId {
+<span class="kw">impl </span>From&lt;UserApplicationId&gt; <span class="kw">for </span>contract_system_api::ApplicationId {
     <span class="kw">fn </span>from(host: UserApplicationId) -&gt; <span class="self">Self </span>{
-        writable_system::ApplicationId {
+        contract_system_api::ApplicationId {
             bytecode_id: host.bytecode_id.<span class="number">0</span>.into(),
             creation: host.creation.into(),
         }
     }
 }
 
-<span class="kw">impl </span>From&lt;ChainId&gt; <span class="kw">for </span>queryable_system::ChainId {
+<span class="kw">impl </span>From&lt;ChainId&gt; <span class="kw">for </span>service_system_api::ChainId {
     <span class="kw">fn </span>from(chain_id: ChainId) -&gt; <span class="self">Self </span>{
         chain_id.<span class="number">0</span>.into()
     }
 }
 
-<span class="kw">impl </span>From&lt;ChainId&gt; <span class="kw">for </span>writable_system::ChainId {
+<span class="kw">impl </span>From&lt;ChainId&gt; <span class="kw">for </span>contract_system_api::ChainId {
     <span class="kw">fn </span>from(chain_id: ChainId) -&gt; <span class="self">Self </span>{
         chain_id.<span class="number">0</span>.into()
     }
@@ -432,11 +432,11 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;CryptoHash&gt; <span class="kw">for </span>queryable_system::CryptoHash {
+<span class="kw">impl </span>From&lt;CryptoHash&gt; <span class="kw">for </span>service_system_api::CryptoHash {
     <span class="kw">fn </span>from(crypto_hash: CryptoHash) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>bytes = crypto_hash.as_bytes();
 
-        queryable_system::CryptoHash {
+        service_system_api::CryptoHash {
             part1: u64::from_le_bytes(bytes[<span class="number">0</span>..<span class="number">8</span>].try_into().expect(<span class="string">&quot;incorrect indices&quot;</span>)),
             part2: u64::from_le_bytes(bytes[<span class="number">8</span>..<span class="number">16</span>].try_into().expect(<span class="string">&quot;incorrect indices&quot;</span>)),
             part3: u64::from_le_bytes(bytes[<span class="number">16</span>..<span class="number">24</span>].try_into().expect(<span class="string">&quot;incorrect indices&quot;</span>)),
@@ -445,11 +445,11 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;CryptoHash&gt; <span class="kw">for </span>writable_system::CryptoHash {
+<span class="kw">impl </span>From&lt;CryptoHash&gt; <span class="kw">for </span>contract_system_api::CryptoHash {
     <span class="kw">fn </span>from(crypto_hash: CryptoHash) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>bytes = crypto_hash.as_bytes();
 
-        writable_system::CryptoHash {
+        contract_system_api::CryptoHash {
             part1: u64::from_le_bytes(bytes[<span class="number">0</span>..<span class="number">8</span>].try_into().expect(<span class="string">&quot;incorrect indices&quot;</span>)),
             part2: u64::from_le_bytes(bytes[<span class="number">8</span>..<span class="number">16</span>].try_into().expect(<span class="string">&quot;incorrect indices&quot;</span>)),
             part3: u64::from_le_bytes(bytes[<span class="number">16</span>..<span class="number">24</span>].try_into().expect(<span class="string">&quot;incorrect indices&quot;</span>)),
@@ -458,31 +458,31 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;CallResult&gt; <span class="kw">for </span>writable_system::CallResult {
+<span class="kw">impl </span>From&lt;CallResult&gt; <span class="kw">for </span>contract_system_api::CallResult {
     <span class="kw">fn </span>from(host: CallResult) -&gt; <span class="self">Self </span>{
-        writable_system::CallResult {
+        contract_system_api::CallResult {
             value: host.value,
             sessions: host
                 .sessions
                 .into_iter()
-                .map(writable_system::SessionId::from)
+                .map(contract_system_api::SessionId::from)
                 .collect(),
         }
     }
 }
 
-<span class="kw">impl </span>From&lt;Balance&gt; <span class="kw">for </span>queryable_system::Balance {
+<span class="kw">impl </span>From&lt;Balance&gt; <span class="kw">for </span>service_system_api::Balance {
     <span class="kw">fn </span>from(host: Balance) -&gt; <span class="self">Self </span>{
-        queryable_system::Balance {
+        service_system_api::Balance {
             lower_half: host.lower_half(),
             upper_half: host.upper_half(),
         }
     }
 }
 
-<span class="kw">impl </span>From&lt;Balance&gt; <span class="kw">for </span>writable_system::Balance {
+<span class="kw">impl </span>From&lt;Balance&gt; <span class="kw">for </span>contract_system_api::Balance {
     <span class="kw">fn </span>from(host: Balance) -&gt; <span class="self">Self </span>{
-        writable_system::Balance {
+        contract_system_api::Balance {
             lower_half: host.lower_half(),
             upper_half: host.upper_half(),
         }
