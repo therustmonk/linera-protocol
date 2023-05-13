@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["GraphQLBatchRequest","Extractor for GraphQL batch request."],["GraphQLProtocol","A GraphQL protocol extractor."],["GraphQLRequest","Extractor for GraphQL request."],["GraphQLResponse","Responder for a GraphQL response."],["GraphQLSubscription","A GraphQL subscription service."],["GraphQLWebSocket","A Websocket connection for GraphQL subscription."]]};
+window.SIDEBAR_ITEMS = {"struct":["GraphQLBatchRequest","GraphQLProtocol","GraphQLRequest","GraphQLResponse","GraphQLSubscription","GraphQLWebSocket"]};

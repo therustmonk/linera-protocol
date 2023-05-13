@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["GetRoleCredentials","Fluent builder constructing a request to `GetRoleCredentials`."],["ListAccountRoles","Fluent builder constructing a request to `ListAccountRoles`."],["ListAccounts","Fluent builder constructing a request to `ListAccounts`."],["Logout","Fluent builder constructing a request to `Logout`."]]};
+window.SIDEBAR_ITEMS = {"struct":["GetRoleCredentials","ListAccountRoles","ListAccounts","Logout"]};

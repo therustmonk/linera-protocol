@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["ProfileFileError","An Error building a Credential source from an AWS Profile"]],"struct":[["Builder","Builder for [`ProfileFileCredentialsProvider`]"],["ProfileFileCredentialsProvider","AWS Profile based credentials provider"]]};
+window.SIDEBAR_ITEMS = {"enum":["ProfileFileError"],"struct":["Builder","ProfileFileCredentialsProvider"]};

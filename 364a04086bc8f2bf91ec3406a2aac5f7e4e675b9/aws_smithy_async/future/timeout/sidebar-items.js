@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["TimedOutError","Error returned when [`Timeout`] times out"],["Timeout","Timeout Future"]]};
+window.SIDEBAR_ITEMS = {"struct":["TimedOutError","Timeout"]};

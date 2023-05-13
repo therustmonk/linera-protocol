@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":[["format_bytes","The [format] macro, but returning [Str]."],["format_bytes_mut","The [format] macro, but returning [StrMut]."]],"mod":[["string","[String]-like wrappers around [Bytes] and [BytesMut]."]],"struct":[["SegmentedBuf","A concatenation of multiple buffers into a large one, without copying the bytes over."],["SegmentedSlice","A consumable view of a sequence of buffers."]]};
+window.SIDEBAR_ITEMS = {"macro":["format_bytes","format_bytes_mut"],"mod":["string"],"struct":["SegmentedBuf","SegmentedSlice"]};

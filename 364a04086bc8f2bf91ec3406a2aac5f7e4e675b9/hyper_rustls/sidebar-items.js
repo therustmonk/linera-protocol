@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["MaybeHttpsStream","A stream that might be protected with TLS."]],"struct":[["HttpsConnector","A Connector for the `https` scheme."]]};
+window.SIDEBAR_ITEMS = {"enum":["MaybeHttpsStream"],"struct":["HttpsConnector"]};

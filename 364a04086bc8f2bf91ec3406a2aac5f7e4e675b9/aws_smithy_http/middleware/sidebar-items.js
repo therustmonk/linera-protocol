@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["load_response","Load a response using `handler` to parse the results."]],"trait":[["AsyncMapRequest","[`AsyncMapRequest`] defines an asynchronous middleware that transforms an [`operation::Request`]."],["MapRequest","[`MapRequest`] defines a synchronous middleware that transforms an [`operation::Request`]."]]};
+window.SIDEBAR_ITEMS = {"fn":["load_response"],"trait":["AsyncMapRequest","MapRequest"]};

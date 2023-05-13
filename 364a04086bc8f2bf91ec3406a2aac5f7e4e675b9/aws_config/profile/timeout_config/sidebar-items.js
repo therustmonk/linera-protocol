@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","Builder for [`ProfileFileTimeoutConfigProvider`]"],["ProfileFileTimeoutConfigProvider","Load timeout configuration properties from a profile file"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder","ProfileFileTimeoutConfigProvider"]};

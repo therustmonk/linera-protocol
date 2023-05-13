@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `DescribeTimeToLiveInput`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

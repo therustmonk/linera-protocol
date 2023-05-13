@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["Error","Errors that could occur while installing a TCP recorder/exporter."]],"struct":[["TcpBuilder","Builder for creating and installing a TCP recorder/exporter."],["TcpRecorder","A TCP recorder."]]};
+window.SIDEBAR_ITEMS = {"enum":["Error"],"struct":["TcpBuilder","TcpRecorder"]};

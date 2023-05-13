@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["delimited","Sequence three parsers, only returning the output of the second."],["preceded","Sequence two parsers, only returning the output from the second."],["separated_pair","Sequence three parsers, only returning the values of the first and third."],["terminated","Sequence two parsers, only returning the output of the first."]]};
+window.SIDEBAR_ITEMS = {"fn":["delimited","preceded","separated_pair","terminated"]};

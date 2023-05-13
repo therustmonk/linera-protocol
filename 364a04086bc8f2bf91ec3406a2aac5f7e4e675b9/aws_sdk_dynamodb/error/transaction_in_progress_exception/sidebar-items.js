@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `TransactionInProgressException`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

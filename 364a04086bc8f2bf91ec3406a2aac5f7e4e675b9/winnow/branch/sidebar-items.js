@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["alt","Pick the first successful parser"],["permutation","Applies a list of parsers in any order."]],"trait":[["Alt","Helper trait for the [alt()] combinator."],["Permutation","Helper trait for the [permutation()] combinator."]]};
+window.SIDEBAR_ITEMS = {"fn":["alt","permutation"],"macro":["dispatch"],"trait":["Alt","Permutation"]};

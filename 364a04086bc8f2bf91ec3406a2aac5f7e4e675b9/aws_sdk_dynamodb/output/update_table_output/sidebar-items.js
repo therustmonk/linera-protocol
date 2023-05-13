@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `UpdateTableOutput`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

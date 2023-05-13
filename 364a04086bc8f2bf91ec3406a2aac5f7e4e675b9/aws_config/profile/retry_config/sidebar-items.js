@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","Builder for [ProfileFileRetryConfigProvider]"],["ProfileFileRetryConfigProvider","Load retry configuration properties from a profile file"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder","ProfileFileRetryConfigProvider"]};

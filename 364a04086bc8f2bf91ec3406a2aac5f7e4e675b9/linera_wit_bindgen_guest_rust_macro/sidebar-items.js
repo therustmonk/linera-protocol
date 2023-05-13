@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":[["export",""],["import",""]]};
+window.SIDEBAR_ITEMS = {"macro":["export","import"]};

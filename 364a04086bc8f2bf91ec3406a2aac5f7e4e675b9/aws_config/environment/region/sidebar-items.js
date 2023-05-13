@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["EnvironmentVariableRegionProvider","Load a region from environment variables"]]};
+window.SIDEBAR_ITEMS = {"struct":["EnvironmentVariableRegionProvider"]};

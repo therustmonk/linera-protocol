@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["DefaultMiddleware","AWS Middleware Stack"],["RetryConfig","Retry Policy Configuration"]]};
+window.SIDEBAR_ITEMS = {"struct":["DefaultMiddleware","RetryConfig"]};

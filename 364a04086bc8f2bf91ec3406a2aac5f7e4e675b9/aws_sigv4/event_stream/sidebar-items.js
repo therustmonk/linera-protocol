@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["sign_empty_message","Returns a signed empty message"],["sign_message","Signs an Event Stream message with the given `credentials`."]],"type":[["SigningParams","Event stream signing parameters"]]};
+window.SIDEBAR_ITEMS = {"fn":["sign_empty_message","sign_message"],"type":["SigningParams"]};

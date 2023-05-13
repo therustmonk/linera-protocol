@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"derive":[["CryptoHashRootView",""],["CryptoHashView",""],["GraphQLView",""],["HashableView",""],["RootView",""],["View",""]]};
+window.SIDEBAR_ITEMS = {"derive":["CryptoHashRootView","CryptoHashView","GraphQLView","HashableView","RootView","View"]};

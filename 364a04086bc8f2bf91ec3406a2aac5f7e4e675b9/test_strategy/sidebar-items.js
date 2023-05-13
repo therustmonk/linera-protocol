@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"attr":[["proptest",""]],"derive":[["Arbitrary",""]]};
+window.SIDEBAR_ITEMS = {"attr":["proptest"],"derive":["Arbitrary"]};

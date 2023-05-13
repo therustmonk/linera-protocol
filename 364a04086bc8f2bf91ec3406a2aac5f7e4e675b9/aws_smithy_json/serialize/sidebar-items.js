@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["JsonArrayWriter",""],["JsonObjectWriter",""],["JsonValueWriter",""]]};
+window.SIDEBAR_ITEMS = {"struct":["JsonArrayWriter","JsonObjectWriter","JsonValueWriter"]};

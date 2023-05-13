@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"static":[["LOGS",""]]};
+window.SIDEBAR_ITEMS = {"static":["LOGS"]};

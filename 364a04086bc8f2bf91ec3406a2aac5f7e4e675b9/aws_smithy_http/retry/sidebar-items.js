@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":[["ClassifyResponse",""]]};
+window.SIDEBAR_ITEMS = {"trait":["ClassifyResponse"]};

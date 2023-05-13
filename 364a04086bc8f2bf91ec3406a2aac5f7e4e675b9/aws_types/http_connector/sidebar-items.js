@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["HttpConnector","Enum for describing the two “kinds” of HTTP Connectors in smithy-rs."]],"struct":[["HttpSettings","HttpSettings for HTTP Connectors"]],"type":[["MakeConnectorFn","Type alias for a Connector factory function."]]};
+window.SIDEBAR_ITEMS = {"enum":["HttpConnector"],"struct":["HttpSettings"],"type":["MakeConnectorFn"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `AutoScalingPolicyDescription`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

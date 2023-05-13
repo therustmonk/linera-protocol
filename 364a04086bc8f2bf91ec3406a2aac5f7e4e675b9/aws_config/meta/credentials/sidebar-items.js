@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["provide_credentials_fn","Returns a new credentials provider built with the given closure. This allows you to create an [`ProvideCredentials`] implementation from an async block that returns a [`credentials::Result`]."]],"mod":[["lazy_caching","Lazy, caching, credentials provider implementation"]],"struct":[["CredentialsProviderChain","Credentials provider that checks a series of inner providers"]]};
+window.SIDEBAR_ITEMS = {"fn":["provide_credentials_fn"],"mod":["lazy_caching"],"struct":["CredentialsProviderChain"]};

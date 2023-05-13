@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `ListObjectsV2Input`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

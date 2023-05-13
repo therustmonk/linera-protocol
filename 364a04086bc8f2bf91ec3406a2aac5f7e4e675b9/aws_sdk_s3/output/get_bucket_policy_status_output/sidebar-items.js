@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `GetBucketPolicyStatusOutput`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

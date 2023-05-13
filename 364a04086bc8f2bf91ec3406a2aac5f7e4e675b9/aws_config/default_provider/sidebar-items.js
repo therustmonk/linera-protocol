@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":[["app_name","Default app name provider chain"],["credentials","Default credentials provider chain"],["region","Default region provider chain"],["retry_config","Default retry behavior configuration provider chain"],["timeout_config","Default timeout configuration provider chain"]]};
+window.SIDEBAR_ITEMS = {"mod":["app_name","credentials","region","retry_config","timeout_config"]};

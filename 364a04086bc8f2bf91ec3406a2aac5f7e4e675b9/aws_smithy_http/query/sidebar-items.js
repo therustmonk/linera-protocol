@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["fmt_string",""],["fmt_timestamp",""]],"struct":[["Writer","Simple abstraction to enable appending params to a string as query params"]]};
+window.SIDEBAR_ITEMS = {"fn":["fmt_string","fmt_timestamp"],"struct":["Writer"]};

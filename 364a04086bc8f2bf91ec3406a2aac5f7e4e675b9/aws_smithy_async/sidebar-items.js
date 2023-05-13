@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":[["assert_elapsed","Given an `Instant` and a `Duration`, assert time elapsed since `Instant` is equal to `Duration`. This macro allows for a 5ms margin of error."]],"mod":[["future","Useful runtime-agnostic future implementations."],["rt","Async runtime agnostic traits and implementations."]]};
+window.SIDEBAR_ITEMS = {"macro":["assert_elapsed"],"mod":["future","rt"]};

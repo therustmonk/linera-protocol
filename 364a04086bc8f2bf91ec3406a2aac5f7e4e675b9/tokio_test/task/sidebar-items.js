@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["spawn","TODO: dox"]],"struct":[["Spawn","Future spawned on a mock task"]]};
+window.SIDEBAR_ITEMS = {"fn":["spawn"],"struct":["Spawn"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `MalformedPolicyDocumentException`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

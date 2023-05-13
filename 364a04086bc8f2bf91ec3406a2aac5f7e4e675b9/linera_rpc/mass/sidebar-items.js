@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["MassClientError",""]],"trait":[["MassClient",""]]};
+window.SIDEBAR_ITEMS = {"enum":["MassClientError"],"trait":["MassClient"]};

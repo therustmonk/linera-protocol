@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `Transition`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

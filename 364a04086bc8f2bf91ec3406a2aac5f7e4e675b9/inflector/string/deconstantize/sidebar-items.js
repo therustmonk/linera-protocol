@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["deconstantize","Deconstantizes a `&str`"]]};
+window.SIDEBAR_ITEMS = {"fn":["deconstantize"]};

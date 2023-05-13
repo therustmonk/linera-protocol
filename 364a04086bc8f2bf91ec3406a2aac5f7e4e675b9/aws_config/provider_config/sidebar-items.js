@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["ProviderConfig","Configuration options for Credential Providers"]]};
+window.SIDEBAR_ITEMS = {"struct":["ProviderConfig"]};

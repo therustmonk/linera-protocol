@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["CredentialProcessProvider","External process credentials provider"]]};
+window.SIDEBAR_ITEMS = {"struct":["CredentialProcessProvider"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["SdkError","Failed SDK Result"]],"struct":[["AggregatedBytes","Non-contiguous Binary Data Storage"],["Blob","Binary Blob Type"],["ByteStream","Stream of binary data"],["DateTime","DateTime in time."]]};
+window.SIDEBAR_ITEMS = {"enum":["SdkError"],"struct":["AggregatedBytes","Blob","ByteStream","DateTime"]};

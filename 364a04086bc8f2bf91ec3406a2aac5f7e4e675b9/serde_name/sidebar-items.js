@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["trace_name","Compute the Serde name of a container."]],"struct":[["DeserializeNameAdapter","An adapter for `serde::de::Deserializer` implementations that lets you override the name of the top-level container."],["SerializeNameAdapter","An adapter for `serde::ser::Serializer` implementations that lets you override the name of the top-level container."]]};
+window.SIDEBAR_ITEMS = {"fn":["trace_name"],"struct":["DeserializeNameAdapter","SerializeNameAdapter"]};

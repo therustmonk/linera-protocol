@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":[["fluent_builders","Utilities to ergonomically construct a request to the service."]],"struct":[["Builder","A builder that provides more customization options when constructing a [`Client`]."],["Client","Client for AWS Security Token Service"]]};
+window.SIDEBAR_ITEMS = {"mod":["fluent_builders"],"struct":["Builder","Client"]};

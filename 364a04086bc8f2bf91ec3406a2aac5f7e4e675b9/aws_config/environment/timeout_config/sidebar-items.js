@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["EnvironmentVariableTimeoutConfigProvider","Load a timeout_config from environment variables"]]};
+window.SIDEBAR_ITEMS = {"struct":["EnvironmentVariableTimeoutConfigProvider"]};

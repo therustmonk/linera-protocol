@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `TargetGrant`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

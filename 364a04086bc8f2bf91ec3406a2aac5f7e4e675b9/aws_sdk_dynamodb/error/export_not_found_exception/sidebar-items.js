@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `ExportNotFoundException`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

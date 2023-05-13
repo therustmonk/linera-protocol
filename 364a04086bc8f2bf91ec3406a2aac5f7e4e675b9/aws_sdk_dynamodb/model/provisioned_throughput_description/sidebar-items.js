@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `ProvisionedThroughputDescription`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

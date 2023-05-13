@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["bits","Deprecated, replaced with [`binary::bits::bits`]"],["bool","Deprecated, replaced with [`binary::bits::bool`]"],["bytes","Deprecated, replaced with [`binary::bits::bytes`]"],["tag","Deprecated, replaced with [`binary::bits::tag`]"],["take","Deprecated, replaced with [`binary::bits::take`]"]]};
+window.SIDEBAR_ITEMS = {"fn":["bits","bool","bytes","tag","take"]};

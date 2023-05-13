@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["RecursionDetectionStage","Recursion Detection Middleware"]]};
+window.SIDEBAR_ITEMS = {"struct":["RecursionDetectionStage"]};

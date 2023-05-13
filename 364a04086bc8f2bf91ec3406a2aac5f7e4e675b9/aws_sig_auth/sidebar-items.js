@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":[["event_stream",""],["middleware",""],["signer",""]]};
+window.SIDEBAR_ITEMS = {"mod":["event_stream","middleware","signer"]};

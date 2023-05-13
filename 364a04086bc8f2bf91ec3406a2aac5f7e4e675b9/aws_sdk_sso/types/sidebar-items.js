@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["SdkError","Failed SDK Result"]]};
+window.SIDEBAR_ITEMS = {"enum":["SdkError"]};

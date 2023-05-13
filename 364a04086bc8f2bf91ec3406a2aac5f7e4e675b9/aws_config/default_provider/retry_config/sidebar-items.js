@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["default_provider","Default RetryConfig Provider chain"]],"struct":[["Builder","Builder for RetryConfig that checks the environment and aws profile for configuration"]]};
+window.SIDEBAR_ITEMS = {"fn":["default_provider"],"struct":["Builder"]};

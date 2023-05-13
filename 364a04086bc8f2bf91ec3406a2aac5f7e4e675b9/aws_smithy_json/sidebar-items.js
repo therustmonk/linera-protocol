@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":[["deserialize",""],["serialize",""]]};
+window.SIDEBAR_ITEMS = {"mod":["deserialize","serialize"]};

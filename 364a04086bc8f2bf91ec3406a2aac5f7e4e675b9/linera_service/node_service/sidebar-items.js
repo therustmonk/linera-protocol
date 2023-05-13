@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["ApplicationOverview",""],["NodeService","The `NodeService` is a server that exposes a web-server to the client. The node service is primarily used to explore the state of a chain in GraphQL."]]};
+window.SIDEBAR_ITEMS = {"struct":["ApplicationOverview","NodeService"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["SdkError","Failed SDK Result"]],"struct":[["DateTime","DateTime in time."]]};
+window.SIDEBAR_ITEMS = {"enum":["SdkError"],"struct":["DateTime"]};

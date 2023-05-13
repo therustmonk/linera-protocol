@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `ObjectLockConfiguration`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

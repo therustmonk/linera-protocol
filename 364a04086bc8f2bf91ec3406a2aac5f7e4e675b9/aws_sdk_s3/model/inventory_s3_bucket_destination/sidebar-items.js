@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `InventoryS3BucketDestination`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `GetCallerIdentityInput`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `LambdaFunctionConfiguration`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

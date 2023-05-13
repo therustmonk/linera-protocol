@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `AbortIncompleteMultipartUpload`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

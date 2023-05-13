@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["CredentialsStageError","Failures that can occur in the credentials middleware."]],"fn":[["set_provider","Sets the credentials provider in the given property bag."]],"struct":[["CredentialsStage","Middleware stage that loads credentials from a CredentialsProvider and places them in the property bag of the request."]]};
+window.SIDEBAR_ITEMS = {"enum":["CredentialsStageError"],"fn":["set_provider"],"struct":["CredentialsStage"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["ByteMapView","A view that supports inserting and removing values indexed by `Vec<u8>`."],["CustomMapView","A Custom MapView that uses the custom serialization"],["MapView","A View that actually has a type for keys. The ordering of the entries is determined by the serialization of the context."]]};
+window.SIDEBAR_ITEMS = {"struct":["ByteMapView","CustomMapView","MapView"]};

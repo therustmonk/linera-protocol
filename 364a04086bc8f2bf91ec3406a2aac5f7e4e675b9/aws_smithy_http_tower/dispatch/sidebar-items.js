@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["DispatchLayer",""],["DispatchService","Connects Operation driven middleware to an HTTP implementation."]]};
+window.SIDEBAR_ITEMS = {"struct":["DispatchLayer","DispatchService"]};

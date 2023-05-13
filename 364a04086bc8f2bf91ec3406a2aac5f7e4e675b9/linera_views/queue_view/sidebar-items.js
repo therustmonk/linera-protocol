@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["QueueView","A view that supports a FIFO queue for values of type `T`."]]};
+window.SIDEBAR_ITEMS = {"struct":["QueueView"]};

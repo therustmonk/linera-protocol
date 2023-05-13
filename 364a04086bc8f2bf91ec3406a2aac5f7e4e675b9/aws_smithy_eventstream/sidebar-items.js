@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":[["error",""],["frame","Event Stream message frame types and serialization/deserialization logic."],["smithy",""],["str_bytes","UTF-8 string byte buffer representation with validation amortization."]]};
+window.SIDEBAR_ITEMS = {"mod":["error","frame","smithy","str_bytes"]};

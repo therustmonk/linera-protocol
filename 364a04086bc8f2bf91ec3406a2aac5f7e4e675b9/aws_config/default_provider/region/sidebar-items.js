@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["default_provider","Default Region Provider chain"]],"struct":[["Builder","Builder for [DefaultRegionChain]"],["DefaultRegionChain","Default region provider chain"]]};
+window.SIDEBAR_ITEMS = {"fn":["default_provider"],"struct":["Builder","DefaultRegionChain"]};

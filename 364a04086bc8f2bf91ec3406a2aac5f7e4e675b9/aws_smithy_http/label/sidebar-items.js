@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["fmt_string",""],["fmt_timestamp",""]]};
+window.SIDEBAR_ITEMS = {"fn":["fmt_string","fmt_timestamp"]};

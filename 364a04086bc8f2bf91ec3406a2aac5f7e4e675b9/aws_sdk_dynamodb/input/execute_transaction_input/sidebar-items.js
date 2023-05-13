@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `ExecuteTransactionInput`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

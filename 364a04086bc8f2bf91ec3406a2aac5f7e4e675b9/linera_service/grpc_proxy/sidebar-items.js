@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["GrpcProxy",""]]};
+window.SIDEBAR_ITEMS = {"struct":["GrpcProxy"]};

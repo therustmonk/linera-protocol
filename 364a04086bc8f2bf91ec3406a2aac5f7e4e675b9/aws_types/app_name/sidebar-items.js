@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["AppName","App name that can be configured with an AWS SDK client to become part of the user agent string."],["InvalidAppName","Error for when an app name doesn’t meet character requirements."]]};
+window.SIDEBAR_ITEMS = {"struct":["AppName","InvalidAppName"]};

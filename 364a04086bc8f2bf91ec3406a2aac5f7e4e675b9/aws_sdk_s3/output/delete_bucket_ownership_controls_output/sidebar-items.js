@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `DeleteBucketOwnershipControlsOutput`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

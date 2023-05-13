@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":[["BodyCallback","A callback that, when inserted into a request body, will be called for corresponding lifecycle events."]]};
+window.SIDEBAR_ITEMS = {"trait":["BodyCallback"]};

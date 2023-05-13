@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["SendOperationError","An Error Occurred During the process of sending an Operation"]],"mod":[["dispatch",""],["map_request",""],["parse_response",""]]};
+window.SIDEBAR_ITEMS = {"enum":["SendOperationError"],"mod":["dispatch","map_request","parse_response"]};

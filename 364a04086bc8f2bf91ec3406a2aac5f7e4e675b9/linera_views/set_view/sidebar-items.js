@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["ByteSetView","A view that supports inserting and removing values indexed by a key."],["CustomSetView","A [‘View’] implementing the set functionality with the index I being a non-trivial type."],["SetView","A [‘View’] implementing the set functionality with the index I being a non-trivial type."]]};
+window.SIDEBAR_ITEMS = {"struct":["ByteSetView","CustomSetView","SetView"]};

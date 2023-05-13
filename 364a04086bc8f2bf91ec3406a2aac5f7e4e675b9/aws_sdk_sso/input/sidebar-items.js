@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":[["get_role_credentials_input","See `GetRoleCredentialsInput`"],["list_account_roles_input","See `ListAccountRolesInput`"],["list_accounts_input","See `ListAccountsInput`"],["logout_input","See `LogoutInput`"]],"struct":[["GetRoleCredentialsInput",""],["ListAccountRolesInput",""],["ListAccountsInput",""],["LogoutInput",""]]};
+window.SIDEBAR_ITEMS = {"mod":["get_role_credentials_input","list_account_roles_input","list_accounts_input","logout_input"],"struct":["GetRoleCredentialsInput","ListAccountRolesInput","ListAccountsInput","LogoutInput"]};

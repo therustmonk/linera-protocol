@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `GlobalSecondaryIndex`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

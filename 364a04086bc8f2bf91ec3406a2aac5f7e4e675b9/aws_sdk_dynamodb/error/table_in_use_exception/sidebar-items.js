@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `TableInUseException`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

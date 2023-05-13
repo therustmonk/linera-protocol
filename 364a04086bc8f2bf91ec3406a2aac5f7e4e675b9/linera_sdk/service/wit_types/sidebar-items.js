@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["PollQuery",""]],"struct":[["CryptoHash",""],["QueryContext",""]],"trait":[["QueryApplication",""],["Service",""]],"type":[["ChainId",""]]};
+window.SIDEBAR_ITEMS = {"enum":["PollQuery"],"struct":["CryptoHash","QueryContext"],"trait":["QueryApplication","Service"],"type":["ChainId"]};

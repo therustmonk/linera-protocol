@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["UserAgentStageError","Failures that can arise from the user agent middleware"]],"struct":[["ApiMetadata","Metadata about the client that’s making the call."],["AwsUserAgent","AWS User Agent"],["InvalidMetadataValue","Error for when an user agent metadata doesn’t meet character requirements."],["UserAgentStage","User agent middleware"]]};
+window.SIDEBAR_ITEMS = {"enum":["UserAgentStageError"],"struct":["ApiMetadata","AwsUserAgent","InvalidMetadataValue","UserAgentStage"]};

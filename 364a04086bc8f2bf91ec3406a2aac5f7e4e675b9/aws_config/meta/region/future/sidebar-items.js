@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["ProvideRegion","Future returned by `ProvideRegion`"]]};
+window.SIDEBAR_ITEMS = {"struct":["ProvideRegion"]};

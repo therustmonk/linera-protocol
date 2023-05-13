@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":[["auth","Credentials middleware"],["recursion_detection","Recursion Detection middleware"],["retry","AWS-specific retry logic AWS-specific retry logic"],["user_agent","User agent middleware"]]};
+window.SIDEBAR_ITEMS = {"mod":["auth","recursion_detection","retry","user_agent"]};

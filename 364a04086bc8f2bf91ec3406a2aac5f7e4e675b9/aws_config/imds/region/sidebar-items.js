@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","Builder for [`ImdsRegionProvider`]"],["ImdsRegionProvider","IMDSv2 Region Provider"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder","ImdsRegionProvider"]};

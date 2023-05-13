@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `LifecycleRuleAndOperator`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

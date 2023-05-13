@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["QueryListWriter",""],["QueryMapWriter",""],["QueryValueWriter",""],["QueryWriter",""]]};
+window.SIDEBAR_ITEMS = {"struct":["QueryListWriter","QueryMapWriter","QueryValueWriter","QueryWriter"]};

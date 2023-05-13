@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["EnvironmentVariableRetryConfigProvider","Load a retry_config from environment variables"]]};
+window.SIDEBAR_ITEMS = {"struct":["EnvironmentVariableRetryConfigProvider"]};

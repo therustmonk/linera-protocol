@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["DateTimeFormatError","Error returned when date-time formatting fails."],["DateTimeParseError","Error returned when date-time parsing fails."],["Format","Formats for representing a `DateTime` in the Smithy protocols."]],"struct":[["ConversionError","Failure to convert a `DateTime` to or from another type."],["DateTime","DateTime in time."]]};
+window.SIDEBAR_ITEMS = {"enum":["DateTimeFormatError","DateTimeParseError","Format"],"struct":["ConversionError","DateTime"]};

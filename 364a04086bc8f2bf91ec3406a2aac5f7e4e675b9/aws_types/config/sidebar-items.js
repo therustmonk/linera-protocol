@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"type":[["Config","AWS Shared Configuration"]]};
+window.SIDEBAR_ITEMS = {"type":["Config"]};

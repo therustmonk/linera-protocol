@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","Builder for [`Error`]."],["Error","Generic Error type"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder","Error"]};

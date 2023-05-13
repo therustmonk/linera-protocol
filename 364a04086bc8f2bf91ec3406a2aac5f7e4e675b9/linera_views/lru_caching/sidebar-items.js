@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":[["TEST_CACHE_SIZE","The standard cache size used for tests."]],"struct":[["LruCachingKeyValueClient","We take a client, a maximum size and build a LRU based system."]],"type":[["LruCachingMemoryContext","A context that stores all values in memory."]]};
+window.SIDEBAR_ITEMS = {"constant":["TEST_CACHE_SIZE"],"struct":["LruCachingKeyValueClient"],"type":["LruCachingMemoryContext"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["Length","The length (in bytes) to read. Determines whether or not a short read counts as an error."]],"struct":[["AggregatedBytes","Non-contiguous Binary Data Storage"],["ByteStream","Stream of binary data"],["Error",""],["FsBuilder","Builder for creating `ByteStreams` from a file/path, with full control over advanced options."]]};
+window.SIDEBAR_ITEMS = {"enum":["Length"],"struct":["AggregatedBytes","ByteStream","Error","FsBuilder"]};

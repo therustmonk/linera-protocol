@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":[["account_info","See `AccountInfo`"],["role_credentials","See `RoleCredentials`"],["role_info","See `RoleInfo`"]],"struct":[["AccountInfo",""],["RoleCredentials",""],["RoleInfo",""]]};
+window.SIDEBAR_ITEMS = {"mod":["account_info","role_credentials","role_info"],"struct":["AccountInfo","RoleCredentials","RoleInfo"]};

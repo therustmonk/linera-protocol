@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["ConfigError","An error that occurs during construction of a `timeout::Config`"]],"struct":[["Api","API timeouts used by Smithy `Client`s"],["Config","Top-level configuration for timeouts"],["Http","HTTP timeouts used by `DynConnector`s"],["Tcp","TCP timeouts used by lower-level `DynConnector`s"]]};
+window.SIDEBAR_ITEMS = {"enum":["ConfigError"],"struct":["Api","Config","Http","Tcp"]};

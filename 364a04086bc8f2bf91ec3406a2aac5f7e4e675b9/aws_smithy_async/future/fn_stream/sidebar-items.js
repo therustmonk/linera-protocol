@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["FnStream","Utility to drive a stream with an async function and a channel."],["TryFlatMap","Utility wrapper to flatten paginated results"]]};
+window.SIDEBAR_ITEMS = {"struct":["FnStream","TryFlatMap"]};

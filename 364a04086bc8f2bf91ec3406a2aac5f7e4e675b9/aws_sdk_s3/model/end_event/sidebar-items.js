@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Builder","A builder for `EndEvent`"]]};
+window.SIDEBAR_ITEMS = {"struct":["Builder"]};

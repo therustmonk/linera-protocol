@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["KeyValueStore","A type to interface with the key value storage provided to applications."]],"type":[["ViewStorageContext","Implementation of [`linera_views::common::Context`] that uses the [`KeyValueStore`] to allow views to store data in the storage layer provided to Linera applications."]]};
+window.SIDEBAR_ITEMS = {"struct":["KeyValueStore"],"type":["ViewStorageContext"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["demodulize","Demodulize a `&str`"]]};
+window.SIDEBAR_ITEMS = {"fn":["demodulize"]};

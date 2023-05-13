@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["TriState","Utility for tracking set vs. unset vs explicitly disabled"]]};
+window.SIDEBAR_ITEMS = {"enum":["TriState"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["ParseResponseLayer",""],["ParseResponseService","`ParseResponseService` dispatches `Operation`s and parses them."]]};
+window.SIDEBAR_ITEMS = {"struct":["ParseResponseLayer","ParseResponseService"]};
