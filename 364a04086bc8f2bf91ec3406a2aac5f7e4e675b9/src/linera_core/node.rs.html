@@ -773,7 +773,7 @@
     <span class="doccomment">/// Processes a certificate without a value.
     </span><span class="kw">async fn </span>handle_lite_certificate(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        certificate: LiteCertificate,
+        certificate: LiteCertificate&lt;<span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfoResponse, NodeError&gt;;
 
     <span class="doccomment">/// Processes a certificate.
@@ -984,7 +984,7 @@
 
     <span class="kw">async fn </span>handle_lite_certificate(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        certificate: LiteCertificate,
+        certificate: LiteCertificate&lt;<span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfoResponse, NodeError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>node = <span class="self">self</span>.node.lock().<span class="kw">await</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>notifications = Vec::new();

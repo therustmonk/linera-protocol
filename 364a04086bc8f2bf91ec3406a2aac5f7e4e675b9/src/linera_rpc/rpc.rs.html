@@ -116,7 +116,7 @@
     <span class="comment">// Inbound
     </span>BlockProposal(Box&lt;BlockProposal&gt;),
     Certificate(Box&lt;Certificate&gt;, Vec&lt;HashedValue&gt;),
-    LiteCertificate(Box&lt;LiteCertificate&gt;),
+    LiteCertificate(Box&lt;LiteCertificate&lt;<span class="lifetime">&#39;static</span>&gt;&gt;),
     ChainInfoQuery(Box&lt;ChainInfoQuery&gt;),
     <span class="comment">// Outbound
     </span>Vote(Box&lt;LiteVote&gt;),
@@ -151,8 +151,8 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;LiteCertificate&gt; <span class="kw">for </span>RpcMessage {
-    <span class="kw">fn </span>from(certificate: LiteCertificate) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;LiteCertificate&lt;<span class="lifetime">&#39;static</span>&gt;&gt; <span class="kw">for </span>RpcMessage {
+    <span class="kw">fn </span>from(certificate: LiteCertificate&lt;<span class="lifetime">&#39;static</span>&gt;) -&gt; <span class="self">Self </span>{
         RpcMessage::LiteCertificate(Box::new(certificate))
     }
 }

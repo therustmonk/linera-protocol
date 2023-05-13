@@ -1291,9 +1291,9 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainInfoResponse, NetworkActions), WorkerError&gt;;
 
     <span class="doccomment">/// Processes a certificate, e.g. to extend a chain with a confirmed block.
-    </span><span class="kw">async fn </span>handle_lite_certificate(
+    </span><span class="kw">async fn </span>handle_lite_certificate&lt;<span class="lifetime">&#39;a</span>&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        certificate: LiteCertificate,
+        certificate: LiteCertificate&lt;<span class="lifetime">&#39;a</span>&gt;,
         notify_message_delivery: <span class="prelude-ty">Option</span>&lt;oneshot::Sender&lt;()&gt;&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainInfoResponse, NetworkActions), WorkerError&gt;;
 
@@ -2146,9 +2146,9 @@
     <span class="comment">// Other fields will be included in handle_certificate&#39;s span.
     </span><span class="attr">#[instrument(skip_all, fields(hash = %certificate.value.value_hash))]
     </span><span class="doccomment">/// Processes a certificate, e.g. to extend a chain with a confirmed block.
-    </span><span class="kw">async fn </span>handle_lite_certificate(
+    </span><span class="kw">async fn </span>handle_lite_certificate&lt;<span class="lifetime">&#39;a</span>&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        certificate: LiteCertificate,
+        certificate: LiteCertificate&lt;<span class="lifetime">&#39;a</span>&gt;,
         notify_when_messages_are_delivered: <span class="prelude-ty">Option</span>&lt;oneshot::Sender&lt;()&gt;&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainInfoResponse, NetworkActions), WorkerError&gt; {
         <span class="kw">let </span>value = <span class="self">self

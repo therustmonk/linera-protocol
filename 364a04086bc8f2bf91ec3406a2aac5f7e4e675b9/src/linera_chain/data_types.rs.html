@@ -643,6 +643,18 @@
 <a href="#643" id="643">643</a>
 <a href="#644" id="644">644</a>
 <a href="#645" id="645">645</a>
+<a href="#646" id="646">646</a>
+<a href="#647" id="647">647</a>
+<a href="#648" id="648">648</a>
+<a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
+<a href="#656" id="656">656</a>
+<a href="#657" id="657">657</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -660,7 +672,10 @@
     ApplicationId, BytecodeLocation, Effect, Operation,
 };
 <span class="kw">use </span>serde::{Deserialize, Serialize};
-<span class="kw">use </span>std::collections::{HashMap, HashSet};
+<span class="kw">use </span>std::{
+    borrow::Cow,
+    collections::{HashMap, HashSet},
+};
 
 <span class="attr">#[cfg(test)]
 #[path = <span class="string">&quot;unit_tests/data_types_tests.rs&quot;</span>]
@@ -902,15 +917,16 @@
 <span class="doccomment">/// A certified statement from the committee, without the value.
 </span><span class="attr">#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Eq, PartialEq))]
-</span><span class="kw">pub struct </span>LiteCertificate {
+</span><span class="kw">pub struct </span>LiteCertificate&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="doccomment">/// Hash and chain ID of the certified value (used as key for storage).
     </span><span class="kw">pub </span>value: LiteValue,
     <span class="doccomment">/// Signatures on the value.
-    </span><span class="kw">pub </span>signatures: Vec&lt;(ValidatorName, Signature)&gt;,
+    </span><span class="kw">pub </span>signatures: Cow&lt;<span class="lifetime">&#39;a</span>, [(ValidatorName, Signature)]&gt;,
 }
 
-<span class="kw">impl </span>LiteCertificate {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; LiteCertificate&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">pub fn </span>new(value: LiteValue, signatures: Vec&lt;(ValidatorName, Signature)&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>signatures = Cow::Owned(signatures);
         <span class="self">Self </span>{ value, signatures }
     }
 
@@ -927,8 +943,16 @@
         }
         <span class="prelude-val">Some</span>(Certificate {
             value,
-            signatures: <span class="self">self</span>.signatures,
+            signatures: <span class="self">self</span>.signatures.into_owned(),
         })
+    }
+
+    <span class="doccomment">/// Returns a `LiteCertificate` that owns the list of signatures.
+    </span><span class="kw">pub fn </span>cloned(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LiteCertificate&lt;<span class="lifetime">&#39;static</span>&gt; {
+        LiteCertificate {
+            value: <span class="self">self</span>.value.clone(),
+            signatures: Cow::Owned(<span class="self">self</span>.signatures.clone().into_owned()),
+        }
     }
 }
 
@@ -1220,7 +1244,7 @@
     </span><span class="kw">pub fn </span>lite_certificate(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LiteCertificate {
         LiteCertificate {
             value: <span class="self">self</span>.lite_value(),
-            signatures: <span class="self">self</span>.signatures.clone(),
+            signatures: Cow::Borrowed(<span class="kw-2">&amp;</span><span class="self">self</span>.signatures),
         }
     }
 
