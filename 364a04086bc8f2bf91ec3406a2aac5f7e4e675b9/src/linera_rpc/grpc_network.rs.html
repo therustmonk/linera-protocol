@@ -730,6 +730,13 @@
 <a href="#730" id="730">730</a>
 <a href="#731" id="731">731</a>
 <a href="#732" id="732">732</a>
+<a href="#733" id="733">733</a>
+<a href="#734" id="734">734</a>
+<a href="#735" id="735">735</a>
+<a href="#736" id="736">736</a>
+<a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -747,6 +754,8 @@
     conversions::ProtoConversionError,
     grpc_pool::ConnectionPool,
     mass::{MassClient, MassClientError},
+    node_provider::NodeOptions,
+    rpc::{HandleCertificateRequest, HandleLiteCertificateRequest},
     RpcMessage,
 };
 <span class="kw">use </span>async_trait::async_trait;
@@ -760,7 +769,7 @@
     validator_node_client::ValidatorNodeClient,
     validator_worker_client::ValidatorWorkerClient,
     validator_worker_server::{ValidatorWorker <span class="kw">as </span>ValidatorWorkerRpc, ValidatorWorkerServer},
-    BlockProposal, CertificateWithDependencies, ChainInfoQuery, ChainInfoResult, CrossChainRequest,
+    BlockProposal, Certificate, ChainInfoQuery, ChainInfoResult, CrossChainRequest,
     LiteCertificate, SubscriptionRequest,
 };
 <span class="kw">use </span>linera_base::identifiers::ChainId;
@@ -1079,19 +1088,24 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         request: Request&lt;LiteCertificate&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;ChainInfoResult&gt;, Status&gt; {
-        <span class="kw">let </span>certificate = request.into_inner().try_into()<span class="question-mark">?</span>;
+        <span class="kw">let </span>HandleLiteCertificateRequest {
+            certificate,
+            wait_for_outgoing_messages,
+        } = request.into_inner().try_into()<span class="question-mark">?</span>;
         <span class="macro">debug!</span>(<span class="question-mark">?</span>certificate, <span class="string">&quot;Handling lite certificate&quot;</span>);
-        <span class="kw">let </span>(sender, receiver) = oneshot::channel();
+        <span class="kw">let </span>(sender, receiver) = wait_for_outgoing_messages.then(oneshot::channel).unzip();
         <span class="kw">match </span><span class="self">self
             </span>.state
             .clone()
-            .handle_lite_certificate(certificate, <span class="prelude-val">Some</span>(sender))
+            .handle_lite_certificate(certificate, sender)
             .<span class="kw">await
         </span>{
             <span class="prelude-val">Ok</span>((info, actions)) =&gt; {
                 <span class="self">self</span>.handle_network_actions(actions);
-                <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = receiver.<span class="kw">await </span>{
-                    <span class="macro">error!</span>(<span class="string">&quot;Failed to wait for message delivery: {e}&quot;</span>);
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(receiver) = receiver {
+                    <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = receiver.<span class="kw">await </span>{
+                        <span class="macro">error!</span>(<span class="string">&quot;Failed to wait for message delivery: {e}&quot;</span>);
+                    }
                 }
                 <span class="prelude-val">Ok</span>(Response::new(info.try_into()<span class="question-mark">?</span>))
             }
@@ -1109,26 +1123,27 @@
     <span class="attr">#[instrument(target = <span class="string">&quot;grpc_server&quot;</span>, skip_all, err, fields(nickname = <span class="self">self</span>.state.nickname(), chain_id = <span class="question-mark">?</span>request.get_ref().chain_id()))]
     </span><span class="kw">async fn </span>handle_certificate(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        request: Request&lt;CertificateWithDependencies&gt;,
+        request: Request&lt;Certificate&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;ChainInfoResult&gt;, Status&gt; {
-        <span class="kw">let </span>cert_with_deps: data_types::CertificateWithDependencies =
-            request.into_inner().try_into()<span class="question-mark">?</span>;
-        <span class="macro">debug!</span>(certificate = <span class="question-mark">?</span>cert_with_deps.certificate, <span class="string">&quot;Handling certificate&quot;</span>);
-        <span class="kw">let </span>(sender, receiver) = oneshot::channel();
+        <span class="kw">let </span>HandleCertificateRequest {
+            certificate,
+            blobs,
+            wait_for_outgoing_messages,
+        } = request.into_inner().try_into()<span class="question-mark">?</span>;
+        <span class="macro">debug!</span>(<span class="question-mark">?</span>certificate, <span class="string">&quot;Handling certificate&quot;</span>);
+        <span class="kw">let </span>(sender, receiver) = wait_for_outgoing_messages.then(oneshot::channel).unzip();
         <span class="kw">match </span><span class="self">self
             </span>.state
             .clone()
-            .handle_certificate(
-                cert_with_deps.certificate,
-                cert_with_deps.blobs,
-                <span class="prelude-val">Some</span>(sender),
-            )
+            .handle_certificate(certificate, blobs, sender)
             .<span class="kw">await
         </span>{
             <span class="prelude-val">Ok</span>((info, actions)) =&gt; {
                 <span class="self">self</span>.handle_network_actions(actions);
-                <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = receiver.<span class="kw">await </span>{
-                    <span class="macro">error!</span>(<span class="string">&quot;Failed to wait for message delivery: {e}&quot;</span>);
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(receiver) = receiver {
+                    <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = receiver.<span class="kw">await </span>{
+                        <span class="macro">error!</span>(<span class="string">&quot;Failed to wait for message delivery: {e}&quot;</span>);
+                    }
                 }
                 <span class="prelude-val">Ok</span>(Response::new(info.try_into()<span class="question-mark">?</span>))
             }
@@ -1181,27 +1196,26 @@
     client: ValidatorNodeClient&lt;Channel&gt;,
     notification_retry_delay: Duration,
     notification_retries: u32,
+    wait_for_outgoing_messages: bool,
 }
 
 <span class="kw">impl </span>GrpcClient {
     <span class="kw">pub fn </span>new(
         network: ValidatorPublicNetworkConfig,
-        connect_timeout: Duration,
-        timeout: Duration,
-        notification_retry_delay: Duration,
-        notification_retries: u32,
+        options: NodeOptions,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, GrpcError&gt; {
         <span class="kw">let </span>address = network.http_address();
         <span class="kw">let </span>channel = Channel::from_shared(address.clone())<span class="question-mark">?
-            </span>.connect_timeout(connect_timeout)
-            .timeout(timeout)
+            </span>.connect_timeout(options.send_timeout)
+            .timeout(options.recv_timeout)
             .connect_lazy();
         <span class="kw">let </span>client = ValidatorNodeClient::new(channel);
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             address,
             client,
-            notification_retry_delay,
-            notification_retries,
+            notification_retry_delay: options.notification_retry_delay,
+            notification_retries: options.notification_retries,
+            wait_for_outgoing_messages: options.wait_for_outgoing_messages,
         })
     }
 
@@ -1238,10 +1252,7 @@
 
 <span class="macro">macro_rules! </span>client_delegate {
     (<span class="macro-nonterminal">$self</span>:ident, <span class="macro-nonterminal">$handler</span>:ident, <span class="macro-nonterminal">$req</span>:ident) =&gt; {{
-        <span class="macro">tracing::debug!</span>(
-            request = <span class="question-mark">?</span><span class="macro-nonterminal">$req</span>,
-            <span class="string">&quot;sending gRPC request&quot;</span>,
-        );
+        <span class="macro">debug!</span>(request = <span class="question-mark">?</span><span class="macro-nonterminal">$req</span>, <span class="string">&quot;sending gRPC request&quot;</span>);
         <span class="kw">let </span>request_inner = <span class="macro-nonterminal">$req</span>.try_into().map_err(|<span class="kw">_</span>| NodeError::GrpcError {
             error: <span class="string">&quot;could not convert request to proto&quot;</span>.to_string(),
         })<span class="question-mark">?</span>;
@@ -1277,7 +1288,7 @@
 }
 
 <span class="macro">macro_rules! </span>mass_client_delegate {
-    (<span class="macro-nonterminal">$client</span>:ident, <span class="macro-nonterminal">$handler</span>:ident, <span class="macro-nonterminal">$msg</span>:ident, <span class="macro-nonterminal">$responses</span>: ident) =&gt; {{
+    (<span class="macro-nonterminal">$client</span>:ident, <span class="macro-nonterminal">$handler</span>:ident, <span class="macro-nonterminal">$msg</span>:ident, <span class="macro-nonterminal">$responses</span>:ident) =&gt; {{
         <span class="kw">let </span>response = <span class="macro-nonterminal">$client</span>.<span class="macro-nonterminal">$handler</span>(Request::new((<span class="kw-2">*</span><span class="macro-nonterminal">$msg</span>).try_into()<span class="question-mark">?</span>)).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">match </span>response
             .into_inner()
@@ -1313,7 +1324,11 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         certificate: data_types::LiteCertificate&lt;<span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;linera_core::data_types::ChainInfoResponse, NodeError&gt; {
-        <span class="macro">client_delegate!</span>(<span class="self">self</span>, handle_lite_certificate, certificate)
+        <span class="kw">let </span>request = HandleLiteCertificateRequest {
+            certificate,
+            wait_for_outgoing_messages: <span class="self">self</span>.wait_for_outgoing_messages,
+        };
+        <span class="macro">client_delegate!</span>(<span class="self">self</span>, handle_lite_certificate, request)
     }
 
     <span class="attr">#[instrument(target = <span class="string">&quot;grpc_client&quot;</span>, skip_all, err, fields(address = <span class="self">self</span>.address))]
@@ -1322,8 +1337,12 @@
         certificate: data_types::Certificate,
         blobs: Vec&lt;data_types::HashedValue&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;linera_core::data_types::ChainInfoResponse, NodeError&gt; {
-        <span class="kw">let </span>cert_with_deps = data_types::CertificateWithDependencies { certificate, blobs };
-        <span class="macro">client_delegate!</span>(<span class="self">self</span>, handle_certificate, cert_with_deps)
+        <span class="kw">let </span>request = HandleCertificateRequest {
+            certificate,
+            blobs,
+            wait_for_outgoing_messages: <span class="self">self</span>.wait_for_outgoing_messages,
+        };
+        <span class="macro">client_delegate!</span>(<span class="self">self</span>, handle_certificate, request)
     }
 
     <span class="attr">#[instrument(target = <span class="string">&quot;grpc_client&quot;</span>, skip_all, err, fields(address = <span class="self">self</span>.address))]
@@ -1331,7 +1350,6 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         query: linera_core::data_types::ChainInfoQuery,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;linera_core::data_types::ChainInfoResponse, NodeError&gt; {
-        <span class="macro">debug!</span>(<span class="question-mark">?</span>query);
         <span class="macro">client_delegate!</span>(<span class="self">self</span>, handle_chain_info_query, query)
     }
 
@@ -1406,12 +1424,8 @@
                 RpcMessage::BlockProposal(proposal) =&gt; {
                     <span class="macro">mass_client_delegate!</span>(client, handle_block_proposal, proposal, responses)
                 }
-                RpcMessage::Certificate(certificate, blobs) =&gt; {
-                    <span class="kw">let </span>cert_with_deps = Box::new(data_types::CertificateWithDependencies {
-                        certificate: <span class="kw-2">*</span>certificate,
-                        blobs,
-                    });
-                    <span class="macro">mass_client_delegate!</span>(client, handle_certificate, cert_with_deps, responses)
+                RpcMessage::Certificate(request) =&gt; {
+                    <span class="macro">mass_client_delegate!</span>(client, handle_certificate, request, responses)
                 }
                 msg =&gt; <span class="macro">panic!</span>(<span class="string">&quot;attempted to send msg: {:?}&quot;</span>, msg),
             }
@@ -1438,9 +1452,9 @@
     }
 }
 
-<span class="kw">impl </span>Proxyable <span class="kw">for </span>CertificateWithDependencies {
+<span class="kw">impl </span>Proxyable <span class="kw">for </span>Certificate {
     <span class="kw">fn </span>chain_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;ChainId&gt; {
-        <span class="self">self</span>.certificate.as_ref()<span class="question-mark">?</span>.chain_id.clone()<span class="question-mark">?</span>.try_into().ok()
+        <span class="self">self</span>.chain_id.clone()<span class="question-mark">?</span>.try_into().ok()
     }
 }
 

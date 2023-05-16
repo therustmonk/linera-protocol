@@ -216,8 +216,8 @@
             notifier_service_server::{NotifierService, NotifierServiceServer},
             validator_node_server::{ValidatorNode, ValidatorNodeServer},
             validator_worker_client::ValidatorWorkerClient,
-            BlockProposal, CertificateWithDependencies, ChainInfoQuery, ChainInfoResult,
-            LiteCertificate, Notification, SubscriptionRequest,
+            BlockProposal, Certificate, ChainInfoQuery, ChainInfoResult, LiteCertificate,
+            Notification, SubscriptionRequest,
         },
         Proxyable,
     },
@@ -361,7 +361,7 @@
     <span class="attr">#[instrument(skip_all, err(Display))]
     </span><span class="kw">async fn </span>handle_certificate(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        request: Request&lt;CertificateWithDependencies&gt;,
+        request: Request&lt;Certificate&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Response&lt;ChainInfoResult&gt;, Status&gt; {
         <span class="kw">let </span>(<span class="kw-2">mut </span>client, inner) = <span class="self">self</span>.client_for_proxy_worker(request).<span class="kw">await</span><span class="question-mark">?</span>;
         client.handle_certificate(inner).<span class="kw">await

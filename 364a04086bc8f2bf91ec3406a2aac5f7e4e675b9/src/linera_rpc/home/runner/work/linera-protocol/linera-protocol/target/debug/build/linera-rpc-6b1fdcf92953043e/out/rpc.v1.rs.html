@@ -1589,60 +1589,60 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>BlockProposal {
     <span class="doccomment">/// The ID of the chain (used for routing).
-    </span><span class="attr">#[prost(message, optional, tag = <span class="string">&quot;10&quot;</span>)]
+    </span><span class="attr">#[prost(message, optional, tag = <span class="string">&quot;1&quot;</span>)]
     </span><span class="kw">pub </span>chain_id: ::core::option::Option&lt;ChainId&gt;,
     <span class="doccomment">/// bincode-encoded content
-    </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;1&quot;</span>)]
+    </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;2&quot;</span>)]
     </span><span class="kw">pub </span>content: ::prost::alloc::vec::Vec&lt;u8&gt;,
     <span class="doccomment">/// Byte-encoded public key
-    </span><span class="attr">#[prost(message, optional, tag = <span class="string">&quot;2&quot;</span>)]
+    </span><span class="attr">#[prost(message, optional, tag = <span class="string">&quot;3&quot;</span>)]
     </span><span class="kw">pub </span>owner: ::core::option::Option&lt;Owner&gt;,
     <span class="doccomment">/// Signature value
-    </span><span class="attr">#[prost(message, optional, tag = <span class="string">&quot;3&quot;</span>)]
+    </span><span class="attr">#[prost(message, optional, tag = <span class="string">&quot;4&quot;</span>)]
     </span><span class="kw">pub </span>signature: ::core::option::Option&lt;Signature&gt;,
     <span class="doccomment">/// Required bytecode
-    </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;4&quot;</span>)]
+    </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;5&quot;</span>)]
     </span><span class="kw">pub </span>blobs: ::prost::alloc::vec::Vec&lt;u8&gt;,
 }
 <span class="doccomment">/// A certified statement from the committee, without the value.
 </span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>LiteCertificate {
-    <span class="doccomment">/// The certified value&#39;s hash
-    </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;1&quot;</span>)]
-    </span><span class="kw">pub </span>hash: ::prost::alloc::vec::Vec&lt;u8&gt;,
     <span class="doccomment">/// The ID of the chain the value belongs to.
-    </span><span class="attr">#[prost(message, optional, tag = <span class="string">&quot;2&quot;</span>)]
+    </span><span class="attr">#[prost(message, optional, tag = <span class="string">&quot;1&quot;</span>)]
     </span><span class="kw">pub </span>chain_id: ::core::option::Option&lt;ChainId&gt;,
+    <span class="doccomment">/// The certified value&#39;s hash
+    </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;2&quot;</span>)]
+    </span><span class="kw">pub </span>hash: ::prost::alloc::vec::Vec&lt;u8&gt;,
     <span class="doccomment">/// Signatures on the value
     </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;3&quot;</span>)]
     </span><span class="kw">pub </span>signatures: ::prost::alloc::vec::Vec&lt;u8&gt;,
-}
-<span class="doccomment">/// A certified statement from the committee.
-</span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-</span><span class="kw">pub struct </span>Certificate {
-    <span class="doccomment">/// The ID of the chain (used for routing).
-    </span><span class="attr">#[prost(message, optional, tag = <span class="string">&quot;10&quot;</span>)]
-    </span><span class="kw">pub </span>chain_id: ::core::option::Option&lt;ChainId&gt;,
-    <span class="doccomment">/// The certified value (BCS signable)
-    </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;1&quot;</span>)]
-    </span><span class="kw">pub </span>value: ::prost::alloc::vec::Vec&lt;u8&gt;,
-    <span class="doccomment">/// Signatures on the value
-    </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;2&quot;</span>)]
-    </span><span class="kw">pub </span>signatures: ::prost::alloc::vec::Vec&lt;u8&gt;,
+    <span class="doccomment">/// Wait until all outgoing cross-chain messages from this certificate have
+    /// been received by the target chains.
+    </span><span class="attr">#[prost(bool, tag = <span class="string">&quot;4&quot;</span>)]
+    </span><span class="kw">pub </span>wait_for_outgoing_messages: bool,
 }
 <span class="doccomment">/// A certified statement from the committee, together with other certificates
 /// required for execution.
 </span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-</span><span class="kw">pub struct </span>CertificateWithDependencies {
-    <span class="doccomment">/// The certificate
+</span><span class="kw">pub struct </span>Certificate {
+    <span class="doccomment">/// The ID of the chain (used for routing).
     </span><span class="attr">#[prost(message, optional, tag = <span class="string">&quot;1&quot;</span>)]
-    </span><span class="kw">pub </span>certificate: ::core::option::Option&lt;Certificate&gt;,
-    <span class="doccomment">/// Other certificates containing bytecode required by the first one
+    </span><span class="kw">pub </span>chain_id: ::core::option::Option&lt;ChainId&gt;,
+    <span class="doccomment">/// The certified value (BCS signable)
     </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;2&quot;</span>)]
+    </span><span class="kw">pub </span>value: ::prost::alloc::vec::Vec&lt;u8&gt;,
+    <span class="doccomment">/// Signatures on the value
+    </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;3&quot;</span>)]
+    </span><span class="kw">pub </span>signatures: ::prost::alloc::vec::Vec&lt;u8&gt;,
+    <span class="doccomment">/// Other certificates containing bytecode required by the first one
+    </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;4&quot;</span>)]
     </span><span class="kw">pub </span>blobs: ::prost::alloc::vec::Vec&lt;u8&gt;,
+    <span class="doccomment">/// Wait until all outgoing cross-chain messages from this certificate have
+    /// been received by the target chains.
+    </span><span class="attr">#[prost(bool, tag = <span class="string">&quot;5&quot;</span>)]
+    </span><span class="kw">pub </span>wait_for_outgoing_messages: bool,
 }
 <span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -1895,7 +1895,7 @@
         <span class="doccomment">/// Process a certificate.
         </span><span class="kw">pub async fn </span>handle_certificate(
             <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-            request: <span class="kw">impl </span>tonic::IntoRequest&lt;<span class="kw">super</span>::CertificateWithDependencies&gt;,
+            request: <span class="kw">impl </span>tonic::IntoRequest&lt;<span class="kw">super</span>::Certificate&gt;,
         ) -&gt; <span class="prelude-ty">Result</span>&lt;tonic::Response&lt;<span class="kw">super</span>::ChainInfoResult&gt;, tonic::Status&gt; {
             <span class="self">self</span>.inner
                 .ready()
@@ -2067,7 +2067,7 @@
         <span class="doccomment">/// Process a certificate.
         </span><span class="kw">pub async fn </span>handle_certificate(
             <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-            request: <span class="kw">impl </span>tonic::IntoRequest&lt;<span class="kw">super</span>::CertificateWithDependencies&gt;,
+            request: <span class="kw">impl </span>tonic::IntoRequest&lt;<span class="kw">super</span>::Certificate&gt;,
         ) -&gt; <span class="prelude-ty">Result</span>&lt;tonic::Response&lt;<span class="kw">super</span>::ChainInfoResult&gt;, tonic::Status&gt; {
             <span class="self">self</span>.inner
                 .ready()
@@ -2299,7 +2299,7 @@
         <span class="doccomment">/// Process a certificate.
         </span><span class="kw">async fn </span>handle_certificate(
             <span class="kw-2">&amp;</span><span class="self">self</span>,
-            request: tonic::Request&lt;<span class="kw">super</span>::CertificateWithDependencies&gt;,
+            request: tonic::Request&lt;<span class="kw">super</span>::Certificate&gt;,
         ) -&gt; <span class="prelude-ty">Result</span>&lt;tonic::Response&lt;<span class="kw">super</span>::ChainInfoResult&gt;, tonic::Status&gt;;
         <span class="doccomment">/// Handle information queries for this chain.
         </span><span class="kw">async fn </span>handle_chain_info_query(
@@ -2461,7 +2461,7 @@
                     </span><span class="kw">struct </span>HandleCertificateSvc&lt;T: ValidatorWorker&gt;(<span class="kw">pub </span>Arc&lt;T&gt;);
                     <span class="kw">impl</span>&lt;
                         T: ValidatorWorker,
-                    &gt; tonic::server::UnaryService&lt;<span class="kw">super</span>::CertificateWithDependencies&gt;
+                    &gt; tonic::server::UnaryService&lt;<span class="kw">super</span>::Certificate&gt;
                     <span class="kw">for </span>HandleCertificateSvc&lt;T&gt; {
                         <span class="kw">type </span>Response = <span class="kw">super</span>::ChainInfoResult;
                         <span class="kw">type </span>Future = BoxFuture&lt;
@@ -2470,7 +2470,7 @@
                         &gt;;
                         <span class="kw">fn </span>call(
                             <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-                            request: tonic::Request&lt;<span class="kw">super</span>::CertificateWithDependencies&gt;,
+                            request: tonic::Request&lt;<span class="kw">super</span>::Certificate&gt;,
                         ) -&gt; <span class="self">Self</span>::Future {
                             <span class="kw">let </span>inner = <span class="self">self</span>.<span class="number">0</span>.clone();
                             <span class="kw">let </span>fut = <span class="kw">async move </span>{
@@ -2635,7 +2635,7 @@
         <span class="doccomment">/// Process a certificate.
         </span><span class="kw">async fn </span>handle_certificate(
             <span class="kw-2">&amp;</span><span class="self">self</span>,
-            request: tonic::Request&lt;<span class="kw">super</span>::CertificateWithDependencies&gt;,
+            request: tonic::Request&lt;<span class="kw">super</span>::Certificate&gt;,
         ) -&gt; <span class="prelude-ty">Result</span>&lt;tonic::Response&lt;<span class="kw">super</span>::ChainInfoResult&gt;, tonic::Status&gt;;
         <span class="doccomment">/// Handle information queries for this chain.
         </span><span class="kw">async fn </span>handle_chain_info_query(
@@ -2799,7 +2799,7 @@
                     </span><span class="kw">struct </span>HandleCertificateSvc&lt;T: ValidatorNode&gt;(<span class="kw">pub </span>Arc&lt;T&gt;);
                     <span class="kw">impl</span>&lt;
                         T: ValidatorNode,
-                    &gt; tonic::server::UnaryService&lt;<span class="kw">super</span>::CertificateWithDependencies&gt;
+                    &gt; tonic::server::UnaryService&lt;<span class="kw">super</span>::Certificate&gt;
                     <span class="kw">for </span>HandleCertificateSvc&lt;T&gt; {
                         <span class="kw">type </span>Response = <span class="kw">super</span>::ChainInfoResult;
                         <span class="kw">type </span>Future = BoxFuture&lt;
@@ -2808,7 +2808,7 @@
                         &gt;;
                         <span class="kw">fn </span>call(
                             <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-                            request: tonic::Request&lt;<span class="kw">super</span>::CertificateWithDependencies&gt;,
+                            request: tonic::Request&lt;<span class="kw">super</span>::Certificate&gt;,
                         ) -&gt; <span class="self">Self</span>::Future {
                             <span class="kw">let </span>inner = <span class="self">self</span>.<span class="number">0</span>.clone();
                             <span class="kw">let </span>fut = <span class="kw">async move </span>{

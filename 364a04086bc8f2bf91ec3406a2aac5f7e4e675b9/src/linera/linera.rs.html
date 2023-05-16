@@ -1410,6 +1410,19 @@
 <a href="#1410" id="1410">1410</a>
 <a href="#1411" id="1411">1411</a>
 <a href="#1412" id="1412">1412</a>
+<a href="#1413" id="1413">1413</a>
+<a href="#1414" id="1414">1414</a>
+<a href="#1415" id="1415">1415</a>
+<a href="#1416" id="1416">1416</a>
+<a href="#1417" id="1417">1417</a>
+<a href="#1418" id="1418">1418</a>
+<a href="#1419" id="1419">1419</a>
+<a href="#1420" id="1420">1420</a>
+<a href="#1421" id="1421">1421</a>
+<a href="#1422" id="1422">1422</a>
+<a href="#1423" id="1423">1423</a>
+<a href="#1424" id="1424">1424</a>
+<a href="#1425" id="1425">1425</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1437,7 +1450,7 @@
     system::{Account, UserData},
     Bytecode, UserApplicationId, WasmRuntime, WithWasmDefault,
 };
-<span class="kw">use </span>linera_rpc::node_provider::NodeProvider;
+<span class="kw">use </span>linera_rpc::node_provider::{NodeOptions, NodeProvider};
 <span class="kw">use </span>linera_service::{
     chain_listener::ChainListenerConfig,
     config::{CommitteeConfig, Export, GenesisConfig, Import, UserChain, WalletState},
@@ -1472,7 +1485,7 @@
     },
     linera_rpc::{
         config::NetworkProtocol, grpc_network::GrpcClient, mass::MassClient, simple_network,
-        RpcMessage,
+        HandleCertificateRequest, RpcMessage,
     },
     std::collections::{HashMap, HashSet},
     tracing::error,
@@ -1487,6 +1500,7 @@
     cross_chain_retries: usize,
     notification_retry_delay: Duration,
     notification_retries: u32,
+    wait_for_outgoing_messages: bool,
 }
 
 <span class="kw">impl </span>ClientContext {
@@ -1533,6 +1547,7 @@
         <span class="kw">let </span>cross_chain_delay = Duration::from_micros(options.cross_chain_delay_ms);
         <span class="kw">let </span>notification_retry_delay = Duration::from_micros(options.notification_retry_delay_us);
         <span class="kw">let </span>notification_retries = options.notification_retries;
+        <span class="kw">let </span>wait_for_outgoing_messages = options.wait_for_outgoing_messages;
 
         ClientContext {
             wallet_state,
@@ -1543,6 +1558,7 @@
             cross_chain_retries: options.cross_chain_retries,
             notification_retry_delay,
             notification_retries,
+            wait_for_outgoing_messages,
         }
     }
 
@@ -1575,14 +1591,7 @@
                     ))
                 }
                 NetworkProtocol::Grpc =&gt; Box::new(
-                    GrpcClient::new(
-                        config.network.clone(),
-                        <span class="self">self</span>.send_timeout,
-                        <span class="self">self</span>.recv_timeout,
-                        <span class="self">self</span>.notification_retry_delay,
-                        <span class="self">self</span>.notification_retries,
-                    )
-                    .unwrap(),
+                    GrpcClient::new(config.network.clone(), <span class="self">self</span>.make_node_options()).unwrap(),
                 ),
             };
 
@@ -1626,12 +1635,17 @@
     }
 
     <span class="kw">fn </span>make_node_provider(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; NodeProvider {
-        NodeProvider::new(
-            <span class="self">self</span>.send_timeout,
-            <span class="self">self</span>.recv_timeout,
-            <span class="self">self</span>.notification_retry_delay,
-            <span class="self">self</span>.notification_retries,
-        )
+        NodeProvider::new(<span class="self">self</span>.make_node_options())
+    }
+
+    <span class="kw">fn </span>make_node_options(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; NodeOptions {
+        NodeOptions {
+            send_timeout: <span class="self">self</span>.send_timeout,
+            recv_timeout: <span class="self">self</span>.recv_timeout,
+            notification_retry_delay: <span class="self">self</span>.notification_retry_delay,
+            notification_retries: <span class="self">self</span>.notification_retries,
+            wait_for_outgoing_messages: <span class="self">self</span>.wait_for_outgoing_messages,
+        }
     }
 
     <span class="attr">#[cfg(feature = <span class="string">&quot;benchmark&quot;</span>)]
@@ -1974,6 +1988,11 @@
     <span class="doccomment">/// Number of times to retry connecting to a validator for notifications.
     </span><span class="attr">#[structopt(long, default_value = <span class="string">&quot;10&quot;</span>)]
     </span>notification_retries: u32,
+
+    <span class="doccomment">/// Whether to wait until a quorum of validators has confirmed that all sent cross-chain
+    /// messages have been delivered.
+    </span><span class="attr">#[structopt(long)]
+    </span>wait_for_outgoing_messages: bool,
 }
 
 <span class="attr">#[derive(StructOpt)]
@@ -2473,7 +2492,14 @@
                 </span>);
                 <span class="kw">let </span>messages = certificates
                     .iter()
-                    .map(|certificate| (certificate.clone(), <span class="macro">vec!</span>[]).into())
+                    .map(|certificate| {
+                        HandleCertificateRequest {
+                            certificate: certificate.clone(),
+                            blobs: <span class="macro">vec!</span>[],
+                            wait_for_outgoing_messages: <span class="bool-val">true</span>,
+                        }
+                        .into()
+                    })
                     .collect();
                 <span class="kw">let </span>responses = context
                     .mass_broadcast(<span class="string">&quot;certificates&quot;</span>, max_in_flight, messages)

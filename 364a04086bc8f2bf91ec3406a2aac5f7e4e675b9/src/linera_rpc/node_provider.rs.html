@@ -114,30 +114,6 @@
 <a href="#114" id="114">114</a>
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
-<a href="#117" id="117">117</a>
-<a href="#118" id="118">118</a>
-<a href="#119" id="119">119</a>
-<a href="#120" id="120">120</a>
-<a href="#121" id="121">121</a>
-<a href="#122" id="122">122</a>
-<a href="#123" id="123">123</a>
-<a href="#124" id="124">124</a>
-<a href="#125" id="125">125</a>
-<a href="#126" id="126">126</a>
-<a href="#127" id="127">127</a>
-<a href="#128" id="128">128</a>
-<a href="#129" id="129">129</a>
-<a href="#130" id="130">130</a>
-<a href="#131" id="131">131</a>
-<a href="#132" id="132">132</a>
-<a href="#133" id="133">133</a>
-<a href="#134" id="134">134</a>
-<a href="#135" id="135">135</a>
-<a href="#136" id="136">136</a>
-<a href="#137" id="137">137</a>
-<a href="#138" id="138">138</a>
-<a href="#139" id="139">139</a>
-<a href="#140" id="140">140</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -159,19 +135,9 @@
 }
 
 <span class="kw">impl </span>NodeProvider {
-    <span class="kw">pub fn </span>new(
-        send_timeout: Duration,
-        recv_timeout: Duration,
-        notification_retry_delay: Duration,
-        notification_retries: u32,
-    ) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>grpc = GrpcNodeProvider::new(
-            send_timeout,
-            recv_timeout,
-            notification_retry_delay,
-            notification_retries,
-        );
-        <span class="kw">let </span>simple = SimpleNodeProvider::new(send_timeout, recv_timeout);
+    <span class="kw">pub fn </span>new(options: NodeOptions) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>grpc = GrpcNodeProvider::new(options);
+        <span class="kw">let </span>simple = SimpleNodeProvider::new(options);
         <span class="self">Self </span>{ grpc, simple }
     }
 }
@@ -197,26 +163,20 @@
 }
 
 <span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">pub struct </span>GrpcNodeProvider {
-    send_timeout: Duration,
-    recv_timeout: Duration,
-    notification_retry_delay: Duration,
-    notification_retries: u32,
+</span><span class="kw">pub struct </span>NodeOptions {
+    <span class="kw">pub </span>send_timeout: Duration,
+    <span class="kw">pub </span>recv_timeout: Duration,
+    <span class="kw">pub </span>notification_retry_delay: Duration,
+    <span class="kw">pub </span>notification_retries: u32,
+    <span class="kw">pub </span>wait_for_outgoing_messages: bool,
 }
 
+<span class="attr">#[derive(Copy, Clone)]
+</span><span class="kw">pub struct </span>GrpcNodeProvider(NodeOptions);
+
 <span class="kw">impl </span>GrpcNodeProvider {
-    <span class="kw">pub fn </span>new(
-        send_timeout: Duration,
-        recv_timeout: Duration,
-        notification_retry_delay: Duration,
-        notification_retries: u32,
-    ) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            send_timeout,
-            recv_timeout,
-            notification_retry_delay,
-            notification_retries,
-        }
+    <span class="kw">pub fn </span>new(options: NodeOptions) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(options)
     }
 }
 
@@ -230,14 +190,7 @@
             }
         })<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>client = GrpcClient::new(
-            network,
-            <span class="self">self</span>.send_timeout,
-            <span class="self">self</span>.recv_timeout,
-            <span class="self">self</span>.notification_retry_delay,
-            <span class="self">self</span>.notification_retries,
-        )
-        .map_err(|e| NodeError::GrpcError {
+        <span class="kw">let </span>client = GrpcClient::new(network, <span class="self">self</span>.<span class="number">0</span>).map_err(|e| NodeError::GrpcError {
             error: <span class="macro">format!</span>(
                 <span class="string">&quot;could not initialize gRPC client for address {} : {}&quot;</span>,
                 address, e
@@ -249,17 +202,11 @@
 
 <span class="doccomment">/// A client without an address - serves as a client factory.
 </span><span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">pub struct </span>SimpleNodeProvider {
-    send_timeout: Duration,
-    recv_timeout: Duration,
-}
+</span><span class="kw">pub struct </span>SimpleNodeProvider(NodeOptions);
 
 <span class="kw">impl </span>SimpleNodeProvider {
-    <span class="kw">pub fn </span>new(send_timeout: Duration, recv_timeout: Duration) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            send_timeout,
-            recv_timeout,
-        }
+    <span class="kw">pub fn </span>new(options: NodeOptions) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(options)
     }
 }
 
@@ -273,7 +220,12 @@
             }
         })<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>client = SimpleClient::new(network, <span class="self">self</span>.send_timeout, <span class="self">self</span>.recv_timeout);
+        <span class="kw">let </span>client = SimpleClient::new(
+            network,
+            <span class="self">self</span>.<span class="number">0</span>.send_timeout,
+            <span class="self">self</span>.<span class="number">0</span>.recv_timeout,
+            <span class="self">self</span>.<span class="number">0</span>.wait_for_outgoing_messages,
+        );
 
         <span class="prelude-val">Ok</span>(client)
     }

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["GrpcNodeProvider","NodeProvider","SimpleNodeProvider"]};
+window.SIDEBAR_ITEMS = {"struct":["GrpcNodeProvider","NodeOptions","NodeProvider","SimpleNodeProvider"]};

@@ -664,10 +664,21 @@
 <a href="#664" id="664">664</a>
 <a href="#665" id="665">665</a>
 <a href="#666" id="666">666</a>
+<a href="#667" id="667">667</a>
+<a href="#668" id="668">668</a>
+<a href="#669" id="669">669</a>
+<a href="#670" id="670">670</a>
+<a href="#671" id="671">671</a>
+<a href="#672" id="672">672</a>
+<a href="#673" id="673">673</a>
+<a href="#674" id="674">674</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="kw">use </span><span class="kw">crate</span>::grpc_network::{grpc, grpc::ChainInfoResult};
+</span><span class="kw">use crate</span>::{
+    grpc_network::{grpc, grpc::ChainInfoResult},
+    HandleCertificateRequest, HandleLiteCertificateRequest,
+};
 <span class="kw">use </span>ed25519::signature::Signature <span class="kw">as </span>edSignature;
 <span class="kw">use </span>linera_base::{
     crypto::{CryptoError, CryptoHash, PublicKey, Signature},
@@ -676,8 +687,7 @@
     identifiers::{ChainId, Owner},
 };
 <span class="kw">use </span>linera_chain::data_types::{
-    BlockAndRound, BlockProposal, Certificate, CertificateWithDependencies, HashedValue,
-    LiteCertificate, LiteValue,
+    BlockAndRound, BlockProposal, Certificate, HashedValue, LiteCertificate, LiteValue,
 };
 <span class="kw">use </span>linera_core::{
     data_types::{ChainInfoQuery, ChainInfoResponse, CrossChainRequest},
@@ -859,7 +869,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TryFrom&lt;grpc::LiteCertificate&gt; <span class="kw">for </span>LiteCertificate&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TryFrom&lt;grpc::LiteCertificate&gt; <span class="kw">for </span>HandleLiteCertificateRequest&lt;<span class="lifetime">&#39;a</span>&gt; {
     <span class="kw">type </span>Error = ProtoConversionError;
 
     <span class="kw">fn </span>try_from(certificate: grpc::LiteCertificate) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
@@ -868,65 +878,56 @@
             chain_id: try_proto_convert(certificate.chain_id)<span class="question-mark">?</span>,
         };
         <span class="kw">let </span>signatures = bincode::deserialize(<span class="kw-2">&amp;</span>certificate.signatures)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(LiteCertificate::new(value, signatures))
-    }
-}
-
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TryFrom&lt;LiteCertificate&lt;<span class="lifetime">&#39;a</span>&gt;&gt; <span class="kw">for </span>grpc::LiteCertificate {
-    <span class="kw">type </span>Error = ProtoConversionError;
-
-    <span class="kw">fn </span>try_from(certificate: LiteCertificate&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
-            hash: certificate.value.value_hash.as_bytes().to_vec(),
-            chain_id: <span class="prelude-val">Some</span>(certificate.value.chain_id.into()),
-            signatures: bincode::serialize(<span class="kw-2">&amp;</span>certificate.signatures)<span class="question-mark">?</span>,
+            certificate: LiteCertificate::new(value, signatures),
+            wait_for_outgoing_messages: certificate.wait_for_outgoing_messages,
         })
     }
 }
 
-<span class="kw">impl </span>TryFrom&lt;grpc::Certificate&gt; <span class="kw">for </span>Certificate {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TryFrom&lt;HandleLiteCertificateRequest&lt;<span class="lifetime">&#39;a</span>&gt;&gt; <span class="kw">for </span>grpc::LiteCertificate {
     <span class="kw">type </span>Error = ProtoConversionError;
 
-    <span class="kw">fn </span>try_from(certificate: grpc::Certificate) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
-        <span class="kw">let </span>value: HashedValue = bincode::deserialize(<span class="kw-2">&amp;</span>certificate.value)<span class="question-mark">?</span>;
+    <span class="kw">fn </span>try_from(request: HandleLiteCertificateRequest) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+            hash: request.certificate.value.value_hash.as_bytes().to_vec(),
+            chain_id: <span class="prelude-val">Some</span>(request.certificate.value.chain_id.into()),
+            signatures: bincode::serialize(<span class="kw-2">&amp;</span>request.certificate.signatures)<span class="question-mark">?</span>,
+            wait_for_outgoing_messages: request.wait_for_outgoing_messages,
+        })
+    }
+}
+
+<span class="kw">impl </span>TryFrom&lt;grpc::Certificate&gt; <span class="kw">for </span>HandleCertificateRequest {
+    <span class="kw">type </span>Error = ProtoConversionError;
+
+    <span class="kw">fn </span>try_from(cert_request: grpc::Certificate) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+        <span class="kw">let </span>value: HashedValue = bincode::deserialize(<span class="kw-2">&amp;</span>cert_request.value)<span class="question-mark">?</span>;
         <span class="macro">ensure!</span>(
-            <span class="prelude-val">Some</span>(value.chain_id().into()) == certificate.chain_id,
+            <span class="prelude-val">Some</span>(value.chain_id().into()) == cert_request.chain_id,
             ProtoConversionError::InconsistentChainId
         );
-        <span class="kw">let </span>signatures = bincode::deserialize(<span class="kw-2">&amp;</span>certificate.signatures)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(Certificate::new(value, signatures))
-    }
-}
-
-<span class="kw">impl </span>TryFrom&lt;Certificate&gt; <span class="kw">for </span>grpc::Certificate {
-    <span class="kw">type </span>Error = ProtoConversionError;
-
-    <span class="kw">fn </span>try_from(certificate: Certificate) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
-        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
-            chain_id: <span class="prelude-val">Some</span>(certificate.value.chain_id().into()),
-            value: bincode::serialize(<span class="kw-2">&amp;</span>certificate.value)<span class="question-mark">?</span>,
-            signatures: bincode::serialize(<span class="kw-2">&amp;</span>certificate.signatures)<span class="question-mark">?</span>,
+        <span class="kw">let </span>signatures = bincode::deserialize(<span class="kw-2">&amp;</span>cert_request.signatures)<span class="question-mark">?</span>;
+        <span class="kw">let </span>blobs = bincode::deserialize(<span class="kw-2">&amp;</span>cert_request.blobs)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(HandleCertificateRequest {
+            certificate: Certificate::new(value, signatures),
+            wait_for_outgoing_messages: cert_request.wait_for_outgoing_messages,
+            blobs,
         })
     }
 }
 
-<span class="kw">impl </span>TryFrom&lt;grpc::CertificateWithDependencies&gt; <span class="kw">for </span>CertificateWithDependencies {
+<span class="kw">impl </span>TryFrom&lt;HandleCertificateRequest&gt; <span class="kw">for </span>grpc::Certificate {
     <span class="kw">type </span>Error = ProtoConversionError;
 
-    <span class="kw">fn </span>try_from(cert_with_deps: grpc::CertificateWithDependencies) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
-        <span class="kw">let </span>blobs = bincode::deserialize(<span class="kw-2">&amp;</span>cert_with_deps.blobs)<span class="question-mark">?</span>;
-        <span class="kw">let </span>certificate: Certificate = try_proto_convert(cert_with_deps.certificate)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(CertificateWithDependencies { certificate, blobs })
-    }
-}
-
-<span class="kw">impl </span>TryFrom&lt;CertificateWithDependencies&gt; <span class="kw">for </span>grpc::CertificateWithDependencies {
-    <span class="kw">type </span>Error = ProtoConversionError;
-
-    <span class="kw">fn </span>try_from(cert_with_deps: CertificateWithDependencies) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
-        <span class="kw">let </span>blobs = bincode::serialize(<span class="kw-2">&amp;</span>cert_with_deps.blobs)<span class="question-mark">?</span>;
-        <span class="kw">let </span>certificate = <span class="prelude-val">Some</span>(cert_with_deps.certificate.try_into()<span class="question-mark">?</span>);
-        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ certificate, blobs })
+    <span class="kw">fn </span>try_from(request: HandleCertificateRequest) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+            chain_id: <span class="prelude-val">Some</span>(request.certificate.value.chain_id().into()),
+            value: bincode::serialize(<span class="kw-2">&amp;</span>request.certificate.value)<span class="question-mark">?</span>,
+            signatures: bincode::serialize(<span class="kw-2">&amp;</span>request.certificate.signatures)<span class="question-mark">?</span>,
+            blobs: bincode::serialize(<span class="kw-2">&amp;</span>request.blobs)<span class="question-mark">?</span>,
+            wait_for_outgoing_messages: request.wait_for_outgoing_messages,
+        })
     }
 }
 
@@ -1243,7 +1244,7 @@
     <span class="attr">#[test]
     </span><span class="kw">pub fn </span>test_lite_certificate() {
         <span class="kw">let </span>key_pair = KeyPair::generate();
-        <span class="kw">let </span>certificate_validated = LiteCertificate {
+        <span class="kw">let </span>certificate = LiteCertificate {
             value: LiteValue {
                 value_hash: CryptoHash::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;value&quot;</span>.into())),
                 chain_id: ChainId::root(<span class="number">0</span>),
@@ -1253,14 +1254,18 @@
                 Signature::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;test&quot;</span>.into()), <span class="kw-2">&amp;</span>key_pair),
             )]),
         };
+        <span class="kw">let </span>request = HandleLiteCertificateRequest {
+            certificate,
+            wait_for_outgoing_messages: <span class="bool-val">true</span>,
+        };
 
-        round_trip_check::&lt;<span class="kw">_</span>, grpc::LiteCertificate&gt;(certificate_validated);
+        round_trip_check::&lt;<span class="kw">_</span>, grpc::LiteCertificate&gt;(request);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">pub fn </span>test_certificate() {
         <span class="kw">let </span>key_pair = KeyPair::generate();
-        <span class="kw">let </span>certificate_validated = Certificate::new(
+        <span class="kw">let </span>certificate = Certificate::new(
             HashedValue::new_validated(
                 get_block(),
                 <span class="macro">vec!</span>[],
@@ -1272,8 +1277,19 @@
                 Signature::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;test&quot;</span>.into()), <span class="kw-2">&amp;</span>key_pair),
             )],
         );
+        <span class="kw">let </span>blobs = <span class="macro">vec!</span>[HashedValue::new_validated(
+            get_block(),
+            <span class="macro">vec!</span>[],
+            CryptoHash::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;also test&quot;</span>.into())),
+            Default::default(),
+        )];
+        <span class="kw">let </span>request = HandleCertificateRequest {
+            certificate,
+            blobs,
+            wait_for_outgoing_messages: <span class="bool-val">false</span>,
+        };
 
-        round_trip_check::&lt;<span class="kw">_</span>, grpc::Certificate&gt;(certificate_validated);
+        round_trip_check::&lt;<span class="kw">_</span>, grpc::Certificate&gt;(request);
     }
 
     <span class="attr">#[test]

@@ -520,6 +520,18 @@
 <a href="#520" id="520">520</a>
 <a href="#521" id="521">521</a>
 <a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
+<a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
+<a href="#534" id="534">534</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -532,7 +544,7 @@
     },
     mass::{MassClient, MassClientError},
     transport::{MessageHandler, ServerHandle, TransportProtocol},
-    RpcMessage,
+    HandleCertificateRequest, HandleLiteCertificateRequest, RpcMessage,
 };
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>futures::{channel::mpsc, sink::SinkExt, stream::StreamExt};
@@ -686,9 +698,9 @@
         <span class="kw">let </span>state = RunningServerState {
             server: <span class="self">self</span>,
             cross_chain_sender,
-            <span class="comment">// Udp servers cannot process several requests (e.g. user requests and
+            <span class="comment">// UDP servers cannot process several requests (e.g. user requests and
             // cross-chain requests) at the same time.
-            </span>wait_for_outgoing_messages: protocol == TransportProtocol::Tcp,
+            </span>can_wait_for_outgoing_messages: protocol == TransportProtocol::Tcp,
         };
         <span class="comment">// Launch server for the appropriate protocol.
         </span>protocol.spawn_server(<span class="kw-2">&amp;</span>address, state).<span class="kw">await
@@ -699,7 +711,7 @@
 </span><span class="kw">struct </span>RunningServerState&lt;S&gt; {
     server: Server&lt;S&gt;,
     cross_chain_sender: mpsc::Sender&lt;(RpcMessage, ShardId)&gt;,
-    wait_for_outgoing_messages: bool,
+    can_wait_for_outgoing_messages: bool,
 }
 
 <span class="attr">#[async_trait]
@@ -725,15 +737,15 @@
                     }
                 }
             }
-            RpcMessage::LiteCertificate(message) =&gt; {
-                <span class="kw">let </span>(sender, receiver) = <span class="self">self
-                    </span>.wait_for_outgoing_messages
+            RpcMessage::LiteCertificate(request) =&gt; {
+                <span class="kw">let </span>(sender, receiver) = (<span class="self">self</span>.can_wait_for_outgoing_messages
+                    &amp;&amp; request.wait_for_outgoing_messages)
                     .then(oneshot::channel)
                     .unzip();
                 <span class="kw">match </span><span class="self">self
                     </span>.server
                     .state
-                    .handle_lite_certificate(<span class="kw-2">*</span>message, sender)
+                    .handle_lite_certificate(request.certificate, sender)
                     .<span class="kw">await
                 </span>{
                     <span class="prelude-val">Ok</span>((info, actions)) =&gt; {
@@ -757,15 +769,15 @@
                     }
                 }
             }
-            RpcMessage::Certificate(message, blobs) =&gt; {
-                <span class="kw">let </span>(sender, receiver) = <span class="self">self
-                    </span>.wait_for_outgoing_messages
+            RpcMessage::Certificate(request) =&gt; {
+                <span class="kw">let </span>(sender, receiver) = (<span class="self">self</span>.can_wait_for_outgoing_messages
+                    &amp;&amp; request.wait_for_outgoing_messages)
                     .then(oneshot::channel)
                     .unzip();
                 <span class="kw">match </span><span class="self">self
                     </span>.server
                     .state
-                    .handle_certificate(<span class="kw-2">*</span>message, blobs, sender)
+                    .handle_certificate(request.certificate, request.blobs, sender)
                     .<span class="kw">await
                 </span>{
                     <span class="prelude-val">Ok</span>((info, actions)) =&gt; {
@@ -869,6 +881,7 @@
     network: ValidatorPublicNetworkPreConfig&lt;TransportProtocol&gt;,
     send_timeout: Duration,
     recv_timeout: Duration,
+    wait_for_outgoing_messages: bool,
 }
 
 <span class="kw">impl </span>SimpleClient {
@@ -876,11 +889,13 @@
         network: ValidatorPublicNetworkPreConfig&lt;TransportProtocol&gt;,
         send_timeout: Duration,
         recv_timeout: Duration,
+        wait_for_outgoing_messages: bool,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             network,
             send_timeout,
             recv_timeout,
+            wait_for_outgoing_messages,
         }
     }
 
@@ -935,7 +950,11 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         certificate: LiteCertificate&lt;<span class="lifetime">&#39;_</span>&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfoResponse, NodeError&gt; {
-        <span class="self">self</span>.send_recv_info(certificate.cloned().into()).<span class="kw">await
+        <span class="kw">let </span>request = HandleLiteCertificateRequest {
+            certificate: certificate.cloned(),
+            wait_for_outgoing_messages: <span class="self">self</span>.wait_for_outgoing_messages,
+        };
+        <span class="self">self</span>.send_recv_info(request.into()).<span class="kw">await
     </span>}
 
     <span class="doccomment">/// Processes a certificate.
@@ -944,7 +963,12 @@
         certificate: Certificate,
         blobs: Vec&lt;HashedValue&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfoResponse, NodeError&gt; {
-        <span class="self">self</span>.send_recv_info((certificate, blobs).into()).<span class="kw">await
+        <span class="kw">let </span>request = HandleCertificateRequest {
+            certificate,
+            blobs,
+            wait_for_outgoing_messages: <span class="self">self</span>.wait_for_outgoing_messages,
+        };
+        <span class="self">self</span>.send_recv_info(request.into()).<span class="kw">await
     </span>}
 
     <span class="doccomment">/// Handles information queries for this chain.
