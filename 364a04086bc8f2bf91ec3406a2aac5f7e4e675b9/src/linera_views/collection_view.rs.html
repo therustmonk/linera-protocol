@@ -1327,9 +1327,9 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : ByteCollectionView&lt;_, RegisterView&lt;_,String&gt;&gt; = ByteCollectionView::load(context).await.unwrap();
-    ///   let view = coll.load_entry_mut(vec![0,1]).await.unwrap();
-    ///   let value = view.get();
+    ///   let mut view : ByteCollectionView&lt;_, RegisterView&lt;_,String&gt;&gt; = ByteCollectionView::load(context).await.unwrap();
+    ///   let subview = view.load_entry_mut(vec![0, 1]).await.unwrap();
+    ///   let value = subview.get();
     ///   assert_eq!(*value, String::default());
     /// # })
     /// ```
@@ -1347,10 +1347,10 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : ByteCollectionView&lt;_, RegisterView&lt;_,String&gt;&gt; = ByteCollectionView::load(context).await.unwrap();
-    ///   coll.load_entry_mut(vec![0,1]).await.unwrap();
-    ///   let view = coll.load_entry(vec![0,1]).await.unwrap();
-    ///   let value = view.get();
+    ///   let mut view : ByteCollectionView&lt;_, RegisterView&lt;_,String&gt;&gt; = ByteCollectionView::load(context).await.unwrap();
+    ///   view.load_entry_mut(vec![0, 1]).await.unwrap();
+    ///   let subview = view.load_entry(vec![0, 1]).await.unwrap();
+    ///   let value = subview.get();
     ///   assert_eq!(*value, String::default());
     /// # })
     /// ```
@@ -1367,9 +1367,9 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : ByteCollectionView&lt;_, RegisterView&lt;_,String&gt;&gt; = ByteCollectionView::load(context).await.unwrap();
-    ///   let view = coll.try_load_entry(vec![0,1]).await.unwrap();
-    ///   let value = view.get();
+    ///   let mut view : ByteCollectionView&lt;_, RegisterView&lt;_,String&gt;&gt; = ByteCollectionView::load(context).await.unwrap();
+    ///   let subview = view.try_load_entry(vec![0, 1]).await.unwrap();
+    ///   let value = subview.get();
     ///   assert_eq!(*value, String::default());
     /// # })
     /// ```
@@ -1427,13 +1427,13 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : ByteCollectionView&lt;_, RegisterView&lt;_,String&gt;&gt; = ByteCollectionView::load(context).await.unwrap();
-    ///   let view = coll.load_entry_mut(vec![0,1]).await.unwrap();
-    ///   let value = view.get_mut();
+    ///   let mut view : ByteCollectionView&lt;_, RegisterView&lt;_,String&gt;&gt; = ByteCollectionView::load(context).await.unwrap();
+    ///   let subview = view.load_entry_mut(vec![0, 1]).await.unwrap();
+    ///   let value = subview.get_mut();
     ///   *value = String::from(&quot;Hello&quot;);
-    ///   coll.reset_entry_to_default(vec![0,1]).await.unwrap();
-    ///   let view = coll.load_entry_mut(vec![0,1]).await.unwrap();
-    ///   let value = view.get_mut();
+    ///   view.reset_entry_to_default(vec![0, 1]).await.unwrap();
+    ///   let subview = view.load_entry_mut(vec![0, 1]).await.unwrap();
+    ///   let value = subview.get_mut();
     ///   assert_eq!(*value, String::default());
     /// # })
     /// ```
@@ -1452,12 +1452,12 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : ByteCollectionView&lt;_, RegisterView&lt;_,String&gt;&gt; = ByteCollectionView::load(context).await.unwrap();
-    ///   let view = coll.load_entry_mut(vec![0,1]).await.unwrap();
-    ///   let value = view.get_mut();
+    ///   let mut view : ByteCollectionView&lt;_, RegisterView&lt;_,String&gt;&gt; = ByteCollectionView::load(context).await.unwrap();
+    ///   let subview = view.load_entry_mut(vec![0, 1]).await.unwrap();
+    ///   let value = subview.get_mut();
     ///   assert_eq!(*value, String::default());
-    ///   coll.remove_entry(vec![0,1]);
-    ///   let keys = coll.keys().await.unwrap();
+    ///   view.remove_entry(vec![0, 1]);
+    ///   let keys = view.keys().await.unwrap();
     ///   assert_eq!(keys.len(), 0);
     /// # })
     /// ```
@@ -1527,11 +1527,11 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : ByteCollectionView&lt;_, RegisterView&lt;_,String&gt;&gt; = ByteCollectionView::load(context).await.unwrap();
-    ///   coll.load_entry_mut(vec![0,1]).await.unwrap();
-    ///   coll.load_entry_mut(vec![0,2]).await.unwrap();
+    ///   let mut view : ByteCollectionView&lt;_, RegisterView&lt;_,String&gt;&gt; = ByteCollectionView::load(context).await.unwrap();
+    ///   view.load_entry_mut(vec![0, 1]).await.unwrap();
+    ///   view.load_entry_mut(vec![0, 2]).await.unwrap();
     ///   let mut count = 0;
-    ///   coll.for_each_key_while(|_key| {
+    ///   view.for_each_key_while(|_key| {
     ///     count += 1;
     ///     Ok(count &lt; 1)
     ///   }).await.unwrap();
@@ -1592,11 +1592,11 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : ByteCollectionView&lt;_, RegisterView&lt;_,String&gt;&gt; = ByteCollectionView::load(context).await.unwrap();
-    ///   coll.load_entry_mut(vec![0,1]).await.unwrap();
-    ///   coll.load_entry_mut(vec![0,2]).await.unwrap();
+    ///   let mut view : ByteCollectionView&lt;_, RegisterView&lt;_,String&gt;&gt; = ByteCollectionView::load(context).await.unwrap();
+    ///   view.load_entry_mut(vec![0, 1]).await.unwrap();
+    ///   view.load_entry_mut(vec![0, 2]).await.unwrap();
     ///   let mut count = 0;
-    ///   coll.for_each_key(|_key| {
+    ///   view.for_each_key(|_key| {
     ///     count += 1;
     ///     Ok(())
     ///   }).await.unwrap();
@@ -1622,11 +1622,11 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : ByteCollectionView&lt;_, RegisterView&lt;_,String&gt;&gt; = ByteCollectionView::load(context).await.unwrap();
-    ///   coll.load_entry_mut(vec![0,1]).await.unwrap();
-    ///   coll.load_entry_mut(vec![0,2]).await.unwrap();
-    ///   let keys = coll.keys().await.unwrap();
-    ///   assert_eq!(keys, vec![vec![0,1],vec![0,2]]);
+    ///   let mut view : ByteCollectionView&lt;_, RegisterView&lt;_,String&gt;&gt; = ByteCollectionView::load(context).await.unwrap();
+    ///   view.load_entry_mut(vec![0, 1]).await.unwrap();
+    ///   view.load_entry_mut(vec![0, 2]).await.unwrap();
+    ///   let keys = view.keys().await.unwrap();
+    ///   assert_eq!(keys, vec![vec![0, 1], vec![0, 2]]);
     /// # })
     /// ```
     </span><span class="kw">pub async fn </span>keys(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Vec&lt;u8&gt;&gt;, ViewError&gt; {
@@ -1754,9 +1754,9 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : CollectionView&lt;_, u64, RegisterView&lt;_,String&gt;&gt; = CollectionView::load(context).await.unwrap();
-    ///   let view = coll.load_entry_mut(&amp;23).await.unwrap();
-    ///   let value = view.get();
+    ///   let mut view : CollectionView&lt;_, u64, RegisterView&lt;_,String&gt;&gt; = CollectionView::load(context).await.unwrap();
+    ///   let subview = view.load_entry_mut(&amp;23).await.unwrap();
+    ///   let value = subview.get();
     ///   assert_eq!(*value, String::default());
     /// # })
     /// ```
@@ -1778,10 +1778,10 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : CollectionView&lt;_, u64, RegisterView&lt;_,String&gt;&gt; = CollectionView::load(context).await.unwrap();
-    ///   coll.load_entry_mut(&amp;23).await.unwrap();
-    ///   let view = coll.load_entry(&amp;23).await.unwrap();
-    ///   let value = view.get();
+    ///   let mut view : CollectionView&lt;_, u64, RegisterView&lt;_,String&gt;&gt; = CollectionView::load(context).await.unwrap();
+    ///   view.load_entry_mut(&amp;23).await.unwrap();
+    ///   let subview = view.load_entry(&amp;23).await.unwrap();
+    ///   let value = subview.get();
     ///   assert_eq!(*value, String::default());
     /// # })
     /// ```
@@ -1803,9 +1803,9 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : CollectionView&lt;_, u64, RegisterView&lt;_,String&gt;&gt; = CollectionView::load(context).await.unwrap();
-    ///   let view = coll.try_load_entry(&amp;23).await.unwrap();
-    ///   let value = view.get();
+    ///   let mut view : CollectionView&lt;_, u64, RegisterView&lt;_,String&gt;&gt; = CollectionView::load(context).await.unwrap();
+    ///   let subview = view.try_load_entry(&amp;23).await.unwrap();
+    ///   let value = subview.get();
     ///   assert_eq!(*value, String::default());
     /// # })
     /// ```
@@ -1826,13 +1826,13 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : CollectionView&lt;_, u64, RegisterView&lt;_,String&gt;&gt; = CollectionView::load(context).await.unwrap();
-    ///   let view = coll.load_entry_mut(&amp;23).await.unwrap();
-    ///   let value = view.get_mut();
+    ///   let mut view : CollectionView&lt;_, u64, RegisterView&lt;_,String&gt;&gt; = CollectionView::load(context).await.unwrap();
+    ///   let subview = view.load_entry_mut(&amp;23).await.unwrap();
+    ///   let value = subview.get_mut();
     ///   *value = String::from(&quot;Hello&quot;);
-    ///   coll.reset_entry_to_default(&amp;23).await.unwrap();
-    ///   let view = coll.load_entry_mut(&amp;23).await.unwrap();
-    ///   let value = view.get_mut();
+    ///   view.reset_entry_to_default(&amp;23).await.unwrap();
+    ///   let subview = view.load_entry_mut(&amp;23).await.unwrap();
+    ///   let value = subview.get_mut();
     ///   assert_eq!(*value, String::default());
     /// # })
     /// ```
@@ -1853,12 +1853,12 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : CollectionView&lt;_, u64, RegisterView&lt;_,String&gt;&gt; = CollectionView::load(context).await.unwrap();
-    ///   let view = coll.load_entry_mut(&amp;23).await.unwrap();
-    ///   let value = view.get_mut();
+    ///   let mut view : CollectionView&lt;_, u64, RegisterView&lt;_,String&gt;&gt; = CollectionView::load(context).await.unwrap();
+    ///   let subview = view.load_entry_mut(&amp;23).await.unwrap();
+    ///   let value = subview.get_mut();
     ///   assert_eq!(*value, String::default());
-    ///   coll.remove_entry(&amp;23);
-    ///   let keys = coll.indices().await.unwrap();
+    ///   view.remove_entry(&amp;23);
+    ///   let keys = view.indices().await.unwrap();
     ///   assert_eq!(keys.len(), 0);
     /// # })
     /// ```
@@ -1894,10 +1894,10 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : CollectionView&lt;_, u64, RegisterView&lt;_,String&gt;&gt; = CollectionView::load(context).await.unwrap();
-    ///   coll.load_entry_mut(&amp;23).await.unwrap();
-    ///   coll.load_entry_mut(&amp;25).await.unwrap();
-    ///   let indices = coll.indices().await.unwrap();
+    ///   let mut view : CollectionView&lt;_, u64, RegisterView&lt;_,String&gt;&gt; = CollectionView::load(context).await.unwrap();
+    ///   view.load_entry_mut(&amp;23).await.unwrap();
+    ///   view.load_entry_mut(&amp;25).await.unwrap();
+    ///   let indices = view.indices().await.unwrap();
     ///   assert_eq!(indices.len(), 2);
     /// # })
     /// ```
@@ -1929,11 +1929,11 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : CollectionView&lt;_, u64, RegisterView&lt;_,String&gt;&gt; = CollectionView::load(context).await.unwrap();
-    ///   coll.load_entry_mut(&amp;23).await.unwrap();
-    ///   coll.load_entry_mut(&amp;24).await.unwrap();
+    ///   let mut view : CollectionView&lt;_, u64, RegisterView&lt;_,String&gt;&gt; = CollectionView::load(context).await.unwrap();
+    ///   view.load_entry_mut(&amp;23).await.unwrap();
+    ///   view.load_entry_mut(&amp;24).await.unwrap();
     ///   let mut count = 0;
-    ///   coll.for_each_index_while(|_key| {
+    ///   view.for_each_index_while(|_key| {
     ///     count += 1;
     ///     Ok(count &lt; 1)
     ///   }).await.unwrap();
@@ -1962,11 +1962,11 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : CollectionView&lt;_, u64, RegisterView&lt;_,String&gt;&gt; = CollectionView::load(context).await.unwrap();
-    ///   coll.load_entry_mut(&amp;23).await.unwrap();
-    ///   coll.load_entry_mut(&amp;28).await.unwrap();
+    ///   let mut view : CollectionView&lt;_, u64, RegisterView&lt;_,String&gt;&gt; = CollectionView::load(context).await.unwrap();
+    ///   view.load_entry_mut(&amp;23).await.unwrap();
+    ///   view.load_entry_mut(&amp;28).await.unwrap();
     ///   let mut count = 0;
-    ///   coll.for_each_index(|_key| {
+    ///   view.for_each_index(|_key| {
     ///     count += 1;
     ///     Ok(())
     ///   }).await.unwrap();
@@ -2066,9 +2066,9 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : CustomCollectionView&lt;_, u128, RegisterView&lt;_,String&gt;&gt; = CustomCollectionView::load(context).await.unwrap();
-    ///   let view = coll.load_entry_mut(&amp;23).await.unwrap();
-    ///   let value = view.get();
+    ///   let mut view : CustomCollectionView&lt;_, u128, RegisterView&lt;_,String&gt;&gt; = CustomCollectionView::load(context).await.unwrap();
+    ///   let subview = view.load_entry_mut(&amp;23).await.unwrap();
+    ///   let value = subview.get();
     ///   assert_eq!(*value, String::default());
     /// # })
     /// ```
@@ -2090,10 +2090,10 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : CustomCollectionView&lt;_, u128, RegisterView&lt;_,String&gt;&gt; = CustomCollectionView::load(context).await.unwrap();
-    ///   coll.load_entry_mut(&amp;23).await.unwrap();
-    ///   let view = coll.load_entry(&amp;23).await.unwrap();
-    ///   let value = view.get();
+    ///   let mut view : CustomCollectionView&lt;_, u128, RegisterView&lt;_,String&gt;&gt; = CustomCollectionView::load(context).await.unwrap();
+    ///   view.load_entry_mut(&amp;23).await.unwrap();
+    ///   let subview = view.load_entry(&amp;23).await.unwrap();
+    ///   let value = subview.get();
     ///   assert_eq!(*value, String::default());
     /// # })
     /// ```
@@ -2115,9 +2115,9 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : CustomCollectionView&lt;_, u128, RegisterView&lt;_,String&gt;&gt; = CustomCollectionView::load(context).await.unwrap();
-    ///   let view = coll.try_load_entry(&amp;23).await.unwrap();
-    ///   let value = view.get();
+    ///   let mut view : CustomCollectionView&lt;_, u128, RegisterView&lt;_,String&gt;&gt; = CustomCollectionView::load(context).await.unwrap();
+    ///   let subview = view.try_load_entry(&amp;23).await.unwrap();
+    ///   let value = subview.get();
     ///   assert_eq!(*value, String::default());
     /// # })
     /// ```
@@ -2138,13 +2138,13 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : CustomCollectionView&lt;_, u128, RegisterView&lt;_,String&gt;&gt; = CustomCollectionView::load(context).await.unwrap();
-    ///   let view = coll.load_entry_mut(&amp;23).await.unwrap();
-    ///   let value = view.get_mut();
+    ///   let mut view : CustomCollectionView&lt;_, u128, RegisterView&lt;_,String&gt;&gt; = CustomCollectionView::load(context).await.unwrap();
+    ///   let subview = view.load_entry_mut(&amp;23).await.unwrap();
+    ///   let value = subview.get_mut();
     ///   *value = String::from(&quot;Hello&quot;);
-    ///   coll.reset_entry_to_default(&amp;23).await.unwrap();
-    ///   let view = coll.load_entry_mut(&amp;23).await.unwrap();
-    ///   let value = view.get_mut();
+    ///   view.reset_entry_to_default(&amp;23).await.unwrap();
+    ///   let subview = view.load_entry_mut(&amp;23).await.unwrap();
+    ///   let value = subview.get_mut();
     ///   assert_eq!(*value, String::default());
     /// # })
     /// ```
@@ -2165,12 +2165,12 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : CustomCollectionView&lt;_, u128, RegisterView&lt;_,String&gt;&gt; = CustomCollectionView::load(context).await.unwrap();
-    ///   let view = coll.load_entry_mut(&amp;23).await.unwrap();
-    ///   let value = view.get_mut();
+    ///   let mut view : CustomCollectionView&lt;_, u128, RegisterView&lt;_,String&gt;&gt; = CustomCollectionView::load(context).await.unwrap();
+    ///   let subview = view.load_entry_mut(&amp;23).await.unwrap();
+    ///   let value = subview.get_mut();
     ///   assert_eq!(*value, String::default());
-    ///   coll.remove_entry(&amp;23);
-    ///   let keys = coll.indices().await.unwrap();
+    ///   view.remove_entry(&amp;23);
+    ///   let keys = view.indices().await.unwrap();
     ///   assert_eq!(keys.len(), 0);
     /// # })
     /// ```
@@ -2205,11 +2205,11 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : CustomCollectionView&lt;_, u128, RegisterView&lt;_,String&gt;&gt; = CustomCollectionView::load(context).await.unwrap();
-    ///   coll.load_entry_mut(&amp;23).await.unwrap();
-    ///   coll.load_entry_mut(&amp;25).await.unwrap();
-    ///   let indices = coll.indices().await.unwrap();
-    ///   assert_eq!(indices, vec![23,25]);
+    ///   let mut view : CustomCollectionView&lt;_, u128, RegisterView&lt;_,String&gt;&gt; = CustomCollectionView::load(context).await.unwrap();
+    ///   view.load_entry_mut(&amp;23).await.unwrap();
+    ///   view.load_entry_mut(&amp;25).await.unwrap();
+    ///   let indices = view.indices().await.unwrap();
+    ///   assert_eq!(indices, vec![23, 25]);
     /// # })
     /// ```
     </span><span class="kw">pub async fn </span>indices(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;I&gt;, ViewError&gt; {
@@ -2240,16 +2240,16 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : CustomCollectionView&lt;_, u128, RegisterView&lt;_,String&gt;&gt; = CustomCollectionView::load(context).await.unwrap();
-    ///   coll.load_entry_mut(&amp;28).await.unwrap();
-    ///   coll.load_entry_mut(&amp;24).await.unwrap();
-    ///   coll.load_entry_mut(&amp;23).await.unwrap();
+    ///   let mut view : CustomCollectionView&lt;_, u128, RegisterView&lt;_,String&gt;&gt; = CustomCollectionView::load(context).await.unwrap();
+    ///   view.load_entry_mut(&amp;28).await.unwrap();
+    ///   view.load_entry_mut(&amp;24).await.unwrap();
+    ///   view.load_entry_mut(&amp;23).await.unwrap();
     ///   let mut part_indices = Vec::new();
-    ///   coll.for_each_index_while(|index| {
+    ///   view.for_each_index_while(|index| {
     ///     part_indices.push(index);
     ///     Ok(part_indices.len() &lt; 2)
     ///   }).await.unwrap();
-    ///   assert_eq!(part_indices, vec![23,24]);
+    ///   assert_eq!(part_indices, vec![23, 24]);
     /// # })
     /// ```
     </span><span class="kw">pub async fn </span>for_each_index_while&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>f: F) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;
@@ -2274,16 +2274,16 @@
     /// # use linera_views::register_view::RegisterView;
     /// # use crate::linera_views::views::View;
     /// # let context = create_test_context();
-    ///   let mut coll : CustomCollectionView&lt;_, u128, RegisterView&lt;_,String&gt;&gt; = CustomCollectionView::load(context).await.unwrap();
-    ///   coll.load_entry_mut(&amp;28).await.unwrap();
-    ///   coll.load_entry_mut(&amp;24).await.unwrap();
-    ///   coll.load_entry_mut(&amp;23).await.unwrap();
+    ///   let mut view : CustomCollectionView&lt;_, u128, RegisterView&lt;_,String&gt;&gt; = CustomCollectionView::load(context).await.unwrap();
+    ///   view.load_entry_mut(&amp;28).await.unwrap();
+    ///   view.load_entry_mut(&amp;24).await.unwrap();
+    ///   view.load_entry_mut(&amp;23).await.unwrap();
     ///   let mut indices = Vec::new();
-    ///   coll.for_each_index(|index| {
+    ///   view.for_each_index(|index| {
     ///     indices.push(index);
     ///     Ok(())
     ///   }).await.unwrap();
-    ///   assert_eq!(indices, vec![23,24,28]);
+    ///   assert_eq!(indices, vec![23, 24, 28]);
     /// # })
     /// ```
     </span><span class="kw">pub async fn </span>for_each_index&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>f: F) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt;

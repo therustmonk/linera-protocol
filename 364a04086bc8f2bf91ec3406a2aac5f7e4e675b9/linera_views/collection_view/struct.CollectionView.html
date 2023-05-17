@@ -9,19 +9,19 @@ key, one subview at a time.</p>
     Q: <a class="trait" href="../../serde/ser/trait.Serialize.html" title="trait serde::ser::Serialize">Serialize</a> + ?<a class="trait" href="https://doc.rust-lang.org/1.69.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</span></h4></section></summary><div class="docblock"><p>Loads a subview for the data at the given index in the collection. If an entry
 was removed before then a default entry is put on this index.</p>
 
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code>  <span class="kw">let </span><span class="kw-2">mut </span>coll : CollectionView&lt;<span class="kw">_</span>, u64, RegisterView&lt;<span class="kw">_</span>,String&gt;&gt; = CollectionView::load(context).<span class="kw">await</span>.unwrap();
-  <span class="kw">let </span>view = coll.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
-  <span class="kw">let </span>value = view.get();
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>  <span class="kw">let </span><span class="kw-2">mut </span>view : CollectionView&lt;<span class="kw">_</span>, u64, RegisterView&lt;<span class="kw">_</span>,String&gt;&gt; = CollectionView::load(context).<span class="kw">await</span>.unwrap();
+  <span class="kw">let </span>subview = view.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
+  <span class="kw">let </span>value = subview.get();
   <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>value, String::default());</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.load_entry" class="method"><a class="srclink rightside" href="../../src/linera_views/collection_view.rs.html#628-635">source</a><h4 class="code-header">pub async fn <a href="#method.load_entry" class="fn">load_entry</a>&lt;Q&gt;(&amp;mut self, index: <a class="primitive" href="https://doc.rust-lang.org/1.69.0/std/primitive.reference.html">&amp;Q</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.69.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.69.0/std/primitive.reference.html">&amp;W</a>, <a class="enum" href="../views/enum.ViewError.html" title="enum linera_views::views::ViewError">ViewError</a>&gt;<span class="where fmt-newline">where
     I: <a class="trait" href="https://doc.rust-lang.org/1.69.0/core/borrow/trait.Borrow.html" title="trait core::borrow::Borrow">Borrow</a>&lt;Q&gt;,
     Q: <a class="trait" href="../../serde/ser/trait.Serialize.html" title="trait serde::ser::Serialize">Serialize</a> + ?<a class="trait" href="https://doc.rust-lang.org/1.69.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</span></h4></section></summary><div class="docblock"><p>Loads a subview for the data at the given index in the collection. If an entry
 was removed before then a default entry is put on this index.</p>
 
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code>  <span class="kw">let </span><span class="kw-2">mut </span>coll : CollectionView&lt;<span class="kw">_</span>, u64, RegisterView&lt;<span class="kw">_</span>,String&gt;&gt; = CollectionView::load(context).<span class="kw">await</span>.unwrap();
-  coll.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
-  <span class="kw">let </span>view = coll.load_entry(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
-  <span class="kw">let </span>value = view.get();
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>  <span class="kw">let </span><span class="kw-2">mut </span>view : CollectionView&lt;<span class="kw">_</span>, u64, RegisterView&lt;<span class="kw">_</span>,String&gt;&gt; = CollectionView::load(context).<span class="kw">await</span>.unwrap();
+  view.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
+  <span class="kw">let </span>subview = view.load_entry(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
+  <span class="kw">let </span>value = subview.get();
   <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>value, String::default());</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.try_load_entry" class="method"><a class="srclink rightside" href="../../src/linera_views/collection_view.rs.html#652-659">source</a><h4 class="code-header">pub async fn <a href="#method.try_load_entry" class="fn">try_load_entry</a>&lt;Q&gt;(
     &amp;self,
@@ -31,9 +31,9 @@ was removed before then a default entry is put on this index.</p>
     Q: <a class="trait" href="../../serde/ser/trait.Serialize.html" title="trait serde::ser::Serialize">Serialize</a> + ?<a class="trait" href="https://doc.rust-lang.org/1.69.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</span></h4></section></summary><div class="docblock"><p>Same as <code>load_entry_mut</code> but for read-only access. May fail if one subview is
 already being visited.</p>
 
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code>  <span class="kw">let </span><span class="kw-2">mut </span>coll : CollectionView&lt;<span class="kw">_</span>, u64, RegisterView&lt;<span class="kw">_</span>,String&gt;&gt; = CollectionView::load(context).<span class="kw">await</span>.unwrap();
-  <span class="kw">let </span>view = coll.try_load_entry(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
-  <span class="kw">let </span>value = view.get();
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>  <span class="kw">let </span><span class="kw-2">mut </span>view : CollectionView&lt;<span class="kw">_</span>, u64, RegisterView&lt;<span class="kw">_</span>,String&gt;&gt; = CollectionView::load(context).<span class="kw">await</span>.unwrap();
+  <span class="kw">let </span>subview = view.try_load_entry(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
+  <span class="kw">let </span>value = subview.get();
   <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>value, String::default());</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.reset_entry_to_default" class="method"><a class="srclink rightside" href="../../src/linera_views/collection_view.rs.html#679-686">source</a><h4 class="code-header">pub async fn <a href="#method.reset_entry_to_default" class="fn">reset_entry_to_default</a>&lt;Q&gt;(
     &amp;mut self,
@@ -42,24 +42,24 @@ already being visited.</p>
     I: <a class="trait" href="https://doc.rust-lang.org/1.69.0/core/borrow/trait.Borrow.html" title="trait core::borrow::Borrow">Borrow</a>&lt;Q&gt;,
     Q: <a class="trait" href="../../serde/ser/trait.Serialize.html" title="trait serde::ser::Serialize">Serialize</a> + ?<a class="trait" href="https://doc.rust-lang.org/1.69.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</span></h4></section></summary><div class="docblock"><p>Resets an entry to the default value.</p>
 
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code>  <span class="kw">let </span><span class="kw-2">mut </span>coll : CollectionView&lt;<span class="kw">_</span>, u64, RegisterView&lt;<span class="kw">_</span>,String&gt;&gt; = CollectionView::load(context).<span class="kw">await</span>.unwrap();
-  <span class="kw">let </span>view = coll.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
-  <span class="kw">let </span>value = view.get_mut();
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>  <span class="kw">let </span><span class="kw-2">mut </span>view : CollectionView&lt;<span class="kw">_</span>, u64, RegisterView&lt;<span class="kw">_</span>,String&gt;&gt; = CollectionView::load(context).<span class="kw">await</span>.unwrap();
+  <span class="kw">let </span>subview = view.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
+  <span class="kw">let </span>value = subview.get_mut();
   <span class="kw-2">*</span>value = String::from(<span class="string">&quot;Hello&quot;</span>);
-  coll.reset_entry_to_default(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
-  <span class="kw">let </span>view = coll.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
-  <span class="kw">let </span>value = view.get_mut();
+  view.reset_entry_to_default(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
+  <span class="kw">let </span>subview = view.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
+  <span class="kw">let </span>value = subview.get_mut();
   <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>value, String::default());</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.remove_entry" class="method"><a class="srclink rightside" href="../../src/linera_views/collection_view.rs.html#705-713">source</a><h4 class="code-header">pub fn <a href="#method.remove_entry" class="fn">remove_entry</a>&lt;Q&gt;(&amp;mut self, index: <a class="primitive" href="https://doc.rust-lang.org/1.69.0/std/primitive.reference.html">&amp;Q</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.69.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.69.0/std/primitive.unit.html">()</a>, <a class="enum" href="../views/enum.ViewError.html" title="enum linera_views::views::ViewError">ViewError</a>&gt;<span class="where fmt-newline">where
     I: <a class="trait" href="https://doc.rust-lang.org/1.69.0/core/borrow/trait.Borrow.html" title="trait core::borrow::Borrow">Borrow</a>&lt;Q&gt;,
     Q: <a class="trait" href="../../serde/ser/trait.Serialize.html" title="trait serde::ser::Serialize">Serialize</a> + ?<a class="trait" href="https://doc.rust-lang.org/1.69.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</span></h4></section></summary><div class="docblock"><p>Removes an entry from the CollectionView. If absent nothing happens.</p>
 
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code>  <span class="kw">let </span><span class="kw-2">mut </span>coll : CollectionView&lt;<span class="kw">_</span>, u64, RegisterView&lt;<span class="kw">_</span>,String&gt;&gt; = CollectionView::load(context).<span class="kw">await</span>.unwrap();
-  <span class="kw">let </span>view = coll.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
-  <span class="kw">let </span>value = view.get_mut();
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>  <span class="kw">let </span><span class="kw-2">mut </span>view : CollectionView&lt;<span class="kw">_</span>, u64, RegisterView&lt;<span class="kw">_</span>,String&gt;&gt; = CollectionView::load(context).<span class="kw">await</span>.unwrap();
+  <span class="kw">let </span>subview = view.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
+  <span class="kw">let </span>value = subview.get_mut();
   <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>value, String::default());
-  coll.remove_entry(<span class="kw-2">&amp;</span><span class="number">23</span>);
-  <span class="kw">let </span>keys = coll.indices().<span class="kw">await</span>.unwrap();
+  view.remove_entry(<span class="kw-2">&amp;</span><span class="number">23</span>);
+  <span class="kw">let </span>keys = view.indices().<span class="kw">await</span>.unwrap();
   <span class="macro">assert_eq!</span>(keys.len(), <span class="number">0</span>);</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.extra" class="method"><a class="srclink rightside" href="../../src/linera_views/collection_view.rs.html#716-718">source</a><h4 class="code-header">pub fn <a href="#method.extra" class="fn">extra</a>(&amp;self) -&gt; &amp;C::<a class="associatedtype" href="../common/trait.Context.html#associatedtype.Extra" title="type linera_views::common::Context::Extra">Extra</a></h4></section></summary><div class="docblock"><p>Gets the extra data.</p>
 </div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-CollectionView%3CC,+I,+W%3E-1" class="impl"><a class="srclink rightside" href="../../src/linera_views/collection_view.rs.html#721-753">source</a><a href="#impl-CollectionView%3CC,+I,+W%3E-1" class="anchor">§</a><h3 class="code-header">impl&lt;C, I, W&gt; <a class="struct" href="struct.CollectionView.html" title="struct linera_views::collection_view::CollectionView">CollectionView</a>&lt;C, I, W&gt;<span class="where fmt-newline">where
@@ -69,10 +69,10 @@ already being visited.</p>
     W: <a class="trait" href="../views/trait.View.html" title="trait linera_views::views::View">View</a>&lt;C&gt; + <a class="trait" href="https://doc.rust-lang.org/1.69.0/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a>,</span></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.indices" class="method"><a class="srclink rightside" href="../../src/linera_views/collection_view.rs.html#744-752">source</a><h4 class="code-header">pub async fn <a href="#method.indices" class="fn">indices</a>(&amp;self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.69.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.69.0/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;I&gt;, <a class="enum" href="../views/enum.ViewError.html" title="enum linera_views::views::ViewError">ViewError</a>&gt;</h4></section></summary><div class="docblock"><p>Returns the list of indices in the collection in the order determined by
 the serialization.</p>
 
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code>  <span class="kw">let </span><span class="kw-2">mut </span>coll : CollectionView&lt;<span class="kw">_</span>, u64, RegisterView&lt;<span class="kw">_</span>,String&gt;&gt; = CollectionView::load(context).<span class="kw">await</span>.unwrap();
-  coll.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
-  coll.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">25</span>).<span class="kw">await</span>.unwrap();
-  <span class="kw">let </span>indices = coll.indices().<span class="kw">await</span>.unwrap();
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>  <span class="kw">let </span><span class="kw-2">mut </span>view : CollectionView&lt;<span class="kw">_</span>, u64, RegisterView&lt;<span class="kw">_</span>,String&gt;&gt; = CollectionView::load(context).<span class="kw">await</span>.unwrap();
+  view.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
+  view.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">25</span>).<span class="kw">await</span>.unwrap();
+  <span class="kw">let </span>indices = view.indices().<span class="kw">await</span>.unwrap();
   <span class="macro">assert_eq!</span>(indices.len(), <span class="number">2</span>);</code></pre></div>
 </div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-CollectionView%3CC,+I,+W%3E-2" class="impl"><a class="srclink rightside" href="../../src/linera_views/collection_view.rs.html#755-828">source</a><a href="#impl-CollectionView%3CC,+I,+W%3E-2" class="anchor">§</a><h3 class="code-header">impl&lt;C, I, W&gt; <a class="struct" href="struct.CollectionView.html" title="struct linera_views::collection_view::CollectionView">CollectionView</a>&lt;C, I, W&gt;<span class="where fmt-newline">where
     C: <a class="trait" href="../common/trait.Context.html" title="trait linera_views::common::Context">Context</a> + <a class="trait" href="https://doc.rust-lang.org/1.69.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a>,
@@ -83,11 +83,11 @@ the serialization.</p>
 determined by the serialization. If the function returns false then
 the loop ends prematurely.</p>
 
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code>  <span class="kw">let </span><span class="kw-2">mut </span>coll : CollectionView&lt;<span class="kw">_</span>, u64, RegisterView&lt;<span class="kw">_</span>,String&gt;&gt; = CollectionView::load(context).<span class="kw">await</span>.unwrap();
-  coll.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
-  coll.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">24</span>).<span class="kw">await</span>.unwrap();
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>  <span class="kw">let </span><span class="kw-2">mut </span>view : CollectionView&lt;<span class="kw">_</span>, u64, RegisterView&lt;<span class="kw">_</span>,String&gt;&gt; = CollectionView::load(context).<span class="kw">await</span>.unwrap();
+  view.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
+  view.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">24</span>).<span class="kw">await</span>.unwrap();
   <span class="kw">let </span><span class="kw-2">mut </span>count = <span class="number">0</span>;
-  coll.for_each_index_while(|_key| {
+  view.for_each_index_while(|_key| {
     count += <span class="number">1</span>;
     <span class="prelude-val">Ok</span>(count &lt; <span class="number">1</span>)
   }).<span class="kw">await</span>.unwrap();
@@ -96,11 +96,11 @@ the loop ends prematurely.</p>
     F: <a class="trait" href="https://doc.rust-lang.org/1.69.0/core/ops/function/trait.FnMut.html" title="trait core::ops::function::FnMut">FnMut</a>(I) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.69.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.69.0/std/primitive.unit.html">()</a>, <a class="enum" href="../views/enum.ViewError.html" title="enum linera_views::views::ViewError">ViewError</a>&gt; + <a class="trait" href="https://doc.rust-lang.org/1.69.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a>,</span></h4></section></summary><div class="docblock"><p>Applies a function f on each index. Indices are visited in an order
 determined by the serialization.</p>
 
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code>  <span class="kw">let </span><span class="kw-2">mut </span>coll : CollectionView&lt;<span class="kw">_</span>, u64, RegisterView&lt;<span class="kw">_</span>,String&gt;&gt; = CollectionView::load(context).<span class="kw">await</span>.unwrap();
-  coll.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
-  coll.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">28</span>).<span class="kw">await</span>.unwrap();
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>  <span class="kw">let </span><span class="kw-2">mut </span>view : CollectionView&lt;<span class="kw">_</span>, u64, RegisterView&lt;<span class="kw">_</span>,String&gt;&gt; = CollectionView::load(context).<span class="kw">await</span>.unwrap();
+  view.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">23</span>).<span class="kw">await</span>.unwrap();
+  view.load_entry_mut(<span class="kw-2">&amp;</span><span class="number">28</span>).<span class="kw">await</span>.unwrap();
   <span class="kw">let </span><span class="kw-2">mut </span>count = <span class="number">0</span>;
-  coll.for_each_index(|_key| {
+  view.for_each_index(|_key| {
     count += <span class="number">1</span>;
     <span class="prelude-val">Ok</span>(())
   }).<span class="kw">await</span>.unwrap();

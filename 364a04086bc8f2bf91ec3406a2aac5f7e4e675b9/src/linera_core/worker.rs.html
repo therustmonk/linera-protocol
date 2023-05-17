@@ -1663,7 +1663,7 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;NetworkActions, WorkerError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>heights_by_recipient: BTreeMap&lt;<span class="kw">_</span>, BTreeMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt; = Default::default();
         <span class="kw">for </span>target <span class="kw">in </span>chain.outboxes.indices().<span class="kw">await</span><span class="question-mark">? </span>{
-            <span class="kw">let </span>outbox = chain.outboxes.load_entry(<span class="kw-2">&amp;</span>target).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>outbox = chain.outboxes.try_load_entry(<span class="kw-2">&amp;</span>target).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">let </span>heights = outbox.queue.elements().<span class="kw">await</span><span class="question-mark">?</span>;
             heights_by_recipient
                 .entry(target.recipient)

@@ -904,6 +904,21 @@
 <a href="#904" id="904">904</a>
 <a href="#905" id="905">905</a>
 <a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
+<a href="#910" id="910">910</a>
+<a href="#911" id="911">911</a>
+<a href="#912" id="912">912</a>
+<a href="#913" id="913">913</a>
+<a href="#914" id="914">914</a>
+<a href="#915" id="915">915</a>
+<a href="#916" id="916">916</a>
+<a href="#917" id="917">917</a>
+<a href="#918" id="918">918</a>
+<a href="#919" id="919">919</a>
+<a href="#920" id="920">920</a>
+<a href="#921" id="921">921</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -1217,7 +1232,10 @@
             };
             (r#impl, <span class="prelude-val">None</span>)
         }
-        <span class="string">&quot;CollectionView&quot; </span>| <span class="string">&quot;CustomCollectionView&quot; </span>=&gt; {
+        <span class="string">&quot;CollectionView&quot;
+        </span>| <span class="string">&quot;ReentrantCollectionView&quot;
+        </span>| <span class="string">&quot;CustomCollectionView&quot;
+        </span>| <span class="string">&quot;ReentrantCustomCollectionView&quot; </span>=&gt; {
             <span class="kw">let </span>generic_arguments = generic_argument_from_type_path(<span class="kw-2">&amp;</span>type_path);
             <span class="kw">let </span>index_ident = generic_arguments
                 .get(<span class="number">1</span>)
@@ -1240,18 +1258,30 @@
 
             <span class="kw">let </span>generic_method_name = snakify(generic_ident);
 
+            <span class="kw">let </span>(guard, lifetime) = <span class="kw">match </span>view_name.as_str() {
+                <span class="string">&quot;ReentrantCollectionView&quot; </span>| <span class="string">&quot;ReentrantCustomCollectionView&quot; </span>=&gt; {
+                    (<span class="macro">quote!</span>(tokio::sync::OwnedRwLockReadGuard), <span class="macro">quote!</span>())
+                }
+                <span class="string">&quot;CollectionView&quot; </span>| <span class="string">&quot;CustomCollectionView&quot; </span>=&gt; (
+                    <span class="macro">quote!</span>(linera_views::collection_view::ReadGuardedView),
+                    <span class="macro">quote!</span>(<span class="lifetime">&#39;a</span>,),
+                ),
+                <span class="kw">_ </span>=&gt; {
+                    <span class="macro">todo!</span>()
+                }
+            };
             <span class="kw">let </span>r#struct = <span class="macro">quote! </span>{
-                <span class="kw">pub struct </span>#entry_name&lt;<span class="lifetime">&#39;a</span>, C&gt;
+                <span class="kw">pub struct </span>#entry_name&lt;#lifetime C&gt;
                 <span class="kw">where
                     </span>C: Sync + Send + linera_views::common::Context + <span class="lifetime">&#39;static</span>,
                     linera_views::views::ViewError: From&lt;C::Error&gt;,
                 {
                     #index_name: #index_ident,
-                    guard: linera_views::collection_view::ReadGuardedView&lt;<span class="lifetime">&#39;a</span>, #generic_ident&gt;,
+                    guard: #guard&lt;#lifetime #generic_ident&gt;,
                 }
 
                 <span class="attr">#[async_graphql::Object]
-                </span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, C&gt; #entry_name&lt;<span class="lifetime">&#39;a</span>, C&gt;
+                </span><span class="kw">impl</span>&lt;#lifetime C&gt; #entry_name&lt;#lifetime C&gt;
                 <span class="kw">where
                     </span>C: Sync + Send + linera_views::common::Context + <span class="lifetime">&#39;static </span>+ Clone,
                     linera_views::views::ViewError: From&lt;C::Error&gt;,

@@ -562,6 +562,23 @@
 <a href="#562" id="562">562</a>
 <a href="#563" id="563">563</a>
 <a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -589,6 +606,7 @@
     collection_view::CollectionView,
     common::Context,
     log_view::LogView,
+    reentrant_collection_view::ReentrantCollectionView,
     register_view::RegisterView,
     set_view::SetView,
     views::{CryptoHashView, GraphQLView, RootView, View, ViewError},
@@ -619,12 +637,12 @@
     <span class="doccomment">/// Mailboxes used to receive messages indexed by their origin.
     </span><span class="kw">pub </span>inboxes: CollectionView&lt;C, Origin, InboxStateView&lt;C&gt;&gt;,
     <span class="doccomment">/// Mailboxes used to send messages, indexed by their target.
-    </span><span class="kw">pub </span>outboxes: CollectionView&lt;C, Target, OutboxStateView&lt;C&gt;&gt;,
+    </span><span class="kw">pub </span>outboxes: ReentrantCollectionView&lt;C, Target, OutboxStateView&lt;C&gt;&gt;,
     <span class="doccomment">/// Number of outgoing messages in flight for each block height.
     /// We use a `RegisterView` to prioritize speed for small maps.
     </span><span class="kw">pub </span>outbox_counters: RegisterView&lt;C, BTreeMap&lt;BlockHeight, u32&gt;&gt;,
     <span class="doccomment">/// Channels able to multicast messages to subscribers.
-    </span><span class="kw">pub </span>channels: CollectionView&lt;C, ChannelFullName, ChannelStateView&lt;C&gt;&gt;,
+    </span><span class="kw">pub </span>channels: ReentrantCollectionView&lt;C, ChannelFullName, ChannelStateView&lt;C&gt;&gt;,
 }
 
 <span class="doccomment">/// Block-chaining state.
@@ -683,7 +701,7 @@
         target: Target,
         height: BlockHeight,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;bool, ChainError&gt; {
-        <span class="kw">let </span>outbox = <span class="self">self</span>.outboxes.load_entry_mut(<span class="kw-2">&amp;</span>target).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>outbox = <span class="self">self</span>.outboxes.try_load_entry_mut(<span class="kw-2">&amp;</span>target).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>updates = outbox.mark_messages_as_received(height).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">if </span>updates.is_empty() {
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="bool-val">false</span>);
@@ -1071,9 +1089,12 @@
 
         <span class="comment">// Update the (regular) outboxes.
         </span><span class="kw">let </span>outbox_counters = <span class="self">self</span>.outbox_counters.get_mut();
-        <span class="kw">for </span>recipient <span class="kw">in </span>recipients {
-            <span class="kw">let </span>target = Target::chain(recipient);
-            <span class="kw">let </span>outbox = <span class="self">self</span>.outboxes.load_entry_mut(<span class="kw-2">&amp;</span>target).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>targets = recipients
+            .into_iter()
+            .map(Target::chain)
+            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+        <span class="kw">let </span>outboxes = <span class="self">self</span>.outboxes.try_load_entries_mut(targets).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">for </span><span class="kw-2">mut </span>outbox <span class="kw">in </span>outboxes {
             <span class="kw">if </span>outbox.schedule_message(height)<span class="question-mark">? </span>{
                 <span class="kw-2">*</span>outbox_counters.entry(height).or_default() += <span class="number">1</span>;
             }
@@ -1085,7 +1106,7 @@
                 application_id,
                 name,
             };
-            <span class="kw">let </span>channel = <span class="self">self</span>.channels.load_entry_mut(<span class="kw-2">&amp;</span>full_name).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span><span class="kw-2">mut </span>channel = <span class="self">self</span>.channels.try_load_entry_mut(<span class="kw-2">&amp;</span>full_name).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="comment">// Remove subscriber. Do not remove the channel outbox yet.
             </span>channel.subscribers.remove(<span class="kw-2">&amp;</span>id)<span class="question-mark">?</span>;
         }
@@ -1094,28 +1115,41 @@
                 application_id,
                 name,
             };
-            <span class="kw">let </span>channel = <span class="self">self</span>.channels.load_entry_mut(<span class="kw-2">&amp;</span>full_name).<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="kw">for </span>recipient <span class="kw">in </span>channel.subscribers.indices().<span class="kw">await</span><span class="question-mark">? </span>{
-                <span class="kw">let </span>target = Target::channel(recipient, full_name.clone());
-                <span class="kw">let </span>outbox = <span class="self">self</span>.outboxes.load_entry_mut(<span class="kw-2">&amp;</span>target).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span><span class="kw-2">mut </span>channel = <span class="self">self</span>.channels.try_load_entry_mut(<span class="kw-2">&amp;</span>full_name).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>recipients = channel.subscribers.indices().<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>targets = recipients
+                .into_iter()
+                .map(|recipient| Target::channel(recipient, full_name.clone()))
+                .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+            <span class="kw">let </span>outboxes = <span class="self">self</span>.outboxes.try_load_entries_mut(targets).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">for </span><span class="kw-2">mut </span>outbox <span class="kw">in </span>outboxes {
                 <span class="kw">if </span>outbox.schedule_message(height)<span class="question-mark">? </span>{
                     <span class="kw-2">*</span>outbox_counters.entry(height).or_default() += <span class="number">1</span>;
                 }
             }
             channel.block_height.set(<span class="prelude-val">Some</span>(height));
         }
-        <span class="kw">for </span>(name, id) <span class="kw">in </span>raw_result.subscribe {
+        <span class="kw">let </span>full_names = raw_result
+            .subscribe
+            .clone()
+            .into_iter()
+            .map(|(name, _id)| ChannelFullName {
+                application_id,
+                name,
+            })
+            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+        <span class="kw">let </span>channels = <span class="self">self</span>.channels.try_load_entries_mut(full_names).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">for </span>((name, id), <span class="kw-2">mut </span>channel) <span class="kw">in </span>raw_result.subscribe.into_iter().zip(channels) {
             <span class="kw">let </span>full_name = ChannelFullName {
                 application_id,
                 name,
             };
-            <span class="kw">let </span>channel = <span class="self">self</span>.channels.load_entry_mut(<span class="kw-2">&amp;</span>full_name).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="comment">// Add subscriber.
             </span><span class="kw">if </span>!channel.subscribers.contains(<span class="kw-2">&amp;</span>id).<span class="kw">await</span><span class="question-mark">? </span>{
                 <span class="comment">// Send the latest message if any.
                 </span><span class="kw">if let </span><span class="prelude-val">Some</span>(latest_height) = channel.block_height.get() {
                     <span class="kw">let </span>target = Target::channel(id, full_name.clone());
-                    <span class="kw">let </span>outbox = <span class="self">self</span>.outboxes.load_entry_mut(<span class="kw-2">&amp;</span>target).<span class="kw">await</span><span class="question-mark">?</span>;
+                    <span class="kw">let </span><span class="kw-2">mut </span>outbox = <span class="self">self</span>.outboxes.try_load_entry_mut(<span class="kw-2">&amp;</span>target).<span class="kw">await</span><span class="question-mark">?</span>;
                     <span class="kw">if </span>outbox.schedule_message(<span class="kw-2">*</span>latest_height)<span class="question-mark">? </span>{
                         <span class="kw-2">*</span>outbox_counters.entry(<span class="kw-2">*</span>latest_height).or_default() += <span class="number">1</span>;
                     }
