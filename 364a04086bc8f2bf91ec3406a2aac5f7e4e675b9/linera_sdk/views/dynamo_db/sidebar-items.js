@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["MAX_TRANSACT_WRITE_ITEM_SIZE"],"enum":["DynamoDbContextError","InvalidTableName","TableStatus"],"struct":["DynamoDbClient","DynamoDbClientInternal","DynamoDbKeyValues","DynamoDbKeys","TableName"],"type":["Config","DynamoDbContext"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["LOCALSTACK_ENDPOINT"],"enum":["EndpointError"],"fn":["get_endpoint"]};

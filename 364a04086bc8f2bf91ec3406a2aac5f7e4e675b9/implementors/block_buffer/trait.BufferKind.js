@@ -1,3 +1,4 @@
 (function() {var implementors = {
-"block_buffer":[]
+"block_buffer":[],
+"linera_sdk":[]
 };if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -1,6 +1,7 @@
 (function() {var implementors = {
 "digest":[],
 "ed25519_dalek":[],
+"linera_sdk":[],
 "md5":[],
 "sha1":[],
 "sha2":[],

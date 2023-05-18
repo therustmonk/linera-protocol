@@ -1,3 +1,4 @@
 (function() {var implementors = {
-"digest":[]
+"digest":[],
+"linera_sdk":[]
 };if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
