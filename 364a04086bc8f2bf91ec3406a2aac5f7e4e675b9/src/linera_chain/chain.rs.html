@@ -579,6 +579,17 @@
 <a href="#579" id="579">579</a>
 <a href="#580" id="580">580</a>
 <a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -603,7 +614,6 @@
     RawExecutionResult, Response, UserApplicationDescription, UserApplicationId,
 };
 <span class="kw">use </span>linera_views::{
-    collection_view::CollectionView,
     common::Context,
     log_view::LogView,
     reentrant_collection_view::ReentrantCollectionView,
@@ -635,7 +645,7 @@
     </span><span class="kw">pub </span>received_log: LogView&lt;C, ChainAndHeight&gt;,
 
     <span class="doccomment">/// Mailboxes used to receive messages indexed by their origin.
-    </span><span class="kw">pub </span>inboxes: CollectionView&lt;C, Origin, InboxStateView&lt;C&gt;&gt;,
+    </span><span class="kw">pub </span>inboxes: ReentrantCollectionView&lt;C, Origin, InboxStateView&lt;C&gt;&gt;,
     <span class="doccomment">/// Mailboxes used to send messages, indexed by their target.
     </span><span class="kw">pub </span>outboxes: ReentrantCollectionView&lt;C, Target, OutboxStateView&lt;C&gt;&gt;,
     <span class="doccomment">/// Number of outgoing messages in flight for each block height.
@@ -759,8 +769,9 @@
     /// have been properly received by now.
     </span><span class="kw">pub async fn </span>validate_incoming_messages(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt; {
         <span class="kw">let </span>chain_id = <span class="self">self</span>.chain_id();
-        <span class="kw">for </span>origin <span class="kw">in </span><span class="self">self</span>.inboxes.indices().<span class="kw">await</span><span class="question-mark">? </span>{
-            <span class="kw">let </span>inbox = <span class="self">self</span>.inboxes.load_entry(<span class="kw-2">&amp;</span>origin).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>origins = <span class="self">self</span>.inboxes.indices().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>inboxes = <span class="self">self</span>.inboxes.try_load_entries(origins.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">for </span>(origin, inbox) <span class="kw">in </span>origins.into_iter().zip(inboxes) {
             <span class="kw">let </span>event = inbox.removed_events.front().<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="macro">ensure!</span>(
                 event.is_none(),
@@ -778,7 +789,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         origin: <span class="kw-2">&amp;</span>Origin,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;BlockHeight, ChainError&gt; {
-        <span class="kw">let </span>inbox = <span class="self">self</span>.inboxes.load_entry(origin).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>inbox = <span class="self">self</span>.inboxes.try_load_entry(origin).<span class="kw">await</span><span class="question-mark">?</span>;
         inbox.next_block_height_to_receive()
     }
 
@@ -786,7 +797,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         origin: <span class="kw-2">&amp;</span>Origin,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;BlockHeight&gt;, ChainError&gt; {
-        <span class="kw">let </span>inbox = <span class="self">self</span>.inboxes.load_entry(origin).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>inbox = <span class="self">self</span>.inboxes.try_load_entry(origin).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">match </span>inbox.removed_events.back().<span class="kw">await</span><span class="question-mark">? </span>{
             <span class="prelude-val">Some</span>(event) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(event.height)),
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
@@ -873,7 +884,7 @@
             ))
         );
         <span class="comment">// Process the inbox events and update the inbox state.
-        </span><span class="kw">let </span>inbox = <span class="self">self</span>.inboxes.load_entry_mut(origin).<span class="kw">await</span><span class="question-mark">?</span>;
+        </span><span class="kw">let </span><span class="kw-2">mut </span>inbox = <span class="self">self</span>.inboxes.try_load_entry_mut(origin).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">for </span>event <span class="kw">in </span>events {
             inbox.add_event(event).<span class="kw">await</span>.map_err(|error| <span class="kw">match </span>error {
                 InboxError::ViewError(error) =&gt; ChainError::ViewError(error),
@@ -940,7 +951,7 @@
                 });
             }
             <span class="comment">// Mark the message as processed in the inbox.
-            </span><span class="kw">let </span>inbox = <span class="self">self</span>.inboxes.load_entry_mut(<span class="kw-2">&amp;</span>message.origin).<span class="kw">await</span><span class="question-mark">?</span>;
+            </span><span class="kw">let </span><span class="kw-2">mut </span>inbox = <span class="self">self</span>.inboxes.try_load_entry_mut(<span class="kw-2">&amp;</span>message.origin).<span class="kw">await</span><span class="question-mark">?</span>;
             inbox
                 .remove_event(<span class="kw-2">&amp;</span>message.event)
                 .<span class="kw">await
@@ -1101,21 +1112,32 @@
         }
 
         <span class="comment">// Update the channels.
-        </span><span class="kw">for </span>(name, id) <span class="kw">in </span>raw_result.unsubscribe {
-            <span class="kw">let </span>full_name = ChannelFullName {
+        </span><span class="kw">let </span>full_names = raw_result
+            .unsubscribe
+            .clone()
+            .into_iter()
+            .map(|(name, _id)| ChannelFullName {
                 application_id,
                 name,
-            };
-            <span class="kw">let </span><span class="kw-2">mut </span>channel = <span class="self">self</span>.channels.try_load_entry_mut(<span class="kw-2">&amp;</span>full_name).<span class="kw">await</span><span class="question-mark">?</span>;
+            })
+            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+        <span class="kw">let </span>channels = <span class="self">self</span>.channels.try_load_entries_mut(full_names).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">for </span>((_name, id), <span class="kw-2">mut </span>channel) <span class="kw">in </span>raw_result.unsubscribe.into_iter().zip(channels) {
             <span class="comment">// Remove subscriber. Do not remove the channel outbox yet.
             </span>channel.subscribers.remove(<span class="kw-2">&amp;</span>id)<span class="question-mark">?</span>;
         }
-        <span class="kw">for </span>name <span class="kw">in </span>channel_broadcasts {
-            <span class="kw">let </span>full_name = ChannelFullName {
+        <span class="kw">let </span>full_names = channel_broadcasts
+            .into_iter()
+            .map(|name| ChannelFullName {
                 application_id,
                 name,
-            };
-            <span class="kw">let </span><span class="kw-2">mut </span>channel = <span class="self">self</span>.channels.try_load_entry_mut(<span class="kw-2">&amp;</span>full_name).<span class="kw">await</span><span class="question-mark">?</span>;
+            })
+            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+        <span class="kw">let </span>channels = <span class="self">self
+            </span>.channels
+            .try_load_entries_mut(full_names.clone())
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">for </span>(full_name, <span class="kw-2">mut </span>channel) <span class="kw">in </span>full_names.into_iter().zip(channels) {
             <span class="kw">let </span>recipients = channel.subscribers.indices().<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">let </span>targets = recipients
                 .into_iter()

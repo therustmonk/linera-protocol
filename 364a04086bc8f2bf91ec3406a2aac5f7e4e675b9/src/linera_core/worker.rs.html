@@ -1226,6 +1226,8 @@
 <a href="#1226" id="1226">1226</a>
 <a href="#1227" id="1227">1227</a>
 <a href="#1228" id="1228">1228</a>
+<a href="#1229" id="1229">1229</a>
+<a href="#1230" id="1230">1230</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1662,8 +1664,9 @@
         chain: <span class="kw-2">&amp;mut </span>ChainStateView&lt;Client::Context&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;NetworkActions, WorkerError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>heights_by_recipient: BTreeMap&lt;<span class="kw">_</span>, BTreeMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt; = Default::default();
-        <span class="kw">for </span>target <span class="kw">in </span>chain.outboxes.indices().<span class="kw">await</span><span class="question-mark">? </span>{
-            <span class="kw">let </span>outbox = chain.outboxes.try_load_entry(<span class="kw-2">&amp;</span>target).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>targets = chain.outboxes.indices().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>outboxes = chain.outboxes.try_load_entries(targets.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">for </span>(target, outbox) <span class="kw">in </span>targets.into_iter().zip(outboxes) {
             <span class="kw">let </span>heights = outbox.queue.elements().<span class="kw">await</span><span class="question-mark">?</span>;
             heights_by_recipient
                 .entry(target.recipient)
@@ -2028,7 +2031,7 @@
         };
 
         <span class="kw">let </span><span class="kw-2">mut </span>chain = <span class="self">self</span>.storage.load_active_chain(chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>inbox = chain.inboxes.load_entry_mut(<span class="kw-2">&amp;</span>origin).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>inbox = chain.inboxes.try_load_entry_mut(<span class="kw-2">&amp;</span>origin).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>certificate_hash = certificate.value.hash();
         <span class="kw">let </span><span class="prelude-val">Some</span>(event) =
@@ -2232,8 +2235,9 @@
         }
         <span class="kw">if </span>query.request_pending_messages {
             <span class="kw">let </span><span class="kw-2">mut </span>messages = Vec::new();
-            <span class="kw">for </span>origin <span class="kw">in </span>chain.inboxes.indices().<span class="kw">await</span><span class="question-mark">? </span>{
-                <span class="kw">let </span>inbox = chain.inboxes.load_entry(<span class="kw-2">&amp;</span>origin).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>origins = chain.inboxes.indices().<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>inboxes = chain.inboxes.try_load_entries(origins.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">for </span>(origin, inbox) <span class="kw">in </span>origins.into_iter().zip(inboxes) {
                 <span class="kw">for </span>event <span class="kw">in </span>inbox.added_events.elements().<span class="kw">await</span><span class="question-mark">? </span>{
                     messages.push(Message {
                         origin: origin.clone(),
