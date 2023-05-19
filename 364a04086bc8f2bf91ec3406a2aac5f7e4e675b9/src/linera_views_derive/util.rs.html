@@ -64,9 +64,9 @@
     transform_type_to_ident(r#type, |s: String| s.to_case(Case::Snake))
 }
 
-<span class="doccomment">/// Extracts the first `Ident` in a type and append the string &#39;Element&#39; to the end.
-</span><span class="kw">pub fn </span>create_entry_name(r#type: <span class="kw-2">&amp;</span>Type) -&gt; Ident {
-    transform_type_to_ident(r#type, |s: String| <span class="macro">format!</span>(<span class="string">&quot;{}{}&quot;</span>, s, <span class="string">&quot;Entry&quot;</span>))
+<span class="doccomment">/// Convert a string into an identifier
+</span><span class="kw">pub fn </span>string_to_ident(s: <span class="kw-2">&amp;</span>str) -&gt; Ident {
+    syn::Ident::new(s, Span::call_site())
 }
 
 <span class="doccomment">/// Extends an identifier with a suffix.

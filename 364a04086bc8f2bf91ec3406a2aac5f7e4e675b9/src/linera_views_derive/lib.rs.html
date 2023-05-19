@@ -1104,6 +1104,17 @@
 <a href="#1104" id="1104">1104</a>
 <a href="#1105" id="1105">1105</a>
 <a href="#1106" id="1106">1106</a>
+<a href="#1107" id="1107">1107</a>
+<a href="#1108" id="1108">1108</a>
+<a href="#1109" id="1109">1109</a>
+<a href="#1110" id="1110">1110</a>
+<a href="#1111" id="1111">1111</a>
+<a href="#1112" id="1112">1112</a>
+<a href="#1113" id="1113">1113</a>
+<a href="#1114" id="1114">1114</a>
+<a href="#1115" id="1115">1115</a>
+<a href="#1116" id="1116">1116</a>
+<a href="#1117" id="1117">1117</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -1111,9 +1122,11 @@
 
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>util;
 
+<span class="kw">extern crate </span>heck;
 <span class="kw">extern crate </span>proc_macro;
 <span class="kw">extern crate </span>syn;
-<span class="kw">use </span><span class="kw">crate</span>::util::{concat, create_entry_name, snakify};
+<span class="kw">use </span><span class="kw">crate</span>::util::{concat, snakify, string_to_ident};
+<span class="kw">use </span>heck::AsUpperCamelCase;
 <span class="kw">use </span>proc_macro::TokenStream;
 <span class="kw">use </span>proc_macro2::{Span, TokenStream <span class="kw">as </span>TokenStream2};
 <span class="kw">use </span>quote::{format_ident, quote};
@@ -1451,6 +1464,7 @@
 }
 
 <span class="kw">fn </span>generate_graphql_code_for_field(
+    struct_name: syn::Ident,
     context: Type,
     context_constraints: <span class="prelude-ty">Option</span>&lt;TokenStream2&gt;,
     field: Field,
@@ -1496,7 +1510,11 @@
                 .unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">&quot;no generic type specified for &#39;{}&#39;&quot;</span>, view_name));
 
             <span class="kw">let </span>index_name = snakify(index_ident);
-            <span class="kw">let </span>entry_name = create_entry_name(generic_ident);
+
+            <span class="kw">let </span>camel_index_name = <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, field_name);
+            <span class="kw">let </span>camel_index_name = AsUpperCamelCase(<span class="kw-2">&amp;</span>camel_index_name);
+            <span class="kw">let </span>entry_name = <span class="macro">format!</span>(<span class="string">&quot;{}{}Entry&quot;</span>, struct_name, camel_index_name);
+            <span class="kw">let </span>entry_name = string_to_ident(<span class="kw-2">&amp;</span>entry_name);
             <span class="kw">let </span>context_generics = context_constraints.as_ref().map(|<span class="kw">_</span>| <span class="macro">quote! </span>{ &lt;#context&gt; });
 
             <span class="kw">let </span>r#impl = <span class="macro">quote! </span>{
@@ -1694,8 +1712,12 @@
     <span class="kw">let </span><span class="kw-2">mut </span>structs = <span class="macro">vec!</span>[];
 
     <span class="kw">for </span>field <span class="kw">in </span>input.fields {
-        <span class="kw">let </span>(r#impl, r#struct) =
-            generate_graphql_code_for_field(context.clone(), context_constraints.clone(), field);
+        <span class="kw">let </span>(r#impl, r#struct) = generate_graphql_code_for_field(
+            struct_name.clone(),
+            context.clone(),
+            context_constraints.clone(),
+            field,
+        );
         impls.push(r#impl);
         <span class="kw">if let </span><span class="prelude-val">Some</span>(r#struct) = r#struct {
             structs.push(r#struct);
@@ -2050,7 +2072,7 @@
                 <span class="kw">let </span>output = generate_graphql_code(input);
 
                 <span class="kw">let </span>expected = <span class="macro">quote! </span>{
-                    <span class="kw">pub struct </span>SomeOtherViewEntry #generics_with_lifetime
+                    <span class="kw">pub struct </span>TestViewCollectionEntry #generics_with_lifetime
                     #constraints
                     {
                         string: String,
@@ -2060,7 +2082,7 @@
                         &gt;,
                     }
                     <span class="attr">#[async_graphql::Object]
-                    </span><span class="kw">impl </span>#generics_with_lifetime SomeOtherViewEntry #generics_with_lifetime
+                    </span><span class="kw">impl </span>#generics_with_lifetime TestViewCollectionEntry #generics_with_lifetime
                     #constraints
                     {
                         <span class="kw">async fn </span>string(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>String {
@@ -2086,8 +2108,8 @@
                         <span class="kw">async fn </span>collection(
                             <span class="kw-2">&amp;</span><span class="self">self</span>,
                             string: String,
-                        ) -&gt; <span class="prelude-ty">Result</span>&lt;SomeOtherViewEntry #generics, async_graphql::Error&gt; {
-                            <span class="prelude-val">Ok</span>(SomeOtherViewEntry {
+                        ) -&gt; <span class="prelude-ty">Result</span>&lt;TestViewCollectionEntry #generics, async_graphql::Error&gt; {
+                            <span class="prelude-val">Ok</span>(TestViewCollectionEntry {
                                 string: string.clone(),
                                 guard: <span class="self">self</span>.collection.try_load_entry(<span class="kw-2">&amp;</span>string).<span class="kw">await</span><span class="question-mark">?</span>,
                             })
