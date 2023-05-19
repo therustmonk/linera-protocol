@@ -2228,7 +2228,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;C, I, W&gt; ReentrantCollectionView&lt;C, I, W&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, C, I, W&gt; ReentrantCollectionView&lt;C, I, W&gt;
 <span class="kw">where
     </span>C: Context + Send + Clone + <span class="lifetime">&#39;static</span>,
     ViewError: From&lt;C::Error&gt;,
@@ -2246,7 +2246,7 @@
     /// # let context = create_test_context();
     ///   let mut view : ReentrantCollectionView&lt;_, u64, RegisterView&lt;_,String&gt;&gt; = ReentrantCollectionView::load(context).await.unwrap();
     ///   let indices = vec![23, 42];
-    ///   let subviews = view.try_load_entries_mut(indices).await.unwrap();
+    ///   let subviews = view.try_load_entries_mut(&amp;indices).await.unwrap();
     ///   let value1 = subviews[0].get();
     ///   let value2 = subviews[1].get();
     ///   assert_eq!(*value1, String::default());
@@ -2254,16 +2254,16 @@
     /// # })
     /// ```
     </span><span class="kw">pub async fn </span>try_load_entries_mut&lt;Q&gt;(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        indices: Vec&lt;Q&gt;,
+        <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>,
+        indices: <span class="kw">impl </span>IntoIterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Q&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;OwnedRwLockWriteGuard&lt;W&gt;&gt;, ViewError&gt;
     <span class="kw">where
         </span>I: Borrow&lt;Q&gt;,
-        Q: Serialize,
+        Q: Serialize + <span class="lifetime">&#39;a</span>,
     {
         <span class="kw">let </span>short_keys = indices
             .into_iter()
-            .map(|index| C::derive_short_key(<span class="kw-2">&amp;</span>index))
+            .map(|index| C::derive_short_key(index))
             .collect::&lt;<span class="prelude-ty">Result</span>&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;()<span class="question-mark">?</span>;
         <span class="self">self</span>.collection.try_load_entries_mut(short_keys).<span class="kw">await
     </span>}
@@ -2279,7 +2279,7 @@
     /// # let context = create_test_context();
     ///   let mut view : ReentrantCollectionView&lt;_, u64, RegisterView&lt;_,String&gt;&gt; = ReentrantCollectionView::load(context).await.unwrap();
     ///   let indices = vec![23, 42];
-    ///   let subviews = view.try_load_entries(indices).await.unwrap();
+    ///   let subviews = view.try_load_entries(&amp;indices).await.unwrap();
     ///   let value1 = subviews[0].get();
     ///   let value2 = subviews[1].get();
     ///   assert_eq!(*value1, String::default());
@@ -2287,16 +2287,16 @@
     /// # })
     /// ```
     </span><span class="kw">pub async fn </span>try_load_entries&lt;Q&gt;(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        indices: Vec&lt;Q&gt;,
+        <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>,
+        indices: <span class="kw">impl </span>IntoIterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Q&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;OwnedRwLockReadGuard&lt;W&gt;&gt;, ViewError&gt;
     <span class="kw">where
         </span>I: Borrow&lt;Q&gt;,
-        Q: Serialize,
+        Q: Serialize + <span class="lifetime">&#39;a</span>,
     {
         <span class="kw">let </span>short_keys = indices
             .into_iter()
-            .map(|index| C::derive_short_key(<span class="kw-2">&amp;</span>index))
+            .map(|index| C::derive_short_key(index))
             .collect::&lt;<span class="prelude-ty">Result</span>&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;()<span class="question-mark">?</span>;
         <span class="self">self</span>.collection.try_load_entries(short_keys).<span class="kw">await
     </span>}
@@ -2616,7 +2616,7 @@
     /// ```
     </span><span class="kw">pub async fn </span>try_load_entries_mut&lt;Q&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        indices: Vec&lt;Q&gt;,
+        indices: <span class="kw">impl </span>IntoIterator&lt;Item = Q&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;OwnedRwLockWriteGuard&lt;W&gt;&gt;, ViewError&gt;
     <span class="kw">where
         </span>I: Borrow&lt;Q&gt;,
@@ -2649,7 +2649,7 @@
     /// ```
     </span><span class="kw">pub async fn </span>try_load_entries&lt;Q&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        indices: Vec&lt;Q&gt;,
+        indices: <span class="kw">impl </span>IntoIterator&lt;Item = Q&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;OwnedRwLockReadGuard&lt;W&gt;&gt;, ViewError&gt;
     <span class="kw">where
         </span>I: Borrow&lt;Q&gt;,

@@ -755,7 +755,7 @@
         {
             <span class="kw">let </span>chain = <span class="self">self</span>.store.load_chain(chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">let </span>origins = chain.inboxes.indices().<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="kw">let </span>inboxes = chain.inboxes.try_load_entries(origins.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>inboxes = chain.inboxes.try_load_entries(<span class="kw-2">&amp;</span>origins).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">for </span>(origin, inbox) <span class="kw">in </span>origins.into_iter().zip(inboxes) {
                 <span class="kw">let </span>next_height = info.entry(origin.sender).or_default();
                 <span class="kw">let </span>inbox_next_height = inbox.next_block_height_to_receive()<span class="question-mark">?</span>;

@@ -590,6 +590,15 @@
 <a href="#590" id="590">590</a>
 <a href="#591" id="591">591</a>
 <a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a>
+<a href="#599" id="599">599</a>
+<a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -622,7 +631,7 @@
     views::{CryptoHashView, GraphQLView, RootView, View, ViewError},
 };
 <span class="kw">use </span>serde::{Deserialize, Serialize};
-<span class="kw">use </span>std::collections::{BTreeMap, HashSet};
+<span class="kw">use </span>std::collections::{BTreeMap, HashMap, HashSet};
 
 <span class="doccomment">/// A view accessing the state of a chain.
 </span><span class="attr">#[derive(Debug, RootView, GraphQLView)]
@@ -770,7 +779,7 @@
     </span><span class="kw">pub async fn </span>validate_incoming_messages(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt; {
         <span class="kw">let </span>chain_id = <span class="self">self</span>.chain_id();
         <span class="kw">let </span>origins = <span class="self">self</span>.inboxes.indices().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>inboxes = <span class="self">self</span>.inboxes.try_load_entries(origins.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>inboxes = <span class="self">self</span>.inboxes.try_load_entries(<span class="kw-2">&amp;</span>origins).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">for </span>(origin, inbox) <span class="kw">in </span>origins.into_iter().zip(inboxes) {
             <span class="kw">let </span>event = inbox.removed_events.front().<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="macro">ensure!</span>(
@@ -937,6 +946,16 @@
     <span class="doccomment">/// Removes the incoming messages in the block from the inboxes.
     </span><span class="kw">pub async fn </span>remove_events_from_inboxes(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: <span class="kw-2">&amp;</span>Block) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt; {
         <span class="kw">let </span>chain_id = <span class="self">self</span>.chain_id();
+        <span class="kw">let </span>origins = block
+            .incoming_messages
+            .iter()
+            .map(|message| message.origin.clone())
+            .collect::&lt;HashSet&lt;<span class="kw">_</span>&gt;&gt;();
+        <span class="kw">let </span>inboxes = <span class="self">self</span>.inboxes.try_load_entries_mut(<span class="kw-2">&amp;</span>origins).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>map = HashMap::new();
+        <span class="kw">for </span>(origin, inbox) <span class="kw">in </span>origins.into_iter().zip(inboxes) {
+            map.insert(origin, inbox);
+        }
         <span class="kw">for </span>message <span class="kw">in </span><span class="kw-2">&amp;</span>block.incoming_messages {
             <span class="macro">tracing::trace!</span>(
                 <span class="string">&quot;Updating inbox {:?} in chain {:?}&quot;</span>,
@@ -951,7 +970,9 @@
                 });
             }
             <span class="comment">// Mark the message as processed in the inbox.
-            </span><span class="kw">let </span><span class="kw-2">mut </span>inbox = <span class="self">self</span>.inboxes.try_load_entry_mut(<span class="kw-2">&amp;</span>message.origin).<span class="kw">await</span><span class="question-mark">?</span>;
+            </span><span class="kw">let </span>inbox = map
+                .get_mut(<span class="kw-2">&amp;</span>message.origin)
+                .expect(<span class="string">&quot;Message origin was added to the map above&quot;</span>);
             inbox
                 .remove_event(<span class="kw-2">&amp;</span>message.event)
                 .<span class="kw">await
@@ -1104,7 +1125,7 @@
             .into_iter()
             .map(Target::chain)
             .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
-        <span class="kw">let </span>outboxes = <span class="self">self</span>.outboxes.try_load_entries_mut(targets).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>outboxes = <span class="self">self</span>.outboxes.try_load_entries_mut(<span class="kw-2">&amp;</span>targets).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">for </span><span class="kw-2">mut </span>outbox <span class="kw">in </span>outboxes {
             <span class="kw">if </span>outbox.schedule_message(height)<span class="question-mark">? </span>{
                 <span class="kw-2">*</span>outbox_counters.entry(height).or_default() += <span class="number">1</span>;
@@ -1121,7 +1142,7 @@
                 name,
             })
             .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
-        <span class="kw">let </span>channels = <span class="self">self</span>.channels.try_load_entries_mut(full_names).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>channels = <span class="self">self</span>.channels.try_load_entries_mut(<span class="kw-2">&amp;</span>full_names).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">for </span>((_name, id), <span class="kw-2">mut </span>channel) <span class="kw">in </span>raw_result.unsubscribe.into_iter().zip(channels) {
             <span class="comment">// Remove subscriber. Do not remove the channel outbox yet.
             </span>channel.subscribers.remove(<span class="kw-2">&amp;</span>id)<span class="question-mark">?</span>;
@@ -1133,17 +1154,14 @@
                 name,
             })
             .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
-        <span class="kw">let </span>channels = <span class="self">self
-            </span>.channels
-            .try_load_entries_mut(full_names.clone())
-            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>channels = <span class="self">self</span>.channels.try_load_entries_mut(<span class="kw-2">&amp;</span>full_names).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">for </span>(full_name, <span class="kw-2">mut </span>channel) <span class="kw">in </span>full_names.into_iter().zip(channels) {
             <span class="kw">let </span>recipients = channel.subscribers.indices().<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">let </span>targets = recipients
                 .into_iter()
                 .map(|recipient| Target::channel(recipient, full_name.clone()))
                 .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
-            <span class="kw">let </span>outboxes = <span class="self">self</span>.outboxes.try_load_entries_mut(targets).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>outboxes = <span class="self">self</span>.outboxes.try_load_entries_mut(<span class="kw-2">&amp;</span>targets).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">for </span><span class="kw-2">mut </span>outbox <span class="kw">in </span>outboxes {
                 <span class="kw">if </span>outbox.schedule_message(height)<span class="question-mark">? </span>{
                     <span class="kw-2">*</span>outbox_counters.entry(height).or_default() += <span class="number">1</span>;
@@ -1160,7 +1178,7 @@
                 name,
             })
             .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
-        <span class="kw">let </span>channels = <span class="self">self</span>.channels.try_load_entries_mut(full_names).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>channels = <span class="self">self</span>.channels.try_load_entries_mut(<span class="kw-2">&amp;</span>full_names).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">for </span>((name, id), <span class="kw-2">mut </span>channel) <span class="kw">in </span>raw_result.subscribe.into_iter().zip(channels) {
             <span class="kw">let </span>full_name = ChannelFullName {
                 application_id,
