@@ -1641,12 +1641,12 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;CrossChainRequest, WorkerError&gt; {
         <span class="kw">let </span>heights =
             BTreeSet::from_iter(height_map.iter().flat_map(|(<span class="kw">_</span>, heights)| heights).copied());
-        <span class="kw">let </span><span class="kw-2">mut </span>keys = Vec::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>heights_usize = Vec::new();
         <span class="kw">for </span>height <span class="kw">in </span>heights {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(key) = confirmed_log.get(height.try_into()<span class="question-mark">?</span>).<span class="kw">await</span><span class="question-mark">? </span>{
-                keys.push(key);
-            }
+            heights_usize.push(height.try_into()<span class="question-mark">?</span>);
         }
+        <span class="kw">let </span>values = confirmed_log.multi_get(heights_usize).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>keys = values.into_iter().flatten();
         <span class="kw">let </span>certificates = <span class="self">self</span>.storage.read_certificates(keys).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(CrossChainRequest::UpdateRecipient {
             height_map,
