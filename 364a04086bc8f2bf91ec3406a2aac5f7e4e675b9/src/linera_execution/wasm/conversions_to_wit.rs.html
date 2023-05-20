@@ -261,7 +261,7 @@
     CallResult, CalleeContext, EffectContext, EffectId, OperationContext, QueryContext, SessionId,
     UserApplicationId,
 };
-<span class="kw">use </span>linera_base::{crypto::CryptoHash, data_types::Balance, identifiers::ChainId};
+<span class="kw">use </span>linera_base::{crypto::CryptoHash, data_types::Amount, identifiers::ChainId};
 
 <span class="kw">impl </span>From&lt;OperationContext&gt; <span class="kw">for </span>contract::OperationContext {
     <span class="kw">fn </span>from(host: OperationContext) -&gt; <span class="self">Self </span>{
@@ -471,18 +471,18 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;Balance&gt; <span class="kw">for </span>service_system_api::Balance {
-    <span class="kw">fn </span>from(host: Balance) -&gt; <span class="self">Self </span>{
-        service_system_api::Balance {
+<span class="kw">impl </span>From&lt;Amount&gt; <span class="kw">for </span>service_system_api::Amount {
+    <span class="kw">fn </span>from(host: Amount) -&gt; <span class="self">Self </span>{
+        service_system_api::Amount {
             lower_half: host.lower_half(),
             upper_half: host.upper_half(),
         }
     }
 }
 
-<span class="kw">impl </span>From&lt;Balance&gt; <span class="kw">for </span>contract_system_api::Balance {
-    <span class="kw">fn </span>from(host: Balance) -&gt; <span class="self">Self </span>{
-        contract_system_api::Balance {
+<span class="kw">impl </span>From&lt;Amount&gt; <span class="kw">for </span>contract_system_api::Amount {
+    <span class="kw">fn </span>from(host: Amount) -&gt; <span class="self">Self </span>{
+        contract_system_api::Amount {
             lower_half: host.lower_half(),
             upper_half: host.upper_half(),
         }

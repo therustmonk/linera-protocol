@@ -931,7 +931,7 @@
 <span class="kw">use </span>custom_debug_derive::Debug;
 <span class="kw">use </span>linera_base::{
     crypto::{CryptoHash, PublicKey},
-    data_types::{Amount, ArithmeticError, Balance, Timestamp},
+    data_types::{Amount, ArithmeticError, Timestamp},
     ensure, hex_debug,
     identifiers::{BytecodeId, ChainDescription, ChainId, EffectId, Owner},
 };
@@ -973,9 +973,9 @@
     <span class="doccomment">/// Ownership of the chain.
     </span><span class="kw">pub </span>ownership: RegisterView&lt;C, ChainOwnership&gt;,
     <span class="doccomment">/// Balance of the chain (unattributed).
-    </span><span class="kw">pub </span>balance: RegisterView&lt;C, Balance&gt;,
+    </span><span class="kw">pub </span>balance: RegisterView&lt;C, Amount&gt;,
     <span class="doccomment">/// Balances attributed to a given owner.
-    </span><span class="kw">pub </span>balances: MapView&lt;C, Owner, Balance&gt;,
+    </span><span class="kw">pub </span>balances: MapView&lt;C, Owner, Amount&gt;,
     <span class="doccomment">/// The timestamp of the most recent block.
     </span><span class="kw">pub </span>timestamp: RegisterView&lt;C, Timestamp&gt;,
     <span class="doccomment">/// Track the locations of known bytecodes as well as the descriptions of known applications.
@@ -992,8 +992,8 @@
     <span class="kw">pub </span>subscriptions: BTreeSet&lt;ChannelSubscription&gt;,
     <span class="kw">pub </span>committees: BTreeMap&lt;Epoch, Committee&gt;,
     <span class="kw">pub </span>ownership: ChainOwnership,
-    <span class="kw">pub </span>balance: Balance,
-    <span class="kw">pub </span>balances: BTreeMap&lt;Owner, Balance&gt;,
+    <span class="kw">pub </span>balance: Amount,
+    <span class="kw">pub </span>balances: BTreeMap&lt;Owner, Amount&gt;,
     <span class="kw">pub </span>timestamp: Timestamp,
     <span class="kw">pub </span>registry: ApplicationRegistry,
 }
@@ -1176,7 +1176,7 @@
 </span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>SystemResponse {
     <span class="kw">pub </span>chain_id: ChainId,
-    <span class="kw">pub </span>balance: Balance,
+    <span class="kw">pub </span>balance: Amount,
 }
 
 <span class="doccomment">/// The channels available in the system application.
@@ -1460,12 +1460,12 @@
                     <span class="prelude-val">None </span>=&gt; <span class="self">self</span>.balance.get_mut(),
                 };
                 <span class="macro">ensure!</span>(
-                    <span class="kw-2">*</span>balance &gt;= (<span class="kw-2">*</span>amount).into(),
+                    <span class="kw-2">*</span>balance &gt;= <span class="kw-2">*</span>amount,
                     SystemExecutionError::InsufficientFunding {
                         current_balance: (<span class="kw-2">*</span>balance).into()
                     }
                 );
-                balance.try_sub_assign((<span class="kw-2">*</span>amount).into())<span class="question-mark">?</span>;
+                balance.try_sub_assign(<span class="kw-2">*</span>amount)<span class="question-mark">?</span>;
                 <span class="kw">if let </span>Recipient::Account(account) = recipient {
                     result.effects.push((
                         Destination::Recipient(account.chain_id),
@@ -1673,12 +1673,12 @@
             Credit { amount, account } <span class="kw">if </span>context.chain_id == account.chain_id =&gt; {
                 <span class="kw">match </span><span class="kw-2">&amp;</span>account.owner {
                     <span class="prelude-val">None </span>=&gt; {
-                        <span class="kw">let </span>new_balance = <span class="self">self</span>.balance.get().saturating_add((<span class="kw-2">*</span>amount).into());
+                        <span class="kw">let </span>new_balance = <span class="self">self</span>.balance.get().saturating_add(<span class="kw-2">*</span>amount);
                         <span class="self">self</span>.balance.set(new_balance);
                     }
                     <span class="prelude-val">Some</span>(owner) =&gt; {
                         <span class="kw">let </span>balance = <span class="self">self</span>.balances.get_mut_or_default(owner).<span class="kw">await</span><span class="question-mark">?</span>;
-                        <span class="kw-2">*</span>balance = balance.saturating_add((<span class="kw-2">*</span>amount).into());
+                        <span class="kw-2">*</span>balance = balance.saturating_add(<span class="kw-2">*</span>amount);
                     }
                 }
             }
@@ -1695,7 +1695,7 @@
                 &amp;&amp; context.authenticated_signer.as_ref() == <span class="prelude-val">Some</span>(owner) =&gt;
             {
                 <span class="kw">let </span>balance = <span class="self">self</span>.balances.get_mut_or_default(owner).<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">if </span>balance.try_sub_assign((<span class="kw-2">*</span>amount).into()).is_ok() {
+                <span class="kw">if </span>balance.try_sub_assign(<span class="kw-2">*</span>amount).is_ok() {
                     <span class="kw">if let </span>Recipient::Account(account) = recipient {
                         result.effects.push((
                             Destination::Recipient(account.chain_id),

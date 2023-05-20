@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["ArithmeticError"],"struct":["Amount","Balance","BlockHeight","RoundNumber","Timestamp"]};
+window.SIDEBAR_ITEMS = {"enum":["ArithmeticError","ParseAmountError"],"struct":["Amount","BlockHeight","RoundNumber","Timestamp"]};

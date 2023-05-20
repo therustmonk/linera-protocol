@@ -1434,7 +1434,7 @@
 <span class="kw">use </span>futures::{lock::Mutex, StreamExt};
 <span class="kw">use </span>linera_base::{
     crypto::{KeyPair, PublicKey},
-    data_types::{Amount, Balance, BlockHeight, Timestamp},
+    data_types::{Amount, BlockHeight, Timestamp},
     identifiers::{BytecodeId, ChainDescription, ChainId, EffectId},
 };
 <span class="kw">use </span>linera_chain::data_types::Certificate;
@@ -2101,7 +2101,7 @@
 
         <span class="doccomment">/// Known initial balance of the chain
         </span><span class="attr">#[structopt(long, default_value = <span class="string">&quot;0&quot;</span>)]
-        </span>initial_funding: Balance,
+        </span>initial_funding: Amount,
 
         <span class="doccomment">/// The start timestamp: no blocks can be created before this time.
         </span><span class="attr">#[structopt(long)]

@@ -736,7 +736,7 @@
 <span class="kw">use </span>derive_more::Display;
 <span class="kw">use </span>linera_base::{
     crypto::CryptoHash,
-    data_types::{ArithmeticError, Balance, BlockHeight, Timestamp},
+    data_types::{Amount, ArithmeticError, BlockHeight, Timestamp},
     hex_debug,
     identifiers::{BytecodeId, ChainId, ChannelName, Destination, EffectId, Owner, SessionId},
 };
@@ -964,7 +964,7 @@
     </span><span class="kw">fn </span>application_parameters(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;u8&gt;;
 
     <span class="doccomment">/// Reads the system balance.
-    </span><span class="kw">fn </span>read_system_balance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Balance;
+    </span><span class="kw">fn </span>read_system_balance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Amount;
 
     <span class="doccomment">/// Reads the system timestamp.
     </span><span class="kw">fn </span>read_system_timestamp(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Timestamp;

@@ -462,7 +462,7 @@
 
 </span><span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>linera_sdk::{
-    base::{ApplicationId, Balance, BlockHeight, BytecodeId, ChainId, EffectId, Timestamp},
+    base::{Amount, ApplicationId, BlockHeight, BytecodeId, ChainId, EffectId, Timestamp},
     contract, service, test, ContractLogger, ServiceLogger,
 };
 <span class="kw">use </span>linera_views::{
@@ -532,7 +532,7 @@
 <span class="doccomment">/// Test if the system balance getter API is mocked successfully.
 </span><span class="attr">#[webassembly_test]
 </span><span class="kw">fn </span>mock_system_balance() {
-    <span class="kw">let </span>balance = Balance::from(<span class="number">0x00010203_04050607_08090a0b_0c0d0e0f</span>);
+    <span class="kw">let </span>balance = Amount::from(<span class="number">0x00010203_04050607_08090a0b_0c0d0e0f</span>);
 
     test::mock_system_balance(balance);
 

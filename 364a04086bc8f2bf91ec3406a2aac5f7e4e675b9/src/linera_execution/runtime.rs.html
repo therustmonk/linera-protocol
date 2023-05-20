@@ -945,7 +945,7 @@
             .clone()
     }
 
-    <span class="kw">fn </span>read_system_balance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; linera_base::data_types::Balance {
+    <span class="kw">fn </span>read_system_balance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; linera_base::data_types::Amount {
         <span class="kw-2">*</span><span class="self">self</span>.execution_state_mut().system.balance.get()
     }
 

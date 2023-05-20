@@ -1494,7 +1494,7 @@
 };
 <span class="kw">use </span>linera_base::{
     crypto::{CryptoHash, KeyPair, PublicKey},
-    data_types::{Amount, Balance, BlockHeight, RoundNumber, Timestamp},
+    data_types::{Amount, BlockHeight, RoundNumber, Timestamp},
     identifiers::{BytecodeId, ChainId, EffectId, Owner},
 };
 <span class="kw">use </span>linera_chain::{
@@ -2606,7 +2606,7 @@
         <span class="prelude-val">Ok</span>(response)
     }
 
-    <span class="kw">pub async fn </span>local_balance(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Balance&gt; {
+    <span class="kw">pub async fn </span>local_balance(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Amount&gt; {
         <span class="macro">ensure!</span>(
             <span class="self">self</span>.chain_info().<span class="kw">await</span><span class="question-mark">?</span>.next_block_height == <span class="self">self</span>.next_block_height,
             <span class="string">&quot;The local node is behind the trusted state in wallet and needs synchronization with validators&quot;
@@ -2680,7 +2680,7 @@
     </span>}
 
     <span class="doccomment">/// Attempts to synchronize with validators and re-compute our balance.
-    </span><span class="kw">pub async fn </span>synchronize_from_validators(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Balance&gt; {
+    </span><span class="kw">pub async fn </span>synchronize_from_validators(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Amount&gt; {
         <span class="self">self</span>.find_received_certificates().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.local_balance().<span class="kw">await

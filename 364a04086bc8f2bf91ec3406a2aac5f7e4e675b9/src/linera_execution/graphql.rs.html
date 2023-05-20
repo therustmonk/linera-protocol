@@ -112,7 +112,7 @@
 };
 <span class="kw">use </span>async_graphql::{Error, Object};
 <span class="kw">use </span>linera_base::{
-    data_types::{Balance, Timestamp},
+    data_types::{Amount, Timestamp},
     doc_scalar,
     identifiers::{ChainDescription, ChainId},
 };
@@ -196,7 +196,7 @@
         <span class="self">self</span>.ownership.get()
     }
 
-    <span class="kw">async fn </span>balance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Balance {
+    <span class="kw">async fn </span>balance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Amount {
         <span class="self">self</span>.balance.get()
     }
 

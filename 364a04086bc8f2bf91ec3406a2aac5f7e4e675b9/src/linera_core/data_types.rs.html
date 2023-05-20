@@ -260,7 +260,7 @@
 </span><span class="kw">use </span><span class="kw">crate</span>::node::NodeError;
 <span class="kw">use </span>linera_base::{
     crypto::{BcsSignable, CryptoHash, KeyPair, Signature},
-    data_types::{Balance, BlockHeight, Timestamp},
+    data_types::{Amount, BlockHeight, Timestamp},
     identifiers::{ChainDescription, ChainId},
 };
 <span class="kw">use </span>linera_chain::{
@@ -381,7 +381,7 @@
     <span class="doccomment">/// The state of the chain authentication.
     </span><span class="kw">pub </span>manager: ChainManagerInfo,
     <span class="doccomment">/// The current balance.
-    </span><span class="kw">pub </span>system_balance: Balance,
+    </span><span class="kw">pub </span>system_balance: Amount,
     <span class="doccomment">/// The last block hash, if any.
     </span><span class="kw">pub </span>block_hash: <span class="prelude-ty">Option</span>&lt;CryptoHash&gt;,
     <span class="doccomment">/// The earliest possible timestamp for the next block.

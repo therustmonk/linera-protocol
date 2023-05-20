@@ -903,11 +903,11 @@
 <span class="kw">struct </span>GenesisAccount {
     description: ChainDescription,
     public_key: PublicKey,
-    balance: Balance,
+    balance: Amount,
 }
 
 <span class="kw">impl </span>GenesisStoreBuilder {
-    <span class="kw">fn </span>add(<span class="kw-2">&amp;mut </span><span class="self">self</span>, description: ChainDescription, public_key: PublicKey, balance: Balance) {
+    <span class="kw">fn </span>add(<span class="kw-2">&amp;mut </span><span class="self">self</span>, description: ChainDescription, public_key: PublicKey, balance: Amount) {
         <span class="self">self</span>.accounts.push(GenesisAccount {
             description,
             public_key,
@@ -1007,7 +1007,7 @@
     <span class="kw">pub async fn </span>add_initial_chain(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         description: ChainDescription,
-        balance: Balance,
+        balance: Amount,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ChainClient&lt;NodeProvider&lt;B::Store&gt;, B::Store&gt;, anyhow::Error&gt; {
         <span class="kw">let </span>key_pair = KeyPair::generate();
         <span class="kw">let </span>public_key = key_pair.public();
@@ -1023,7 +1023,7 @@
                         <span class="self">self</span>.admin_id,
                         description,
                         public_key,
-                        Balance::from(<span class="number">0</span>),
+                        Amount::from(<span class="number">0</span>),
                         Timestamp::from(<span class="number">0</span>),
                     )
                     .<span class="kw">await

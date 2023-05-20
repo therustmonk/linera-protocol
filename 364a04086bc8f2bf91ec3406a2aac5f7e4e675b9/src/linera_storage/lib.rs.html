@@ -395,7 +395,7 @@
 <span class="kw">use </span>futures::future;
 <span class="kw">use </span>linera_base::{
     crypto::{CryptoHash, PublicKey},
-    data_types::{Balance, Timestamp},
+    data_types::{Amount, Timestamp},
     identifiers::{ChainDescription, ChainId},
 };
 <span class="kw">use </span>linera_chain::{
@@ -504,7 +504,7 @@
         admin_id: ChainId,
         description: ChainDescription,
         public_key: PublicKey,
-        balance: Balance,
+        balance: Amount,
         timestamp: Timestamp,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt;
     <span class="kw">where
