@@ -203,22 +203,6 @@
 <a href="#203" id="203">203</a>
 <a href="#204" id="204">204</a>
 <a href="#205" id="205">205</a>
-<a href="#206" id="206">206</a>
-<a href="#207" id="207">207</a>
-<a href="#208" id="208">208</a>
-<a href="#209" id="209">209</a>
-<a href="#210" id="210">210</a>
-<a href="#211" id="211">211</a>
-<a href="#212" id="212">212</a>
-<a href="#213" id="213">213</a>
-<a href="#214" id="214">214</a>
-<a href="#215" id="215">215</a>
-<a href="#216" id="216">216</a>
-<a href="#217" id="217">217</a>
-<a href="#218" id="218">218</a>
-<a href="#219" id="219">219</a>
-<a href="#220" id="220">220</a>
-<a href="#221" id="221">221</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -231,8 +215,8 @@
 
 </span><span class="kw">use super</span>::{contract, contract_system_api, service_system_api};
 <span class="kw">use crate</span>::{
-    ApplicationCallResult, ChannelName, Destination, NewSession, RawExecutionResult,
-    SessionCallResult, SessionId, UserApplicationId,
+    ApplicationCallResult, ChannelName, Destination, RawExecutionResult, SessionCallResult,
+    SessionId, UserApplicationId,
 };
 <span class="kw">use </span>linera_base::{
     crypto::CryptoHash,
@@ -244,25 +228,19 @@
     <span class="kw">fn </span>from(result: contract::SessionCallResult) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>session_call_result = SessionCallResult {
             inner: result.inner.into(),
-            close_session: result.data.is_some(),
+            close_session: result.new_state.is_some(),
         };
 
-        <span class="kw">let </span>updated_session_data = result.data.unwrap_or_default();
+        <span class="kw">let </span>updated_session_state = result.new_state.unwrap_or_default();
 
-        (session_call_result, updated_session_data)
+        (session_call_result, updated_session_state)
     }
 }
 
 <span class="kw">impl </span>From&lt;contract::ApplicationCallResult&gt; <span class="kw">for </span>ApplicationCallResult {
     <span class="kw">fn </span>from(result: contract::ApplicationCallResult) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>create_sessions = result
-            .create_sessions
-            .into_iter()
-            .map(NewSession::from)
-            .collect();
-
         ApplicationCallResult {
-            create_sessions,
+            create_sessions: result.create_sessions,
             execution_result: result.execution_result.into(),
             value: result.value,
         }
@@ -309,15 +287,6 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;contract::SessionResult&gt; <span class="kw">for </span>NewSession {
-    <span class="kw">fn </span>from(guest: contract::SessionResult) -&gt; <span class="self">Self </span>{
-        NewSession {
-            kind: guest.kind,
-            data: guest.data,
-        }
-    }
-}
-
 <span class="kw">impl </span>From&lt;contract::ChannelName&gt; <span class="kw">for </span>ChannelName {
     <span class="kw">fn </span>from(guest: contract::ChannelName) -&gt; <span class="self">Self </span>{
         guest.name.into()
@@ -347,7 +316,6 @@
     <span class="kw">fn </span>from(guest: contract_system_api::SessionId) -&gt; <span class="self">Self </span>{
         SessionId {
             application_id: guest.application_id.into(),
-            kind: guest.kind,
             index: guest.index,
         }
     }

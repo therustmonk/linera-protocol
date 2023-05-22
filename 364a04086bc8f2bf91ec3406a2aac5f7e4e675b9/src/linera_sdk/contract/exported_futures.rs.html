@@ -685,7 +685,7 @@
     /// This is called from the host.
     </span><span class="kw">pub fn </span>new(
         context: wit_types::CalleeContext,
-        session: wit_types::Session,
+        session_state: Vec&lt;u8&gt;,
         argument: Vec&lt;u8&gt;,
         forwarded_sessions: Vec&lt;wit_types::SessionId&gt;,
     ) -&gt; <span class="self">Self </span>{
@@ -702,7 +702,7 @@
                         application
                             .handle_session_call(
                                 <span class="kw-2">&amp;</span>context.into(),
-                                session.into(),
+                                <span class="kw-2">&amp;</span>session_state,
                                 <span class="kw-2">&amp;</span>argument,
                                 forwarded_sessions,
                             )

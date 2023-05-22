@@ -40,17 +40,18 @@
              'life0: 'async_trait,
              'life1: 'async_trait,
              'life2: 'async_trait</span>;
-<span class="item-spacer"></span>    fn <a href="#tymethod.handle_session_call" class="fn">handle_session_call</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+<span class="item-spacer"></span>    fn <a href="#tymethod.handle_session_call" class="fn">handle_session_call</a>&lt;'life0, 'life1, 'life2, 'life3, 'async_trait&gt;(
         &amp;'life0 mut self,
         context: &amp;'life1 <a class="struct" href="struct.CalleeContext.html" title="struct linera_sdk::CalleeContext">CalleeContext</a>,
-        session: <a class="struct" href="struct.Session.html" title="struct linera_sdk::Session">Session</a>,
-        argument: &amp;'life2 [<a class="primitive" href="https://doc.rust-lang.org/1.69.0/std/primitive.u8.html">u8</a>],
+        state: &amp;'life2 [<a class="primitive" href="https://doc.rust-lang.org/1.69.0/std/primitive.u8.html">u8</a>],
+        argument: &amp;'life3 [<a class="primitive" href="https://doc.rust-lang.org/1.69.0/std/primitive.u8.html">u8</a>],
         forwarded_sessions: <a class="struct" href="https://doc.rust-lang.org/1.69.0/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="base/struct.SessionId.html" title="struct linera_sdk::base::SessionId">SessionId</a>&gt;
     ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.69.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.69.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="views/futures/trait.Future.html" title="trait linera_sdk::views::futures::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.69.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="struct.SessionCallResult.html" title="struct linera_sdk::SessionCallResult">SessionCallResult</a>, Self::<a class="associatedtype" href="trait.Contract.html#associatedtype.Error" title="type linera_sdk::Contract::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.69.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
        <span class="where">where Self: 'async_trait,
              'life0: 'async_trait,
              'life1: 'async_trait,
-             'life2: 'async_trait</span>;
+             'life2: 'async_trait,
+             'life3: 'async_trait</span>;
 }</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>The public entry points provided by an application’s contract.</p>
 <p>Execution of these endpoints consume fuel, because they can change the application’s state and
 are therefore consensus criticial.</p>
@@ -65,13 +66,13 @@ are therefore consensus criticial.</p>
     'life0: 'async_trait,
     'life1: 'async_trait,
     'life2: 'async_trait,</span></h4></section></summary><div class="docblock"><p>Initializes the application on the chain that created it.</p>
-<p>This is only called once when the application is created and only on the microchain that
+<p>This is only called once when the application is created and only on the chain that
 created the application.</p>
-<p>Deployment on other microchains will use the <a href="https://doc.rust-lang.org/1.69.0/core/default/trait.Default.html" title="trait core::default::Default"><code>Default</code></a> implementation of the application
+<p>Deployment on other chains will use the <a href="https://doc.rust-lang.org/1.69.0/core/default/trait.Default.html" title="trait core::default::Default"><code>Default</code></a> implementation of the application
 state if <a href="struct.SimpleStateStorage.html" title="struct linera_sdk::SimpleStateStorage"><code>SimpleStateStorage</code></a> is used, or the <a href="https://doc.rust-lang.org/1.69.0/core/default/trait.Default.html" title="trait core::default::Default"><code>Default</code></a> value of all sub-views in the
 state if the <a href="struct.ViewStateStorage.html" title="struct linera_sdk::ViewStateStorage"><code>ViewStateStorage</code></a> is used.</p>
 <p>Returns an <a href="struct.ExecutionResult.html" title="struct linera_sdk::ExecutionResult"><code>ExecutionResult</code></a>, which can contain subscription or unsubscription requests
-to channels and effects to be sent to this application on another microchain.</p>
+to channels and effects to be sent to this application on another chain.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="tymethod.execute_operation" class="method"><a class="srclink rightside" href="../src/linera_sdk/lib.rs.html#111-115">source</a><h4 class="code-header">fn <a href="#tymethod.execute_operation" class="fn">execute_operation</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
     &amp;'life0 mut self,
     context: &amp;'life1 <a class="struct" href="struct.OperationContext.html" title="struct linera_sdk::OperationContext">OperationContext</a>,
@@ -84,7 +85,7 @@ to channels and effects to be sent to this application on another microchain.</p
 <p>Operations are created by users and added to blocks, serving as the starting point for an
 application’s execution.</p>
 <p>Returns an <a href="struct.ExecutionResult.html" title="struct linera_sdk::ExecutionResult"><code>ExecutionResult</code></a>, which can contain subscription or unsubscription requests
-to channels and effects to be sent to this application on another microchain.</p>
+to channels and effects to be sent to this application on another chain.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="tymethod.execute_effect" class="method"><a class="srclink rightside" href="../src/linera_sdk/lib.rs.html#131-135">source</a><h4 class="code-header">fn <a href="#tymethod.execute_effect" class="fn">execute_effect</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
     &amp;'life0 mut self,
     context: &amp;'life1 <a class="struct" href="struct.EffectContext.html" title="struct linera_sdk::EffectContext">EffectContext</a>,
@@ -94,16 +95,16 @@ to channels and effects to be sent to this application on another microchain.</p
     'life0: 'async_trait,
     'life1: 'async_trait,
     'life2: 'async_trait,</span></h4></section></summary><div class="docblock"><p>Applies an effect originating from a cross-chain message.</p>
-<p>Effects are messages sent across microchains. These messages are created and received by
+<p>Effects are messages sent across chains. These messages are created and received by
 the same application. Effects can be either single-sender and single-receiver, or
 single-sender and multiple-receivers. The former allows sending cross-chain messages to the
-application on some other specific microchain, while the latter uses broadcast channels to
-send a message to multiple other microchains where the application is subscribed to a
-sender channel on this microchain.</p>
+application on some other specific chain, while the latter uses broadcast channels to
+send a message to multiple other chains where the application is subscribed to a
+sender channel on this chain.</p>
 <p>For an effect to be executed, a user must mark it to be received in a block of the receiver
-microchain.</p>
+chain.</p>
 <p>Returns an <a href="struct.ExecutionResult.html" title="struct linera_sdk::ExecutionResult"><code>ExecutionResult</code></a>, which can contain effects to be sent to this application
-on another microchain and subscription or unsubscription requests to channels.</p>
+on another chain and subscription or unsubscription requests to channels.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="tymethod.handle_application_call" class="method"><a class="srclink rightside" href="../src/linera_sdk/lib.rs.html#154-159">source</a><h4 class="code-header">fn <a href="#tymethod.handle_application_call" class="fn">handle_application_call</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
     &amp;'life0 mut self,
     context: &amp;'life1 <a class="struct" href="struct.CalleeContext.html" title="struct linera_sdk::CalleeContext">CalleeContext</a>,
@@ -114,33 +115,34 @@ on another microchain and subscription or unsubscription requests to channels.</
     'life0: 'async_trait,
     'life1: 'async_trait,
     'life2: 'async_trait,</span></h4></section></summary><div class="docblock"><p>Handles a call from another application.</p>
-<p>Cross-application calls are a way for applications to interact inside a microchain. An
-application can call any other application available on the microchain the execution is
-taking place on.</p>
+<p>Cross-application calls allow applications to interact inside a chain. An
+application can call any other application available on the chain the
+execution is taking place on.</p>
 <p>Use the <code>Self::call_application</code> method generated by the <a href="macro.contract.html" title="macro linera_sdk::contract"><code>contract!</code></a> macro to call
 another application.</p>
 <p>Returns an <a href="struct.ApplicationCallResult.html" title="struct linera_sdk::ApplicationCallResult"><code>ApplicationCallResult</code></a>, which contains:</p>
 <ul>
-<li>a response <code>value</code> sent to the caller application;</li>
-<li>a list of newly created <a href="struct.Session.html" title="struct linera_sdk::Session"><code>Session</code></a>s sent to the caller application;</li>
-<li>an <a href="struct.ExecutionResult.html" title="struct linera_sdk::ExecutionResult"><code>ExecutionResult</code></a> with effects to be sent to this application on other microchains
+<li>a return value sent to the caller application;</li>
+<li>a list of new session states; the newly-created sessions will be owned by the caller application;</li>
+<li>an <a href="struct.ExecutionResult.html" title="struct linera_sdk::ExecutionResult"><code>ExecutionResult</code></a> with effects to be sent to this application on other chains
 and channel subscription and unsubscription requests.</li>
 </ul>
 <p>See <a href="trait.Contract.html#tymethod.handle_session_call"><code>Self::handle_session_call</code></a> for more information on</p>
-</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.handle_session_call" class="method"><a class="srclink rightside" href="../src/linera_sdk/lib.rs.html#193-199">source</a><h4 class="code-header">fn <a href="#tymethod.handle_session_call" class="fn">handle_session_call</a>&lt;'life0, 'life1, 'life2, 'async_trait&gt;(
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.handle_session_call" class="method"><a class="srclink rightside" href="../src/linera_sdk/lib.rs.html#193-199">source</a><h4 class="code-header">fn <a href="#tymethod.handle_session_call" class="fn">handle_session_call</a>&lt;'life0, 'life1, 'life2, 'life3, 'async_trait&gt;(
     &amp;'life0 mut self,
     context: &amp;'life1 <a class="struct" href="struct.CalleeContext.html" title="struct linera_sdk::CalleeContext">CalleeContext</a>,
-    session: <a class="struct" href="struct.Session.html" title="struct linera_sdk::Session">Session</a>,
-    argument: &amp;'life2 [<a class="primitive" href="https://doc.rust-lang.org/1.69.0/std/primitive.u8.html">u8</a>],
+    state: &amp;'life2 [<a class="primitive" href="https://doc.rust-lang.org/1.69.0/std/primitive.u8.html">u8</a>],
+    argument: &amp;'life3 [<a class="primitive" href="https://doc.rust-lang.org/1.69.0/std/primitive.u8.html">u8</a>],
     forwarded_sessions: <a class="struct" href="https://doc.rust-lang.org/1.69.0/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="base/struct.SessionId.html" title="struct linera_sdk::base::SessionId">SessionId</a>&gt;
 ) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.69.0/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.69.0/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="views/futures/trait.Future.html" title="trait linera_sdk::views::futures::Future">Future</a>&lt;Output = <a class="enum" href="https://doc.rust-lang.org/1.69.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="struct.SessionCallResult.html" title="struct linera_sdk::SessionCallResult">SessionCallResult</a>, Self::<a class="associatedtype" href="trait.Contract.html#associatedtype.Error" title="type linera_sdk::Contract::Error">Error</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/1.69.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<span class="where fmt-newline">where
     Self: 'async_trait,
     'life0: 'async_trait,
     'life1: 'async_trait,
-    'life2: 'async_trait,</span></h4></section></summary><div class="docblock"><p>Handles a call into a <a href="struct.Session.html" title="struct linera_sdk::Session"><code>Session</code></a> created by this application.</p>
-<p><a href="struct.Session.html" title="struct linera_sdk::Session"><code>Session</code></a>s are another way for applications to interact inside a microchain. Sessions
+    'life2: 'async_trait,
+    'life3: 'async_trait,</span></h4></section></summary><div class="docblock"><p>Handles a call into a session created by this application.</p>
+<p>Sessions are another way for applications to interact inside a chain. Sessions
 are very similar to cross-application calls (see <a href="trait.Contract.html#tymethod.handle_application_call"><code>Self::handle_application_call</code></a>), but
-each one of them has a separate state, that’s also separate from the application state.</p>
+each one of them has a separate state, in addition to the application state.</p>
 <p>This allows moving parts of the application’s state out into sessions, which are sent
 to other applications. These sessions can be freely moved between other applications, and
 the application that created the session does not have to keep track of which application
@@ -151,19 +153,19 @@ application’s session is through calls into that session.</p>
 <p>At the end of the execution of a block, no sessions should be alive. If a block’s execution
 ends with any leaked sessions, the block is rejected. This means that all sessions should
 be called at least once in a way that the call terminates the session (by returning
-<a href="https://doc.rust-lang.org/1.69.0/core/option/enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a> as the updated session data in <a href="struct.SessionCallResult.html#structfield.data" title="field linera_sdk::SessionCallResult::data"><code>SessionCallResult::data</code></a>).</p>
+<a href="https://doc.rust-lang.org/1.69.0/core/option/enum.Option.html#variant.None" title="variant core::option::Option::None"><code>None</code></a> as the updated session data in <a href="struct.SessionCallResult.html#structfield.new_state" title="field linera_sdk::SessionCallResult::new_state"><code>SessionCallResult::new_state</code></a>).</p>
 <p>Use the <code>Self::call_application</code> method generated by the <a href="macro.contract.html" title="macro linera_sdk::contract"><code>contract!</code></a> macro to call
 another application.</p>
 <p>Returns a <a href="struct.SessionCallResult.html" title="struct linera_sdk::SessionCallResult"><code>SessionCallResult</code></a> after the call into the session has finished executing,
 which contains:</p>
 <ul>
-<li>the updated session <code>data</code>, or <code>None</code> if the session should be terminated;</li>
+<li>the updated session state, or <code>None</code> if the session should be terminated;</li>
 <li>an <a href="struct.ApplicationCallResult.html" title="struct linera_sdk::ApplicationCallResult"><code>ApplicationCallResult</code></a>, which contains:
 <ul>
-<li>a response <code>value</code> sent to the caller application;</li>
-<li>a list of newly created <a href="struct.Session.html" title="struct linera_sdk::Session"><code>Session</code></a>s sent to the caller application;</li>
+<li>a return value sent to the caller application;</li>
+<li>a list of new session states; the newly-created sessions will be owned by the caller application;</li>
 <li>an <a href="struct.ExecutionResult.html" title="struct linera_sdk::ExecutionResult"><code>ExecutionResult</code></a> with effects to be sent to this application on other
-microchains and channel subscription and unsubscription requests.</li>
+chains and channel subscription and unsubscription requests.</li>
 </ul>
 </li>
 </ul>

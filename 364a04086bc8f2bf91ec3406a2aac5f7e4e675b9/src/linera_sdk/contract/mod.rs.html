@@ -254,7 +254,7 @@
         <span class="macro-nonterminal">$</span><span class="macro">crate::instance_exported_future! </span>{
             <span class="macro-nonterminal">contract::HandleSessionCall</span>&lt;<span class="macro-nonterminal">$application</span>&gt;(
                 context: <span class="macro-nonterminal">$crate::contract::wit_types::CalleeContext</span>,
-                session: <span class="macro-nonterminal">$crate::contract::wit_types::Session</span>,
+                session: Vec&lt;u8&gt;,
                 argument: Vec&lt;u8&gt;,
                 forwarded_sessions: Vec&lt;<span class="macro-nonterminal">$crate::contract::wit_types::SessionId</span>&gt;,
             ) -&gt; PollCallSession

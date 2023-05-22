@@ -622,15 +622,13 @@
 <a href="#622" id="622">622</a>
 <a href="#623" id="623">623</a>
 <a href="#624" id="624">624</a>
-<a href="#625" id="625">625</a>
-<a href="#626" id="626">626</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use crate</span>::{
     execution::ExecutionStateView, BaseRuntime, CallResult, ContractRuntime, ExecutionError,
-    ExecutionResult, ExecutionRuntimeContext, NewSession, ServiceRuntime, SessionId,
-    UserApplicationCode, UserApplicationDescription, UserApplicationId,
+    ExecutionResult, ExecutionRuntimeContext, ServiceRuntime, SessionId, UserApplicationCode,
+    UserApplicationDescription, UserApplicationId,
 };
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>custom_debug_derive::Debug;
@@ -824,7 +822,7 @@
 
     <span class="kw">fn </span>make_sessions(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        new_sessions: Vec&lt;NewSession&gt;,
+        new_sessions: Vec&lt;Vec&lt;u8&gt;&gt;,
         creator_id: UserApplicationId,
         receiver_id: UserApplicationId,
     ) -&gt; Vec&lt;SessionId&gt; {
@@ -833,17 +831,16 @@
         <span class="kw">let </span>states = <span class="kw-2">&amp;mut </span>manager.states;
         <span class="kw">let </span>counter = manager.counters.entry(creator_id).or_default();
         <span class="kw">let </span><span class="kw-2">mut </span>session_ids = Vec::new();
-        <span class="kw">for </span>session <span class="kw">in </span>new_sessions {
+        <span class="kw">for </span>data <span class="kw">in </span>new_sessions {
             <span class="kw">let </span>id = SessionId {
                 application_id: creator_id,
-                kind: session.kind,
                 index: <span class="kw-2">*</span>counter,
             };
             <span class="kw-2">*</span>counter += <span class="number">1</span>;
             session_ids.push(id);
             <span class="kw">let </span>state = SessionState {
                 owner: receiver_id,
-                data: session.data,
+                data,
             };
             states.insert(id, Arc::new(Mutex::new(state)));
         }
@@ -1194,7 +1191,7 @@
         <span class="comment">// Change the owners of forwarded sessions.
         </span><span class="self">self</span>.forward_sessions(<span class="kw-2">&amp;</span>forwarded_sessions, caller.id, callee_id)<span class="question-mark">?</span>;
         <span class="comment">// Load the session.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>session_data = <span class="self">self</span>.try_load_session(session_id, <span class="self">self</span>.application_id())<span class="question-mark">?</span>;
+        </span><span class="kw">let </span><span class="kw-2">mut </span>session_state = <span class="self">self</span>.try_load_session(session_id, <span class="self">self</span>.application_id())<span class="question-mark">?</span>;
         <span class="comment">// Make the call to user code.
         </span><span class="kw">let </span>authenticated_signer = <span class="kw">match </span>caller.signer {
             <span class="prelude-val">Some</span>(signer) <span class="kw">if </span>authenticated =&gt; <span class="prelude-val">Some</span>(signer),
@@ -1216,8 +1213,7 @@
             .handle_session_call(
                 <span class="kw-2">&amp;</span>callee_context,
                 <span class="self">self</span>,
-                session_id.kind,
-                <span class="kw-2">&amp;mut </span>session_data,
+                <span class="kw-2">&amp;mut </span>session_state,
                 argument,
                 forwarded_sessions,
             )
@@ -1229,7 +1225,7 @@
             </span><span class="self">self</span>.try_close_session(session_id, <span class="self">self</span>.application_id())<span class="question-mark">?</span>;
         } <span class="kw">else </span>{
             <span class="comment">// Save the session.
-            </span><span class="self">self</span>.try_save_session(session_id, <span class="self">self</span>.application_id(), session_data)<span class="question-mark">?</span>;
+            </span><span class="self">self</span>.try_save_session(session_id, <span class="self">self</span>.application_id(), session_state)<span class="question-mark">?</span>;
         }
         <span class="kw">let </span>inner_result = raw_result.inner;
         <span class="self">self</span>.execution_results_mut().push(ExecutionResult::User(

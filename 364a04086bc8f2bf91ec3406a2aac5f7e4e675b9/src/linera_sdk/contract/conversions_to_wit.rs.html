@@ -178,22 +178,6 @@
 <a href="#178" id="178">178</a>
 <a href="#179" id="179">179</a>
 <a href="#180" id="180">180</a>
-<a href="#181" id="181">181</a>
-<a href="#182" id="182">182</a>
-<a href="#183" id="183">183</a>
-<a href="#184" id="184">184</a>
-<a href="#185" id="185">185</a>
-<a href="#186" id="186">186</a>
-<a href="#187" id="187">187</a>
-<a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
-<a href="#194" id="194">194</a>
-<a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -201,7 +185,7 @@
 //! [`wit-bindgen-guest-rust`].
 
 </span><span class="kw">use super</span>::{contract_system_api <span class="kw">as </span>wit_system_api, wit_types};
-<span class="kw">use crate</span>::{ApplicationCallResult, ExecutionResult, Session, SessionCallResult};
+<span class="kw">use crate</span>::{ApplicationCallResult, ExecutionResult, SessionCallResult};
 <span class="kw">use </span>linera_base::{
     crypto::CryptoHash,
     identifiers::{ApplicationId, ChannelName, Destination, EffectId, SessionId},
@@ -247,7 +231,6 @@
     <span class="kw">fn </span>from(session_id: SessionId) -&gt; <span class="self">Self </span>{
         wit_system_api::SessionId {
             application_id: session_id.application_id.into(),
-            kind: session_id.kind,
             index: session_id.index,
         }
     }
@@ -277,25 +260,10 @@
 
 <span class="kw">impl </span>From&lt;ApplicationCallResult&gt; <span class="kw">for </span>wit_types::ApplicationCallResult {
     <span class="kw">fn </span>from(result: ApplicationCallResult) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>create_sessions = result
-            .create_sessions
-            .into_iter()
-            .map(wit_types::Session::from)
-            .collect();
-
         wit_types::ApplicationCallResult {
-            create_sessions,
+            create_sessions: result.create_sessions,
             execution_result: result.execution_result.into(),
             value: result.value,
-        }
-    }
-}
-
-<span class="kw">impl </span>From&lt;Session&gt; <span class="kw">for </span>wit_types::Session {
-    <span class="kw">fn </span>from(new_session: Session) -&gt; <span class="self">Self </span>{
-        wit_types::Session {
-            kind: new_session.kind,
-            data: new_session.data,
         }
     }
 }
@@ -304,7 +272,7 @@
     <span class="kw">fn </span>from(result: SessionCallResult) -&gt; <span class="self">Self </span>{
         wit_types::SessionCallResult {
             inner: result.inner.into(),
-            data: result.data,
+            new_state: result.new_state,
         }
     }
 }
