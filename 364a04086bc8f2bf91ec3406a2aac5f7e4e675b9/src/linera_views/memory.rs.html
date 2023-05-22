@@ -136,8 +136,6 @@
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
 <a href="#138" id="138">138</a>
-<a href="#139" id="139">139</a>
-<a href="#140" id="140">140</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -148,7 +146,6 @@
 };
 <span class="kw">use </span>async_lock::{Mutex, MutexGuardArc, RwLock};
 <span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>std::{collections::BTreeMap, fmt::Debug, sync::Arc};
 <span class="kw">use </span>thiserror::Error;
 
@@ -177,8 +174,7 @@
 </span><span class="kw">pub fn </span>create_test_context() -&gt; MemoryContext&lt;()&gt; {
     <span class="kw">let </span>state = Arc::new(Mutex::new(BTreeMap::new()));
     <span class="kw">let </span>guard = state
-        .lock_arc()
-        .now_or_never()
+        .try_lock_arc()
         .expect(<span class="string">&quot;We should acquire the lock just after creating the object&quot;</span>);
     MemoryContext::new(guard, ())
 }

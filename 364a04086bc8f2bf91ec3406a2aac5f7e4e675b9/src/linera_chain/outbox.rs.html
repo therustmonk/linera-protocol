@@ -86,6 +86,8 @@
 <a href="#86" id="86">86</a>
 <a href="#87" id="87">87</a>
 <a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -167,7 +169,9 @@
     ViewError: From&lt;&lt;MemoryContext&lt;()&gt; <span class="kw">as </span>linera_views::common::Context&gt;::Error&gt;,
 {
     <span class="kw">pub async fn </span>new() -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>guard = Arc::new(Mutex::new(BTreeMap::new())).lock_arc().<span class="kw">await</span>;
+        <span class="kw">let </span>guard = Arc::new(Mutex::new(BTreeMap::new()))
+            .try_lock_arc()
+            .expect(<span class="string">&quot;a guard&quot;</span>);
         <span class="kw">let </span>context = MemoryContext::new(guard, ());
         <span class="self">Self</span>::load(context)
             .<span class="kw">await

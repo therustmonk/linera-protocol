@@ -34,14 +34,11 @@
 <a href="#34" id="34">34</a>
 <a href="#35" id="35">35</a>
 <a href="#36" id="36">36</a>
-<a href="#37" id="37">37</a>
-<a href="#38" id="38">38</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use crate</span>::{chain_guards::ChainGuards, DbStore, DbStoreClient};
 <span class="kw">use </span>async_lock::{Mutex, RwLock};
-<span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>linera_execution::WasmRuntime;
 <span class="kw">use </span>linera_views::memory::MemoryClient;
 <span class="kw">use </span>std::{collections::BTreeMap, sync::Arc};
@@ -62,8 +59,7 @@
     <span class="kw">pub fn </span>new(wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>state = Arc::new(Mutex::new(BTreeMap::new()));
         <span class="kw">let </span>guard = state
-            .lock_arc()
-            .now_or_never()
+            .try_lock_arc()
             .expect(<span class="string">&quot;We should be able to acquire what we just created&quot;</span>);
         <span class="kw">let </span>client = Arc::new(RwLock::new(guard));
         <span class="self">Self </span>{
