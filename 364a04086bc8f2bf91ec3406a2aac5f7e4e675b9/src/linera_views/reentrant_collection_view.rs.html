@@ -2497,7 +2497,7 @@
         </span>I: Borrow&lt;Q&gt;,
         Q: CustomSerialize + <span class="question-mark">?</span>Sized,
     {
-        <span class="kw">let </span>short_key = index.to_custom_bytes::&lt;C&gt;()<span class="question-mark">?</span>;
+        <span class="kw">let </span>short_key = index.to_custom_bytes()<span class="question-mark">?</span>;
         <span class="self">self</span>.collection.try_load_entry_mut(short_key).<span class="kw">await
     </span>}
 
@@ -2521,7 +2521,7 @@
         </span>I: Borrow&lt;Q&gt;,
         Q: CustomSerialize + <span class="question-mark">?</span>Sized,
     {
-        <span class="kw">let </span>short_key = index.to_custom_bytes::&lt;C&gt;()<span class="question-mark">?</span>;
+        <span class="kw">let </span>short_key = index.to_custom_bytes()<span class="question-mark">?</span>;
         <span class="self">self</span>.collection.try_load_entry(short_key).<span class="kw">await
     </span>}
 
@@ -2547,7 +2547,7 @@
         </span>I: Borrow&lt;Q&gt;,
         Q: CustomSerialize + <span class="question-mark">?</span>Sized,
     {
-        <span class="kw">let </span>short_key = index.to_custom_bytes::&lt;C&gt;()<span class="question-mark">?</span>;
+        <span class="kw">let </span>short_key = index.to_custom_bytes()<span class="question-mark">?</span>;
         <span class="self">self</span>.collection.remove_entry(short_key);
         <span class="prelude-val">Ok</span>(())
     }
@@ -2579,7 +2579,7 @@
         </span>I: Borrow&lt;Q&gt;,
         Q: CustomSerialize + <span class="question-mark">?</span>Sized,
     {
-        <span class="kw">let </span>short_key = index.to_custom_bytes::&lt;C&gt;()<span class="question-mark">?</span>;
+        <span class="kw">let </span>short_key = index.to_custom_bytes()<span class="question-mark">?</span>;
         <span class="self">self</span>.collection.try_reset_entry_to_default(short_key).<span class="kw">await
     </span>}
 
@@ -2624,7 +2624,7 @@
     {
         <span class="kw">let </span>short_keys = indices
             .into_iter()
-            .map(|index| index.to_custom_bytes::&lt;C&gt;())
+            .map(|index| index.to_custom_bytes())
             .collect::&lt;<span class="prelude-ty">Result</span>&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;()<span class="question-mark">?</span>;
         <span class="self">self</span>.collection.try_load_entries_mut(short_keys).<span class="kw">await
     </span>}
@@ -2657,7 +2657,7 @@
     {
         <span class="kw">let </span>short_keys = indices
             .into_iter()
-            .map(|index| index.to_custom_bytes::&lt;C&gt;())
+            .map(|index| index.to_custom_bytes())
             .collect::&lt;<span class="prelude-ty">Result</span>&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;()<span class="question-mark">?</span>;
         <span class="self">self</span>.collection.try_load_entries(short_keys).<span class="kw">await
     </span>}
@@ -2724,7 +2724,7 @@
     {
         <span class="self">self</span>.collection
             .for_each_key_while(|key| {
-                <span class="kw">let </span>index = I::from_custom_bytes::&lt;C&gt;(key)<span class="question-mark">?</span>;
+                <span class="kw">let </span>index = I::from_custom_bytes(key)<span class="question-mark">?</span>;
                 f(index)
             })
             .<span class="kw">await</span><span class="question-mark">?</span>;
@@ -2758,7 +2758,7 @@
     {
         <span class="self">self</span>.collection
             .for_each_key(|key| {
-                <span class="kw">let </span>index = I::from_custom_bytes::&lt;C&gt;(key)<span class="question-mark">?</span>;
+                <span class="kw">let </span>index = I::from_custom_bytes(key)<span class="question-mark">?</span>;
                 f(index)
             })
             .<span class="kw">await</span><span class="question-mark">?</span>;

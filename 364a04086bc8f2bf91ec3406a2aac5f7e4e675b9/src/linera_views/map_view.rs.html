@@ -2319,7 +2319,7 @@
         </span>I: Borrow&lt;Q&gt;,
         Q: Serialize + <span class="question-mark">?</span>Sized + CustomSerialize,
     {
-        <span class="kw">let </span>short_key = index.to_custom_bytes::&lt;C&gt;()<span class="question-mark">?</span>;
+        <span class="kw">let </span>short_key = index.to_custom_bytes()<span class="question-mark">?</span>;
         <span class="self">self</span>.map.insert(short_key, value);
         <span class="prelude-val">Ok</span>(())
     }
@@ -2341,7 +2341,7 @@
         </span>I: Borrow&lt;Q&gt;,
         Q: Serialize + <span class="question-mark">?</span>Sized + CustomSerialize,
     {
-        <span class="kw">let </span>short_key = index.to_custom_bytes::&lt;C&gt;()<span class="question-mark">?</span>;
+        <span class="kw">let </span>short_key = index.to_custom_bytes()<span class="question-mark">?</span>;
         <span class="self">self</span>.map.remove(short_key);
         <span class="prelude-val">Ok</span>(())
     }
@@ -2377,7 +2377,7 @@
         </span>I: Borrow&lt;Q&gt;,
         Q: Serialize + <span class="question-mark">?</span>Sized + CustomSerialize,
     {
-        <span class="kw">let </span>short_key = index.to_custom_bytes::&lt;C&gt;()<span class="question-mark">?</span>;
+        <span class="kw">let </span>short_key = index.to_custom_bytes()<span class="question-mark">?</span>;
         <span class="self">self</span>.map.get(short_key).<span class="kw">await
     </span>}
 
@@ -2400,7 +2400,7 @@
         </span>I: Borrow&lt;Q&gt;,
         Q: Serialize + <span class="question-mark">?</span>Sized + CustomSerialize,
     {
-        <span class="kw">let </span>short_key = index.to_custom_bytes::&lt;C&gt;()<span class="question-mark">?</span>;
+        <span class="kw">let </span>short_key = index.to_custom_bytes()<span class="question-mark">?</span>;
         <span class="self">self</span>.map.get_mut(short_key).<span class="kw">await
     </span>}
 }
@@ -2462,7 +2462,7 @@
     {
         <span class="self">self</span>.map
             .for_each_key_while(|key| {
-                <span class="kw">let </span>index = I::from_custom_bytes::&lt;C&gt;(key)<span class="question-mark">?</span>;
+                <span class="kw">let </span>index = I::from_custom_bytes(key)<span class="question-mark">?</span>;
                 f(index)
             })
             .<span class="kw">await</span><span class="question-mark">?</span>;
@@ -2494,7 +2494,7 @@
     {
         <span class="self">self</span>.map
             .for_each_key(|key| {
-                <span class="kw">let </span>index = I::from_custom_bytes::&lt;C&gt;(key)<span class="question-mark">?</span>;
+                <span class="kw">let </span>index = I::from_custom_bytes(key)<span class="question-mark">?</span>;
                 f(index)
             })
             .<span class="kw">await</span><span class="question-mark">?</span>;
@@ -2527,7 +2527,7 @@
     {
         <span class="self">self</span>.map
             .for_each_key_value_while(|key, bytes| {
-                <span class="kw">let </span>index = I::from_custom_bytes::&lt;C&gt;(key)<span class="question-mark">?</span>;
+                <span class="kw">let </span>index = I::from_custom_bytes(key)<span class="question-mark">?</span>;
                 <span class="kw">let </span>value = C::deserialize_value(bytes)<span class="question-mark">?</span>;
                 f(index, value)
             })
@@ -2560,7 +2560,7 @@
     {
         <span class="self">self</span>.map
             .for_each_key_value(|key, bytes| {
-                <span class="kw">let </span>index = I::from_custom_bytes::&lt;C&gt;(key)<span class="question-mark">?</span>;
+                <span class="kw">let </span>index = I::from_custom_bytes(key)<span class="question-mark">?</span>;
                 <span class="kw">let </span>value = C::deserialize_value(bytes)<span class="question-mark">?</span>;
                 f(index, value)
             })
@@ -2593,7 +2593,7 @@
         </span>I: Borrow&lt;Q&gt;,
         Q: Sync + Send + Serialize + <span class="question-mark">?</span>Sized + CustomSerialize,
     {
-        <span class="kw">let </span>short_key = index.to_custom_bytes::&lt;C&gt;()<span class="question-mark">?</span>;
+        <span class="kw">let </span>short_key = index.to_custom_bytes()<span class="question-mark">?</span>;
         <span class="self">self</span>.map.get_mut_or_default(short_key).<span class="kw">await
     </span>}
 }

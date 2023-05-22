@@ -1493,7 +1493,7 @@
         </span>I: Borrow&lt;Q&gt;,
         Q: CustomSerialize + <span class="question-mark">?</span>Sized,
     {
-        <span class="kw">let </span>short_key = index.to_custom_bytes::&lt;C&gt;()<span class="question-mark">?</span>;
+        <span class="kw">let </span>short_key = index.to_custom_bytes()<span class="question-mark">?</span>;
         <span class="self">self</span>.set.insert(short_key);
         <span class="prelude-val">Ok</span>(())
     }
@@ -1515,7 +1515,7 @@
         </span>I: Borrow&lt;Q&gt;,
         Q: CustomSerialize + <span class="question-mark">?</span>Sized,
     {
-        <span class="kw">let </span>short_key = index.to_custom_bytes::&lt;C&gt;()<span class="question-mark">?</span>;
+        <span class="kw">let </span>short_key = index.to_custom_bytes()<span class="question-mark">?</span>;
         <span class="self">self</span>.set.remove(short_key);
         <span class="prelude-val">Ok</span>(())
     }
@@ -1550,7 +1550,7 @@
         </span>I: Borrow&lt;Q&gt;,
         Q: CustomSerialize + <span class="question-mark">?</span>Sized,
     {
-        <span class="kw">let </span>short_key = index.to_custom_bytes::&lt;C&gt;()<span class="question-mark">?</span>;
+        <span class="kw">let </span>short_key = index.to_custom_bytes()<span class="question-mark">?</span>;
         <span class="self">self</span>.set.contains(short_key).<span class="kw">await
     </span>}
 }
@@ -1612,7 +1612,7 @@
     {
         <span class="self">self</span>.set
             .for_each_key_while(|key| {
-                <span class="kw">let </span>index = I::from_custom_bytes::&lt;C&gt;(key)<span class="question-mark">?</span>;
+                <span class="kw">let </span>index = I::from_custom_bytes(key)<span class="question-mark">?</span>;
                 f(index)
             })
             .<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1645,7 +1645,7 @@
     {
         <span class="self">self</span>.set
             .for_each_key(|key| {
-                <span class="kw">let </span>index = I::from_custom_bytes::&lt;C&gt;(key)<span class="question-mark">?</span>;
+                <span class="kw">let </span>index = I::from_custom_bytes(key)<span class="question-mark">?</span>;
                 f(index)
             })
             .<span class="kw">await</span><span class="question-mark">?</span>;
