@@ -178,6 +178,65 @@
 <a href="#178" id="178">178</a>
 <a href="#179" id="179">179</a>
 <a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -190,7 +249,8 @@
     crypto::CryptoHash,
     identifiers::{ApplicationId, ChannelName, Destination, EffectId, SessionId},
 };
-<span class="kw">use </span>std::task::Poll;
+<span class="kw">use </span>serde::{de::DeserializeOwned, Serialize};
+<span class="kw">use </span>std::{fmt::Debug, task::Poll};
 
 <span class="kw">impl </span>From&lt;CryptoHash&gt; <span class="kw">for </span>wit_system_api::CryptoHash {
     <span class="kw">fn </span>from(hash_value: CryptoHash) -&gt; <span class="self">Self </span>{
@@ -258,31 +318,70 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;ApplicationCallResult&gt; <span class="kw">for </span>wit_types::ApplicationCallResult {
-    <span class="kw">fn </span>from(result: ApplicationCallResult) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;Effect, Value, SessionState&gt; From&lt;ApplicationCallResult&lt;Effect, Value, SessionState&gt;&gt;
+    <span class="kw">for </span>wit_types::ApplicationCallResult
+<span class="kw">where
+    </span>Effect: Serialize + DeserializeOwned + Debug,
+    Value: Serialize,
+    SessionState: Serialize,
+{
+    <span class="kw">fn </span>from(result: ApplicationCallResult&lt;Effect, Value, SessionState&gt;) -&gt; <span class="self">Self </span>{
+        <span class="comment">// TODO(#743): Do we need explicit error handling?
+        </span><span class="kw">let </span>value = bcs::to_bytes(<span class="kw-2">&amp;</span>result.value)
+            .expect(<span class="string">&quot;failed to serialize Value for ApplicationCallResult&quot;</span>);
+
+        <span class="kw">let </span>create_sessions = result
+            .create_sessions
+            .into_iter()
+            .map(|v| {
+                bcs::to_bytes(<span class="kw-2">&amp;</span>v)
+                    .expect(<span class="string">&quot;failed to serialize session state for ApplicationCallResult&quot;</span>)
+            })
+            .collect();
+
         wit_types::ApplicationCallResult {
-            create_sessions: result.create_sessions,
+            value,
             execution_result: result.execution_result.into(),
-            value: result.value,
+            create_sessions,
         }
     }
 }
 
-<span class="kw">impl </span>From&lt;SessionCallResult&gt; <span class="kw">for </span>wit_types::SessionCallResult {
-    <span class="kw">fn </span>from(result: SessionCallResult) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;Effect, Value, SessionState&gt; From&lt;SessionCallResult&lt;Effect, Value, SessionState&gt;&gt;
+    <span class="kw">for </span>wit_types::SessionCallResult
+<span class="kw">where
+    </span>Effect: Serialize + DeserializeOwned + Debug,
+    Value: Serialize,
+    SessionState: Serialize,
+{
+    <span class="kw">fn </span>from(result: SessionCallResult&lt;Effect, Value, SessionState&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>new_state = result.new_state.as_ref().map(|state| {
+            <span class="comment">// TODO(#743): Do we need explicit error handling?
+            </span>bcs::to_bytes(state).expect(<span class="string">&quot;session type serialization failed&quot;</span>)
+        });
         wit_types::SessionCallResult {
             inner: result.inner.into(),
-            new_state: result.new_state,
+            new_state,
         }
     }
 }
 
-<span class="kw">impl </span>From&lt;ExecutionResult&gt; <span class="kw">for </span>wit_types::ExecutionResult {
-    <span class="kw">fn </span>from(result: ExecutionResult) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;Effect&gt; From&lt;ExecutionResult&lt;Effect&gt;&gt; <span class="kw">for </span>wit_types::ExecutionResult
+<span class="kw">where
+    </span>Effect: Debug + Serialize + DeserializeOwned,
+{
+    <span class="kw">fn </span>from(result: ExecutionResult&lt;Effect&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>effects = result
             .effects
             .into_iter()
-            .map(|(destination, authenticated, effect)| (destination.into(), authenticated, effect))
+            .map(|(destination, authenticated, effect)| {
+                (
+                    destination.into(),
+                    authenticated,
+                    <span class="comment">// TODO(#743): Do we need explicit error handling?
+                    </span>bcs::to_bytes(<span class="kw-2">&amp;</span>effect).expect(<span class="string">&quot;effect serialization failed&quot;</span>),
+                )
+            })
             .collect();
 
         <span class="kw">let </span>subscribe = result
@@ -326,8 +425,11 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;Poll&lt;<span class="prelude-ty">Result</span>&lt;ExecutionResult, String&gt;&gt;&gt; <span class="kw">for </span>wit_types::PollExecutionResult {
-    <span class="kw">fn </span>from(poll: Poll&lt;<span class="prelude-ty">Result</span>&lt;ExecutionResult, String&gt;&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;Effect&gt; From&lt;Poll&lt;<span class="prelude-ty">Result</span>&lt;ExecutionResult&lt;Effect&gt;, String&gt;&gt;&gt; <span class="kw">for </span>wit_types::PollExecutionResult
+<span class="kw">where
+    </span>Effect: DeserializeOwned + Serialize + Debug,
+{
+    <span class="kw">fn </span>from(poll: Poll&lt;<span class="prelude-ty">Result</span>&lt;ExecutionResult&lt;Effect&gt;, String&gt;&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">use </span>wit_types::PollExecutionResult;
         <span class="kw">match </span>poll {
             Poll::Pending =&gt; PollExecutionResult::Pending,
@@ -337,8 +439,17 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;Poll&lt;<span class="prelude-ty">Result</span>&lt;ApplicationCallResult, String&gt;&gt;&gt; <span class="kw">for </span>wit_types::PollCallApplication {
-    <span class="kw">fn </span>from(poll: Poll&lt;<span class="prelude-ty">Result</span>&lt;ApplicationCallResult, String&gt;&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;Effect, Value, SessionState&gt;
+    From&lt;Poll&lt;<span class="prelude-ty">Result</span>&lt;ApplicationCallResult&lt;Effect, Value, SessionState&gt;, String&gt;&gt;&gt;
+    <span class="kw">for </span>wit_types::PollCallApplication
+<span class="kw">where
+    </span>Effect: Serialize + DeserializeOwned + Debug,
+    Value: Serialize,
+    SessionState: Serialize,
+{
+    <span class="kw">fn </span>from(
+        poll: Poll&lt;<span class="prelude-ty">Result</span>&lt;ApplicationCallResult&lt;Effect, Value, SessionState&gt;, String&gt;&gt;,
+    ) -&gt; <span class="self">Self </span>{
         <span class="kw">use </span>wit_types::PollCallApplication;
         <span class="kw">match </span>poll {
             Poll::Pending =&gt; PollCallApplication::Pending,
@@ -348,8 +459,15 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;Poll&lt;<span class="prelude-ty">Result</span>&lt;SessionCallResult, String&gt;&gt;&gt; <span class="kw">for </span>wit_types::PollCallSession {
-    <span class="kw">fn </span>from(poll: Poll&lt;<span class="prelude-ty">Result</span>&lt;SessionCallResult, String&gt;&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;Effect, Value, SessionState&gt;
+    From&lt;Poll&lt;<span class="prelude-ty">Result</span>&lt;SessionCallResult&lt;Effect, Value, SessionState&gt;, String&gt;&gt;&gt;
+    <span class="kw">for </span>wit_types::PollCallSession
+<span class="kw">where
+    </span>Effect: Serialize + DeserializeOwned + Debug,
+    Value: Serialize,
+    SessionState: Serialize,
+{
+    <span class="kw">fn </span>from(poll: Poll&lt;<span class="prelude-ty">Result</span>&lt;SessionCallResult&lt;Effect, Value, SessionState&gt;, String&gt;&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">use </span>wit_types::PollCallSession;
         <span class="kw">match </span>poll {
             Poll::Pending =&gt; PollCallSession::Pending,

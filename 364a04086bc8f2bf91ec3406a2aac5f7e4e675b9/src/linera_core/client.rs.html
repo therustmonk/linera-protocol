@@ -1476,6 +1476,26 @@
 <a href="#1476" id="1476">1476</a>
 <a href="#1477" id="1477">1477</a>
 <a href="#1478" id="1478">1478</a>
+<a href="#1479" id="1479">1479</a>
+<a href="#1480" id="1480">1480</a>
+<a href="#1481" id="1481">1481</a>
+<a href="#1482" id="1482">1482</a>
+<a href="#1483" id="1483">1483</a>
+<a href="#1484" id="1484">1484</a>
+<a href="#1485" id="1485">1485</a>
+<a href="#1486" id="1486">1486</a>
+<a href="#1487" id="1487">1487</a>
+<a href="#1488" id="1488">1488</a>
+<a href="#1489" id="1489">1489</a>
+<a href="#1490" id="1490">1490</a>
+<a href="#1491" id="1491">1491</a>
+<a href="#1492" id="1492">1492</a>
+<a href="#1493" id="1493">1493</a>
+<a href="#1494" id="1494">1494</a>
+<a href="#1495" id="1495">1495</a>
+<a href="#1496" id="1496">1496</a>
+<a href="#1497" id="1497">1497</a>
+<a href="#1498" id="1498">1498</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1493,6 +1513,7 @@
     stream::{<span class="self">self</span>, FuturesUnordered, StreamExt},
 };
 <span class="kw">use </span>linera_base::{
+    abi::ContractAbi,
     crypto::{CryptoHash, KeyPair, PublicKey},
     data_types::{Amount, BlockHeight, RoundNumber, Timestamp},
     identifiers::{BytecodeId, ChainId, EffectId, Owner},
@@ -2799,7 +2820,26 @@
     }
 
     <span class="doccomment">/// Creates an application by instantiating some bytecode.
-    </span><span class="kw">pub async fn </span>create_application(
+    </span><span class="kw">pub async fn </span>create_application&lt;A: ContractAbi&gt;(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        bytecode_id: BytecodeId,
+        parameters: <span class="kw-2">&amp;</span>A::Parameters,
+        initialization_argument: <span class="kw-2">&amp;</span>A::InitializationArgument,
+        required_application_ids: Vec&lt;UserApplicationId&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(UserApplicationId, Certificate)&gt; {
+        <span class="kw">let </span>initialization_argument = serde_json::to_vec(initialization_argument)<span class="question-mark">?</span>;
+        <span class="kw">let </span>parameters = serde_json::to_vec(parameters)<span class="question-mark">?</span>;
+        <span class="self">self</span>.create_application_untyped(
+            bytecode_id,
+            parameters,
+            initialization_argument,
+            required_application_ids,
+        )
+        .<span class="kw">await
+    </span>}
+
+    <span class="doccomment">/// Creates an application by instantiating some bytecode.
+    </span><span class="kw">pub async fn </span>create_application_untyped(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         bytecode_id: BytecodeId,
         parameters: Vec&lt;u8&gt;,

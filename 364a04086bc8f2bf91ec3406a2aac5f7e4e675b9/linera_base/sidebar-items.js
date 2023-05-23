@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["BcsHexParseError"],"fn":["hex_debug"],"macro":["bcs_scalar","doc_scalar","ensure"],"mod":["crypto","data_types","identifiers"]};
+window.SIDEBAR_ITEMS = {"enum":["BcsHexParseError"],"fn":["hex_debug"],"macro":["bcs_scalar","doc_scalar","ensure"],"mod":["abi","crypto","data_types","identifiers"]};

@@ -154,6 +154,10 @@
 <a href="#154" id="154">154</a>
 <a href="#155" id="155">155</a>
 <a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -163,6 +167,7 @@
 //! it, and blocks can be added to each microchain individually.
 
 </span><span class="kw">use </span><span class="kw">super</span>::ActiveChain;
+<span class="kw">use </span><span class="kw">crate</span>::ContractAbi;
 <span class="kw">use </span>dashmap::DashMap;
 <span class="kw">use </span>linera_base::{
     crypto::KeyPair,
@@ -245,16 +250,19 @@
     /// another microchain.
     ///
     /// Returns the new [`TestValidator`] and the [`ApplicationId`] of the created application.
-    </span><span class="kw">pub async fn </span>with_current_application(
-        parameters: Vec&lt;u8&gt;,
-        initialization_argument: Vec&lt;u8&gt;,
-    ) -&gt; (TestValidator, ApplicationId) {
+    </span><span class="kw">pub async fn </span>with_current_application&lt;A&gt;(
+        parameters: A::Parameters,
+        initialization_argument: A::InitializationArgument,
+    ) -&gt; (TestValidator, ApplicationId)
+    <span class="kw">where
+        </span>A: ContractAbi,
+    {
         <span class="kw">let </span>(validator, bytecode_id) = TestValidator::with_current_bytecode().<span class="kw">await</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>creator = validator.new_chain().<span class="kw">await</span>;
 
         <span class="kw">let </span>application_id = creator
-            .create_application(bytecode_id, parameters, initialization_argument, <span class="macro">vec!</span>[])
+            .create_application::&lt;A&gt;(bytecode_id, parameters, initialization_argument, <span class="macro">vec!</span>[])
             .<span class="kw">await</span>;
 
         (validator, application_id)

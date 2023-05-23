@@ -360,6 +360,27 @@
 <a href="#360" id="360">360</a>
 <a href="#361" id="361">361</a>
 <a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -493,26 +514,28 @@
 /// [`Contract::initialize`].
 ///
 /// Loads the `Application` state and calls its [`initialize`][Contract::initialize] method.
-</span><span class="kw">pub struct </span>Initialize&lt;Application&gt; {
-    future: ExportedFuture&lt;<span class="prelude-ty">Result</span>&lt;ExecutionResult, String&gt;&gt;,
+</span><span class="kw">pub struct </span>Initialize&lt;Application: Contract&gt; {
+    future: ExportedFuture&lt;<span class="prelude-ty">Result</span>&lt;ExecutionResult&lt;Application::Effect&gt;, String&gt;&gt;,
     _application: PhantomData&lt;Application&gt;,
 }
 
 <span class="kw">impl</span>&lt;Application&gt; Initialize&lt;Application&gt;
 <span class="kw">where
-    </span>Application: Contract + Send,
-    Application::Error: <span class="lifetime">&#39;static</span>,
-    Application::Storage: ContractStateStorage&lt;Application&gt; + Send + <span class="lifetime">&#39;static</span>,
+    </span>Application: Contract,
 {
     <span class="doccomment">/// Creates the exported future that the host can poll.
     ///
     /// This is called from the host.
-    </span><span class="kw">pub fn </span>new(context: wit_types::OperationContext, argument: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(context: wit_types::OperationContext, bytes: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
         ContractLogger::install();
         Initialize {
             future: ExportedFuture::new(Application::Storage::execute_with_state(
                 <span class="kw">move </span>|application| {
-                    <span class="kw">async move </span>{ application.initialize(<span class="kw-2">&amp;</span>context.into(), <span class="kw-2">&amp;</span>argument).<span class="kw">await </span>}.boxed()
+                    <span class="kw">async move </span>{
+                        <span class="kw">let </span>argument = serde_json::from_slice(<span class="kw-2">&amp;</span>bytes)<span class="question-mark">?</span>;
+                        application.initialize(<span class="kw-2">&amp;</span>context.into(), argument).<span class="kw">await
+                    </span>}
+                    .boxed()
                 },
             )),
             _application: PhantomData,
@@ -532,16 +555,14 @@
 ///
 /// Loads the `Application` state and calls its
 /// [`execute_operation`][Contract::execute_operation] method.
-</span><span class="kw">pub struct </span>ExecuteOperation&lt;Application&gt; {
-    future: ExportedFuture&lt;<span class="prelude-ty">Result</span>&lt;ExecutionResult, String&gt;&gt;,
+</span><span class="kw">pub struct </span>ExecuteOperation&lt;Application: Contract&gt; {
+    future: ExportedFuture&lt;<span class="prelude-ty">Result</span>&lt;ExecutionResult&lt;Application::Effect&gt;, String&gt;&gt;,
     _application: PhantomData&lt;Application&gt;,
 }
 
 <span class="kw">impl</span>&lt;Application&gt; ExecuteOperation&lt;Application&gt;
 <span class="kw">where
-    </span>Application: Contract + Send,
-    Application::Error: <span class="lifetime">&#39;static</span>,
-    Application::Storage: ContractStateStorage&lt;Application&gt; + Send + <span class="lifetime">&#39;static</span>,
+    </span>Application: Contract,
 {
     <span class="doccomment">/// Creates the exported future that the host can poll.
     ///
@@ -552,8 +573,9 @@
             future: ExportedFuture::new(Application::Storage::execute_with_state(
                 <span class="kw">move </span>|application| {
                     <span class="kw">async move </span>{
+                        <span class="kw">let </span>operation: Application::Operation = bcs::from_bytes(<span class="kw-2">&amp;</span>operation)<span class="question-mark">?</span>;
                         application
-                            .execute_operation(<span class="kw-2">&amp;</span>context.into(), <span class="kw-2">&amp;</span>operation)
+                            .execute_operation(<span class="kw-2">&amp;</span>context.into(), operation)
                             .<span class="kw">await
                     </span>}
                     .boxed()
@@ -576,16 +598,14 @@
 ///
 /// Loads the `Application` state and calls its [`execute_effect`][Contract::execute_effect]
 /// method.
-</span><span class="kw">pub struct </span>ExecuteEffect&lt;Application&gt; {
-    future: ExportedFuture&lt;<span class="prelude-ty">Result</span>&lt;ExecutionResult, String&gt;&gt;,
+</span><span class="kw">pub struct </span>ExecuteEffect&lt;Application: Contract&gt; {
+    future: ExportedFuture&lt;<span class="prelude-ty">Result</span>&lt;ExecutionResult&lt;Application::Effect&gt;, String&gt;&gt;,
     _application: PhantomData&lt;Application&gt;,
 }
 
 <span class="kw">impl</span>&lt;Application&gt; ExecuteEffect&lt;Application&gt;
 <span class="kw">where
-    </span>Application: Contract + Send,
-    Application::Error: <span class="lifetime">&#39;static</span>,
-    Application::Storage: ContractStateStorage&lt;Application&gt; + Send + <span class="lifetime">&#39;static</span>,
+    </span>Application: Contract,
 {
     <span class="doccomment">/// Creates the exported future that the host can poll.
     ///
@@ -595,8 +615,11 @@
         ExecuteEffect {
             future: ExportedFuture::new(Application::Storage::execute_with_state(
                 <span class="kw">move </span>|application| {
-                    <span class="kw">async move </span>{ application.execute_effect(<span class="kw-2">&amp;</span>context.into(), <span class="kw-2">&amp;</span>effect).<span class="kw">await </span>}
-                        .boxed()
+                    <span class="kw">async move </span>{
+                        <span class="kw">let </span>effect: Application::Effect = bcs::from_bytes(<span class="kw-2">&amp;</span>effect)<span class="question-mark">?</span>;
+                        application.execute_effect(<span class="kw-2">&amp;</span>context.into(), effect).<span class="kw">await
+                    </span>}
+                    .boxed()
                 },
             )),
             _application: PhantomData,
@@ -616,16 +639,24 @@
 ///
 /// Loads the `Application` state and calls its
 /// [`handle_application_call`][Contract::handle_application_call] method.
-</span><span class="kw">pub struct </span>HandleApplicationCall&lt;Application&gt; {
-    future: ExportedFuture&lt;<span class="prelude-ty">Result</span>&lt;ApplicationCallResult, String&gt;&gt;,
+</span><span class="attr">#[allow(clippy::type_complexity)]
+</span><span class="kw">pub struct </span>HandleApplicationCall&lt;Application: Contract&gt; {
+    future: ExportedFuture&lt;
+        <span class="prelude-ty">Result</span>&lt;
+            ApplicationCallResult&lt;
+                Application::Effect,
+                Application::Response,
+                Application::SessionState,
+            &gt;,
+            String,
+        &gt;,
+    &gt;,
     _application: PhantomData&lt;Application&gt;,
 }
 
 <span class="kw">impl</span>&lt;Application&gt; HandleApplicationCall&lt;Application&gt;
 <span class="kw">where
-    </span>Application: Contract + Send,
-    Application::Error: <span class="lifetime">&#39;static</span>,
-    Application::Storage: ContractStateStorage&lt;Application&gt; + Send + <span class="lifetime">&#39;static</span>,
+    </span>Application: Contract,
 {
     <span class="doccomment">/// Creates the exported future that the host can poll.
     ///
@@ -640,13 +671,14 @@
             future: ExportedFuture::new(Application::Storage::execute_with_state(
                 <span class="kw">move </span>|application| {
                     <span class="kw">async move </span>{
+                        <span class="kw">let </span>argument: Application::ApplicationCall = bcs::from_bytes(<span class="kw-2">&amp;</span>argument)<span class="question-mark">?</span>;
                         <span class="kw">let </span>forwarded_sessions = forwarded_sessions
                             .into_iter()
                             .map(SessionId::from)
                             .collect();
 
                         application
-                            .handle_application_call(<span class="kw-2">&amp;</span>context.into(), <span class="kw-2">&amp;</span>argument, forwarded_sessions)
+                            .handle_application_call(<span class="kw-2">&amp;</span>context.into(), argument, forwarded_sessions)
                             .<span class="kw">await
                     </span>}
                     .boxed()
@@ -669,23 +701,31 @@
 ///
 /// Loads the `Application` state and calls its
 /// [`handle_session_call`][Contract::handle_session_call] method.
-</span><span class="kw">pub struct </span>HandleSessionCall&lt;Application&gt; {
-    future: ExportedFuture&lt;<span class="prelude-ty">Result</span>&lt;SessionCallResult, String&gt;&gt;,
+</span><span class="attr">#[allow(clippy::type_complexity)]
+</span><span class="kw">pub struct </span>HandleSessionCall&lt;Application: Contract&gt; {
+    future: ExportedFuture&lt;
+        <span class="prelude-ty">Result</span>&lt;
+            SessionCallResult&lt;
+                Application::Effect,
+                Application::Response,
+                Application::SessionState,
+            &gt;,
+            String,
+        &gt;,
+    &gt;,
     _application: PhantomData&lt;Application&gt;,
 }
 
 <span class="kw">impl</span>&lt;Application&gt; HandleSessionCall&lt;Application&gt;
 <span class="kw">where
-    </span>Application: Contract + Send,
-    Application::Error: <span class="lifetime">&#39;static</span>,
-    Application::Storage: ContractStateStorage&lt;Application&gt; + Send + <span class="lifetime">&#39;static</span>,
+    </span>Application: Contract,
 {
     <span class="doccomment">/// Creates the exported future that the host can poll.
     ///
     /// This is called from the host.
     </span><span class="kw">pub fn </span>new(
         context: wit_types::CalleeContext,
-        session_state: Vec&lt;u8&gt;,
+        session: Vec&lt;u8&gt;,
         argument: Vec&lt;u8&gt;,
         forwarded_sessions: Vec&lt;wit_types::SessionId&gt;,
     ) -&gt; <span class="self">Self </span>{
@@ -694,6 +734,8 @@
             future: ExportedFuture::new(Application::Storage::execute_with_state(
                 <span class="kw">move </span>|application| {
                     <span class="kw">async move </span>{
+                        <span class="kw">let </span>session: Application::SessionState = bcs::from_bytes(<span class="kw-2">&amp;</span>session)<span class="question-mark">?</span>;
+                        <span class="kw">let </span>argument: Application::SessionCall = bcs::from_bytes(<span class="kw-2">&amp;</span>argument)<span class="question-mark">?</span>;
                         <span class="kw">let </span>forwarded_sessions = forwarded_sessions
                             .into_iter()
                             .map(SessionId::from)
@@ -702,8 +744,8 @@
                         application
                             .handle_session_call(
                                 <span class="kw-2">&amp;</span>context.into(),
-                                <span class="kw-2">&amp;</span>session_state,
-                                <span class="kw-2">&amp;</span>argument,
+                                session,
+                                argument,
                                 forwarded_sessions,
                             )
                             .<span class="kw">await

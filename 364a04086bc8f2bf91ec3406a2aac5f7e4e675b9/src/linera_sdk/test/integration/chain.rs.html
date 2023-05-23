@@ -391,6 +391,13 @@
 <a href="#391" id="391">391</a>
 <a href="#392" id="392">392</a>
 <a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -399,6 +406,7 @@
 //! This allows manipulating a test microchain.
 
 </span><span class="kw">use super</span>::{BlockBuilder, TestValidator};
+<span class="kw">use </span><span class="kw">crate</span>::ContractAbi;
 <span class="kw">use </span>cargo_toml::Manifest;
 <span class="kw">use </span>linera_base::{
     crypto::{KeyPair, PublicKey},
@@ -655,13 +663,16 @@
     /// The application is initialized using the initialization parameters, which consist of the
     /// global static `parameters`, the one time `initialization_argument` and the
     /// `required_application_ids` of the applications that the new application will depend on.
-    </span><span class="kw">pub async fn </span>create_application(
+    </span><span class="kw">pub async fn </span>create_application&lt;A&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         bytecode_id: BytecodeId,
-        parameters: Vec&lt;u8&gt;,
-        initialization_argument: Vec&lt;u8&gt;,
+        parameters: A::Parameters,
+        initialization_argument: A::InitializationArgument,
         required_application_ids: Vec&lt;ApplicationId&gt;,
-    ) -&gt; ApplicationId {
+    ) -&gt; ApplicationId
+    <span class="kw">where
+        </span>A: ContractAbi,
+    {
         <span class="kw">let </span>bytecode_location_effect = <span class="kw">if </span><span class="self">self</span>.needs_bytecode_location(bytecode_id).<span class="kw">await </span>{
             <span class="self">self</span>.subscribe_to_published_bytecodes_from(bytecode_id.<span class="number">0</span>.chain_id)
                 .<span class="kw">await</span>;
@@ -669,6 +680,9 @@
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>};
+
+        <span class="kw">let </span>parameters = serde_json::to_vec(<span class="kw-2">&amp;</span>parameters).unwrap();
+        <span class="kw">let </span>initialization_argument = serde_json::to_vec(<span class="kw-2">&amp;</span>initialization_argument).unwrap();
 
         <span class="self">self</span>.add_block(|block| {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(effect_id) = bytecode_location_effect {

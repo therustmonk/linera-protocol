@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["ClientCommand","ProjectCommand","WalletCommand"],"fn":["deserialize_response","main"],"static":["CALLSITE","META"],"struct":["ClientContext","ClientOptions","Job","JsonArg"]};
+window.SIDEBAR_ITEMS = {"enum":["ClientCommand","ProjectCommand","WalletCommand"],"fn":["deserialize_response","main","read_json"],"static":["CALLSITE","META"],"struct":["ClientContext","ClientOptions","Job"]};
