@@ -96,6 +96,12 @@
 <a href="#96" id="96">96</a>
 <a href="#97" id="97">97</a>
 <a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -133,10 +139,13 @@
     ) -&gt; ExportedFuture&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, String&gt;&gt; {
         ExportedFuture::new(<span class="kw">async move </span>{
             <span class="kw">let </span>application: Arc&lt;Application&gt; = Arc::new(system_api::load().<span class="kw">await</span>);
-            application
-                .query_application(<span class="kw-2">&amp;</span>context.into(), <span class="kw-2">&amp;</span>argument)
+            <span class="kw">let </span>argument: Application::Query =
+                serde_json::from_slice(<span class="kw-2">&amp;</span>argument).map_err(|e| e.to_string())<span class="question-mark">?</span>;
+            <span class="kw">let </span>query_response = application
+                .query_application(<span class="kw-2">&amp;</span>context.into(), argument)
                 .<span class="kw">await
-                </span>.map_err(|error| error.to_string())
+                </span>.map_err(|error| error.to_string())<span class="question-mark">?</span>;
+            serde_json::to_vec(<span class="kw-2">&amp;</span>query_response).map_err(|e| e.to_string())
         })
     }
 }
@@ -151,13 +160,16 @@
     ) -&gt; ExportedFuture&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;, String&gt;&gt; {
         ExportedFuture::new(<span class="kw">async move </span>{
             <span class="kw">let </span>application: Arc&lt;Application&gt; = Arc::new(system_api::lock_and_load_view().<span class="kw">await</span>);
+            <span class="kw">let </span>argument: Application::Query =
+                serde_json::from_slice(<span class="kw-2">&amp;</span>argument).map_err(|e| e.to_string())<span class="question-mark">?</span>;
             <span class="kw">let </span>result = application
-                .query_application(<span class="kw-2">&amp;</span>context.into(), <span class="kw-2">&amp;</span>argument)
+                .query_application(<span class="kw-2">&amp;</span>context.into(), argument)
                 .<span class="kw">await</span>;
             <span class="kw">if </span>result.is_ok() {
                 system_api::unlock_view().<span class="kw">await</span>;
             }
-            result.map_err(|error| error.to_string())
+            <span class="kw">let </span>query_response = result.map_err(|error| error.to_string())<span class="question-mark">?</span>;
+            serde_json::to_vec(<span class="kw-2">&amp;</span>query_response).map_err(|e| e.to_string())
         })
     }
 }
