@@ -1226,6 +1226,10 @@
 <a href="#1226" id="1226">1226</a>
 <a href="#1227" id="1227">1227</a>
 <a href="#1228" id="1228">1228</a>
+<a href="#1229" id="1229">1229</a>
+<a href="#1230" id="1230">1230</a>
+<a href="#1231" id="1231">1231</a>
+<a href="#1232" id="1232">1232</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1753,8 +1757,12 @@
         </span><span class="kw">for </span>value <span class="kw">in </span>blobs {
             <span class="self">self</span>.cache_recent_value(value.clone());
         }
-        <span class="self">self</span>.storage.write_values(blobs).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="self">self</span>.storage.write_certificate(<span class="kw-2">&amp;</span>certificate).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>(result_blob, result_certificate) = <span class="macro">tokio::join!</span>(
+            <span class="self">self</span>.storage.write_values(blobs),
+            <span class="self">self</span>.storage.write_certificate(<span class="kw-2">&amp;</span>certificate)
+        );
+        result_blob<span class="question-mark">?</span>;
+        result_certificate<span class="question-mark">?</span>;
         <span class="comment">// Execute the block and update inboxes.
         </span>chain.remove_events_from_inboxes(block).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>verified_effects = chain.execute_block(block).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1926,7 +1934,8 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
         };
         <span class="comment">// Process the received messages in certificates.
-        </span><span class="kw">for </span>certificate <span class="kw">in </span>certificates {
+        </span><span class="self">self</span>.storage.write_certificates(<span class="kw-2">&amp;</span>certificates).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">for </span>certificate <span class="kw">in </span>certificates {
             <span class="kw">let </span>block = certificate.value.block();
             <span class="comment">// Update the staged chain state with the received block.
             </span>chain
@@ -1938,7 +1947,6 @@
                     certificate.value.hash(),
                 )
                 .<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="self">self</span>.storage.write_certificate(<span class="kw-2">&amp;</span>certificate).<span class="kw">await</span><span class="question-mark">?</span>;
         }
         <span class="kw">if </span>!<span class="self">self</span>.allow_inactive_chains &amp;&amp; !chain.is_active() {
             <span class="comment">// Refuse to create a chain state if the chain is still inactive by
