@@ -1749,7 +1749,7 @@
                 result.unsubscribe.push((subscription.name.clone(), <span class="kw-2">*</span>id));
             }
             BytecodePublished { operation_index } =&gt; {
-                <span class="kw">let </span>bytecode_id = BytecodeId(context.effect_id);
+                <span class="kw">let </span>bytecode_id = BytecodeId::new(context.effect_id);
                 <span class="kw">let </span>bytecode_location = BytecodeLocation {
                     certificate_hash: context.certificate_hash,
                     operation_index: <span class="kw-2">*</span>operation_index,

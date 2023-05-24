@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":["ContractAbi","ServiceAbi","WithContractAbi","WithServiceAbi"]};
+window.SIDEBAR_ITEMS = {"trait":["Abi","ContractAbi","ServiceAbi","WithContractAbi","WithServiceAbi"]};

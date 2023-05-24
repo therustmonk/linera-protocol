@@ -541,7 +541,7 @@
         })
         .<span class="kw">await</span>;
 
-        BytecodeId(publish_effect_id)
+        BytecodeId::new(publish_effect_id)
     }
 
     <span class="doccomment">/// Compiles the crate calling this method to generate the WebAssembly binaries.
@@ -674,7 +674,7 @@
         </span>A: ContractAbi,
     {
         <span class="kw">let </span>bytecode_location_effect = <span class="kw">if </span><span class="self">self</span>.needs_bytecode_location(bytecode_id).<span class="kw">await </span>{
-            <span class="self">self</span>.subscribe_to_published_bytecodes_from(bytecode_id.<span class="number">0</span>.chain_id)
+            <span class="self">self</span>.subscribe_to_published_bytecodes_from(bytecode_id.effect_id.chain_id)
                 .<span class="kw">await</span>;
             <span class="prelude-val">Some</span>(<span class="self">self</span>.find_bytecode_location(bytecode_id).<span class="kw">await</span>)
         } <span class="kw">else </span>{
@@ -729,12 +729,12 @@
 
     <span class="doccomment">/// Finds the effect that sends the message with the bytecode location of `bytecode_id`.
     </span><span class="kw">async fn </span>find_bytecode_location(<span class="kw-2">&amp;</span><span class="self">self</span>, bytecode_id: BytecodeId) -&gt; EffectId {
-        <span class="kw">for </span>height <span class="kw">in </span>bytecode_id.<span class="number">0</span>.height.<span class="number">0</span>.. {
+        <span class="kw">for </span>height <span class="kw">in </span>bytecode_id.effect_id.height.<span class="number">0</span>.. {
             <span class="kw">let </span>certificate = <span class="self">self
                 </span>.validator
                 .worker()
                 .<span class="kw">await
-                </span>.read_certificate(bytecode_id.<span class="number">0</span>.chain_id, height.into())
+                </span>.read_certificate(bytecode_id.effect_id.chain_id, height.into())
                 .<span class="kw">await
                 </span>.expect(<span class="string">&quot;Failed to load certificate to search for bytecode location&quot;</span>)
                 .expect(<span class="string">&quot;Bytecode location not found&quot;</span>);
@@ -749,7 +749,7 @@
 
             <span class="kw">if let </span><span class="prelude-val">Some</span>(index) = effect_index {
                 <span class="kw">return </span>EffectId {
-                    chain_id: bytecode_id.<span class="number">0</span>.chain_id,
+                    chain_id: bytecode_id.effect_id.chain_id,
                     height: BlockHeight(height),
                     index: index.try_into().expect(
                         <span class="string">&quot;Incompatible `EffectId` index types in \

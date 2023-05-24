@@ -348,7 +348,7 @@
 <span class="kw">impl </span>From&lt;UserApplicationId&gt; <span class="kw">for </span>contract::ApplicationId {
     <span class="kw">fn </span>from(host: UserApplicationId) -&gt; <span class="self">Self </span>{
         contract::ApplicationId {
-            bytecode_id: host.bytecode_id.<span class="number">0</span>.into(),
+            bytecode_id: host.bytecode_id.effect_id.into(),
             creation: host.creation.into(),
         }
     }
@@ -357,7 +357,7 @@
 <span class="kw">impl </span>From&lt;UserApplicationId&gt; <span class="kw">for </span>service_system_api::ApplicationId {
     <span class="kw">fn </span>from(host: UserApplicationId) -&gt; <span class="self">Self </span>{
         service_system_api::ApplicationId {
-            bytecode_id: host.bytecode_id.<span class="number">0</span>.into(),
+            bytecode_id: host.bytecode_id.effect_id.into(),
             creation: host.creation.into(),
         }
     }
@@ -366,7 +366,7 @@
 <span class="kw">impl </span>From&lt;UserApplicationId&gt; <span class="kw">for </span>contract_system_api::ApplicationId {
     <span class="kw">fn </span>from(host: UserApplicationId) -&gt; <span class="self">Self </span>{
         contract_system_api::ApplicationId {
-            bytecode_id: host.bytecode_id.<span class="number">0</span>.into(),
+            bytecode_id: host.bytecode_id.effect_id.into(),
             creation: host.creation.into(),
         }
     }

@@ -141,7 +141,7 @@
 <span class="kw">impl </span>From&lt;wit_system_api::ApplicationId&gt; <span class="kw">for </span>ApplicationId {
     <span class="kw">fn </span>from(application_id: wit_system_api::ApplicationId) -&gt; <span class="self">Self </span>{
         ApplicationId {
-            bytecode_id: BytecodeId(application_id.bytecode_id.into()),
+            bytecode_id: BytecodeId::new(application_id.bytecode_id.into()),
             creation: application_id.creation.into(),
         }
     }

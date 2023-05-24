@@ -1202,12 +1202,11 @@
 <a href="#1202" id="1202">1202</a>
 <a href="#1203" id="1203">1203</a>
 <a href="#1204" id="1204">1204</a>
-<a href="#1205" id="1205">1205</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use </span>anyhow::Result;
-<span class="kw">use </span>linera_base::identifiers::{ApplicationId, ChainId, EffectId};
+<span class="kw">use </span>linera_base::identifiers::{ApplicationId, BytecodeId, ChainId, EffectId};
 <span class="kw">use </span>linera_views::batch::WriteOperation;
 <span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>wasmtime::{Caller, Extern, Func, Linker};
@@ -1965,12 +1964,11 @@
                 );
 
                 <span class="kw">let </span>application_id = ApplicationId {
-                    bytecode_id: EffectId {
+                    bytecode_id: BytecodeId::new(EffectId {
                         chain_id: bytecode_chain_id,
                         height: (application_bytecode_height <span class="kw">as </span>u64).into(),
                         index: application_bytecode_index <span class="kw">as </span>u32,
-                    }
-                    .into(),
+                    }),
                     creation: EffectId {
                         chain_id: creation_chain_id,
                         height: (application_creation_height <span class="kw">as </span>u64).into(),
@@ -2041,7 +2039,7 @@
                 <span class="kw">let </span>application_id = caller.data().get::&lt;Query&gt;(handle).application_id;
 
                 <span class="kw">let </span>application_id_bytecode_chain_id: [u64; <span class="number">4</span>] =
-                    application_id.bytecode_id.<span class="number">0</span>.chain_id.<span class="number">0</span>.into();
+                    application_id.bytecode_id.effect_id.chain_id.<span class="number">0</span>.into();
 
                 <span class="kw">let </span>application_id_creation_chain_id: [u64; <span class="number">4</span>] =
                     application_id.creation.chain_id.<span class="number">0</span>.into();
@@ -2071,8 +2069,8 @@
                             application_id_bytecode_chain_id[<span class="number">1</span>] <span class="kw">as </span>i64,
                             application_id_bytecode_chain_id[<span class="number">2</span>] <span class="kw">as </span>i64,
                             application_id_bytecode_chain_id[<span class="number">3</span>] <span class="kw">as </span>i64,
-                            application_id.bytecode_id.<span class="number">0</span>.height.<span class="number">0 </span><span class="kw">as </span>i64,
-                            application_id.bytecode_id.<span class="number">0</span>.index <span class="kw">as </span>i32,
+                            application_id.bytecode_id.effect_id.height.<span class="number">0 </span><span class="kw">as </span>i64,
+                            application_id.bytecode_id.effect_id.index <span class="kw">as </span>i32,
                             application_id_creation_chain_id[<span class="number">0</span>] <span class="kw">as </span>i64,
                             application_id_creation_chain_id[<span class="number">1</span>] <span class="kw">as </span>i64,
                             application_id_creation_chain_id[<span class="number">2</span>] <span class="kw">as </span>i64,

@@ -432,6 +432,10 @@
 <a href="#432" id="432">432</a>
 <a href="#433" id="433">433</a>
 <a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -489,7 +493,7 @@
 };
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>linera_base::{
-    abi::ContractAbi,
+    abi::{ContractAbi, ServiceAbi, WithContractAbi, WithServiceAbi},
     data_types::BlockHeight,
     identifiers::{ApplicationId, ChainId, ChannelName, Destination, EffectId, Owner, SessionId},
 };
@@ -501,7 +505,6 @@
     extensions::{FromBcsBytes, ToBcsBytes},
     log::{ContractLogger, ServiceLogger},
 };
-<span class="kw">use </span>linera_base::abi::ServiceAbi;
 <span class="kw">pub use </span>linera_base::ensure;
 <span class="attr">#[doc(hidden)]
 </span><span class="kw">pub use </span>wit_bindgen_guest_rust;
@@ -521,7 +524,7 @@
 /// Below we use the word &quot;transaction&quot; to refer to the current operation or effect being
 /// executed.
 </span><span class="attr">#[async_trait]
-</span><span class="kw">pub trait </span>Contract: ContractAbi + Send + Sized {
+</span><span class="kw">pub trait </span>Contract: WithContractAbi + ContractAbi + Send + Sized {
     <span class="doccomment">/// The type used to report errors to the execution environment.
     ///
     /// Errors are not recoverable and always interrupt the current transaction. To return
@@ -655,10 +658,10 @@
     <span class="doccomment">/// Calls another application.
     </span><span class="comment">// TODO(#488): Currently, the application state is persisted before the call and restored after the call in
     // order to allow reentrant calls to use the most up-to-date state.
-    </span><span class="kw">async fn </span>call_application&lt;A: ContractAbi&gt;(
+    </span><span class="kw">async fn </span>call_application&lt;A: ContractAbi + Send&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         authenticated: bool,
-        application: ApplicationId,
+        application: ApplicationId&lt;A&gt;,
         call: <span class="kw-2">&amp;</span>A::ApplicationCall,
         forwarded_sessions: Vec&lt;SessionId&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(A::Response, Vec&lt;SessionId&gt;), <span class="self">Self</span>::Error&gt; {
@@ -667,7 +670,7 @@
             <span class="self">Self</span>::Storage::execute_with_released_state(<span class="self">self</span>, <span class="kw">move </span>|| <span class="kw">async move </span>{
                 <span class="kw">crate</span>::contract::system_api::call_application_without_persisting_state(
                     authenticated,
-                    application,
+                    application.forget_abi(),
                     <span class="kw-2">&amp;</span>call_bytes,
                     forwarded_sessions,
                 )
@@ -680,10 +683,10 @@
     <span class="doccomment">/// Calls a session from another application.
     </span><span class="comment">// TODO(#488): Currently, the application state is persisted before the call and restored after the call in
     // order to allow reentrant calls to use the most up-to-date state.
-    </span><span class="kw">async fn </span>call_session&lt;A: ContractAbi&gt;(
+    </span><span class="kw">async fn </span>call_session&lt;A: ContractAbi + Send&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         authenticated: bool,
-        session: SessionId,
+        session: SessionId&lt;A&gt;,
         call: <span class="kw-2">&amp;</span>A::SessionCall,
         forwarded_sessions: Vec&lt;SessionId&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(A::Response, Vec&lt;SessionId&gt;), <span class="self">Self</span>::Error&gt; {
@@ -692,7 +695,7 @@
             <span class="self">Self</span>::Storage::execute_with_released_state(<span class="self">self</span>, <span class="kw">move </span>|| <span class="kw">async move </span>{
                 <span class="kw">crate</span>::contract::system_api::call_session_without_persisting_state(
                     authenticated,
-                    session,
+                    session.forget_abi(),
                     <span class="kw-2">&amp;</span>call_bytes,
                     forwarded_sessions,
                 )
@@ -708,6 +711,11 @@
         <span class="kw">let </span>parameters = serde_json::from_slice(<span class="kw-2">&amp;</span>bytes)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(parameters)
     }
+
+    <span class="doccomment">/// Retrieves the current application ID.
+    </span><span class="kw">fn </span>current_application_id() -&gt; ApplicationId&lt;<span class="self">Self</span>::Abi&gt; {
+        <span class="kw">crate</span>::contract::system_api::current_application_id().with_abi()
+    }
 }
 
 <span class="doccomment">/// The service interface of a Linera application.
@@ -716,7 +724,7 @@
 /// are triggered by JSON queries (typically GraphQL). Their execution cannot modify
 /// storage and is not gas-metered.
 </span><span class="attr">#[async_trait]
-</span><span class="kw">pub trait </span>Service: ServiceAbi {
+</span><span class="kw">pub trait </span>Service: WithServiceAbi + ServiceAbi {
     <span class="doccomment">/// Type used to report errors to the execution environment.
     ///
     /// Errors are not recoverable and always interrupt the current query.

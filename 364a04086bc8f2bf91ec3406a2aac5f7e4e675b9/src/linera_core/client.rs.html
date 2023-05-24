@@ -1496,6 +1496,38 @@
 <a href="#1496" id="1496">1496</a>
 <a href="#1497" id="1497">1497</a>
 <a href="#1498" id="1498">1498</a>
+<a href="#1499" id="1499">1499</a>
+<a href="#1500" id="1500">1500</a>
+<a href="#1501" id="1501">1501</a>
+<a href="#1502" id="1502">1502</a>
+<a href="#1503" id="1503">1503</a>
+<a href="#1504" id="1504">1504</a>
+<a href="#1505" id="1505">1505</a>
+<a href="#1506" id="1506">1506</a>
+<a href="#1507" id="1507">1507</a>
+<a href="#1508" id="1508">1508</a>
+<a href="#1509" id="1509">1509</a>
+<a href="#1510" id="1510">1510</a>
+<a href="#1511" id="1511">1511</a>
+<a href="#1512" id="1512">1512</a>
+<a href="#1513" id="1513">1513</a>
+<a href="#1514" id="1514">1514</a>
+<a href="#1515" id="1515">1515</a>
+<a href="#1516" id="1516">1516</a>
+<a href="#1517" id="1517">1517</a>
+<a href="#1518" id="1518">1518</a>
+<a href="#1519" id="1519">1519</a>
+<a href="#1520" id="1520">1520</a>
+<a href="#1521" id="1521">1521</a>
+<a href="#1522" id="1522">1522</a>
+<a href="#1523" id="1523">1523</a>
+<a href="#1524" id="1524">1524</a>
+<a href="#1525" id="1525">1525</a>
+<a href="#1526" id="1526">1526</a>
+<a href="#1527" id="1527">1527</a>
+<a href="#1528" id="1528">1528</a>
+<a href="#1529" id="1529">1529</a>
+<a href="#1530" id="1530">1530</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1513,7 +1545,7 @@
     stream::{<span class="self">self</span>, FuturesUnordered, StreamExt},
 };
 <span class="kw">use </span>linera_base::{
-    abi::ContractAbi,
+    abi::{Abi, ContractAbi},
     crypto::{CryptoHash, KeyPair, PublicKey},
     data_types::{Amount, BlockHeight, RoundNumber, Timestamp},
     identifiers::{BytecodeId, ChainId, EffectId, Owner},
@@ -1527,7 +1559,8 @@
 <span class="kw">use </span>linera_execution::{
     committee::{Committee, Epoch, ValidatorName, ValidatorState},
     system::{Account, Recipient, SystemChannel, SystemOperation, UserData},
-    Bytecode, Effect, Operation, Query, Response, SystemEffect, UserApplicationId,
+    Bytecode, Effect, Operation, Query, Response, SystemEffect, SystemQuery, SystemResponse,
+    UserApplicationId,
 };
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;
@@ -2627,6 +2660,35 @@
         <span class="prelude-val">Ok</span>(response)
     }
 
+    <span class="doccomment">/// Queries a system application.
+    </span><span class="kw">pub async fn </span>query_system_application(<span class="kw-2">&amp;mut </span><span class="self">self</span>, query: SystemQuery) -&gt; <span class="prelude-ty">Result</span>&lt;SystemResponse&gt; {
+        <span class="kw">let </span>response = <span class="self">self
+            </span>.node_client
+            .query_application(<span class="self">self</span>.chain_id, <span class="kw-2">&amp;</span>Query::System(query))
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">match </span>response {
+            Response::System(response) =&gt; <span class="prelude-val">Ok</span>(response),
+            <span class="kw">_ </span>=&gt; <span class="macro">bail!</span>(<span class="string">&quot;Unexpected response for system query&quot;</span>),
+        }
+    }
+
+    <span class="doccomment">/// Queries a user application.
+    </span><span class="kw">pub async fn </span>query_user_application&lt;A: Abi&gt;(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        application_id: UserApplicationId&lt;A&gt;,
+        query: <span class="kw-2">&amp;</span>A::Query,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;A::QueryResponse&gt; {
+        <span class="kw">let </span>query = Query::user(application_id, query)<span class="question-mark">?</span>;
+        <span class="kw">let </span>response = <span class="self">self
+            </span>.node_client
+            .query_application(<span class="self">self</span>.chain_id, <span class="kw-2">&amp;</span>query)
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">match </span>response {
+            Response::User(response) =&gt; <span class="prelude-val">Ok</span>(serde_json::from_slice(<span class="kw-2">&amp;</span>response)<span class="question-mark">?</span>),
+            <span class="kw">_ </span>=&gt; <span class="macro">bail!</span>(<span class="string">&quot;Unexpected response for user query&quot;</span>),
+        }
+    }
+
     <span class="kw">pub async fn </span>local_balance(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Amount&gt; {
         <span class="macro">ensure!</span>(
             <span class="self">self</span>.chain_info().<span class="kw">await</span><span class="question-mark">?</span>.next_block_height == <span class="self">self</span>.next_block_height,
@@ -2815,28 +2877,30 @@
             .value
             .nth_last_effect_id(<span class="number">1</span>)
             .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;Failed to publish bytecode&quot;</span>))<span class="question-mark">?</span>;
-        <span class="kw">let </span>id = BytecodeId(effect_id);
+        <span class="kw">let </span>id = BytecodeId::new(effect_id);
         <span class="prelude-val">Ok</span>((id, certificate))
     }
 
     <span class="doccomment">/// Creates an application by instantiating some bytecode.
-    </span><span class="kw">pub async fn </span>create_application&lt;A: ContractAbi&gt;(
+    </span><span class="kw">pub async fn </span>create_application&lt;A: Abi&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        bytecode_id: BytecodeId,
-        parameters: <span class="kw-2">&amp;</span>A::Parameters,
+        bytecode_id: BytecodeId&lt;A&gt;,
+        parameters: <span class="kw-2">&amp;</span>&lt;A <span class="kw">as </span>ContractAbi&gt;::Parameters,
         initialization_argument: <span class="kw-2">&amp;</span>A::InitializationArgument,
         required_application_ids: Vec&lt;UserApplicationId&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(UserApplicationId, Certificate)&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(UserApplicationId&lt;A&gt;, Certificate)&gt; {
         <span class="kw">let </span>initialization_argument = serde_json::to_vec(initialization_argument)<span class="question-mark">?</span>;
         <span class="kw">let </span>parameters = serde_json::to_vec(parameters)<span class="question-mark">?</span>;
-        <span class="self">self</span>.create_application_untyped(
-            bytecode_id,
-            parameters,
-            initialization_argument,
-            required_application_ids,
-        )
-        .<span class="kw">await
-    </span>}
+        <span class="kw">let </span>(app_id, cert) = <span class="self">self
+            </span>.create_application_untyped(
+                bytecode_id.forget_abi(),
+                parameters,
+                initialization_argument,
+                required_application_ids,
+            )
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>((app_id.with_abi(), cert))
+    }
 
     <span class="doccomment">/// Creates an application by instantiating some bytecode.
     </span><span class="kw">pub async fn </span>create_application_untyped(
