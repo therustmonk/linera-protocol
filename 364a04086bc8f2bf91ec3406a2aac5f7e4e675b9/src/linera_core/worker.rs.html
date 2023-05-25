@@ -1218,18 +1218,6 @@
 <a href="#1218" id="1218">1218</a>
 <a href="#1219" id="1219">1219</a>
 <a href="#1220" id="1220">1220</a>
-<a href="#1221" id="1221">1221</a>
-<a href="#1222" id="1222">1222</a>
-<a href="#1223" id="1223">1223</a>
-<a href="#1224" id="1224">1224</a>
-<a href="#1225" id="1225">1225</a>
-<a href="#1226" id="1226">1226</a>
-<a href="#1227" id="1227">1227</a>
-<a href="#1228" id="1228">1228</a>
-<a href="#1229" id="1229">1229</a>
-<a href="#1230" id="1230">1230</a>
-<a href="#1231" id="1231">1231</a>
-<a href="#1232" id="1232">1232</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1866,11 +1854,10 @@
         <span class="comment">// Check that the chain is active and ready for this confirmation.
         // Verify the certificate. Returns a catch-all error to make client code more robust.
         </span><span class="kw">let </span><span class="kw-2">mut </span>chain = <span class="self">self</span>.storage.load_active_chain(block.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>epoch = chain
+        <span class="kw">let </span>(epoch, committee) = chain
             .execution_state
             .system
-            .epoch
-            .get()
+            .current_committee()
             .expect(<span class="string">&quot;chain is active&quot;</span>);
         <span class="macro">ensure!</span>(
             block.epoch == epoch,
@@ -1879,19 +1866,13 @@
                 epoch: block.epoch,
             }
         );
-        <span class="kw">let </span>committee = chain
-            .execution_state
-            .system
-            .committees
-            .get()
-            .get(<span class="kw-2">&amp;</span>epoch)
-            .expect(<span class="string">&quot;chain is active&quot;</span>);
         certificate.check(committee)<span class="question-mark">?</span>;
-        <span class="kw">if </span>chain.manager.get_mut().check_validated_block(
-            chain.tip_state.get().next_block_height,
-            block,
-            round,
-        )<span class="question-mark">? </span>== ChainManagerOutcome::Skip
+        <span class="kw">if </span>chain.tip_state.get().already_validated_block(block)<span class="question-mark">?
+            </span>|| chain
+                .manager
+                .get_mut()
+                .check_validated_block(block, round)<span class="question-mark">?
+                </span>== ChainManagerOutcome::Skip
         {
             <span class="comment">// If we just processed the same pending block, return the chain info
             // unchanged.
@@ -2107,13 +2088,8 @@
         }
         <span class="comment">// Check if the chain is ready for this new block proposal.
         // This should always pass for nodes without voting key.
-        </span><span class="kw">if </span>chain.manager.get().check_proposed_block(
-            chain.tip_state.get().block_hash,
-            chain.tip_state.get().next_block_height,
-            block,
-            <span class="kw-2">*</span>round,
-        )<span class="question-mark">? </span>== ChainManagerOutcome::Skip
-        {
+        </span>chain.tip_state.get().verify_block_chaining(block)<span class="question-mark">?</span>;
+        <span class="kw">if </span>chain.manager.get().check_proposed_block(block, <span class="kw-2">*</span>round)<span class="question-mark">? </span>== ChainManagerOutcome::Skip {
             <span class="comment">// If we just processed the same pending block, return the chain info unchanged.
             </span><span class="kw">return </span><span class="prelude-val">Ok</span>((
                 ChainInfoResponse::new(<span class="kw-2">&amp;</span>chain, <span class="self">self</span>.key_pair()),
