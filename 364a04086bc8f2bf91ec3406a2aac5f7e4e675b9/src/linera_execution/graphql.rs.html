@@ -101,6 +101,15 @@
 <a href="#101" id="101">101</a>
 <a href="#102" id="102">102</a>
 <a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -162,7 +171,8 @@
 <span class="kw">where
     </span>ViewError: From&lt;C::Error&gt;,
 {
-    <span class="kw">async fn </span>system(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>SystemExecutionStateView&lt;C&gt; {
+    <span class="attr">#[graphql(derived(name = <span class="string">&quot;system&quot;</span>))]
+    </span><span class="kw">async fn </span>_system(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>SystemExecutionStateView&lt;C&gt; {
         <span class="kw-2">&amp;</span><span class="self">self</span>.system
     }
 }
@@ -172,35 +182,43 @@
 <span class="kw">where
     </span>ViewError: From&lt;C::Error&gt;,
 {
-    <span class="kw">async fn </span>description(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;ChainDescription&gt; {
+    <span class="attr">#[graphql(derived(name = <span class="string">&quot;description&quot;</span>))]
+    </span><span class="kw">async fn </span>_description(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;ChainDescription&gt; {
         <span class="self">self</span>.description.get()
     }
 
-    <span class="kw">async fn </span>epoch(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;Epoch&gt; {
+    <span class="attr">#[graphql(derived(name = <span class="string">&quot;epoch&quot;</span>))]
+    </span><span class="kw">async fn </span>_epoch(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;Epoch&gt; {
         <span class="self">self</span>.epoch.get()
     }
 
-    <span class="kw">async fn </span>admin_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;ChainId&gt; {
+    <span class="attr">#[graphql(derived(name = <span class="string">&quot;admin_id&quot;</span>))]
+    </span><span class="kw">async fn </span>_admin_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;ChainId&gt; {
         <span class="self">self</span>.admin_id.get()
     }
 
-    <span class="kw">async fn </span>subscriptions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;ChannelSubscription&gt;, Error&gt; {
+    <span class="attr">#[graphql(derived(name = <span class="string">&quot;subscription&quot;</span>))]
+    </span><span class="kw">async fn </span>_subscriptions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;ChannelSubscription&gt;, Error&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.subscriptions.indices().<span class="kw">await</span><span class="question-mark">?</span>)
     }
 
-    <span class="kw">async fn </span>committees(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>BTreeMap&lt;Epoch, Committee&gt; {
+    <span class="attr">#[graphql(derived(name = <span class="string">&quot;committees&quot;</span>))]
+    </span><span class="kw">async fn </span>_committees(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>BTreeMap&lt;Epoch, Committee&gt; {
         <span class="self">self</span>.committees.get()
     }
 
-    <span class="kw">async fn </span>ownership(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>ChainOwnership {
+    <span class="attr">#[graphql(derived(name = <span class="string">&quot;ownership&quot;</span>))]
+    </span><span class="kw">async fn </span>_ownership(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>ChainOwnership {
         <span class="self">self</span>.ownership.get()
     }
 
-    <span class="kw">async fn </span>balance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Amount {
+    <span class="attr">#[graphql(derived(name = <span class="string">&quot;balance&quot;</span>))]
+    </span><span class="kw">async fn </span>_balance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Amount {
         <span class="self">self</span>.balance.get()
     }
 
-    <span class="kw">async fn </span>timestamp(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Timestamp {
+    <span class="attr">#[graphql(derived(name = <span class="string">&quot;timestamp&quot;</span>))]
+    </span><span class="kw">async fn </span>_timestamp(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Timestamp {
         <span class="self">self</span>.timestamp.get()
     }
 }

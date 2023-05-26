@@ -1115,6 +1115,32 @@
 <a href="#1115" id="1115">1115</a>
 <a href="#1116" id="1116">1116</a>
 <a href="#1117" id="1117">1117</a>
+<a href="#1118" id="1118">1118</a>
+<a href="#1119" id="1119">1119</a>
+<a href="#1120" id="1120">1120</a>
+<a href="#1121" id="1121">1121</a>
+<a href="#1122" id="1122">1122</a>
+<a href="#1123" id="1123">1123</a>
+<a href="#1124" id="1124">1124</a>
+<a href="#1125" id="1125">1125</a>
+<a href="#1126" id="1126">1126</a>
+<a href="#1127" id="1127">1127</a>
+<a href="#1128" id="1128">1128</a>
+<a href="#1129" id="1129">1129</a>
+<a href="#1130" id="1130">1130</a>
+<a href="#1131" id="1131">1131</a>
+<a href="#1132" id="1132">1132</a>
+<a href="#1133" id="1133">1133</a>
+<a href="#1134" id="1134">1134</a>
+<a href="#1135" id="1135">1135</a>
+<a href="#1136" id="1136">1136</a>
+<a href="#1137" id="1137">1137</a>
+<a href="#1138" id="1138">1138</a>
+<a href="#1139" id="1139">1139</a>
+<a href="#1140" id="1140">1140</a>
+<a href="#1141" id="1141">1141</a>
+<a href="#1142" id="1142">1142</a>
+<a href="#1143" id="1143">1143</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -1125,7 +1151,7 @@
 <span class="kw">extern crate </span>heck;
 <span class="kw">extern crate </span>proc_macro;
 <span class="kw">extern crate </span>syn;
-<span class="kw">use </span><span class="kw">crate</span>::util::{concat, snakify, string_to_ident};
+<span class="kw">use </span><span class="kw">crate</span>::util::{concat, get_graphql_identifiers, snakify, string_to_ident};
 <span class="kw">use </span>heck::AsUpperCamelCase;
 <span class="kw">use </span>proc_macro::TokenStream;
 <span class="kw">use </span>proc_macro2::{Span, TokenStream <span class="kw">as </span>TokenStream2};
@@ -1479,6 +1505,8 @@
         <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(),
     };
 
+    <span class="kw">let </span>(field_name_underscore, field_name_str) = get_graphql_identifiers(<span class="kw-2">&amp;</span>field_name);
+
     <span class="kw">let </span>view_name = view_type.to_string();
     <span class="kw">match </span>view_type.to_string().as_str() {
         <span class="string">&quot;RegisterView&quot; </span>=&gt; {
@@ -1489,7 +1517,8 @@
                 .get(generic_types_offset)
                 .expect(<span class="string">&quot;no generic specified for &#39;RegisterView&#39;&quot;</span>);
             <span class="kw">let </span>r#impl = <span class="macro">quote! </span>{
-                <span class="kw">async fn </span>#field_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>#generic_ident {
+                <span class="attr">#[graphql(derived(name = #field_name_str))]
+                </span><span class="kw">async fn </span>#field_name_underscore(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>#generic_ident {
                     <span class="self">self</span>.#field_name.get()
                 }
             };
@@ -1518,7 +1547,8 @@
             <span class="kw">let </span>context_generics = context_constraints.as_ref().map(|<span class="kw">_</span>| <span class="macro">quote! </span>{ &lt;#context&gt; });
 
             <span class="kw">let </span>r#impl = <span class="macro">quote! </span>{
-                <span class="kw">async fn </span>#field_name(
+                <span class="attr">#[graphql(derived(name = #field_name_str))]
+                </span><span class="kw">async fn </span>#field_name_underscore(
                     <span class="kw-2">&amp;</span><span class="self">self</span>,
                     #index_name: #index_ident,
                 ) -&gt; <span class="prelude-ty">Result</span>&lt;#entry_name #context_generics, async_graphql::Error&gt; {
@@ -1547,6 +1577,9 @@
                 .as_ref()
                 .map(|<span class="kw">_</span>| <span class="macro">quote! </span>{ &lt;#lifetime #context&gt; })
                 .unwrap_or_else(|| <span class="macro">quote! </span>{ &lt;#lifetime&gt; });
+            <span class="kw">let </span>(index_name_underscore, index_name_str) = get_graphql_identifiers(<span class="kw-2">&amp;</span>index_name);
+            <span class="kw">let </span>(generic_underscore, generic_str) = get_graphql_identifiers(<span class="kw-2">&amp;</span>generic_method_name);
+
             <span class="kw">let </span>r#struct = <span class="macro">quote! </span>{
                 <span class="kw">pub struct </span>#entry_name #context_generics_with_lifetime
                 #context_constraints
@@ -1559,11 +1592,13 @@
                 </span><span class="kw">impl </span>#context_generics_with_lifetime #entry_name #context_generics_with_lifetime
                 #context_constraints
                 {
-                    <span class="kw">async fn </span>#index_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>#index_ident {
+                    <span class="attr">#[graphql(derived(name = #index_name_str))]
+                    </span><span class="kw">async fn </span>#index_name_underscore(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>#index_ident {
                         <span class="kw-2">&amp;</span><span class="self">self</span>.#index_name
                     }
 
-                    <span class="kw">async fn </span>#generic_method_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>#generic_ident {
+                    <span class="attr">#[graphql(derived(name = #generic_str))]
+                    </span><span class="kw">async fn </span>#generic_underscore(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>#generic_ident {
                         <span class="kw">use </span>std::ops::Deref;
                         <span class="self">self</span>.guard.deref()
                     }
@@ -1581,7 +1616,8 @@
                 .unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">&quot;no generic type specified for &#39;{}&#39;&quot;</span>, view_name));
 
             <span class="kw">let </span>r#impl = <span class="macro">quote! </span>{
-                <span class="kw">async fn </span>#field_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;#generic_ident&gt;, async_graphql::Error&gt; {
+                <span class="attr">#[graphql(derived(name = #field_name_str))]
+                </span><span class="kw">async fn </span>#field_name_underscore(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;#generic_ident&gt;, async_graphql::Error&gt; {
                     <span class="prelude-val">Ok</span>(<span class="self">self</span>.#field_name.indices().<span class="kw">await</span><span class="question-mark">?</span>)
                 }
             };
@@ -1596,7 +1632,8 @@
                 .expect(<span class="string">&quot;no generic type specified for &#39;LogView&#39;&quot;</span>);
 
             <span class="kw">let </span>r#impl = <span class="macro">quote! </span>{
-                <span class="kw">async fn </span>#field_name(<span class="kw-2">&amp;</span><span class="self">self</span>,
+                <span class="attr">#[graphql(derived(name = #field_name_str))]
+                </span><span class="kw">async fn </span>#field_name_underscore(<span class="kw-2">&amp;</span><span class="self">self</span>,
                     start: <span class="prelude-ty">Option</span>&lt;usize&gt;,
                     end: <span class="prelude-ty">Option</span>&lt;usize&gt;
                 ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;#generic_ident&gt;, async_graphql::Error&gt; {
@@ -1617,7 +1654,8 @@
                 .get(generic_types_offset)
                 .expect(<span class="string">&quot;no generic specified for &#39;WrappedHashableContainerView&#39;&quot;</span>);
             <span class="kw">let </span>r#impl = <span class="macro">quote! </span>{
-                <span class="kw">async fn </span>#field_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>#generic_ident {
+                <span class="attr">#[graphql(derived(name = #field_name_str))]
+                </span><span class="kw">async fn </span>#field_name_underscore(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>#generic_ident {
                     <span class="kw">use </span>std::ops::Deref;
                     <span class="self">self</span>.#field_name.deref()
                 }
@@ -1633,7 +1671,8 @@
                 .expect(<span class="string">&quot;no generic type specified for &#39;QueueView&#39;&quot;</span>);
 
             <span class="kw">let </span>r#impl = <span class="macro">quote! </span>{
-                <span class="kw">async fn </span>#field_name(<span class="kw-2">&amp;</span><span class="self">self</span>, count: <span class="prelude-ty">Option</span>&lt;usize&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;#generic_ident&gt;, async_graphql::Error&gt; {
+                <span class="attr">#[graphql(derived(name = #field_name_str))]
+                </span><span class="kw">async fn </span>#field_name_underscore(<span class="kw-2">&amp;</span><span class="self">self</span>, count: <span class="prelude-ty">Option</span>&lt;usize&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;#generic_ident&gt;, async_graphql::Error&gt; {
                     <span class="kw">let </span>count = count.unwrap_or_else(|| <span class="self">self</span>.#field_name.count());
                     <span class="prelude-val">Ok</span>(<span class="self">self</span>.#field_name.read_front(count).<span class="kw">await</span><span class="question-mark">?</span>)
                 }
@@ -1649,7 +1688,8 @@
                 .expect(<span class="string">&quot;no generic type specified for &#39;ByteMapView&#39;&quot;</span>);
 
             <span class="kw">let </span>r#impl = <span class="macro">quote! </span>{
-                <span class="kw">async fn </span>#field_name(<span class="kw-2">&amp;</span><span class="self">self</span>, short_key: Vec&lt;u8&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;#generic_ident&gt;, async_graphql::Error&gt; {
+                <span class="attr">#[graphql(derived(name = #field_name_str))]
+                </span><span class="kw">async fn </span>#field_name_underscore(<span class="kw-2">&amp;</span><span class="self">self</span>, short_key: Vec&lt;u8&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;#generic_ident&gt;, async_graphql::Error&gt; {
                     <span class="prelude-val">Ok</span>(<span class="self">self</span>.#field_name.get(<span class="kw-2">&amp;</span>short_key).<span class="kw">await</span><span class="question-mark">?</span>)
                 }
             };
@@ -1668,12 +1708,15 @@
 
             <span class="kw">let </span>index_name = snakify(index_ident);
             <span class="kw">let </span>field_keys = concat(<span class="kw-2">&amp;</span>field_name, <span class="string">&quot;_keys&quot;</span>);
+            <span class="kw">let </span>(field_keys_underscore, field_keys_str) = get_graphql_identifiers(<span class="kw-2">&amp;</span>field_keys);
 
             <span class="kw">let </span>r#impl = <span class="macro">quote! </span>{
-                <span class="kw">async fn </span>#field_name(<span class="kw-2">&amp;</span><span class="self">self</span>, #index_name: #index_ident) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;#generic_ident&gt;, async_graphql::Error&gt; {
+                <span class="attr">#[graphql(derived(name = #field_name_str))]
+                </span><span class="kw">async fn </span>#field_name_underscore(<span class="kw-2">&amp;</span><span class="self">self</span>, #index_name: #index_ident) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;#generic_ident&gt;, async_graphql::Error&gt; {
                     <span class="prelude-val">Ok</span>(<span class="self">self</span>.#field_name.get(<span class="kw-2">&amp;</span>#index_name).<span class="kw">await</span><span class="question-mark">?</span>)
                 }
-                <span class="kw">async fn </span>#field_keys(<span class="kw-2">&amp;</span><span class="self">self</span>, count: <span class="prelude-ty">Option</span>&lt;u64&gt;)
+                <span class="attr">#[graphql(derived(name = #field_keys_str))]
+                </span><span class="kw">async fn </span>#field_keys_underscore(<span class="kw-2">&amp;</span><span class="self">self</span>, count: <span class="prelude-ty">Option</span>&lt;u64&gt;)
                     -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;#index_ident&gt;, async_graphql::Error&gt;
                 {
                     <span class="kw">let </span>count = count.unwrap_or(u64::MAX).try_into().unwrap_or(usize::MAX);
@@ -2085,10 +2128,12 @@
                     </span><span class="kw">impl </span>#generics_with_lifetime TestViewCollectionEntry #generics_with_lifetime
                     #constraints
                     {
-                        <span class="kw">async fn </span>string(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>String {
+                        <span class="attr">#[graphql(derived(name = <span class="string">&quot;string&quot;</span>))]
+                        </span><span class="kw">async fn </span>_string(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>String {
                             <span class="kw-2">&amp;</span><span class="self">self</span>.string
                         }
-                        <span class="kw">async fn </span>some_other_view(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>SomeOtherView&lt;#context&gt; {
+                        <span class="attr">#[graphql(derived(name = <span class="string">&quot;some_other_view&quot;</span>))]
+                        </span><span class="kw">async fn </span>_some_other_view(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>SomeOtherView&lt;#context&gt; {
                             <span class="kw">use </span>std::ops::Deref;
                             <span class="self">self</span>.guard.deref()
                         }
@@ -2101,11 +2146,13 @@
                             <span class="kw-2">&amp;</span><span class="self">self</span>.raw
                         }
 
-                        <span class="kw">async fn </span>register(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;usize&gt; {
+                        <span class="attr">#[graphql(derived(name = <span class="string">&quot;register&quot;</span>))]
+                        </span><span class="kw">async fn </span>_register(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;usize&gt; {
                             <span class="self">self</span>.register.get()
                         }
 
-                        <span class="kw">async fn </span>collection(
+                        <span class="attr">#[graphql(derived(name = <span class="string">&quot;collection&quot;</span>))]
+                        </span><span class="kw">async fn </span>_collection(
                             <span class="kw-2">&amp;</span><span class="self">self</span>,
                             string: String,
                         ) -&gt; <span class="prelude-ty">Result</span>&lt;TestViewCollectionEntry #generics, async_graphql::Error&gt; {
@@ -2115,11 +2162,13 @@
                             })
                         }
 
-                        <span class="kw">async fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;HashSet&lt;usize&gt;&gt;, async_graphql::Error&gt; {
+                        <span class="attr">#[graphql(derived(name = <span class="string">&quot;set&quot;</span>))]
+                        </span><span class="kw">async fn </span>_set(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;HashSet&lt;usize&gt;&gt;, async_graphql::Error&gt; {
                             <span class="prelude-val">Ok</span>(<span class="self">self</span>.set.indices().<span class="kw">await</span><span class="question-mark">?</span>)
                         }
 
-                        <span class="kw">async fn </span>log(
+                        <span class="attr">#[graphql(derived(name = <span class="string">&quot;log&quot;</span>))]
+                        </span><span class="kw">async fn </span>_log(
                             <span class="kw-2">&amp;</span><span class="self">self</span>,
                             start: <span class="prelude-ty">Option</span>&lt;usize&gt;,
                             end: <span class="prelude-ty">Option</span>&lt;usize&gt;
@@ -2131,7 +2180,8 @@
                             <span class="prelude-val">Ok</span>(<span class="self">self</span>.log.read(range).<span class="kw">await</span><span class="question-mark">?</span>)
                         }
 
-                        <span class="kw">async fn </span>queue(
+                        <span class="attr">#[graphql(derived(name = <span class="string">&quot;queue&quot;</span>))]
+                        </span><span class="kw">async fn </span>_queue(
                             <span class="kw-2">&amp;</span><span class="self">self</span>,
                             count: <span class="prelude-ty">Option</span>&lt;usize&gt;
                         ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;usize&gt;, async_graphql::Error&gt; {
@@ -2139,14 +2189,16 @@
                             <span class="prelude-val">Ok</span>(<span class="self">self</span>.queue.read_front(count).<span class="kw">await</span><span class="question-mark">?</span>)
                         }
 
-                        <span class="kw">async fn </span>map(
+                        <span class="attr">#[graphql(derived(name = <span class="string">&quot;map&quot;</span>))]
+                        </span><span class="kw">async fn </span>_map(
                             <span class="kw-2">&amp;</span><span class="self">self</span>,
                             string: String
                         ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;usize&gt;, async_graphql::Error&gt; {
                             <span class="prelude-val">Ok</span>(<span class="self">self</span>.map.get(<span class="kw-2">&amp;</span>string).<span class="kw">await</span><span class="question-mark">?</span>)
                         }
 
-                        <span class="kw">async fn </span>map_keys(
+                        <span class="attr">#[graphql(derived(name = <span class="string">&quot;map_keys&quot;</span>))]
+                        </span><span class="kw">async fn </span>_map_keys(
                             <span class="kw-2">&amp;</span><span class="self">self</span>,
                             count: <span class="prelude-ty">Option</span>&lt;u64&gt;
                         ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;String&gt;, async_graphql::Error&gt; {

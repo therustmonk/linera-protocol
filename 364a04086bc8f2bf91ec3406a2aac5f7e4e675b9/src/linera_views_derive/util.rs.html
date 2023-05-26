@@ -52,6 +52,12 @@
 <a href="#52" id="52">52</a>
 <a href="#53" id="53">53</a>
 <a href="#54" id="54">54</a>
+<a href="#55" id="55">55</a>
+<a href="#56" id="56">56</a>
+<a href="#57" id="57">57</a>
+<a href="#58" id="58">58</a>
+<a href="#59" id="59">59</a>
+<a href="#60" id="60">60</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -67,6 +73,12 @@
 <span class="doccomment">/// Convert a string into an identifier
 </span><span class="kw">pub fn </span>string_to_ident(s: <span class="kw-2">&amp;</span>str) -&gt; Ident {
     syn::Ident::new(s, Span::call_site())
+}
+
+<span class="kw">pub fn </span>get_graphql_identifiers(id: <span class="kw-2">&amp;</span>Ident) -&gt; (Ident, String) {
+    <span class="kw">let </span>id_str = <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, id);
+    <span class="kw">let </span>id_underscore = <span class="macro">format!</span>(<span class="string">&quot;_{}&quot;</span>, id);
+    (string_to_ident(<span class="kw-2">&amp;</span>id_underscore), id_str)
 }
 
 <span class="doccomment">/// Extends an identifier with a suffix.
