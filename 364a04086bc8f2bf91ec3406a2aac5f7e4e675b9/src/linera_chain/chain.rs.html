@@ -630,6 +630,46 @@
 <a href="#630" id="630">630</a>
 <a href="#631" id="631">631</a>
 <a href="#632" id="632">632</a>
+<a href="#633" id="633">633</a>
+<a href="#634" id="634">634</a>
+<a href="#635" id="635">635</a>
+<a href="#636" id="636">636</a>
+<a href="#637" id="637">637</a>
+<a href="#638" id="638">638</a>
+<a href="#639" id="639">639</a>
+<a href="#640" id="640">640</a>
+<a href="#641" id="641">641</a>
+<a href="#642" id="642">642</a>
+<a href="#643" id="643">643</a>
+<a href="#644" id="644">644</a>
+<a href="#645" id="645">645</a>
+<a href="#646" id="646">646</a>
+<a href="#647" id="647">647</a>
+<a href="#648" id="648">648</a>
+<a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
+<a href="#656" id="656">656</a>
+<a href="#657" id="657">657</a>
+<a href="#658" id="658">658</a>
+<a href="#659" id="659">659</a>
+<a href="#660" id="660">660</a>
+<a href="#661" id="661">661</a>
+<a href="#662" id="662">662</a>
+<a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
+<a href="#665" id="665">665</a>
+<a href="#666" id="666">666</a>
+<a href="#667" id="667">667</a>
+<a href="#668" id="668">668</a>
+<a href="#669" id="669">669</a>
+<a href="#670" id="670">670</a>
+<a href="#671" id="671">671</a>
+<a href="#672" id="672">672</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -644,14 +684,15 @@
 <span class="kw">use </span>async_graphql::SimpleObject;
 <span class="kw">use </span>linera_base::{
     crypto::CryptoHash,
-    data_types::{ArithmeticError, BlockHeight, Timestamp},
+    data_types::{Amount, ArithmeticError, BlockHeight, Timestamp},
     ensure,
     identifiers::{ChainId, Destination, EffectId},
 };
 <span class="kw">use </span>linera_execution::{
-    system::SystemEffect, ApplicationId, Effect, EffectContext, ExecutionResult,
-    ExecutionRuntimeContext, ExecutionStateView, OperationContext, Query, QueryContext,
-    RawExecutionResult, Response, UserApplicationDescription, UserApplicationId,
+    system::{Account, SystemEffect},
+    ApplicationId, Effect, EffectContext, ExecutionResult, ExecutionRuntimeContext,
+    ExecutionStateView, OperationContext, Query, QueryContext, RawExecutionResult, Response,
+    UserApplicationDescription, UserApplicationId,
 };
 <span class="kw">use </span>linera_views::{
     common::Context,
@@ -1045,7 +1086,8 @@
 
     <span class="doccomment">/// Executes a new block: first the incoming messages, then the main operation.
     /// * Modifies the state of inboxes, outboxes, and channels, if needed.
-    /// * As usual, in case of errors, `self` may not be consistent any more and should be thrown away.
+    /// * As usual, in case of errors, `self` may not be consistent any more and should be thrown
+    ///   away.
     /// * Returns the list of effects caused by the block being executed.
     </span><span class="kw">pub async fn </span>execute_block(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -1058,8 +1100,33 @@
             ChainError::InvalidBlockTimestamp
         );
         <span class="self">self</span>.execution_state.system.timestamp.set(block.timestamp);
-        <span class="self">self</span>.execution_state.add_fuel(<span class="number">10_000_000</span>);
+        <span class="kw">let </span><span class="prelude-val">Some</span>((<span class="kw">_</span>, committee)) = <span class="self">self</span>.execution_state.system.current_committee() <span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ChainError::InactiveChain(chain_id));
+        };
+
+        <span class="kw">let </span>pricing = committee.pricing.clone();
+        <span class="kw">let </span>credit: Amount = block
+            .incoming_messages
+            .iter()
+            .filter_map(|msg| <span class="kw">match </span><span class="kw-2">&amp;</span>msg.event.effect {
+                Effect::System(SystemEffect::Credit { account, amount })
+                    <span class="kw">if </span><span class="kw-2">*</span>account == Account::chain(chain_id) =&gt;
+                {
+                    <span class="prelude-val">Some</span>(amount)
+                }
+                <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
+            })
+            .sum();
+        <span class="kw">let </span>balance = <span class="self">self</span>.execution_state.system.balance.get_mut();
+
+        balance.try_add_assign(credit)<span class="question-mark">?</span>;
+        <span class="self">Self</span>::sub_assign_fees(balance, pricing.certificate_price())<span class="question-mark">?</span>;
+        <span class="self">Self</span>::sub_assign_fees(balance, pricing.storage_price(<span class="kw-2">&amp;</span>block.incoming_messages)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
+        <span class="self">Self</span>::sub_assign_fees(balance, pricing.storage_price(<span class="kw-2">&amp;</span>block.operations)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
+
         <span class="kw">let </span><span class="kw-2">mut </span>effects = Vec::new();
+        <span class="kw">let </span>available_fuel = pricing.remaining_fuel(<span class="kw-2">*</span>balance);
+        <span class="kw">let </span><span class="kw-2">mut </span>remaining_fuel = available_fuel;
         <span class="kw">for </span>message <span class="kw">in </span><span class="kw-2">&amp;</span>block.incoming_messages {
             <span class="comment">// Execute the received effect.
             </span><span class="kw">let </span>context = EffectContext {
@@ -1075,7 +1142,7 @@
             };
             <span class="kw">let </span>results = <span class="self">self
                 </span>.execution_state
-                .execute_effect(<span class="kw-2">&amp;</span>context, <span class="kw-2">&amp;</span>message.event.effect)
+                .execute_effect(<span class="kw-2">&amp;</span>context, <span class="kw-2">&amp;</span>message.event.effect, <span class="kw-2">&amp;mut </span>remaining_fuel)
                 .<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="self">self</span>.process_execution_results(<span class="kw-2">&amp;mut </span>effects, context.height, results)
                 .<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1094,11 +1161,18 @@
             };
             <span class="kw">let </span>results = <span class="self">self
                 </span>.execution_state
-                .execute_operation(<span class="kw-2">&amp;</span>context, operation)
+                .execute_operation(<span class="kw-2">&amp;</span>context, operation, <span class="kw-2">&amp;mut </span>remaining_fuel)
                 .<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="self">self</span>.process_execution_results(<span class="kw-2">&amp;mut </span>effects, context.height, results)
                 .<span class="kw">await</span><span class="question-mark">?</span>;
         }
+        <span class="kw">let </span>used_fuel = available_fuel.saturating_sub(remaining_fuel);
+
+        <span class="kw">let </span>balance = <span class="self">self</span>.execution_state.system.balance.get_mut();
+        <span class="self">Self</span>::sub_assign_fees(balance, credit)<span class="question-mark">?</span>;
+        <span class="self">Self</span>::sub_assign_fees(balance, pricing.fuel_price(used_fuel))<span class="question-mark">?</span>;
+        <span class="self">Self</span>::sub_assign_fees(balance, pricing.messages_price(<span class="kw-2">&amp;</span>effects)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
+
         <span class="comment">// Recompute the state hash.
         </span><span class="kw">let </span>hash = <span class="self">self</span>.execution_state.crypto_hash().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.execution_state_hash.set(<span class="prelude-val">Some</span>(hash));
@@ -1260,6 +1334,12 @@
             }
         }
         <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">fn </span>sub_assign_fees(balance: <span class="kw-2">&amp;mut </span>Amount, fees: Amount) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt; {
+        balance
+            .try_sub_assign(fees)
+            .map_err(|<span class="kw">_</span>| ChainError::InsufficientBalance)
     }
 }
 </code></pre></div>

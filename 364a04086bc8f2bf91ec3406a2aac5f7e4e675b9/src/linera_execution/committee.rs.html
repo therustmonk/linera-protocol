@@ -184,11 +184,16 @@
 <a href="#184" id="184">184</a>
 <a href="#185" id="185">185</a>
 <a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="kw">use </span>async_graphql::InputObject;
+</span><span class="kw">use </span><span class="kw">crate</span>::pricing::Pricing;
+<span class="kw">use </span>async_graphql::InputObject;
 <span class="kw">use </span>linera_base::{
     crypto::{CryptoError, PublicKey},
     data_types::ArithmeticError,
@@ -226,6 +231,8 @@
     </span><span class="kw">pub </span>quorum_threshold: u64,
     <span class="doccomment">/// The threshold to prove the validity of a statement.
     </span><span class="kw">pub </span>validity_threshold: u64,
+    <span class="doccomment">/// The pricing agreed on for this epoch.
+    </span><span class="kw">pub </span>pricing: Pricing,
 }
 
 <span class="kw">impl </span>std::fmt::Display <span class="kw">for </span>ValidatorName {
@@ -283,7 +290,7 @@
 }
 
 <span class="kw">impl </span>Committee {
-    <span class="kw">pub fn </span>new(validators: BTreeMap&lt;ValidatorName, ValidatorState&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(validators: BTreeMap&lt;ValidatorName, ValidatorState&gt;, pricing: Pricing) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>total_votes = validators.values().fold(<span class="number">0</span>, |sum, state| sum + state.votes);
         <span class="comment">// Let N = 3f + 1 + k (0 &lt;= k &lt; 3).
         // * (2 N + 3) / 3 = 2f + 1 + (2k + 2)/3 = 2f + 1 + k = N - f
@@ -296,6 +303,7 @@
             total_votes,
             quorum_threshold,
             validity_threshold,
+            pricing,
         }
     }
 
@@ -313,7 +321,7 @@
                 )
             })
             .collect();
-        Committee::new(map)
+        Committee::new(map, Pricing::default())
     }
 
     <span class="kw">pub fn </span>weight(<span class="kw-2">&amp;</span><span class="self">self</span>, author: <span class="kw-2">&amp;</span>ValidatorName) -&gt; u64 {

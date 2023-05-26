@@ -1449,6 +1449,83 @@
 <a href="#1449" id="1449">1449</a>
 <a href="#1450" id="1450">1450</a>
 <a href="#1451" id="1451">1451</a>
+<a href="#1452" id="1452">1452</a>
+<a href="#1453" id="1453">1453</a>
+<a href="#1454" id="1454">1454</a>
+<a href="#1455" id="1455">1455</a>
+<a href="#1456" id="1456">1456</a>
+<a href="#1457" id="1457">1457</a>
+<a href="#1458" id="1458">1458</a>
+<a href="#1459" id="1459">1459</a>
+<a href="#1460" id="1460">1460</a>
+<a href="#1461" id="1461">1461</a>
+<a href="#1462" id="1462">1462</a>
+<a href="#1463" id="1463">1463</a>
+<a href="#1464" id="1464">1464</a>
+<a href="#1465" id="1465">1465</a>
+<a href="#1466" id="1466">1466</a>
+<a href="#1467" id="1467">1467</a>
+<a href="#1468" id="1468">1468</a>
+<a href="#1469" id="1469">1469</a>
+<a href="#1470" id="1470">1470</a>
+<a href="#1471" id="1471">1471</a>
+<a href="#1472" id="1472">1472</a>
+<a href="#1473" id="1473">1473</a>
+<a href="#1474" id="1474">1474</a>
+<a href="#1475" id="1475">1475</a>
+<a href="#1476" id="1476">1476</a>
+<a href="#1477" id="1477">1477</a>
+<a href="#1478" id="1478">1478</a>
+<a href="#1479" id="1479">1479</a>
+<a href="#1480" id="1480">1480</a>
+<a href="#1481" id="1481">1481</a>
+<a href="#1482" id="1482">1482</a>
+<a href="#1483" id="1483">1483</a>
+<a href="#1484" id="1484">1484</a>
+<a href="#1485" id="1485">1485</a>
+<a href="#1486" id="1486">1486</a>
+<a href="#1487" id="1487">1487</a>
+<a href="#1488" id="1488">1488</a>
+<a href="#1489" id="1489">1489</a>
+<a href="#1490" id="1490">1490</a>
+<a href="#1491" id="1491">1491</a>
+<a href="#1492" id="1492">1492</a>
+<a href="#1493" id="1493">1493</a>
+<a href="#1494" id="1494">1494</a>
+<a href="#1495" id="1495">1495</a>
+<a href="#1496" id="1496">1496</a>
+<a href="#1497" id="1497">1497</a>
+<a href="#1498" id="1498">1498</a>
+<a href="#1499" id="1499">1499</a>
+<a href="#1500" id="1500">1500</a>
+<a href="#1501" id="1501">1501</a>
+<a href="#1502" id="1502">1502</a>
+<a href="#1503" id="1503">1503</a>
+<a href="#1504" id="1504">1504</a>
+<a href="#1505" id="1505">1505</a>
+<a href="#1506" id="1506">1506</a>
+<a href="#1507" id="1507">1507</a>
+<a href="#1508" id="1508">1508</a>
+<a href="#1509" id="1509">1509</a>
+<a href="#1510" id="1510">1510</a>
+<a href="#1511" id="1511">1511</a>
+<a href="#1512" id="1512">1512</a>
+<a href="#1513" id="1513">1513</a>
+<a href="#1514" id="1514">1514</a>
+<a href="#1515" id="1515">1515</a>
+<a href="#1516" id="1516">1516</a>
+<a href="#1517" id="1517">1517</a>
+<a href="#1518" id="1518">1518</a>
+<a href="#1519" id="1519">1519</a>
+<a href="#1520" id="1520">1520</a>
+<a href="#1521" id="1521">1521</a>
+<a href="#1522" id="1522">1522</a>
+<a href="#1523" id="1523">1523</a>
+<a href="#1524" id="1524">1524</a>
+<a href="#1525" id="1525">1525</a>
+<a href="#1526" id="1526">1526</a>
+<a href="#1527" id="1527">1527</a>
+<a href="#1528" id="1528">1528</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1473,6 +1550,7 @@
 };
 <span class="kw">use </span>linera_execution::{
     committee::{ValidatorName, ValidatorState},
+    pricing::Pricing,
     system::{Account, UserData},
     Bytecode, UserApplicationId, WasmRuntime, WithWasmDefault,
 };
@@ -1705,7 +1783,7 @@
                 operations: <span class="macro">vec!</span>[Operation::System(SystemOperation::Transfer {
                     owner: <span class="prelude-val">None</span>,
                     recipient: Recipient::Account(Account::chain(next_recipient)),
-                    amount: Amount::from(<span class="number">1</span>),
+                    amount: Amount::ONE,
                     user_data: UserData::default(),
                 })],
                 previous_block_hash: chain.block_hash,
@@ -1734,12 +1812,7 @@
     <span class="doccomment">/// Tries to aggregate votes into certificates.
     </span><span class="attr">#[cfg(feature = <span class="string">&quot;benchmark&quot;</span>)]
     </span><span class="kw">fn </span>make_benchmark_certificates_from_votes(<span class="kw-2">&amp;</span><span class="self">self</span>, votes: Vec&lt;Vote&gt;) -&gt; Vec&lt;Certificate&gt; {
-        <span class="kw">let </span>committee = <span class="self">self
-            </span>.wallet_state
-            .genesis_config()
-            .committee
-            .clone()
-            .into_committee();
+        <span class="kw">let </span>committee = <span class="self">self</span>.wallet_state.genesis_config().create_committee();
         <span class="kw">let </span><span class="kw-2">mut </span>aggregators = HashMap::new();
         <span class="kw">let </span><span class="kw-2">mut </span>certificates = Vec::new();
         <span class="kw">let </span><span class="kw-2">mut </span>done_senders = HashSet::new();
@@ -2097,6 +2170,25 @@
         </span>name: ValidatorName,
     },
 
+    <span class="doccomment">/// View or update the pricing.
+    </span>Pricing {
+        <span class="doccomment">/// Set the base price for each certificate.
+        </span><span class="attr">#[structopt(long)]
+        </span>certificate: <span class="prelude-ty">Option</span>&lt;Amount&gt;,
+
+        <span class="doccomment">/// Set the price per unit of fuel when executing user effects and operations.
+        </span><span class="attr">#[structopt(long)]
+        </span>fuel: <span class="prelude-ty">Option</span>&lt;Amount&gt;,
+
+        <span class="doccomment">/// Set the price per byte to store a block&#39;s operations, incoming and outgoing messages.
+        </span><span class="attr">#[structopt(long)]
+        </span>storage: <span class="prelude-ty">Option</span>&lt;Amount&gt;,
+
+        <span class="doccomment">/// Set the price per byte to store and send outgoing cross-chain messages.
+        </span><span class="attr">#[structopt(long)]
+        </span>messages: <span class="prelude-ty">Option</span>&lt;Amount&gt;,
+    },
+
     <span class="doccomment">/// Send one transfer per chain in bulk mode
     </span><span class="attr">#[cfg(feature = <span class="string">&quot;benchmark&quot;</span>)]
     </span>Benchmark {
@@ -2135,6 +2227,22 @@
 
         <span class="doccomment">/// Number of additional chains to create
         </span>num: u32,
+
+        <span class="doccomment">/// Set the base price for each certificate.
+        </span><span class="attr">#[structopt(long, default_value = <span class="string">&quot;0&quot;</span>)]
+        </span>certificate_price: Amount,
+
+        <span class="doccomment">/// Set the price per unit of fuel when executing user effects and operations.
+        </span><span class="attr">#[structopt(long, default_value = <span class="string">&quot;0&quot;</span>)]
+        </span>fuel_price: Amount,
+
+        <span class="doccomment">/// Set the price per byte to store a block&#39;s operations, incoming and outgoing messages.
+        </span><span class="attr">#[structopt(long, default_value = <span class="string">&quot;0&quot;</span>)]
+        </span>storage_price: Amount,
+
+        <span class="doccomment">/// Set the price per byte to store and send outgoing cross-chain messages.
+        </span><span class="attr">#[structopt(long, default_value = <span class="string">&quot;0&quot;</span>)]
+        </span>messages_price: Amount,
     },
 
     <span class="doccomment">/// Watch the network for notifications.
@@ -2426,7 +2534,7 @@
                 context.save_wallet();
             }
 
-            command @ (SetValidator { .. } | RemoveValidator { .. }) =&gt; {
+            command @ (SetValidator { .. } | RemoveValidator { .. } | Pricing { .. }) =&gt; {
                 <span class="macro">info!</span>(<span class="string">&quot;Starting operations to change validator set&quot;</span>);
                 <span class="kw">let </span>time_start = Instant::now();
 
@@ -2447,15 +2555,14 @@
                 <span class="macro">info!</span>(<span class="string">&quot;Subscribed {} chains to new committees&quot;</span>, n);
 
                 <span class="comment">// Create the new committee.
-                </span><span class="kw">let </span>committee = chain_client.local_committee().<span class="kw">await</span>.unwrap();
-                <span class="kw">let </span><span class="kw-2">mut </span>validators = committee.validators;
+                </span><span class="kw">let </span><span class="kw-2">mut </span>committee = chain_client.local_committee().<span class="kw">await</span>.unwrap();
                 <span class="kw">match </span>command {
                     SetValidator {
                         name,
                         address,
                         votes,
                     } =&gt; {
-                        validators.insert(
+                        committee.validators.insert(
                             name,
                             ValidatorState {
                                 network_address: address,
@@ -2464,14 +2571,51 @@
                         );
                     }
                     RemoveValidator { name } =&gt; {
-                        <span class="kw">if </span>validators.remove(<span class="kw-2">&amp;</span>name).is_none() {
+                        <span class="kw">if </span>committee.validators.remove(<span class="kw-2">&amp;</span>name).is_none() {
                             <span class="macro">warn!</span>(<span class="string">&quot;Skipping removal of nonexistent validator&quot;</span>);
+                            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+                        }
+                    }
+                    Pricing {
+                        certificate,
+                        fuel,
+                        storage,
+                        messages,
+                    } =&gt; {
+                        <span class="kw">if let </span><span class="prelude-val">Some</span>(certificate) = certificate {
+                            committee.pricing.certificate = certificate;
+                        }
+                        <span class="kw">if let </span><span class="prelude-val">Some</span>(fuel) = fuel {
+                            committee.pricing.fuel = fuel;
+                        }
+                        <span class="kw">if let </span><span class="prelude-val">Some</span>(storage) = storage {
+                            committee.pricing.storage = storage;
+                        }
+                        <span class="kw">if let </span><span class="prelude-val">Some</span>(messages) = messages {
+                            committee.pricing.messages = messages;
+                        }
+                        <span class="macro">println!</span>(
+                            <span class="string">&quot;Pricing:\n\
+                            {:.2} base cost per block\n\
+                            {:.2} per unit of fuel used in executing user operations and effects\n\
+                            {:.2} per byte of operations and incoming messages\n\
+                            {:.2} per byte of outgoing messages&quot;</span>,
+                            committee.pricing.certificate,
+                            committee.pricing.fuel,
+                            committee.pricing.storage,
+                            committee.pricing.messages
+                        );
+                        <span class="kw">if </span>certificate.is_none()
+                            &amp;&amp; fuel.is_none()
+                            &amp;&amp; storage.is_none()
+                            &amp;&amp; messages.is_none()
+                        {
                             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
                         }
                     }
                     <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
                 }
-                <span class="kw">let </span>certificate = chain_client.stage_new_committee(validators).<span class="kw">await</span>.unwrap();
+                <span class="kw">let </span>certificate = chain_client.stage_new_committee(committee).<span class="kw">await</span>.unwrap();
                 context.update_wallet_from_client(<span class="kw-2">&amp;mut </span>chain_client).<span class="kw">await</span>;
                 <span class="macro">info!</span>(<span class="string">&quot;Staging committee:\n{:?}&quot;</span>, certificate);
                 context.push_to_all_chains(<span class="kw-2">&amp;</span>storage, <span class="kw-2">&amp;</span>certificate).<span class="kw">await</span>;
@@ -2790,11 +2934,21 @@
             initial_funding,
             start_timestamp,
             num,
+            certificate_price,
+            fuel_price,
+            storage_price,
+            messages_price,
         } =&gt; {
             <span class="kw">let </span>committee_config = CommitteeConfig::read(committee_config_path)
                 .expect(<span class="string">&quot;Unable to read committee config file&quot;</span>);
+            <span class="kw">let </span>pricing = Pricing {
+                certificate: <span class="kw-2">*</span>certificate_price,
+                fuel: <span class="kw-2">*</span>fuel_price,
+                storage: <span class="kw-2">*</span>storage_price,
+                messages: <span class="kw-2">*</span>messages_price,
+            };
             <span class="kw">let </span><span class="kw-2">mut </span>genesis_config =
-                GenesisConfig::new(committee_config, ChainId::root(<span class="kw-2">*</span>admin_root));
+                GenesisConfig::new(committee_config, ChainId::root(<span class="kw-2">*</span>admin_root), pricing);
             <span class="kw">let </span>timestamp = start_timestamp
                 .map(|st| {
                     Timestamp::from(

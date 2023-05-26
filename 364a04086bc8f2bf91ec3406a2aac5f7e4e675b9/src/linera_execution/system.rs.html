@@ -1308,7 +1308,7 @@
     <span class="attr">#[error(
         <span class="string">&quot;The transferred amount must be not exceed the current chain balance: {current_balance}&quot;
     </span>)]
-    </span>InsufficientFunding { current_balance: u128 },
+    </span>InsufficientFunding { current_balance: Amount },
     <span class="attr">#[error(<span class="string">&quot;Claim must have positive amount&quot;</span>)]
     </span>IncorrectClaimAmount,
     <span class="attr">#[error(<span class="string">&quot;Claim must be authenticated by the right signer&quot;</span>)]
@@ -1480,7 +1480,7 @@
                 <span class="macro">ensure!</span>(
                     <span class="kw-2">*</span>balance &gt;= <span class="kw-2">*</span>amount,
                     SystemExecutionError::InsufficientFunding {
-                        current_balance: (<span class="kw-2">*</span>balance).into()
+                        current_balance: <span class="kw-2">*</span>balance
                     }
                 );
                 balance.try_sub_assign(<span class="kw-2">*</span>amount)<span class="question-mark">?</span>;

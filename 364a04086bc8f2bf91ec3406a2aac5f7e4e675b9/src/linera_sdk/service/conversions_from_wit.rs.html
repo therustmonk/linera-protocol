@@ -160,7 +160,7 @@
 <span class="kw">impl </span>From&lt;wit_system_api::Amount&gt; <span class="kw">for </span>Amount {
     <span class="kw">fn </span>from(balance: wit_system_api::Amount) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>value = ((balance.upper_half <span class="kw">as </span>u128) &lt;&lt; <span class="number">64</span>) | (balance.lower_half <span class="kw">as </span>u128);
-        Amount::from(value)
+        Amount::from_atto(value)
     }
 }
 

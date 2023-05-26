@@ -424,6 +424,15 @@
 <a href="#424" id="424">424</a>
 <a href="#425" id="425">425</a>
 <a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -440,7 +449,10 @@
     identifiers::{ChainDescription, ChainId, Owner},
 };
 <span class="kw">use </span>linera_core::client::{ChainClient, ValidatorNodeProvider};
-<span class="kw">use </span>linera_execution::committee::{Committee, ValidatorName, ValidatorState};
+<span class="kw">use </span>linera_execution::{
+    committee::{Committee, ValidatorName, ValidatorState},
+    pricing::Pricing,
+};
 <span class="kw">use </span>linera_rpc::config::{ValidatorInternalNetworkConfig, ValidatorPublicNetworkConfig};
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;
@@ -500,7 +512,7 @@
 <span class="kw">impl </span>Export <span class="kw">for </span>CommitteeConfig {}
 
 <span class="kw">impl </span>CommitteeConfig {
-    <span class="kw">pub fn </span>into_committee(<span class="self">self</span>) -&gt; Committee {
+    <span class="kw">pub fn </span>into_committee(<span class="self">self</span>, pricing: Pricing) -&gt; Committee {
         <span class="kw">let </span>validators = <span class="self">self
             </span>.validators
             .into_iter()
@@ -514,7 +526,7 @@
                 )
             })
             .collect();
-        Committee::new(validators)
+        Committee::new(validators, pricing)
     }
 }
 
@@ -816,17 +828,19 @@ Next Block Height:  {}&quot;#</span>,
     <span class="kw">pub </span>committee: CommitteeConfig,
     <span class="kw">pub </span>admin_id: ChainId,
     <span class="kw">pub </span>chains: Vec&lt;(ChainDescription, PublicKey, Amount, Timestamp)&gt;,
+    <span class="kw">pub </span>pricing: Pricing,
 }
 
 <span class="kw">impl </span>Import <span class="kw">for </span>GenesisConfig {}
 <span class="kw">impl </span>Export <span class="kw">for </span>GenesisConfig {}
 
 <span class="kw">impl </span>GenesisConfig {
-    <span class="kw">pub fn </span>new(committee: CommitteeConfig, admin_id: ChainId) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(committee: CommitteeConfig, admin_id: ChainId, pricing: Pricing) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             committee,
             admin_id,
             chains: Vec::new(),
+            pricing,
         }
     }
 
@@ -838,7 +852,7 @@ Next Block Height:  {}&quot;#</span>,
         <span class="kw">for </span>(description, public_key, balance, timestamp) <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.chains {
             store
                 .create_chain(
-                    <span class="self">self</span>.committee.clone().into_committee(),
+                    <span class="self">self</span>.create_committee(),
                     <span class="self">self</span>.admin_id,
                     <span class="kw-2">*</span>description,
                     <span class="kw-2">*</span>public_key,
@@ -848,6 +862,10 @@ Next Block Height:  {}&quot;#</span>,
                 .<span class="kw">await</span><span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">pub fn </span>create_committee(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Committee {
+        <span class="self">self</span>.committee.clone().into_committee(<span class="self">self</span>.pricing.clone())
     }
 }
 </code></pre></div>

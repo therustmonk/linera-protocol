@@ -1524,10 +1524,6 @@
 <a href="#1524" id="1524">1524</a>
 <a href="#1525" id="1525">1525</a>
 <a href="#1526" id="1526">1526</a>
-<a href="#1527" id="1527">1527</a>
-<a href="#1528" id="1528">1528</a>
-<a href="#1529" id="1529">1529</a>
-<a href="#1530" id="1530">1530</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1557,7 +1553,7 @@
     ChainManagerInfo, ChainStateView,
 };
 <span class="kw">use </span>linera_execution::{
-    committee::{Committee, Epoch, ValidatorName, ValidatorState},
+    committee::{Committee, Epoch, ValidatorName},
     system::{Account, Recipient, SystemChannel, SystemOperation, UserData},
     Bytecode, Effect, Operation, Query, Response, SystemEffect, SystemQuery, SystemResponse,
     UserApplicationId,
@@ -2935,13 +2931,9 @@
         <span class="prelude-val">Ok</span>((id, certificate))
     }
 
-    <span class="doccomment">/// Creates a new committee and start using it (admin chains only).
-    </span><span class="kw">pub async fn </span>stage_new_committee(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        validators: BTreeMap&lt;ValidatorName, ValidatorState&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    <span class="doccomment">/// Creates a new committee and starts using it (admin chains only).
+    </span><span class="kw">pub async fn </span>stage_new_committee(<span class="kw-2">&amp;mut </span><span class="self">self</span>, committee: Committee) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>committee = Committee::new(validators);
         <span class="kw">let </span>epoch = <span class="self">self</span>.epoch().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.execute_block(

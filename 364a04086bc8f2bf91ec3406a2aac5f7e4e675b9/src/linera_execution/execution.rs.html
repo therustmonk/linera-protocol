@@ -387,11 +387,6 @@
 <a href="#387" id="387">387</a>
 <a href="#388" id="388">388</a>
 <a href="#389" id="389">389</a>
-<a href="#390" id="390">390</a>
-<a href="#391" id="391">391</a>
-<a href="#392" id="392">392</a>
-<a href="#393" id="393">393</a>
-<a href="#394" id="394">394</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -433,8 +428,6 @@
     </span><span class="kw">pub </span>simple_users: ReentrantCollectionView&lt;C, UserApplicationId, RegisterView&lt;C, Vec&lt;u8&gt;&gt;&gt;,
     <span class="doccomment">/// User applications (View based).
     </span><span class="kw">pub </span>view_users: ReentrantCollectionView&lt;C, UserApplicationId, KeyValueStoreView&lt;C&gt;&gt;,
-    <span class="doccomment">/// Fuel available for running applications.
-    </span><span class="kw">pub </span>available_fuel: RegisterView&lt;C, u64&gt;,
 }
 
 <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
@@ -494,13 +487,8 @@
         view
     }
 
-    <span class="doccomment">/// Sets the amount of `available_fuel` using the builder pattern.
-    </span><span class="kw">pub fn </span>with_fuel(<span class="kw-2">mut </span><span class="self">self</span>, fuel: u64) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.available_fuel.set(fuel);
-        <span class="self">self
-    </span>}
-
     <span class="doccomment">/// Simulates the initialization of an application.
+    </span><span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
     </span><span class="kw">pub async fn </span>simulate_initialization(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         application: UserApplicationCode,
@@ -529,7 +517,7 @@
             .user_applications()
             .insert(application_id, application);
 
-        <span class="self">self</span>.run_user_action(application_id, chain_id, action)
+        <span class="self">self</span>.run_user_action(application_id, chain_id, action, <span class="kw-2">&amp;mut </span><span class="number">10_000_000</span>)
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(())
@@ -559,17 +547,12 @@
     ViewError: From&lt;C::Error&gt;,
     C::Extra: ExecutionRuntimeContext,
 {
-    <span class="doccomment">/// Adds `fuel` to the amount of `available_fuel` in the chain.
-    </span><span class="kw">pub fn </span>add_fuel(<span class="kw-2">&amp;mut </span><span class="self">self</span>, fuel: u64) {
-        <span class="kw">let </span>updated_amount = <span class="self">self</span>.available_fuel.get().saturating_add(fuel);
-        <span class="self">self</span>.available_fuel.set(updated_amount);
-    }
-
     <span class="kw">async fn </span>run_user_action(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         application_id: UserApplicationId,
         chain_id: ChainId,
         action: UserAction&lt;<span class="lifetime">&#39;_</span>&gt;,
+        remaining_fuel: <span class="kw-2">&amp;mut </span>u64,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;ExecutionResult&gt;, ExecutionError&gt; {
         <span class="comment">// Try to load the application. This may fail if the corresponding
         // bytecode-publishing certificate doesn&#39;t exist yet on this validator.
@@ -592,14 +575,13 @@
             parameters: description.parameters,
             signer,
         }];
-        <span class="kw">let </span>available_fuel = <span class="kw-2">*</span><span class="self">self</span>.available_fuel.get();
         <span class="kw">let </span>runtime = ExecutionRuntime::new(
             chain_id,
             <span class="kw-2">&amp;mut </span>applications,
             <span class="self">self</span>,
             <span class="kw-2">&amp;mut </span>session_manager,
             <span class="kw-2">&amp;mut </span>results,
-            available_fuel,
+            <span class="kw-2">*</span>remaining_fuel,
         );
         <span class="comment">// Make the call to user code.
         </span><span class="kw">let </span>call_result = <span class="kw">match </span>action {
@@ -621,9 +603,8 @@
         <span class="kw">let </span><span class="kw-2">mut </span>result = call_result<span class="question-mark">?</span>;
         <span class="comment">// Set the authenticated signer to be used in outgoing effects.
         </span>result.authenticated_signer = signer;
-        <span class="comment">// Update the amount of available fuel after execution has consumed some or all of it
-        </span><span class="kw">let </span>remaining_fuel = runtime.remaining_fuel();
-        <span class="self">self</span>.available_fuel.set(remaining_fuel);
+        <span class="kw-2">*</span>remaining_fuel = runtime.remaining_fuel();
+
         <span class="comment">// Check that applications were correctly stacked and unstacked.
         </span><span class="macro">assert_eq!</span>(applications.len(), <span class="number">1</span>);
         <span class="macro">assert_eq!</span>(applications[<span class="number">0</span>].id, application_id);
@@ -661,6 +642,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         context: <span class="kw-2">&amp;</span>OperationContext,
         operation: <span class="kw-2">&amp;</span>Operation,
+        remaining_fuel: <span class="kw-2">&amp;mut </span>u64,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;ExecutionResult&gt;, ExecutionError&gt; {
         <span class="macro">assert_eq!</span>(context.chain_id, <span class="self">self</span>.context().extra().chain_id());
         <span class="kw">match </span>operation {
@@ -672,8 +654,13 @@
                 <span class="kw">if let </span><span class="prelude-val">Some</span>((application_id, argument)) = new_application {
                     <span class="kw">let </span>user_action = UserAction::Initialize(context, argument);
                     results.extend(
-                        <span class="self">self</span>.run_user_action(application_id, context.chain_id, user_action)
-                            .<span class="kw">await</span><span class="question-mark">?</span>,
+                        <span class="self">self</span>.run_user_action(
+                            application_id,
+                            context.chain_id,
+                            user_action,
+                            remaining_fuel,
+                        )
+                        .<span class="kw">await</span><span class="question-mark">?</span>,
                     );
                 }
                 <span class="prelude-val">Ok</span>(results)
@@ -686,6 +673,7 @@
                     <span class="kw-2">*</span>application_id,
                     context.chain_id,
                     UserAction::Operation(context, bytes),
+                    remaining_fuel,
                 )
                 .<span class="kw">await
             </span>}
@@ -696,6 +684,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         context: <span class="kw-2">&amp;</span>EffectContext,
         effect: <span class="kw-2">&amp;</span>Effect,
+        remaining_fuel: <span class="kw-2">&amp;mut </span>u64,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;ExecutionResult&gt;, ExecutionError&gt; {
         <span class="macro">assert_eq!</span>(context.chain_id, <span class="self">self</span>.context().extra().chain_id());
         <span class="kw">match </span>effect {
@@ -711,6 +700,7 @@
                     <span class="kw-2">*</span>application_id,
                     context.chain_id,
                     UserAction::Effect(context, bytes),
+                    remaining_fuel,
                 )
                 .<span class="kw">await
             </span>}

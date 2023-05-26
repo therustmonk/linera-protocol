@@ -107,6 +107,10 @@
 <a href="#107" id="107">107</a>
 <a href="#108" id="108">108</a>
 <a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -125,7 +129,7 @@
     data_types::{ArithmeticError, BlockHeight, RoundNumber, Timestamp},
     identifiers::ChainId,
 };
-<span class="kw">use </span>linera_execution::ExecutionError;
+<span class="kw">use </span>linera_execution::{pricing::PricingError, ExecutionError};
 <span class="kw">use </span>linera_views::views::ViewError;
 <span class="kw">pub use </span>manager::{ChainManager, ChainManagerInfo, Outcome <span class="kw">as </span>ChainManagerOutcome};
 <span class="kw">use </span>thiserror::Error;
@@ -140,6 +144,8 @@
     </span>ViewError(<span class="attr">#[from] </span>ViewError),
     <span class="attr">#[error(<span class="string">&quot;Execution error: {0}&quot;</span>)]
     </span>ExecutionError(<span class="attr">#[from] </span>ExecutionError),
+    <span class="attr">#[error(<span class="string">&quot;Pricing error: {0}&quot;</span>)]
+    </span>PricingError(<span class="attr">#[from] </span>PricingError),
 
     <span class="attr">#[error(<span class="string">&quot;The chain being queried is not active {0:?}&quot;</span>)]
     </span>InactiveChain(ChainId),
@@ -215,6 +221,8 @@
     </span>CertificateSignatureVerificationFailed { error: String },
     <span class="attr">#[error(<span class="string">&quot;Internal error {0}&quot;</span>)]
     </span>InternalError(String),
+    <span class="attr">#[error(<span class="string">&quot;Insufficient balance to pay the fees&quot;</span>)]
+    </span>InsufficientBalance,
 }
 </code></pre></div>
 </section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="linera_chain" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0 (84c898d65 2023-04-16)" data-search-js="search-8a59a8356673ec1f.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>

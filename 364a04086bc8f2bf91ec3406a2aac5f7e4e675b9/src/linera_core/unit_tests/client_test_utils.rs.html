@@ -616,6 +616,12 @@
 <a href="#616" id="616">616</a>
 <a href="#617" id="617">617</a>
 <a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a>
+<a href="#624" id="624">624</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -635,6 +641,7 @@
 <span class="kw">use </span>linera_chain::data_types::{BlockProposal, Certificate, HashedValue, LiteCertificate};
 <span class="kw">use </span>linera_execution::{
     committee::{Committee, ValidatorName},
+    pricing::Pricing,
     WasmRuntime,
 };
 <span class="kw">use </span>linera_storage::{MemoryStoreClient, RocksdbStoreClient, Store};
@@ -988,6 +995,11 @@
         })
     }
 
+    <span class="kw">pub fn </span>with_pricing(<span class="kw-2">mut </span><span class="self">self</span>, pricing: Pricing) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.initial_committee.pricing = pricing;
+        <span class="self">self
+    </span>}
+
     <span class="kw">pub async fn </span>set_fault_type&lt;I&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, range: I, fault_type: FaultType)
     <span class="kw">where
         </span>I: SliceIndex&lt;[LocalValidatorClient&lt;B::Store&gt;], Output = [LocalValidatorClient&lt;B::Store&gt;]&gt;,
@@ -1023,7 +1035,7 @@
                         <span class="self">self</span>.admin_id,
                         description,
                         public_key,
-                        Amount::from(<span class="number">0</span>),
+                        Amount::ZERO,
                         Timestamp::from(<span class="number">0</span>),
                     )
                     .<span class="kw">await
