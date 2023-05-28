@@ -731,7 +731,7 @@
 };
 <span class="kw">use </span>linera_chain::{
     data_types::{
-        Block, BlockProposal, Certificate, HashedValue, LiteCertificate, Origin, OutgoingEffect,
+        Block, BlockProposal, Certificate, ExecutedBlock, HashedValue, LiteCertificate, Origin,
     },
     ChainError, ChainManagerInfo,
 };
@@ -1058,11 +1058,11 @@
 {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>stage_block_execution(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        block: <span class="kw-2">&amp;</span>Block,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(Vec&lt;OutgoingEffect&gt;, ChainInfoResponse), NodeError&gt; {
+        block: Block,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(ExecutedBlock, ChainInfoResponse), NodeError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>node = <span class="self">self</span>.node.lock().<span class="kw">await</span>;
-        <span class="kw">let </span>(effects, info) = node.state.stage_block_execution(block).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>((effects, info))
+        <span class="kw">let </span>(executed_block, info) = node.state.stage_block_execution(block).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>((executed_block, info))
     }
 
     <span class="kw">async fn </span>try_process_certificates&lt;A&gt;(
@@ -1077,15 +1077,15 @@
     {
         <span class="kw">let </span><span class="kw-2">mut </span>info = <span class="prelude-val">None</span>;
         <span class="kw">for </span>certificate <span class="kw">in </span>certificates {
-            <span class="kw">let </span>hash = certificate.value.hash();
-            <span class="kw">if </span>!certificate.value.is_confirmed() || certificate.value.block().chain_id != chain_id {
+            <span class="kw">let </span>hash = certificate.hash();
+            <span class="kw">if </span>!certificate.value().is_confirmed() || certificate.value().chain_id() != chain_id {
                 <span class="comment">// The certificate is not as expected. Give up.
                 </span><span class="macro">tracing::warn!</span>(<span class="string">&quot;Failed to process network certificate {}&quot;</span>, hash);
                 <span class="kw">return </span>info;
             }
             <span class="kw">let </span><span class="kw-2">mut </span>result = <span class="self">self</span>.handle_certificate(certificate.clone(), <span class="macro">vec!</span>[]).<span class="kw">await</span>;
             <span class="kw">if let </span><span class="prelude-val">Err</span>(NodeError::ApplicationBytecodesNotFound(locations)) = <span class="kw-2">&amp;</span>result {
-                <span class="kw">let </span>chain_id = certificate.value.chain_id();
+                <span class="kw">let </span>chain_id = certificate.value().chain_id();
                 <span class="kw">let </span><span class="kw-2">mut </span>blobs = Vec::new();
                 <span class="kw">for </span>maybe_blob <span class="kw">in </span>future::join_all(locations.iter().map(|location| {
                     <span class="kw">let </span><span class="kw-2">mut </span>client = client.clone();
@@ -1379,8 +1379,8 @@
                 }
             }
             <span class="kw">if let </span><span class="prelude-val">Some</span>(cert) = manager.requested_locked {
-                <span class="kw">if </span>cert.value.is_validated() &amp;&amp; cert.value.block().chain_id == chain_id {
-                    <span class="kw">let </span>hash = cert.value.hash();
+                <span class="kw">if </span>cert.value().is_validated() &amp;&amp; cert.value().chain_id() == chain_id {
+                    <span class="kw">let </span>hash = cert.hash();
                     <span class="kw">if let </span><span class="prelude-val">Err</span>(error) = <span class="self">self</span>.handle_certificate(cert, <span class="macro">vec!</span>[]).<span class="kw">await </span>{
                         <span class="macro">tracing::warn!</span>(<span class="string">&quot;Skipping certificate {}: {}&quot;</span>, hash, error);
                     }

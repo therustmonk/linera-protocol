@@ -149,7 +149,7 @@
         <span class="kw">let </span>chain_id = <span class="kw">match </span><span class="self">self </span>{
             RpcMessage::BlockProposal(proposal) =&gt; proposal.content.block.chain_id,
             RpcMessage::LiteCertificate(request) =&gt; request.certificate.value.chain_id,
-            RpcMessage::Certificate(request) =&gt; request.certificate.value.chain_id(),
+            RpcMessage::Certificate(request) =&gt; request.certificate.value().chain_id(),
             RpcMessage::ChainInfoQuery(query) =&gt; query.chain_id,
             RpcMessage::CrossChainRequest(request) =&gt; request.target_chain_id(),
             RpcMessage::Vote(<span class="kw">_</span>) | RpcMessage::Error(<span class="kw">_</span>) | RpcMessage::ChainInfoResponse(<span class="kw">_</span>) =&gt; {

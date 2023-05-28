@@ -672,6 +672,10 @@
 <a href="#672" id="672">672</a>
 <a href="#673" id="673">673</a>
 <a href="#674" id="674">674</a>
+<a href="#675" id="675">675</a>
+<a href="#676" id="676">676</a>
+<a href="#677" id="677">677</a>
+<a href="#678" id="678">678</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -904,7 +908,7 @@
     <span class="kw">fn </span>try_from(cert_request: grpc::Certificate) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         <span class="kw">let </span>value: HashedValue = bincode::deserialize(<span class="kw-2">&amp;</span>cert_request.value)<span class="question-mark">?</span>;
         <span class="macro">ensure!</span>(
-            <span class="prelude-val">Some</span>(value.chain_id().into()) == cert_request.chain_id,
+            <span class="prelude-val">Some</span>(value.inner().chain_id().into()) == cert_request.chain_id,
             ProtoConversionError::InconsistentChainId
         );
         <span class="kw">let </span>signatures = bincode::deserialize(<span class="kw-2">&amp;</span>cert_request.signatures)<span class="question-mark">?</span>;
@@ -922,7 +926,7 @@
 
     <span class="kw">fn </span>try_from(request: HandleCertificateRequest) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
-            chain_id: <span class="prelude-val">Some</span>(request.certificate.value.chain_id().into()),
+            chain_id: <span class="prelude-val">Some</span>(request.certificate.value().chain_id().into()),
             value: bincode::serialize(<span class="kw-2">&amp;</span>request.certificate.value)<span class="question-mark">?</span>,
             signatures: bincode::serialize(<span class="kw-2">&amp;</span>request.certificate.signatures)<span class="question-mark">?</span>,
             blobs: bincode::serialize(<span class="kw-2">&amp;</span>request.blobs)<span class="question-mark">?</span>,
@@ -1109,7 +1113,7 @@
 </span><span class="kw">pub mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span>linera_base::crypto::{BcsSignable, CryptoHash, KeyPair};
-    <span class="kw">use </span>linera_chain::data_types::{Block, BlockAndRound, HashedValue};
+    <span class="kw">use </span>linera_chain::data_types::{Block, BlockAndRound, ExecutedBlock, HashedValue};
     <span class="kw">use </span>linera_core::data_types::ChainInfo;
     <span class="kw">use </span>serde::{Deserialize, Serialize};
     <span class="kw">use </span>std::{borrow::Cow, fmt::Debug};
@@ -1267,9 +1271,11 @@
         <span class="kw">let </span>key_pair = KeyPair::generate();
         <span class="kw">let </span>certificate = Certificate::new(
             HashedValue::new_validated(
-                get_block(),
-                <span class="macro">vec!</span>[],
-                CryptoHash::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;test&quot;</span>.into())),
+                ExecutedBlock {
+                    block: get_block(),
+                    effects: <span class="macro">vec!</span>[],
+                    state_hash: CryptoHash::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;test&quot;</span>.into())),
+                },
                 Default::default(),
             ),
             <span class="macro">vec!</span>[(
@@ -1278,9 +1284,11 @@
             )],
         );
         <span class="kw">let </span>blobs = <span class="macro">vec!</span>[HashedValue::new_validated(
-            get_block(),
-            <span class="macro">vec!</span>[],
-            CryptoHash::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;also test&quot;</span>.into())),
+            ExecutedBlock {
+                block: get_block(),
+                effects: <span class="macro">vec!</span>[],
+                state_hash: CryptoHash::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;also test&quot;</span>.into())),
+            },
             Default::default(),
         )];
         <span class="kw">let </span>request = HandleCertificateRequest {
@@ -1325,11 +1333,11 @@
             },
             owner: Owner::from(KeyPair::generate().public()),
             signature: Signature::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;test&quot;</span>.into()), <span class="kw-2">&amp;</span>KeyPair::generate()),
-            blobs: <span class="macro">vec!</span>[HashedValue::new_confirmed(
-                get_block(),
-                <span class="macro">vec!</span>[],
-                CryptoHash::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;execution state&quot;</span>.into())),
-            )],
+            blobs: <span class="macro">vec!</span>[HashedValue::new_confirmed(ExecutedBlock {
+                block: get_block(),
+                effects: <span class="macro">vec!</span>[],
+                state_hash: CryptoHash::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;execution state&quot;</span>.into())),
+            })],
         };
 
         round_trip_check::&lt;<span class="kw">_</span>, grpc::BlockProposal&gt;(block_proposal);

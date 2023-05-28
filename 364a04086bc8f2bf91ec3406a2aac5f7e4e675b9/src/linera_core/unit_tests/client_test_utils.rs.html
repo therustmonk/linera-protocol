@@ -1127,9 +1127,9 @@
                         ..
                     } = response.info;
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(cert) = requested_sent_certificates.pop() {
-                        <span class="kw">if </span>cert.value.is_confirmed()
-                            &amp;&amp; cert.value.block().chain_id == chain_id
-                            &amp;&amp; cert.value.block().height == block_height
+                        <span class="kw">if </span>cert.value().is_confirmed()
+                            &amp;&amp; cert.value().chain_id() == chain_id
+                            &amp;&amp; cert.value().height() == block_height
                         {
                             cert.check(<span class="kw-2">&amp;</span><span class="self">self</span>.initial_committee).unwrap();
                             count += <span class="number">1</span>;

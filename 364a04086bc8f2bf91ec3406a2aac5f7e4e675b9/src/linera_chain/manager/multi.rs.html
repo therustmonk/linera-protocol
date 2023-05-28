@@ -195,14 +195,22 @@
 <a href="#195" id="195">195</a>
 <a href="#196" id="196">196</a>
 <a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use </span><span class="kw">super</span>::Outcome;
 <span class="kw">use crate</span>::{
     data_types::{
-        Block, BlockAndRound, BlockProposal, Certificate, HashedValue, LiteVote, OutgoingEffect,
-        ValueKind, Vote,
+        Block, BlockAndRound, BlockProposal, Certificate, ExecutedBlock, HashedValue, LiteVote,
+        OutgoingEffect, Value, Vote,
     },
     ChainError,
 };
@@ -246,7 +254,7 @@
             }
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(cert) = <span class="kw-2">&amp;</span><span class="self">self</span>.locked {
-            <span class="kw">if let </span>ValueKind::ValidatedBlock { round } = <span class="kw-2">&amp;</span>cert.value.kind() {
+            <span class="kw">if let </span>Value::ValidatedBlock { round, .. } = cert.value() {
                 <span class="kw">if </span>current_round &lt; <span class="kw-2">*</span>round {
                     current_round = <span class="kw-2">*</span>round;
                 }
@@ -273,12 +281,16 @@
                 <span class="kw">return </span><span class="prelude-val">Err</span>(ChainError::InsufficientRound(proposal.content.round));
             }
         }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(Certificate { value, .. }) = <span class="kw-2">&amp;</span><span class="self">self</span>.locked {
-            <span class="kw">if let </span>ValueKind::ValidatedBlock { round } = value.kind() {
-                <span class="macro">ensure!</span>(new_round &gt; round, ChainError::InsufficientRound(round));
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(certificate) = <span class="kw-2">&amp;</span><span class="self">self</span>.locked {
+            <span class="kw">if let </span>Value::ValidatedBlock {
+                round,
+                executed_block: ExecutedBlock { block, .. },
+            } = certificate.value()
+            {
+                <span class="macro">ensure!</span>(new_round &gt; <span class="kw-2">*</span>round, ChainError::InsufficientRound(<span class="kw-2">*</span>round));
                 <span class="macro">ensure!</span>(
-                    new_block == value.block(),
-                    ChainError::HasLockedBlock(value.block().height, round)
+                    <span class="kw-2">*</span>new_block == <span class="kw-2">*</span>block,
+                    ChainError::HasLockedBlock(block.height, <span class="kw-2">*</span>round)
                 );
             }
         }
@@ -291,22 +303,22 @@
         new_round: RoundNumber,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Outcome, ChainError&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(Vote { value, .. }) = <span class="kw-2">&amp;</span><span class="self">self</span>.pending {
-            <span class="kw">match </span>value.kind() {
-                ValueKind::ConfirmedBlock =&gt; {
-                    <span class="kw">if </span>value.block() == new_block {
+            <span class="kw">match </span>value.inner() {
+                Value::ConfirmedBlock { executed_block } =&gt; {
+                    <span class="kw">if </span>executed_block.block == <span class="kw-2">*</span>new_block {
                         <span class="kw">return </span><span class="prelude-val">Ok</span>(Outcome::Skip);
                     }
                 }
-                ValueKind::ValidatedBlock { round } =&gt; <span class="macro">ensure!</span>(
-                    new_round &gt;= round,
+                Value::ValidatedBlock { round, .. } =&gt; <span class="macro">ensure!</span>(
+                    new_round &gt;= <span class="kw-2">*</span>round,
                     ChainError::InsufficientRound(round.try_sub_one().unwrap())
                 ),
             }
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(Certificate { value, .. }) = <span class="kw-2">&amp;</span><span class="self">self</span>.locked {
-            <span class="kw">if let </span>ValueKind::ValidatedBlock { round } = value.kind() {
+            <span class="kw">if let </span>Value::ValidatedBlock { round, .. } = value.inner() {
                 <span class="macro">ensure!</span>(
-                    new_round &gt;= round,
+                    new_round &gt;= <span class="kw-2">*</span>round,
                     ChainError::InsufficientRound(round.try_sub_one().unwrap())
                 );
             }
@@ -327,8 +339,12 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(key_pair) = key_pair {
             <span class="comment">// Vote to validate.
             </span><span class="kw">let </span>BlockAndRound { block, round } = proposal.content;
-            <span class="kw">let </span>value = HashedValue::new_validated(block, effects, state_hash, round);
-            <span class="kw">let </span>vote = Vote::new(value, key_pair);
+            <span class="kw">let </span>executed_block = ExecutedBlock {
+                block,
+                effects,
+                state_hash,
+            };
+            <span class="kw">let </span>vote = Vote::new(HashedValue::new_validated(executed_block, round), key_pair);
             <span class="self">self</span>.pending = <span class="prelude-val">Some</span>(vote);
         }
     }

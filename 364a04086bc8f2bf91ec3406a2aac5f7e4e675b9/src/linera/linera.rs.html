@@ -1526,6 +1526,21 @@
 <a href="#1526" id="1526">1526</a>
 <a href="#1527" id="1527">1527</a>
 <a href="#1528" id="1528">1528</a>
+<a href="#1529" id="1529">1529</a>
+<a href="#1530" id="1530">1530</a>
+<a href="#1531" id="1531">1531</a>
+<a href="#1532" id="1532">1532</a>
+<a href="#1533" id="1533">1533</a>
+<a href="#1534" id="1534">1534</a>
+<a href="#1535" id="1535">1535</a>
+<a href="#1536" id="1536">1536</a>
+<a href="#1537" id="1537">1537</a>
+<a href="#1538" id="1538">1538</a>
+<a href="#1539" id="1539">1539</a>
+<a href="#1540" id="1540">1540</a>
+<a href="#1541" id="1541">1541</a>
+<a href="#1542" id="1542">1542</a>
+<a href="#1543" id="1543">1543</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1540,7 +1555,7 @@
     data_types::{Amount, BlockHeight, Timestamp},
     identifiers::{BytecodeId, ChainDescription, ChainId, EffectId},
 };
-<span class="kw">use </span>linera_chain::data_types::Certificate;
+<span class="kw">use </span>linera_chain::data_types::{Certificate, ExecutedBlock, Value <span class="kw">as </span>LineraValue};
 <span class="kw">use </span>linera_core::{
     client::{ChainClient, ValidatorNodeProvider},
     data_types::ChainInfoQuery,
@@ -1818,7 +1833,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>done_senders = HashSet::new();
         <span class="kw">for </span>vote <span class="kw">in </span>votes {
             <span class="comment">// We aggregate votes indexed by sender.
-            </span><span class="kw">let </span>chain_id = vote.value.chain_id();
+            </span><span class="kw">let </span>chain_id = vote.value.inner().chain_id();
             <span class="kw">if </span>done_senders.contains(<span class="kw-2">&amp;</span>chain_id) {
                 <span class="kw">continue</span>;
             }
@@ -2475,7 +2490,14 @@
                 <span class="macro">info!</span>(<span class="string">&quot;{:#?}&quot;</span>, certificate);
                 context.update_wallet_from_client(<span class="kw-2">&amp;mut </span>chain_client).<span class="kw">await</span>;
                 <span class="kw">let </span>id = ChainId::child(effect_id);
-                <span class="kw">let </span>timestamp = certificate.value.block().timestamp;
+                <span class="kw">let </span>timestamp = <span class="kw">match </span>certificate.value() {
+                    LineraValue::ConfirmedBlock {
+                        executed_block: ExecutedBlock { block, .. },
+                    } =&gt; block.timestamp,
+                    LineraValue::ValidatedBlock { .. } =&gt; {
+                        <span class="macro">panic!</span>(<span class="string">&quot;Unexpected certificate.&quot;</span>)
+                    }
+                };
                 context.update_wallet_for_new_chain(id, key_pair, timestamp);
                 <span class="comment">// Print the new chain ID and effect ID on stdout for scripting purposes.
                 </span><span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, effect_id);
@@ -2550,7 +2572,12 @@
                     .<span class="kw">await
                     </span>.unwrap()
                     .into_iter()
-                    .map(|c| c.value.effects().len())
+                    .map(|c| <span class="kw">match </span>c.value() {
+                        LineraValue::ConfirmedBlock { executed_block } =&gt; {
+                            executed_block.effects.len()
+                        }
+                        LineraValue::ValidatedBlock { .. } =&gt; <span class="number">0</span>,
+                    })
                     .sum::&lt;usize&gt;();
                 <span class="macro">info!</span>(<span class="string">&quot;Subscribed {} chains to new committees&quot;</span>, n);
 
@@ -2654,13 +2681,11 @@
 
                 <span class="kw">for </span>rpc_msg <span class="kw">in </span><span class="kw-2">&amp;</span>proposals {
                     <span class="kw">if let </span>RpcMessage::BlockProposal(proposal) = rpc_msg {
-                        <span class="kw">let </span>block = proposal.content.block.clone();
-                        <span class="kw">let </span>(effects, response) =
+                        <span class="kw">let </span>(executed_block, <span class="kw">_</span>) =
                             WorkerState::new(<span class="string">&quot;staging&quot;</span>.to_string(), <span class="prelude-val">None</span>, storage.clone())
-                                .stage_block_execution(<span class="kw-2">&amp;</span>block)
+                                .stage_block_execution(proposal.content.block.clone())
                                 .<span class="kw">await</span><span class="question-mark">?</span>;
-                        <span class="kw">let </span>state_hash = response.info.state_hash.expect(<span class="string">&quot;state was just computed&quot;</span>);
-                        <span class="kw">let </span>value = HashedValue::new_confirmed(block, effects, state_hash);
+                        <span class="kw">let </span>value = HashedValue::new_confirmed(executed_block);
                         values.insert(value.hash(), value);
                     }
                 }
@@ -2899,7 +2924,12 @@
                     .certificate_for(<span class="kw-2">&amp;</span>effect_id)
                     .<span class="kw">await
                     </span>.context(<span class="string">&quot;could not find OpenChain effect&quot;</span>)<span class="question-mark">?</span>;
-                <span class="kw">let </span>timestamp = certificate.value.block().timestamp;
+                <span class="kw">let </span>timestamp = <span class="kw">match </span>certificate.value() {
+                    LineraValue::ConfirmedBlock {
+                        executed_block: ExecutedBlock { block, .. },
+                    } =&gt; block.timestamp,
+                    LineraValue::ValidatedBlock { .. } =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unexpected certificate.&quot;</span>),
+                };
                 <span class="kw">let </span>chain_id = ChainId::child(effect_id);
                 context
                     .wallet_state

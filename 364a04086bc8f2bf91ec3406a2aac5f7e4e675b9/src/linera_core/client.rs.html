@@ -1521,9 +1521,6 @@
 <a href="#1521" id="1521">1521</a>
 <a href="#1522" id="1522">1522</a>
 <a href="#1523" id="1523">1523</a>
-<a href="#1524" id="1524">1524</a>
-<a href="#1525" id="1525">1525</a>
-<a href="#1526" id="1526">1526</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1548,7 +1545,7 @@
 };
 <span class="kw">use </span>linera_chain::{
     data_types::{
-        Block, BlockAndRound, BlockProposal, Certificate, HashedValue, LiteVote, Message,
+        Block, BlockAndRound, BlockProposal, Certificate, HashedValue, LiteVote, Message, Value,
     },
     ChainManagerInfo, ChainStateView,
 };
@@ -2131,12 +2128,9 @@
             .collect();
         <span class="kw">match </span>action {
             CommunicateAction::SubmitBlockForConfirmation(proposal) =&gt; {
-                <span class="kw">let </span>(effects, response) = <span class="self">self
-                    </span>.node_client
-                    .stage_block_execution(<span class="kw-2">&amp;</span>proposal.content.block)
-                    .<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>state_hash = response.info.state_hash.expect(<span class="string">&quot;was just computed&quot;</span>);
-                <span class="kw">let </span>value = HashedValue::new_confirmed(proposal.content.block, effects, state_hash);
+                <span class="kw">let </span>block = proposal.content.block;
+                <span class="kw">let </span>(executed_block, <span class="kw">_</span>) = <span class="self">self</span>.node_client.stage_block_execution(block).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>value = HashedValue::new_confirmed(executed_block);
                 <span class="kw">let </span>certificate = Certificate::new(value, signatures);
                 <span class="comment">// Certificate is valid because
                 // * `communicate_with_quorum` ensured a sufficient &quot;weight&quot; of
@@ -2145,13 +2139,9 @@
                 </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(certificate))
             }
             CommunicateAction::SubmitBlockForValidation(proposal) =&gt; {
-                <span class="kw">let </span>(effects, response) = <span class="self">self
-                    </span>.node_client
-                    .stage_block_execution(<span class="kw-2">&amp;</span>proposal.content.block)
-                    .<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>state_hash = response.info.state_hash.expect(<span class="string">&quot;was just computed&quot;</span>);
                 <span class="kw">let </span>BlockAndRound { block, round } = proposal.content;
-                <span class="kw">let </span>value = HashedValue::new_validated(block, effects, state_hash, round);
+                <span class="kw">let </span>(executed_block, <span class="kw">_</span>) = <span class="self">self</span>.node_client.stage_block_execution(block).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">let </span>value = HashedValue::new_validated(executed_block, round);
                 <span class="kw">let </span>certificate = Certificate::new(value, signatures);
                 <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(certificate))
             }
@@ -2168,11 +2158,10 @@
         certificate: Certificate,
         mode: ReceiveCertificateMode,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="macro">ensure!</span>(
-            certificate.value.is_confirmed(),
-            <span class="string">&quot;Was expecting a confirmed chain operation&quot;
-        </span>);
-        <span class="kw">let </span>block = certificate.value.block();
+        <span class="kw">let </span>Value::ConfirmedBlock { executed_block } = certificate.value() <span class="kw">else </span>{
+            <span class="macro">bail!</span>(<span class="string">&quot;Was expecting a confirmed chain operation&quot;</span>);
+        };
+        <span class="kw">let </span>block = <span class="kw-2">&amp;</span>executed_block.block;
         <span class="comment">// Verify the certificate before doing any expensive networking.
         </span><span class="kw">let </span>(committees, max_epoch) = <span class="self">self</span>.known_committees().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="macro">ensure!</span>(
@@ -2252,10 +2241,10 @@
                 .requested_sent_certificates.pop() <span class="kw">else </span>{
                 <span class="kw">break</span>;
             };
-            <span class="kw">if </span>!certificate.value.is_confirmed() {
+            <span class="kw">let </span>Value::ConfirmedBlock { executed_block } = certificate.value() <span class="kw">else </span>{
                 <span class="kw">return </span><span class="prelude-val">Err</span>(NodeError::InvalidChainInfoResponse);
             };
-            <span class="kw">let </span>block = certificate.value.block();
+            <span class="kw">let </span>block = <span class="kw-2">&amp;</span>executed_block.block;
             <span class="comment">// Check that certificates are valid w.r.t one of our trusted committees.
             </span><span class="kw">if </span>block.epoch &gt; max_epoch {
                 <span class="comment">// We don&#39;t accept a certificate from a committee in the future.
@@ -2300,7 +2289,7 @@
         certificates: Vec&lt;Certificate&gt;,
     ) {
         <span class="kw">for </span>certificate <span class="kw">in </span>certificates {
-            <span class="kw">let </span>hash = certificate.value.hash();
+            <span class="kw">let </span>hash = certificate.hash();
             <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = <span class="self">self
                 </span>.receive_certificate_internal(certificate, ReceiveCertificateMode::AlreadyChecked)
                 .<span class="kw">await
@@ -2546,8 +2535,11 @@
                     )
                     .<span class="kw">await</span><span class="question-mark">?
                     </span>.expect(<span class="string">&quot;a certificate&quot;</span>);
-                <span class="macro">assert!</span>(certificate.value.is_validated());
-                <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>certificate.value.block(), proposal.content.block);
+                <span class="macro">assert!</span>(<span class="macro">matches!</span>(
+                    certificate.value(),
+                    Value::ValidatedBlock { executed_block, .. }
+                        <span class="kw">if </span>executed_block.block == proposal.content.block
+                ));
                 <span class="self">self</span>.communicate_chain_updates(
                     <span class="kw-2">&amp;</span>committee,
                     <span class="self">self</span>.chain_id,
@@ -2570,8 +2562,10 @@
         };
         <span class="comment">// By now the block should be final.
         </span><span class="macro">ensure!</span>(
-            final_certificate.value.is_confirmed()
-                &amp;&amp; <span class="kw-2">*</span>final_certificate.value.block() == proposal.content.block,
+            <span class="macro">matches!</span>(
+                final_certificate.value(), Value::ConfirmedBlock { executed_block }
+                    <span class="kw">if </span>executed_block.block == proposal.content.block
+            ),
             <span class="string">&quot;A different operation was executed in parallel (consider retrying the operation)&quot;
         </span>);
         <span class="comment">// Since `handle_block_proposal` succeeded, we have the needed bytecode.
@@ -2702,7 +2696,7 @@
             authenticated_signer: <span class="prelude-val">None</span>,
             timestamp,
         };
-        <span class="kw">let </span>(<span class="kw">_</span>, response) = <span class="self">self</span>.node_client.stage_block_execution(<span class="kw-2">&amp;</span>block).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>(<span class="kw">_</span>, response) = <span class="self">self</span>.node_client.stage_block_execution(block).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(response.info.system_balance)
     }
 

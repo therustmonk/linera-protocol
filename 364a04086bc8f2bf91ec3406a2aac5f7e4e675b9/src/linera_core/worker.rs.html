@@ -1218,6 +1218,16 @@
 <a href="#1218" id="1218">1218</a>
 <a href="#1219" id="1219">1219</a>
 <a href="#1220" id="1220">1220</a>
+<a href="#1221" id="1221">1221</a>
+<a href="#1222" id="1222">1222</a>
+<a href="#1223" id="1223">1223</a>
+<a href="#1224" id="1224">1224</a>
+<a href="#1225" id="1225">1225</a>
+<a href="#1226" id="1226">1226</a>
+<a href="#1227" id="1227">1227</a>
+<a href="#1228" id="1228">1228</a>
+<a href="#1229" id="1229">1229</a>
+<a href="#1230" id="1230">1230</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1233,8 +1243,8 @@
 };
 <span class="kw">use </span>linera_chain::{
     data_types::{
-        Block, BlockAndRound, BlockProposal, Certificate, HashedValue, LiteCertificate, Medium,
-        Message, Origin, OutgoingEffect, Target, ValueKind,
+        Block, BlockAndRound, BlockProposal, Certificate, ExecutedBlock, HashedValue,
+        LiteCertificate, Medium, Message, Origin, Target, Value,
     },
     ChainManagerOutcome, ChainStateView,
 };
@@ -1257,7 +1267,7 @@
 };
 <span class="kw">use </span>thiserror::Error;
 <span class="kw">use </span>tokio::sync::{oneshot, Mutex};
-<span class="kw">use </span>tracing::{info, instrument, trace, warn};
+<span class="kw">use </span>tracing::{error, info, instrument, trace, warn};
 
 <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
 </span><span class="kw">use </span>{
@@ -1557,13 +1567,18 @@
     <span class="doccomment">/// Tries to execute a block proposal without any verification other than block execution.
     </span><span class="kw">pub async fn </span>stage_block_execution(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        block: <span class="kw-2">&amp;</span>Block,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(Vec&lt;OutgoingEffect&gt;, ChainInfoResponse), WorkerError&gt; {
+        block: Block,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(ExecutedBlock, ChainInfoResponse), WorkerError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>chain = <span class="self">self</span>.storage.load_active_chain(block.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>effects = chain.execute_block(block).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>info = ChainInfoResponse::new(<span class="kw-2">&amp;</span>chain, <span class="prelude-val">None</span>);
+        <span class="kw">let </span>(effects, state_hash) = chain.execute_block(<span class="kw-2">&amp;</span>block).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>response = ChainInfoResponse::new(<span class="kw-2">&amp;</span>chain, <span class="prelude-val">None</span>);
+        <span class="kw">let </span>executed_block = ExecutedBlock {
+            block,
+            effects,
+            state_hash,
+        };
         <span class="comment">// Do not save the new state.
-        </span><span class="prelude-val">Ok</span>((effects, info))
+        </span><span class="prelude-val">Ok</span>((executed_block, response))
     }
 
     <span class="comment">// Schedule a notification when cross-chain messages are delivered up to the given height.
@@ -1686,11 +1701,14 @@
         blobs: <span class="kw-2">&amp;</span>[HashedValue],
         notify_when_messages_are_delivered: <span class="prelude-ty">Option</span>&lt;oneshot::Sender&lt;()&gt;&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainInfoResponse, NetworkActions), WorkerError&gt; {
-        <span class="macro">assert!</span>(
-            certificate.value.is_confirmed(),
-            <span class="string">&quot;Expecting a confirmation certificate&quot;
-        </span>);
-        <span class="kw">let </span>block = certificate.value.block();
+        <span class="kw">let </span>Value::ConfirmedBlock { executed_block } = certificate.value() <span class="kw">else </span>{
+            <span class="macro">panic!</span>(<span class="string">&quot;Expecting a confirmation certificate&quot;</span>);
+        };
+        <span class="kw">let </span>ExecutedBlock {
+            block,
+            effects,
+            state_hash,
+        } = executed_block;
         <span class="kw">let </span><span class="kw-2">mut </span>chain = <span class="self">self</span>.storage.load_active_chain(block.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="comment">// Check that the chain is active and ready for this confirmation.
         </span><span class="kw">let </span>tip = chain.tip_state.get();
@@ -1753,21 +1771,18 @@
         result_certificate<span class="question-mark">?</span>;
         <span class="comment">// Execute the block and update inboxes.
         </span>chain.remove_events_from_inboxes(block).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>verified_effects = chain.execute_block(block).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="comment">// We should always agree on the effects and state hash.
+        </span><span class="kw">let </span>(verified_effects, verified_state_hash) = chain.execute_block(block).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="macro">ensure!</span>(<span class="kw-2">*</span>effects == verified_effects, WorkerError::IncorrectEffects);
         <span class="macro">ensure!</span>(
-            <span class="kw-2">*</span>certificate.value.effects() == verified_effects,
-            WorkerError::IncorrectEffects
+            <span class="kw-2">*</span>state_hash == verified_state_hash,
+            WorkerError::IncorrectStateHash
         );
         <span class="comment">// Advance to next block height.
         </span><span class="kw">let </span>tip = chain.tip_state.get_mut();
-        tip.block_hash = <span class="prelude-val">Some</span>(certificate.value.hash());
+        tip.block_hash = <span class="prelude-val">Some</span>(certificate.hash());
         tip.next_block_height.try_add_assign_one()<span class="question-mark">?</span>;
-        chain.confirmed_log.push(certificate.value.hash());
-        <span class="comment">// We should always agree on the state hash.
-        </span><span class="macro">ensure!</span>(
-            <span class="kw-2">*</span>chain.execution_state_hash.get() == <span class="prelude-val">Some</span>(certificate.value.state_hash()),
-            WorkerError::IncorrectStateHash
-        );
+        chain.confirmed_log.push(certificate.hash());
         <span class="kw">let </span>info = ChainInfoResponse::new(<span class="kw-2">&amp;</span>chain, <span class="self">self</span>.key_pair());
         <span class="kw">let </span><span class="kw-2">mut </span>actions = <span class="self">self</span>.create_network_actions(<span class="kw-2">&amp;mut </span>chain).<span class="kw">await</span><span class="question-mark">?</span>;
         actions.notifications.push(Notification {
@@ -1846,11 +1861,13 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         certificate: Certificate,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfoResponse, WorkerError&gt; {
-        <span class="kw">let </span>round = <span class="kw">match </span>certificate.value.kind() {
-            ValueKind::ValidatedBlock { round } =&gt; round,
-            ValueKind::ConfirmedBlock =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Expecting a validation certificate&quot;</span>),
+        <span class="kw">let </span>(block, round) = <span class="kw">match </span>certificate.value() {
+            Value::ValidatedBlock {
+                executed_block: ExecutedBlock { block, .. },
+                round,
+            } =&gt; (block, <span class="kw-2">*</span>round),
+            Value::ConfirmedBlock { .. } =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Expecting a validation certificate&quot;</span>),
         };
-        <span class="kw">let </span>block = certificate.value.block();
         <span class="comment">// Check that the chain is active and ready for this confirmation.
         // Verify the certificate. Returns a catch-all error to make client code more robust.
         </span><span class="kw">let </span><span class="kw-2">mut </span>chain = <span class="self">self</span>.storage.load_active_chain(block.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1911,23 +1928,27 @@
             certificates,
         )<span class="question-mark">?</span>;
         <span class="kw">let </span><span class="prelude-val">Some</span>(last_updated_height) =
-            certificates.last().map(|cert| cert.value.block().height) <span class="kw">else </span>{
+            certificates.last().map(|cert| cert.value().height()) <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
         };
         <span class="comment">// Process the received messages in certificates.
         </span><span class="self">self</span>.storage.write_certificates(<span class="kw-2">&amp;</span>certificates).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">for </span>certificate <span class="kw">in </span>certificates {
-            <span class="kw">let </span>block = certificate.value.block();
-            <span class="comment">// Update the staged chain state with the received block.
-            </span>chain
-                .receive_block(
-                    origin,
-                    block.height,
-                    block.timestamp,
-                    certificate.value.effects().clone(),
-                    certificate.value.hash(),
-                )
-                .<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="kw">let </span>hash = certificate.hash();
+            <span class="kw">match </span>certificate.value.into_inner() {
+                Value::ConfirmedBlock {
+                    executed_block: ExecutedBlock { block, effects, .. },
+                } =&gt; {
+                    <span class="comment">// Update the staged chain state with the received block.
+                    </span>chain
+                        .receive_block(origin, block.height, block.timestamp, effects, hash)
+                        .<span class="kw">await</span><span class="question-mark">?
+                </span>}
+                value =&gt; {
+                    <span class="macro">error!</span>(<span class="question-mark">?</span>value, <span class="string">&quot;Unexpected value in cross-chain message&quot;</span>);
+                    <span class="kw">continue</span>;
+                }
+            }
         }
         <span class="kw">if </span>!<span class="self">self</span>.allow_inactive_chains &amp;&amp; !chain.is_active() {
             <span class="comment">// Refuse to create a chain state if the chain is still inactive by
@@ -1950,7 +1971,7 @@
         <span class="kw">if </span><span class="self">self</span>.recent_values.contains(<span class="kw-2">&amp;</span>hash) {
             <span class="kw">return</span>;
         }
-        <span class="kw">if </span>value.is_validated() {
+        <span class="kw">if </span>value.inner().is_validated() {
             <span class="comment">// Cache the corresponding confirmed block, too, in case we get a certificate.
             </span><span class="kw">let </span>conf_value = value.clone().into_confirmed();
             <span class="kw">let </span>conf_hash = conf_value.hash();
@@ -2002,7 +2023,7 @@
             </span><span class="kw">else </span>{ <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) };
 
         <span class="kw">let </span>index = usize::try_from(effect_id.index).map_err(|<span class="kw">_</span>| ArithmeticError::Overflow)<span class="question-mark">?</span>;
-        <span class="kw">let </span><span class="prelude-val">Some</span>(outgoing_effect) = certificate.value.effects().get(index).cloned()
+        <span class="kw">let </span><span class="prelude-val">Some</span>(outgoing_effect) = certificate.value().effects().get(index).cloned()
             <span class="kw">else </span>{ <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) };
 
         <span class="kw">let </span>application_id = outgoing_effect.effect.application_id();
@@ -2020,7 +2041,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>chain = <span class="self">self</span>.storage.load_active_chain(chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>inbox = chain.inboxes.try_load_entry_mut(<span class="kw-2">&amp;</span>origin).<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span>certificate_hash = certificate.value.hash();
+        <span class="kw">let </span>certificate_hash = certificate.hash();
         <span class="kw">let </span><span class="prelude-val">Some</span>(event) =
             inbox
                 .added_events
@@ -2112,14 +2133,12 @@
             tokio::time::sleep(Duration::from_micros(time_till_block)).<span class="kw">await</span>;
         }
         <span class="kw">let </span>(effects, state_hash) = {
-            <span class="kw">let </span>effects = chain.execute_block(block).<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="kw">let </span>hash = chain.execution_state_hash.get().expect(<span class="string">&quot;was just computed&quot;</span>);
-            <span class="comment">// Verify that the resulting chain would have no unconfirmed incoming
-            // messages.
+            <span class="kw">let </span>(effects, state_hash) = chain.execute_block(block).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="comment">// Verify that the resulting chain would have no unconfirmed incoming messages.
             </span>chain.validate_incoming_messages().<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="comment">// Reset all the staged changes as we were only validating things.
             </span>chain.rollback();
-            (effects, hash)
+            (effects, state_hash)
         };
         <span class="comment">// Create the vote and store it in the chain state.
         </span><span class="kw">let </span>manager = chain.manager.get_mut();
@@ -2153,8 +2172,8 @@
     <span class="doccomment">/// Processes a certificate.
     </span><span class="attr">#[instrument(skip_all, fields(
         nick = <span class="self">self</span>.nickname,
-        chain_id = <span class="macro">format!</span>(<span class="string">&quot;{:.8}&quot;</span>, certificate.value.block().chain_id),
-        height = %certificate.value.block().height,
+        chain_id = <span class="macro">format!</span>(<span class="string">&quot;{:.8}&quot;</span>, certificate.value().chain_id()),
+        height = %certificate.value().height(),
     ))]
     </span><span class="kw">async fn </span>handle_certificate(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -2164,19 +2183,19 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainInfoResponse, NetworkActions), WorkerError&gt; {
         <span class="macro">trace!</span>(<span class="string">&quot;{} &lt;-- {:?}&quot;</span>, <span class="self">self</span>.nickname, certificate);
         <span class="macro">ensure!</span>(
-            certificate.value.is_confirmed() || blobs.is_empty(),
+            certificate.value().is_confirmed() || blobs.is_empty(),
             WorkerError::UnneededValue {
                 value_hash: blobs[<span class="number">0</span>].hash(),
             }
         );
-        <span class="kw">let </span>(info, actions) = <span class="kw">match </span>certificate.value.kind() {
-            ValueKind::ValidatedBlock { .. } =&gt; {
+        <span class="kw">let </span>(info, actions) = <span class="kw">match </span>certificate.value() {
+            Value::ValidatedBlock { .. } =&gt; {
                 <span class="comment">// Confirm the validated block.
                 </span><span class="self">self</span>.process_validated_block(certificate.clone())
                     .<span class="kw">await
                     </span>.map(|info| (info, NetworkActions::default()))<span class="question-mark">?
             </span>}
-            ValueKind::ConfirmedBlock =&gt; {
+            Value::ConfirmedBlock { .. } =&gt; {
                 <span class="comment">// Execute the confirmed block.
                 </span><span class="self">self</span>.process_confirmed_block(
                     certificate.clone(),
@@ -2279,7 +2298,7 @@
                     <span class="kw">let </span>origin = Origin { sender, medium };
                     <span class="kw">let </span>app_certificates = certificates
                         .iter()
-                        .filter(|cert| heights.binary_search(<span class="kw-2">&amp;</span>cert.value.block().height).is_ok())
+                        .filter(|cert| heights.binary_search(<span class="kw-2">&amp;</span>cert.value().height()).is_ok())
                         .cloned()
                         .collect();
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(height) = <span class="self">self
@@ -2386,48 +2405,49 @@
         <span class="kw">let </span><span class="kw-2">mut </span>skipped_len = <span class="number">0</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>trusted_len = <span class="number">0</span>;
         <span class="kw">for </span>(i, certificate) <span class="kw">in </span>certificates.iter().enumerate() {
+            <span class="kw">let </span>value = certificate.value();
             <span class="comment">// Certificates are confirming blocks.
-            </span><span class="kw">if </span>!certificate.value.is_confirmed() {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(WorkerError::InvalidCrossChainRequest);
-            };
-            <span class="kw">let </span>block = certificate.value.block();
+            </span><span class="macro">ensure!</span>(value.is_confirmed(), WorkerError::InvalidCrossChainRequest);
             <span class="comment">// Make sure that the chain_id is correct.
             </span><span class="macro">ensure!</span>(
-                origin.sender == block.chain_id,
+                origin.sender == value.chain_id(),
                 WorkerError::InvalidCrossChainRequest
             );
             <span class="comment">// Make sure that heights are increasing.
             </span><span class="macro">ensure!</span>(
-                latest_height &lt; <span class="prelude-val">Some</span>(block.height),
+                latest_height &lt; <span class="prelude-val">Some</span>(value.height()),
                 WorkerError::InvalidCrossChainRequest
             );
-            latest_height = <span class="prelude-val">Some</span>(block.height);
+            latest_height = <span class="prelude-val">Some</span>(value.height());
             <span class="comment">// Check if the block has been received already.
-            </span><span class="kw">if </span>block.height &lt; next_height_to_receive {
+            </span><span class="kw">if </span>value.height() &lt; next_height_to_receive {
                 skipped_len = i + <span class="number">1</span>;
             }
             <span class="comment">// Check if the height is trusted or the epoch is trusted.
             </span><span class="kw">if </span><span class="self">self</span>.allow_messages_from_deprecated_epochs
-                || <span class="prelude-val">Some</span>(block.height) &lt;= last_anticipated_block_height
-                || <span class="prelude-val">Some</span>(block.epoch) &gt;= <span class="self">self</span>.current_epoch
-                || <span class="self">self</span>.committees.contains_key(<span class="kw-2">&amp;</span>block.epoch)
+                || <span class="prelude-val">Some</span>(value.height()) &lt;= last_anticipated_block_height
+                || <span class="prelude-val">Some</span>(value.epoch()) &gt;= <span class="self">self</span>.current_epoch
+                || <span class="self">self</span>.committees.contains_key(<span class="kw-2">&amp;</span>value.epoch())
             {
                 trusted_len = i + <span class="number">1</span>;
             }
         }
         <span class="kw">if </span>skipped_len &gt; <span class="number">0 </span>{
-            <span class="kw">let </span>sample_block = certificates[skipped_len - <span class="number">1</span>].value.block();
+            <span class="kw">let </span>sample_value = certificates[skipped_len - <span class="number">1</span>].value();
             <span class="macro">info!</span>(
                 <span class="string">&quot;[{}] Ignoring repeated messages to {recipient:?} from {origin:?} at height {}&quot;</span>,
-                <span class="self">self</span>.nickname, sample_block.height,
+                <span class="self">self</span>.nickname,
+                sample_value.height(),
             );
         }
         <span class="kw">if </span>skipped_len &lt; certificates.len() &amp;&amp; trusted_len &lt; certificates.len() {
-            <span class="kw">let </span>sample_block = certificates[trusted_len].value.block();
+            <span class="kw">let </span>sample_value = certificates[trusted_len].value();
             <span class="macro">warn!</span>(
                 <span class="string">&quot;[{}] Refusing messages to {recipient:?} from {origin:?} at height {} \
                  because the epoch {:?} is not trusted any more&quot;</span>,
-                <span class="self">self</span>.nickname, sample_block.height, sample_block.epoch,
+                <span class="self">self</span>.nickname,
+                sample_value.height(),
+                sample_value.epoch(),
             );
         }
         <span class="kw">let </span>certificates = <span class="kw">if </span>skipped_len &lt; trusted_len {

@@ -1092,7 +1092,7 @@
     </span><span class="kw">pub async fn </span>execute_block(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         block: <span class="kw-2">&amp;</span>Block,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;OutgoingEffect&gt;, ChainError&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(Vec&lt;OutgoingEffect&gt;, CryptoHash), ChainError&gt; {
         <span class="macro">assert_eq!</span>(block.chain_id, <span class="self">self</span>.chain_id());
         <span class="kw">let </span>chain_id = <span class="self">self</span>.chain_id();
         <span class="macro">ensure!</span>(
@@ -1174,13 +1174,13 @@
         <span class="self">Self</span>::sub_assign_fees(balance, pricing.messages_price(<span class="kw-2">&amp;</span>effects)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
 
         <span class="comment">// Recompute the state hash.
-        </span><span class="kw">let </span>hash = <span class="self">self</span>.execution_state.crypto_hash().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="self">self</span>.execution_state_hash.set(<span class="prelude-val">Some</span>(hash));
+        </span><span class="kw">let </span>state_hash = <span class="self">self</span>.execution_state.crypto_hash().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.execution_state_hash.set(<span class="prelude-val">Some</span>(state_hash));
         <span class="comment">// Last, reset the consensus state based on the current ownership.
         </span><span class="self">self</span>.manager
             .get_mut()
             .reset(<span class="self">self</span>.execution_state.system.ownership.get());
-        <span class="prelude-val">Ok</span>(effects)
+        <span class="prelude-val">Ok</span>((effects, state_hash))
     }
 
     <span class="kw">async fn </span>process_execution_results(

@@ -111,13 +111,22 @@
 <a href="#111" id="111">111</a>
 <a href="#112" id="112">112</a>
 <a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use </span><span class="kw">super</span>::Outcome;
 <span class="kw">use crate</span>::{
     data_types::{
-        Block, BlockAndRound, BlockProposal, HashedValue, LiteVote, OutgoingEffect, Vote,
+        Block, BlockAndRound, BlockProposal, ExecutedBlock, HashedValue, LiteVote, OutgoingEffect,
+        Value, Vote,
     },
     ChainError,
 };
@@ -164,13 +173,16 @@
             ChainError::InvalidBlockProposal
         );
         <span class="kw">if let </span><span class="prelude-val">Some</span>(vote) = <span class="kw-2">&amp;</span><span class="self">self</span>.pending {
-            <span class="macro">ensure!</span>(vote.value.is_confirmed(), ChainError::InvalidBlockProposal);
-            <span class="kw">if </span>vote.value.block() == new_block {
+            <span class="kw">let </span>block = <span class="kw">match </span><span class="kw-2">&amp;</span>vote.value.inner() {
+                Value::ConfirmedBlock { executed_block } =&gt; <span class="kw-2">&amp;</span>executed_block.block,
+                Value::ValidatedBlock { .. } =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(ChainError::InvalidBlockProposal),
+            };
+            <span class="kw">if </span>block == new_block {
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(Outcome::Skip);
             } <span class="kw">else </span>{
                 <span class="macro">tracing::error!</span>(
                     <span class="string">&quot;Attempting to sign a different block at the same height:\n{:?}\n{:?}&quot;</span>,
-                    vote.value.block(),
+                    block,
                     new_block
                 );
                 <span class="kw">return </span><span class="prelude-val">Err</span>(ChainError::PreviousBlockMustBeConfirmedFirst);
@@ -189,8 +201,12 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(key_pair) = key_pair {
             <span class="comment">// Vote to confirm.
             </span><span class="kw">let </span>BlockAndRound { block, .. } = proposal.content;
-            <span class="kw">let </span>value = HashedValue::new_confirmed(block, effects, state_hash);
-            <span class="kw">let </span>vote = Vote::new(value, key_pair);
+            <span class="kw">let </span>executed_block = ExecutedBlock {
+                block,
+                effects,
+                state_hash,
+            };
+            <span class="kw">let </span>vote = Vote::new(HashedValue::new_confirmed(executed_block), key_pair);
             <span class="self">self</span>.pending = <span class="prelude-val">Some</span>(vote);
         }
     }

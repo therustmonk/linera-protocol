@@ -157,9 +157,6 @@
 <a href="#157" id="157">157</a>
 <a href="#158" id="158">158</a>
 <a href="#159" id="159">159</a>
-<a href="#160" id="160">160</a>
-<a href="#161" id="161">161</a>
-<a href="#162" id="162">162</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -205,13 +202,12 @@
         previous_block: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Certificate&gt;,
         validator: TestValidator,
     ) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>previous_block_hash = previous_block.map(|certificate| certificate.value.hash());
+        <span class="kw">let </span>previous_block_hash = previous_block.map(|certificate| certificate.hash());
         <span class="kw">let </span>height = previous_block
             .map(|certificate| {
                 certificate
-                    .value
-                    .block()
-                    .height
+                    .value()
+                    .height()
                     .try_add_one()
                     .expect(<span class="string">&quot;Block height limit reached&quot;</span>)
             })
@@ -283,16 +279,14 @@
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>sign(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; Certificate {
         <span class="self">self</span>.collect_incoming_messages().<span class="kw">await</span>;
 
-        <span class="kw">let </span>(effects, info) = <span class="self">self
+        <span class="kw">let </span>(executed_block, <span class="kw">_</span>) = <span class="self">self
             </span>.validator
             .worker()
             .<span class="kw">await
-            </span>.stage_block_execution(<span class="kw-2">&amp;</span><span class="self">self</span>.block)
+            </span>.stage_block_execution(<span class="self">self</span>.block)
             .<span class="kw">await
             </span>.expect(<span class="string">&quot;Failed to execute block&quot;</span>);
-        <span class="kw">let </span>state_hash = info.info.state_hash.expect(<span class="string">&quot;Missing execution state hash&quot;</span>);
-
-        <span class="kw">let </span>value = HashedValue::new_confirmed(<span class="self">self</span>.block, effects, state_hash);
+        <span class="kw">let </span>value = HashedValue::new_confirmed(executed_block);
         <span class="kw">let </span>vote = LiteVote::new(value.lite(), <span class="self">self</span>.validator.key_pair());
         <span class="kw">let </span><span class="kw-2">mut </span>builder = SignatureAggregator::new(value, <span class="self">self</span>.validator.committee());
         builder

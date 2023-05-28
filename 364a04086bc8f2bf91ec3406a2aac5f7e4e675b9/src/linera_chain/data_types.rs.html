@@ -645,6 +645,21 @@
 <a href="#645" id="645">645</a>
 <a href="#646" id="646">646</a>
 <a href="#647" id="647">647</a>
+<a href="#648" id="648">648</a>
+<a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
+<a href="#656" id="656">656</a>
+<a href="#657" id="657">657</a>
+<a href="#658" id="658">658</a>
+<a href="#659" id="659">659</a>
+<a href="#660" id="660">660</a>
+<a href="#661" id="661">661</a>
+<a href="#662" id="662">662</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -818,23 +833,24 @@
     <span class="kw">pub </span>effect: Effect,
 }
 
-<span class="doccomment">/// The type of a value: whether it&#39;s a validated block in a particular round, or already
-/// confirmed.
-</span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Serialize, Deserialize)]
-</span><span class="kw">pub enum </span>ValueKind {
-    <span class="doccomment">/// The block was validated but confirmation will require additional steps.
-    </span>ValidatedBlock { round: RoundNumber },
-    <span class="doccomment">/// The block is validated and confirmed (i.e. ready to be published).
-    </span>ConfirmedBlock,
+<span class="doccomment">/// A block, together with the effects and the state hash resulting from its execution.
+</span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
+</span><span class="kw">pub struct </span>ExecutedBlock {
+    <span class="kw">pub </span>block: Block,
+    <span class="kw">pub </span>effects: Vec&lt;OutgoingEffect&gt;,
+    <span class="kw">pub </span>state_hash: CryptoHash,
 }
 
 <span class="doccomment">/// A statement to be certified by the validators.
 </span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Deserialize, Serialize)]
-</span><span class="kw">pub struct </span>Value {
-    <span class="kw">pub </span>block: Block,
-    <span class="kw">pub </span>effects: Vec&lt;OutgoingEffect&gt;,
-    <span class="kw">pub </span>state_hash: CryptoHash,
-    <span class="kw">pub </span>kind: ValueKind,
+</span><span class="kw">pub enum </span>Value {
+    ValidatedBlock {
+        executed_block: ExecutedBlock,
+        round: RoundNumber,
+    },
+    ConfirmedBlock {
+        executed_block: ExecutedBlock,
+    },
 }
 
 <span class="doccomment">/// A statement to be certified by the validators, with its hash.
@@ -928,7 +944,8 @@
 
     <span class="doccomment">/// Returns the `Certificate` with the specified value, if it matches.
     </span><span class="kw">pub fn </span>with_value(<span class="self">self</span>, value: HashedValue) -&gt; <span class="prelude-ty">Option</span>&lt;Certificate&gt; {
-        <span class="kw">if </span><span class="self">self</span>.value.chain_id != value.chain_id() || <span class="self">self</span>.value.value_hash != value.hash() {
+        <span class="kw">if </span><span class="self">self</span>.value.chain_id != value.inner().chain_id() || <span class="self">self</span>.value.value_hash != value.hash()
+        {
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
         <span class="prelude-val">Some</span>(Certificate {
@@ -1020,6 +1037,18 @@
 }
 
 <span class="kw">impl </span>Value {
+    <span class="kw">pub fn </span>chain_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ChainId {
+        <span class="self">self</span>.executed_block().block.chain_id
+    }
+
+    <span class="kw">pub fn </span>height(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BlockHeight {
+        <span class="self">self</span>.executed_block().block.height
+    }
+
+    <span class="kw">pub fn </span>epoch(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Epoch {
+        <span class="self">self</span>.executed_block().block.epoch
+    }
+
     <span class="doccomment">/// Creates a `HashedValue` without checking that this is the correct hash!
     </span><span class="kw">pub fn </span>with_hash_unchecked(<span class="self">self</span>, hash: CryptoHash) -&gt; HashedValue {
         HashedValue { value: <span class="self">self</span>, hash }
@@ -1027,9 +1056,10 @@
 
     <span class="doccomment">/// Returns whether this value contains the effect with the specified ID.
     </span><span class="kw">pub fn </span>has_effect(<span class="kw-2">&amp;</span><span class="self">self</span>, effect_id: <span class="kw-2">&amp;</span>EffectId) -&gt; bool {
-        <span class="self">self</span>.block.height == effect_id.height
-            &amp;&amp; <span class="self">self</span>.block.chain_id == effect_id.chain_id
-            &amp;&amp; <span class="self">self</span>.effects.len() &gt; usize::try_from(effect_id.index).unwrap_or(usize::MAX)
+        <span class="self">self</span>.height() == effect_id.height
+            &amp;&amp; <span class="self">self</span>.chain_id() == effect_id.chain_id
+            &amp;&amp; <span class="self">self</span>.executed_block().effects.len()
+                &gt; usize::try_from(effect_id.index).unwrap_or(usize::MAX)
     }
 
     <span class="doccomment">/// Skip `n-1` effects from the end of the block and return the effect ID, if any.
@@ -1038,83 +1068,72 @@
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
         <span class="prelude-val">Some</span>(EffectId {
-            chain_id: <span class="self">self</span>.block.chain_id,
-            height: <span class="self">self</span>.block.height,
-            index: u32::try_from(<span class="self">self</span>.effects.len()).ok()<span class="question-mark">?</span>.checked_sub(n)<span class="question-mark">?</span>,
+            chain_id: <span class="self">self</span>.chain_id(),
+            height: <span class="self">self</span>.height(),
+            index: u32::try_from(<span class="self">self</span>.executed_block().effects.len())
+                .ok()<span class="question-mark">?
+                </span>.checked_sub(n)<span class="question-mark">?</span>,
         })
+    }
+
+    <span class="kw">pub fn </span>is_confirmed(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="macro">matches!</span>(<span class="self">self</span>, Value::ConfirmedBlock { .. })
+    }
+
+    <span class="kw">pub fn </span>is_validated(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="macro">matches!</span>(<span class="self">self</span>, Value::ValidatedBlock { .. })
+    }
+
+    <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+    </span><span class="kw">pub fn </span>effects(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Vec&lt;OutgoingEffect&gt; {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.executed_block().effects
+    }
+
+    <span class="kw">fn </span>executed_block(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>ExecutedBlock {
+        <span class="kw">match </span><span class="self">self </span>{
+            Value::ConfirmedBlock { executed_block }
+            | Value::ValidatedBlock { executed_block, .. } =&gt; executed_block,
+        }
     }
 }
 
 <span class="kw">impl </span>HashedValue {
-    <span class="kw">pub fn </span>new_confirmed(
-        block: Block,
-        effects: Vec&lt;OutgoingEffect&gt;,
-        state_hash: CryptoHash,
-    ) -&gt; HashedValue {
-        Value {
-            block,
-            effects,
-            state_hash,
-            kind: ValueKind::ConfirmedBlock,
+    <span class="kw">pub fn </span>new_confirmed(executed_block: ExecutedBlock) -&gt; HashedValue {
+        Value::ConfirmedBlock { executed_block }.into()
+    }
+
+    <span class="kw">pub fn </span>new_validated(executed_block: ExecutedBlock, round: RoundNumber) -&gt; HashedValue {
+        Value::ValidatedBlock {
+            executed_block,
+            round,
         }
         .into()
-    }
-    <span class="kw">pub fn </span>new_validated(
-        block: Block,
-        effects: Vec&lt;OutgoingEffect&gt;,
-        state_hash: CryptoHash,
-        round: RoundNumber,
-    ) -&gt; HashedValue {
-        Value {
-            block,
-            effects,
-            state_hash,
-            kind: ValueKind::ValidatedBlock { round },
-        }
-        .into()
-    }
-
-    <span class="kw">pub fn </span>chain_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ChainId {
-        <span class="self">self</span>.value.block.chain_id
-    }
-
-    <span class="kw">pub fn </span>block(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Block {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.value.block
-    }
-
-    <span class="kw">pub fn </span>state_hash(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CryptoHash {
-        <span class="self">self</span>.value.state_hash
-    }
-
-    <span class="kw">pub fn </span>effects(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Vec&lt;OutgoingEffect&gt; {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.value.effects
-    }
-
-    <span class="kw">pub fn </span>kind(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ValueKind {
-        <span class="self">self</span>.value.kind
     }
 
     <span class="kw">pub fn </span>hash(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CryptoHash {
         <span class="self">self</span>.hash
     }
 
-    <span class="kw">pub fn </span>is_confirmed(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="macro">matches!</span>(<span class="self">self</span>.value.kind, ValueKind::ConfirmedBlock)
-    }
-
-    <span class="kw">pub fn </span>is_validated(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="macro">matches!</span>(<span class="self">self</span>.value.kind, ValueKind::ValidatedBlock { .. })
-    }
-
     <span class="kw">pub fn </span>lite(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LiteValue {
         LiteValue {
             value_hash: <span class="self">self</span>.hash(),
-            chain_id: <span class="self">self</span>.chain_id(),
+            chain_id: <span class="self">self</span>.value.chain_id(),
         }
     }
 
     <span class="kw">pub fn </span>into_confirmed(<span class="self">self</span>) -&gt; HashedValue {
-        <span class="self">Self</span>::new_confirmed(<span class="self">self</span>.value.block, <span class="self">self</span>.value.effects, <span class="self">self</span>.value.state_hash)
+        <span class="kw">match </span><span class="self">self</span>.value {
+            Value::ConfirmedBlock { executed_block }
+            | Value::ValidatedBlock { executed_block, .. } =&gt; <span class="self">Self</span>::new_confirmed(executed_block),
+        }
+    }
+
+    <span class="kw">pub fn </span>inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Value {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.value
+    }
+
+    <span class="kw">pub fn </span>into_inner(<span class="self">self</span>) -&gt; Value {
+        <span class="self">self</span>.value
     }
 
     <span class="doccomment">/// Returns whether this value contains the effect with the specified ID.
@@ -1228,11 +1247,22 @@
         }
     }
 
-    <span class="kw">pub fn </span>lite_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LiteValue {
+    <span class="doccomment">/// Returns the `LiteValue` corresponding to the certified value.
+    </span><span class="kw">pub fn </span>lite_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LiteValue {
         LiteValue {
-            value_hash: <span class="self">self</span>.value.hash(),
-            chain_id: <span class="self">self</span>.value.chain_id(),
+            value_hash: <span class="self">self</span>.hash(),
+            chain_id: <span class="self">self</span>.value().chain_id(),
         }
+    }
+
+    <span class="doccomment">/// Returns the certified value.
+    </span><span class="kw">pub fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Value {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.value.value
+    }
+
+    <span class="doccomment">/// Returns the certified value&#39;s hash.
+    </span><span class="kw">pub fn </span>hash(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CryptoHash {
+        <span class="self">self</span>.value.hash
     }
 }
 
