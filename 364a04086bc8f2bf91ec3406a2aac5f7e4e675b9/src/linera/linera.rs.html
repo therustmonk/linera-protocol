@@ -1541,6 +1541,7 @@
 <a href="#1541" id="1541">1541</a>
 <a href="#1542" id="1542">1542</a>
 <a href="#1543" id="1543">1543</a>
+<a href="#1544" id="1544">1544</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1607,7 +1608,7 @@
         HandleCertificateRequest, RpcMessage,
     },
     std::collections::{HashMap, HashSet},
-    tracing::error,
+    tracing::{error, trace},
 };
 
 <span class="kw">struct </span>ClientContext {
@@ -1687,9 +1688,9 @@
         })<span class="question-mark">?</span>;
         config_dir.push(<span class="string">&quot;linera&quot;</span>);
         <span class="kw">if </span>!config_dir.exists() {
-            <span class="macro">info!</span>(<span class="string">&quot;{} does not exist, creating...&quot;</span>, config_dir.display());
+            <span class="macro">debug!</span>(<span class="string">&quot;{} does not exist, creating...&quot;</span>, config_dir.display());
             fs::create_dir(<span class="kw-2">&amp;</span>config_dir)<span class="question-mark">?</span>;
-            <span class="macro">info!</span>(<span class="string">&quot;{} created.&quot;</span>, config_dir.display());
+            <span class="macro">debug!</span>(<span class="string">&quot;{} created.&quot;</span>, config_dir.display());
         }
         config_dir.push(<span class="string">&quot;wallet.json&quot;</span>);
         <span class="prelude-val">Ok</span>(config_dir)
@@ -1806,7 +1807,7 @@
                 authenticated_signer: <span class="prelude-val">None</span>,
                 timestamp: chain.timestamp.max(Timestamp::now()),
             };
-            <span class="macro">debug!</span>(<span class="string">&quot;Preparing block proposal: {:?}&quot;</span>, block);
+            <span class="macro">trace!</span>(<span class="string">&quot;Preparing block proposal: {:?}&quot;</span>, block);
             <span class="kw">let </span>proposal = BlockProposal::new(
                 BlockAndRound {
                     block: block.clone(),
@@ -1837,21 +1838,22 @@
             <span class="kw">if </span>done_senders.contains(<span class="kw-2">&amp;</span>chain_id) {
                 <span class="kw">continue</span>;
             }
-            <span class="macro">debug!</span>(
+            <span class="macro">trace!</span>(
                 <span class="string">&quot;Processing vote on {:?}&#39;s block by {:?}&quot;</span>,
-                chain_id, vote.validator,
+                chain_id,
+                vote.validator,
             );
             <span class="kw">let </span>aggregator = aggregators
                 .entry(chain_id)
                 .or_insert_with(|| SignatureAggregator::new(vote.value, <span class="kw-2">&amp;</span>committee));
             <span class="kw">match </span>aggregator.append(vote.validator, vote.signature) {
                 <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(certificate)) =&gt; {
-                    <span class="macro">debug!</span>(<span class="string">&quot;Found certificate: {:?}&quot;</span>, certificate);
+                    <span class="macro">trace!</span>(<span class="string">&quot;Found certificate: {:?}&quot;</span>, certificate);
                     certificates.push(certificate);
                     done_senders.insert(chain_id);
                 }
                 <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; {
-                    <span class="macro">debug!</span>(<span class="string">&quot;Added one vote&quot;</span>);
+                    <span class="macro">trace!</span>(<span class="string">&quot;Added one vote&quot;</span>);
                 }
                 <span class="prelude-val">Err</span>(error) =&gt; {
                     <span class="macro">error!</span>(<span class="string">&quot;Failed to aggregate vote: {}&quot;</span>, error);
@@ -1875,9 +1877,9 @@
         <span class="kw">for </span><span class="kw-2">mut </span>client <span class="kw">in </span><span class="self">self</span>.make_validator_mass_clients(max_in_flight) {
             <span class="kw">let </span>proposals = proposals.clone();
             handles.push(tokio::spawn(<span class="kw">async move </span>{
-                <span class="macro">info!</span>(<span class="string">&quot;Sending {} requests&quot;</span>, proposals.len());
+                <span class="macro">debug!</span>(<span class="string">&quot;Sending {} requests&quot;</span>, proposals.len());
                 <span class="kw">let </span>responses = client.send(proposals).<span class="kw">await</span>.unwrap_or_default();
-                <span class="macro">info!</span>(<span class="string">&quot;Done sending requests&quot;</span>);
+                <span class="macro">debug!</span>(<span class="string">&quot;Done sending requests&quot;</span>);
                 responses
             }));
         }
@@ -1888,12 +1890,12 @@
             .flatten()
             .collect::&lt;Vec&lt;RpcMessage&gt;&gt;();
         <span class="kw">let </span>time_elapsed = time_start.elapsed();
-        <span class="macro">warn!</span>(
+        <span class="macro">info!</span>(
             <span class="string">&quot;Received {} responses in {} ms.&quot;</span>,
             responses.len(),
             time_elapsed.as_millis()
         );
-        <span class="macro">warn!</span>(
+        <span class="macro">info!</span>(
             <span class="string">&quot;Estimated server throughput: {} {} per sec&quot;</span>,
             (proposals.len() <span class="kw">as </span>u128) * <span class="number">1_000_000 </span>/ time_elapsed.as_micros(),
             phase
@@ -1971,7 +1973,7 @@
         <span class="kw">for </span>chain_id <span class="kw">in </span><span class="self">self</span>.wallet_state.chain_ids() {
             <span class="kw">let </span><span class="kw-2">mut </span>chain_client = <span class="self">self</span>.make_chain_client(storage.clone(), chain_id);
             <span class="kw">if let </span><span class="prelude-val">Ok</span>(cert) = chain_client.subscribe_to_new_committees().<span class="kw">await </span>{
-                <span class="macro">info!</span>(
+                <span class="macro">debug!</span>(
                     <span class="string">&quot;Subscribed {:?} to the admin chain {:?}&quot;</span>,
                     chain_id,
                     <span class="self">self</span>.wallet_state.genesis_admin_chain(),
@@ -1996,7 +1998,7 @@
                 </span>.unwrap();
             chain_client.process_inbox().<span class="kw">await</span>.unwrap();
             <span class="kw">let </span>epochs = chain_client.epochs().<span class="kw">await</span>.unwrap();
-            <span class="macro">info!</span>(<span class="string">&quot;{:?} accepts epochs {:?}&quot;</span>, chain_id, epochs);
+            <span class="macro">debug!</span>(<span class="string">&quot;{:?} accepts epochs {:?}&quot;</span>, chain_id, epochs);
             <span class="self">self</span>.update_wallet_from_client(<span class="kw-2">&amp;mut </span>chain_client).<span class="kw">await</span>;
         }
     }
@@ -2029,7 +2031,7 @@
 
         <span class="macro">info!</span>(<span class="string">&quot;{}&quot;</span>, <span class="string">&quot;Bytecode published successfully!&quot;</span>.green().bold());
 
-        <span class="macro">info!</span>(<span class="string">&quot;Synchronizing...&quot;</span>);
+        <span class="macro">debug!</span>(<span class="string">&quot;Synchronizing...&quot;</span>);
         chain_client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
         chain_client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(bytecode_id)
@@ -2674,7 +2676,7 @@
                 // the client library. We update the wallet storage at the end using a local node.
                 </span><span class="kw">let </span>max_proposals =
                     max_proposals.unwrap_or_else(|| context.wallet_state.num_chains());
-                <span class="macro">warn!</span>(<span class="string">&quot;Starting benchmark phase 1 (block proposals)&quot;</span>);
+                <span class="macro">info!</span>(<span class="string">&quot;Starting benchmark phase 1 (block proposals)&quot;</span>);
                 <span class="kw">let </span>proposals = context.make_benchmark_block_proposals(max_proposals);
                 <span class="kw">let </span>num_proposal = proposals.len();
                 <span class="kw">let </span><span class="kw-2">mut </span>values = HashMap::new();
@@ -2704,9 +2706,9 @@
                         })
                     })
                     .collect();
-                <span class="macro">warn!</span>(<span class="string">&quot;Received {} valid votes.&quot;</span>, votes.len());
+                <span class="macro">info!</span>(<span class="string">&quot;Received {} valid votes.&quot;</span>, votes.len());
 
-                <span class="macro">warn!</span>(<span class="string">&quot;Starting benchmark phase 2 (certified blocks)&quot;</span>);
+                <span class="macro">info!</span>(<span class="string">&quot;Starting benchmark phase 2 (certified blocks)&quot;</span>);
                 <span class="kw">let </span>certificates = context.make_benchmark_certificates_from_votes(votes);
                 <span class="macro">assert_eq!</span>(
                     num_proposal,
@@ -2737,13 +2739,13 @@
                         <span class="prelude-val">None </span>=&gt; acc,
                     }
                 });
-                <span class="macro">warn!</span>(
+                <span class="macro">info!</span>(
                     <span class="string">&quot;Confirmed {} valid certificates for {} block proposals.&quot;</span>,
                     num_valid,
                     confirmed.len()
                 );
 
-                <span class="macro">warn!</span>(<span class="string">&quot;Updating local state of user chains&quot;</span>);
+                <span class="macro">info!</span>(<span class="string">&quot;Updating local state of user chains&quot;</span>);
                 context
                     .update_wallet_from_certificates(storage, certificates)
                     .<span class="kw">await</span>;
@@ -2753,7 +2755,7 @@
             Watch { chain_id, raw } =&gt; {
                 <span class="kw">let </span>chain_client = context.make_chain_client(storage, chain_id);
                 <span class="kw">let </span>chain_id = chain_client.chain_id();
-                <span class="macro">debug!</span>(<span class="string">&quot;Watching for notifications for chain {:?}&quot;</span>, chain_id);
+                <span class="macro">info!</span>(<span class="string">&quot;Watching for notifications for chain {:?}&quot;</span>, chain_id);
                 <span class="kw">let </span><span class="kw-2">mut </span>tracker = NotificationTracker::default();
                 <span class="kw">let </span><span class="kw-2">mut </span>notification_stream =
                     ChainClient::listen(Arc::new(Mutex::new(chain_client))).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -2762,7 +2764,7 @@
                         <span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, notification);
                     }
                 }
-                <span class="macro">warn!</span>(<span class="string">&quot;Notification stream ended.&quot;</span>);
+                <span class="macro">info!</span>(<span class="string">&quot;Notification stream ended.&quot;</span>);
                 <span class="comment">// Not saving the wallet because `listen()` does not create blocks.
             </span>}
 

@@ -1267,7 +1267,7 @@
 };
 <span class="kw">use </span>thiserror::Error;
 <span class="kw">use </span>tokio::sync::{oneshot, Mutex};
-<span class="kw">use </span>tracing::{error, info, instrument, trace, warn};
+<span class="kw">use </span>tracing::{debug, error, instrument, trace, warn};
 
 <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
 </span><span class="kw">use </span>{
@@ -2434,7 +2434,7 @@
         }
         <span class="kw">if </span>skipped_len &gt; <span class="number">0 </span>{
             <span class="kw">let </span>sample_value = certificates[skipped_len - <span class="number">1</span>].value();
-            <span class="macro">info!</span>(
+            <span class="macro">debug!</span>(
                 <span class="string">&quot;[{}] Ignoring repeated messages to {recipient:?} from {origin:?} at height {}&quot;</span>,
                 <span class="self">self</span>.nickname,
                 sample_value.height(),

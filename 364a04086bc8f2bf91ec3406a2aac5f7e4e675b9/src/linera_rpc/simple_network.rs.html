@@ -532,6 +532,7 @@
 <a href="#532" id="532">532</a>
 <a href="#533" id="533">533</a>
 <a href="#534" id="534">534</a>
+<a href="#535" id="535">535</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -843,7 +844,8 @@
         <span class="kw">match </span>reply {
             <span class="prelude-val">Ok</span>(x) =&gt; x,
             <span class="prelude-val">Err</span>(error) =&gt; {
-                <span class="macro">warn!</span>(
+                <span class="comment">// TODO(#459): Make it a warning or an error again.
+                </span><span class="macro">debug!</span>(
                     <span class="string">&quot;[{}] User query failed: {}&quot;</span>,
                     <span class="self">self</span>.server.state.nickname(),
                     error

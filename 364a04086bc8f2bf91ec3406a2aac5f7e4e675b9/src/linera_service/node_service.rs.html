@@ -644,24 +644,6 @@
 <a href="#644" id="644">644</a>
 <a href="#645" id="645">645</a>
 <a href="#646" id="646">646</a>
-<a href="#647" id="647">647</a>
-<a href="#648" id="648">648</a>
-<a href="#649" id="649">649</a>
-<a href="#650" id="650">650</a>
-<a href="#651" id="651">651</a>
-<a href="#652" id="652">652</a>
-<a href="#653" id="653">653</a>
-<a href="#654" id="654">654</a>
-<a href="#655" id="655">655</a>
-<a href="#656" id="656">656</a>
-<a href="#657" id="657">657</a>
-<a href="#658" id="658">658</a>
-<a href="#659" id="659">659</a>
-<a href="#660" id="660">660</a>
-<a href="#661" id="661">661</a>
-<a href="#662" id="662">662</a>
-<a href="#663" id="663">663</a>
-<a href="#664" id="664">664</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -799,8 +781,6 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;CryptoHash, Error&gt; {
         <span class="kw">let </span>operation = Operation::System(system_operation);
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
-        client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
-        client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(client.execute_operation(operation).<span class="kw">await</span><span class="question-mark">?</span>.value.hash())
     }
 }
@@ -831,8 +811,6 @@
         user_data: <span class="prelude-ty">Option</span>&lt;UserData&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;CryptoHash, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
-        client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
-        client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>certificate = client
             .transfer(owner, amount, recipient, user_data.unwrap_or_default())
             .<span class="kw">await</span><span class="question-mark">?</span>;
@@ -851,8 +829,6 @@
         user_data: <span class="prelude-ty">Option</span>&lt;UserData&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;CryptoHash, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
-        client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
-        client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>certificate = client
             .claim(
                 owner,
@@ -869,8 +845,6 @@
     /// This will automatically subscribe to the future committees created by `admin_id`.
     </span><span class="kw">async fn </span>open_chain(<span class="kw-2">&amp;</span><span class="self">self</span>, public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;ChainId, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
-        client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
-        client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>(effect_id, <span class="kw">_</span>) = client.open_chain(public_key).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(ChainId::child(effect_id))
     }
@@ -878,8 +852,6 @@
     <span class="doccomment">/// Closes the chain.
     </span><span class="kw">async fn </span>close_chain(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CryptoHash, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
-        client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
-        client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>certificate = client.close_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(certificate.hash())
     }
@@ -951,8 +923,6 @@
         service: Bytecode,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;BytecodeId, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
-        client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
-        client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>(bytecode_id, <span class="kw">_</span>) = client.publish_bytecode(contract, service).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(bytecode_id)
     }
@@ -966,8 +936,6 @@
         required_application_ids: Vec&lt;UserApplicationId&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ApplicationId, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
-        client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
-        client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>(application_id, <span class="kw">_</span>) = client
             .create_application_untyped(
                 bytecode_id,
@@ -987,8 +955,6 @@
         target_chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;CryptoHash, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
-        client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
-        client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>certificate = client
             .request_application(application_id, target_chain_id)
             .<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1276,8 +1242,6 @@
             .collect();
 
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
-        client.synchronize_from_validators().<span class="kw">await</span><span class="question-mark">?</span>;
-        client.process_inbox().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>hash = client.execute_operations(operations).<span class="kw">await</span><span class="question-mark">?</span>.value.hash();
         <span class="prelude-val">Ok</span>(async_graphql::Response::new(hash.to_value()))
     }
