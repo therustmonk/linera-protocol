@@ -102,6 +102,13 @@
 <a href="#102" id="102">102</a>
 <a href="#103" id="103">103</a>
 <a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -111,13 +118,17 @@
 </span><span class="kw">use </span>serde::{de::DeserializeOwned, Serialize};
 <span class="kw">use </span>std::fmt::Debug;
 
-<span class="doccomment">/// A trait that includes all the types exported by a Linera application (both contract and service).
+<span class="comment">// ANCHOR: abi
+</span><span class="doccomment">/// A trait that includes all the types exported by a Linera application (both contract
+/// and service).
 </span><span class="kw">pub trait </span>Abi: ContractAbi + ServiceAbi {}
+<span class="comment">// ANCHOR_END: abi
 
-<span class="comment">// T::Parameters is duplicated for simplicity but it must match.
+// T::Parameters is duplicated for simplicity but it must match.
 </span><span class="kw">impl</span>&lt;T&gt; Abi <span class="kw">for </span>T <span class="kw">where </span>T: ContractAbi + ServiceAbi&lt;Parameters = &lt;T <span class="kw">as </span>ContractAbi&gt;::Parameters&gt; {}
 
-<span class="doccomment">/// A trait that includes all the types exported by a Linera application contract.
+<span class="comment">// ANCHOR: contract_abi
+</span><span class="doccomment">/// A trait that includes all the types exported by a Linera application contract.
 </span><span class="kw">pub trait </span>ContractAbi {
     <span class="doccomment">/// Immutable parameters specific to this application (e.g. the name of a token).
     </span><span class="kw">type </span>Parameters: Serialize + DeserializeOwned + Send + Sync + Debug + <span class="lifetime">&#39;static</span>;
@@ -158,8 +169,10 @@
     <span class="doccomment">/// The response type of an application call.
     </span><span class="kw">type </span>Response: Serialize + DeserializeOwned + Send + Sync + Debug + <span class="lifetime">&#39;static</span>;
 }
+<span class="comment">// ANCHOR_END: contract_abi
 
-<span class="doccomment">/// A trait that includes all the types exported by a Linera application service.
+// ANCHOR: service_abi
+</span><span class="doccomment">/// A trait that includes all the types exported by a Linera application service.
 </span><span class="kw">pub trait </span>ServiceAbi {
     <span class="doccomment">/// Immutable parameters specific to this application (e.g. the name of a token).
     </span><span class="kw">type </span>Parameters: Serialize + DeserializeOwned + Send + Sync + Debug + <span class="lifetime">&#39;static</span>;
@@ -170,8 +183,9 @@
     <span class="doccomment">/// The response type of the application&#39;s service.
     </span><span class="kw">type </span>QueryResponse: Serialize + DeserializeOwned + Send + Sync + Debug + <span class="lifetime">&#39;static</span>;
 }
+<span class="comment">// ANCHOR_END: service_abi
 
-<span class="doccomment">/// Marker trait to help importing contract types.
+</span><span class="doccomment">/// Marker trait to help importing contract types.
 </span><span class="kw">pub trait </span>WithContractAbi {
     <span class="doccomment">/// The contract types to import.
     </span><span class="kw">type </span>Abi: ContractAbi;

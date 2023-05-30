@@ -119,6 +119,10 @@
 <a href="#119" id="119">119</a>
 <a href="#120" id="120">120</a>
 <a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -162,7 +166,7 @@
         <span class="self">self</span>.pending.as_ref()
     }
 
-    <span class="doccomment">/// Verify the safety of the block w.r.t. voting rules.
+    <span class="doccomment">/// Verifies the safety of the block w.r.t. voting rules.
     </span><span class="kw">pub fn </span>check_proposed_block(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         new_block: <span class="kw-2">&amp;</span>Block,
@@ -174,7 +178,7 @@
         );
         <span class="kw">if let </span><span class="prelude-val">Some</span>(vote) = <span class="kw-2">&amp;</span><span class="self">self</span>.pending {
             <span class="kw">let </span>block = <span class="kw">match </span><span class="kw-2">&amp;</span>vote.value.inner() {
-                Value::ConfirmedBlock { executed_block } =&gt; <span class="kw-2">&amp;</span>executed_block.block,
+                Value::ConfirmedBlock { executed_block, .. } =&gt; <span class="kw-2">&amp;</span>executed_block.block,
                 Value::ValidatedBlock { .. } =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(ChainError::InvalidBlockProposal),
             };
             <span class="kw">if </span>block == new_block {
@@ -206,7 +210,11 @@
                 effects,
                 state_hash,
             };
-            <span class="kw">let </span>vote = Vote::new(HashedValue::new_confirmed(executed_block), key_pair);
+            <span class="kw">let </span>value = HashedValue::from(Value::ConfirmedBlock {
+                executed_block,
+                round: RoundNumber(<span class="number">0</span>),
+            });
+            <span class="kw">let </span>vote = Vote::new(value, key_pair);
             <span class="self">self</span>.pending = <span class="prelude-val">Some</span>(vote);
         }
     }

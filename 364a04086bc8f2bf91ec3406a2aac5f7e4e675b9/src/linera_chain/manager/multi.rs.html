@@ -203,6 +203,9 @@
 <a href="#203" id="203">203</a>
 <a href="#204" id="204">204</a>
 <a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -228,7 +231,7 @@
 </span><span class="kw">pub struct </span>MultiOwnerManager {
     <span class="doccomment">/// The co-owners of the chain.
     </span><span class="kw">pub </span>owners: HashMap&lt;Owner, PublicKey&gt;,
-    <span class="doccomment">/// Latest authenticated block that we have received.
+    <span class="doccomment">/// Latest authenticated block that we have received (and voted to validate).
     </span><span class="kw">pub </span>proposed: <span class="prelude-ty">Option</span>&lt;BlockProposal&gt;,
     <span class="doccomment">/// Latest validated proposal that we have seen (and voted to confirm).
     </span><span class="kw">pub </span>locked: <span class="prelude-ty">Option</span>&lt;Certificate&gt;,
@@ -267,7 +270,7 @@
         <span class="self">self</span>.pending.as_ref()
     }
 
-    <span class="doccomment">/// Verify the safety of the block w.r.t. voting rules.
+    <span class="doccomment">/// Verifies the safety of the block w.r.t. voting rules.
     </span><span class="kw">pub fn </span>check_proposed_block(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         new_block: <span class="kw-2">&amp;</span>Block,
@@ -304,8 +307,11 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Outcome, ChainError&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(Vote { value, .. }) = <span class="kw-2">&amp;</span><span class="self">self</span>.pending {
             <span class="kw">match </span>value.inner() {
-                Value::ConfirmedBlock { executed_block } =&gt; {
-                    <span class="kw">if </span>executed_block.block == <span class="kw-2">*</span>new_block {
+                Value::ConfirmedBlock {
+                    executed_block,
+                    round,
+                } =&gt; {
+                    <span class="kw">if </span>executed_block.block == <span class="kw-2">*</span>new_block &amp;&amp; <span class="kw-2">*</span>round == new_round {
                         <span class="kw">return </span><span class="prelude-val">Ok</span>(Outcome::Skip);
                     }
                 }

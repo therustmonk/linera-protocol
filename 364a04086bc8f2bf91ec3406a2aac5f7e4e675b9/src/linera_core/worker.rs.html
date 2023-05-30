@@ -1208,6 +1208,7 @@
 <a href="#1208" id="1208">1208</a>
 <a href="#1209" id="1209">1209</a>
 <a href="#1210" id="1210">1210</a>
+<a href="#1211" id="1211">1211</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1662,7 +1663,7 @@
         blobs: <span class="kw-2">&amp;</span>[HashedValue],
         notify_when_messages_are_delivered: <span class="prelude-ty">Option</span>&lt;oneshot::Sender&lt;()&gt;&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainInfoResponse, NetworkActions), WorkerError&gt; {
-        <span class="kw">let </span>Value::ConfirmedBlock { executed_block } = certificate.value() <span class="kw">else </span>{
+        <span class="kw">let </span>Value::ConfirmedBlock { executed_block, .. } = certificate.value() <span class="kw">else </span>{
             <span class="macro">panic!</span>(<span class="string">&quot;Expecting a confirmation certificate&quot;</span>);
         };
         <span class="kw">let </span>ExecutedBlock {
@@ -1899,6 +1900,7 @@
             <span class="kw">match </span>certificate.value.into_inner() {
                 Value::ConfirmedBlock {
                     executed_block: ExecutedBlock { block, effects, .. },
+                    ..
                 } =&gt; {
                     <span class="comment">// Update the staged chain state with the received block.
                     </span>chain

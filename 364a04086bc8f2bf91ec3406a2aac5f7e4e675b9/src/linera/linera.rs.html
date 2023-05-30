@@ -1542,6 +1542,9 @@
 <a href="#1542" id="1542">1542</a>
 <a href="#1543" id="1543">1543</a>
 <a href="#1544" id="1544">1544</a>
+<a href="#1545" id="1545">1545</a>
+<a href="#1546" id="1546">1546</a>
+<a href="#1547" id="1547">1547</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -2495,10 +2498,9 @@
                 <span class="kw">let </span>timestamp = <span class="kw">match </span>certificate.value() {
                     LineraValue::ConfirmedBlock {
                         executed_block: ExecutedBlock { block, .. },
+                        ..
                     } =&gt; block.timestamp,
-                    LineraValue::ValidatedBlock { .. } =&gt; {
-                        <span class="macro">panic!</span>(<span class="string">&quot;Unexpected certificate.&quot;</span>)
-                    }
+                    <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unexpected certificate.&quot;</span>),
                 };
                 context.update_wallet_for_new_chain(id, key_pair, timestamp);
                 <span class="comment">// Print the new chain ID and effect ID on stdout for scripting purposes.
@@ -2575,7 +2577,7 @@
                     </span>.unwrap()
                     .into_iter()
                     .map(|c| <span class="kw">match </span>c.value() {
-                        LineraValue::ConfirmedBlock { executed_block } =&gt; {
+                        LineraValue::ConfirmedBlock { executed_block, .. } =&gt; {
                             executed_block.effects.len()
                         }
                         LineraValue::ValidatedBlock { .. } =&gt; <span class="number">0</span>,
@@ -2687,7 +2689,10 @@
                             WorkerState::new(<span class="string">&quot;staging&quot;</span>.to_string(), <span class="prelude-val">None</span>, storage.clone())
                                 .stage_block_execution(proposal.content.block.clone())
                                 .<span class="kw">await</span><span class="question-mark">?</span>;
-                        <span class="kw">let </span>value = HashedValue::new_confirmed(executed_block);
+                        <span class="kw">let </span>value = HashedValue::from(LineraValue::ConfirmedBlock {
+                            executed_block,
+                            round: RoundNumber(<span class="number">0</span>),
+                        });
                         values.insert(value.hash(), value);
                     }
                 }
@@ -2929,8 +2934,9 @@
                 <span class="kw">let </span>timestamp = <span class="kw">match </span>certificate.value() {
                     LineraValue::ConfirmedBlock {
                         executed_block: ExecutedBlock { block, .. },
+                        ..
                     } =&gt; block.timestamp,
-                    LineraValue::ValidatedBlock { .. } =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unexpected certificate.&quot;</span>),
+                    <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unexpected certificate.&quot;</span>),
                 };
                 <span class="kw">let </span>chain_id = ChainId::child(effect_id);
                 context

@@ -1257,7 +1257,7 @@
         <span class="kw">let </span>certificate = info
             .requested_sent_certificates
             .into_iter()
-            .find(|certificate| certificate.value.has_effect(effect_id))
+            .find(|certificate| certificate.value().has_effect(effect_id))
             .ok_or_else(|| {
                 ViewError::not_found(<span class="string">&quot;could not find certificate with effect {}&quot;</span>, effect_id)
             })<span class="question-mark">?</span>;
