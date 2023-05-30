@@ -660,6 +660,13 @@
 <a href="#660" id="660">660</a>
 <a href="#661" id="661">661</a>
 <a href="#662" id="662">662</a>
+<a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
+<a href="#665" id="665">665</a>
+<a href="#666" id="666">666</a>
+<a href="#667" id="667">667</a>
+<a href="#668" id="668">668</a>
+<a href="#669" id="669">669</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1263,6 +1270,13 @@
     <span class="doccomment">/// Returns the certified value&#39;s hash.
     </span><span class="kw">pub fn </span>hash(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CryptoHash {
         <span class="self">self</span>.value.hash
+    }
+
+    <span class="doccomment">/// Returns whether the validator is among the signatories of this certificate.
+    </span><span class="kw">pub fn </span>is_signed_by(<span class="kw-2">&amp;</span><span class="self">self</span>, validator_name: <span class="kw-2">&amp;</span>ValidatorName) -&gt; bool {
+        <span class="self">self</span>.signatures
+            .iter()
+            .any(|(name, <span class="kw">_</span>)| name == validator_name)
     }
 }
 

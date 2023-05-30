@@ -414,6 +414,11 @@
 <a href="#414" id="414">414</a>
 <a href="#415" id="415">415</a>
 <a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -437,6 +442,7 @@
     ops::Range,
     time::Duration,
 };
+<span class="kw">use </span>tracing::{error, info, warn};
 
 <span class="doccomment">/// Used for `communicate_chain_updates`
 </span><span class="attr">#[allow(clippy::large_enum_variant)]
@@ -542,19 +548,25 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfo, NodeError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>count = <span class="number">0</span>;
         <span class="kw">loop </span>{
-            <span class="kw">let </span><span class="kw-2">mut </span>result = <span class="kw">match </span><span class="self">self
-                </span>.client
-                .handle_lite_certificate(certificate.lite_certificate())
-                .<span class="kw">await
-            </span>{
-                <span class="prelude-val">Ok</span>(response) =&gt; <span class="prelude-val">Ok</span>(response),
-                <span class="prelude-val">Err</span>(NodeError::MissingCertificateValue) =&gt; {
-                    <span class="self">self</span>.client
-                        .handle_certificate(certificate.clone(), <span class="macro">vec!</span>[])
-                        .<span class="kw">await
-                </span>}
-                <span class="prelude-val">Err</span>(err) =&gt; <span class="prelude-val">Err</span>(err),
-            };
+            <span class="kw">let </span><span class="kw-2">mut </span>result = <span class="kw">if </span>certificate.is_signed_by(<span class="kw-2">&amp;</span><span class="self">self</span>.name) {
+                <span class="kw">match </span><span class="self">self
+                    </span>.client
+                    .handle_lite_certificate(certificate.lite_certificate())
+                    .<span class="kw">await
+                </span>{
+                    <span class="prelude-val">Ok</span>(response) =&gt; <span class="prelude-val">Ok</span>(response),
+                    <span class="prelude-val">Err</span>(NodeError::MissingCertificateValue) =&gt; {
+                        <span class="self">self</span>.client
+                            .handle_certificate(certificate.clone(), <span class="macro">vec!</span>[])
+                            .<span class="kw">await
+                    </span>}
+                    <span class="prelude-val">Err</span>(err) =&gt; <span class="prelude-val">Err</span>(err),
+                }
+            } <span class="kw">else </span>{
+                <span class="self">self</span>.client
+                    .handle_certificate(certificate.clone(), <span class="macro">vec!</span>[])
+                    .<span class="kw">await
+            </span>};
             <span class="kw">if let </span><span class="prelude-val">Err</span>(NodeError::ApplicationBytecodesNotFound(locations)) = <span class="kw-2">&amp;</span>result {
                 <span class="kw">let </span>required = <span class="kw">match </span>certificate.value() {
                     Value::ConfirmedBlock { executed_block }
@@ -565,13 +577,13 @@
                 <span class="kw">for </span>location <span class="kw">in </span>locations {
                     <span class="kw">if </span>!required.contains_key(location) {
                         <span class="kw">let </span>hash = location.certificate_hash;
-                        <span class="macro">tracing::warn!</span>(<span class="string">&quot;validator requested {:?} but it is not required&quot;</span>, hash);
+                        <span class="macro">warn!</span>(<span class="string">&quot;validator requested {:?} but it is not required&quot;</span>, hash);
                         <span class="kw">return </span><span class="prelude-val">Err</span>(NodeError::InvalidChainInfoResponse);
                     }
                 }
                 <span class="kw">let </span>unique_locations: HashSet&lt;<span class="kw">_</span>&gt; = locations.iter().cloned().collect();
                 <span class="kw">if </span>locations.len() &gt; unique_locations.len() {
-                    <span class="macro">tracing::warn!</span>(<span class="string">&quot;locations requested by validator contain duplicates&quot;</span>);
+                    <span class="macro">warn!</span>(<span class="string">&quot;locations requested by validator contain duplicates&quot;</span>);
                     <span class="kw">return </span><span class="prelude-val">Err</span>(NodeError::InvalidChainInfoResponse);
                 }
                 <span class="kw">let </span>blobs = future::join_all(
@@ -653,7 +665,7 @@
                         </span>tokio::time::sleep(<span class="self">self</span>.delay).<span class="kw">await</span>;
                         count += <span class="number">1</span>;
                     } <span class="kw">else </span>{
-                        <span class="macro">tracing::info!</span>(<span class="string">&quot;Missing cross-chain updates: {:?}&quot;</span>, e);
+                        <span class="macro">info!</span>(<span class="string">&quot;Missing cross-chain updates: {:?}&quot;</span>, e);
                         <span class="kw">return </span><span class="prelude-val">Err</span>(NodeError::ProposedBlockWithLaggingMessages {
                             chain_id,
                             retries: <span class="self">self</span>.retries,
@@ -726,11 +738,9 @@
                     }
                 }
                 <span class="prelude-val">Err</span>(e) =&gt; {
-                    <span class="macro">tracing::error!</span>(
+                    <span class="macro">error!</span>(
                         <span class="string">&quot;Failed to query validator {:?} for information about chain {:?}: {}&quot;</span>,
-                        <span class="self">self</span>.name,
-                        chain_id,
-                        e
+                        <span class="self">self</span>.name, chain_id, e
                     );
                     <span class="kw">return </span><span class="prelude-val">Err</span>(e);
                 }
