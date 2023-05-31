@@ -94,6 +94,9 @@
 <a href="#94" id="94">94</a>
 <a href="#95" id="95">95</a>
 <a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -151,15 +154,18 @@
 </span><span class="kw">pub mod </span>hashable_wrapper;
 
 <span class="doccomment">/// Helper definitions for Rocksdb storage.
-</span><span class="attr">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
+#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">pub mod </span>rocksdb;
 
 <span class="doccomment">/// Helper definitions for DynamoDB storage.
 </span><span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
+#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">pub mod </span>dynamo_db;
 
 <span class="doccomment">/// Helper types for interfacing with a LocalStack instance.
 </span><span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
+#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">pub mod </span>localstack;
 
 <span class="doccomment">/// Helper types for tests.
