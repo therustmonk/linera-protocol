@@ -244,6 +244,8 @@
 <a href="#244" id="244">244</a>
 <a href="#245" id="245">245</a>
 <a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -290,6 +292,7 @@
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>KeyValueStoreClient <span class="kw">for </span>DbInternal {
+    <span class="kw">const </span>MAX_CONNECTIONS: usize = <span class="number">1</span>;
     <span class="kw">type </span>Error = RocksdbContextError;
     <span class="kw">type </span>Keys = Vec&lt;Vec&lt;u8&gt;&gt;;
     <span class="kw">type </span>KeyValues = Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt;;
@@ -417,6 +420,7 @@
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>KeyValueStoreClient <span class="kw">for </span>RocksdbClient {
+    <span class="kw">const </span>MAX_CONNECTIONS: usize = <span class="number">1</span>;
     <span class="kw">type </span>Error = RocksdbContextError;
     <span class="kw">type </span>Keys = Vec&lt;Vec&lt;u8&gt;&gt;;
     <span class="kw">type </span>KeyValues = Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt;;
