@@ -323,6 +323,7 @@
 <a href="#323" id="323">323</a>
 <a href="#324" id="324">324</a>
 <a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -550,9 +551,10 @@
 <span class="kw">impl </span>Committee {
     <span class="kw">pub fn </span>new(validators: BTreeMap&lt;ValidatorName, ValidatorState&gt;, pricing: Pricing) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>total_votes = validators.values().fold(<span class="number">0</span>, |sum, state| sum + state.votes);
-        <span class="comment">// Let N = 3f + 1 + k (0 &lt;= k &lt; 3).
-        // * (2 N + 3) / 3 = 2f + 1 + (2k + 2)/3 = 2f + 1 + k = N - f
-        // * (N + 2) / 3 = f + 1 + k/3 = f + 1
+        <span class="comment">// Let N = 3f + 1 + k such that 0 &lt;= k &lt;= 2. (Notably ⌊k / 3⌋ = 0 and ⌊(2 - k) / 3⌋ = 0.)
+        // The following thresholds verify:
+        // * ⌊2 N / 3⌋ + 1 = ⌊(6f + 2 + 2k) / 3⌋ + 1 = 2f + 1 + k + ⌊(2 - k) / 3⌋ = N - f
+        // * ⌊(N + 2) / 3⌋= ⌊(3f + 3 + k) / 3⌋ = f + 1 + ⌊k / 3⌋ = f + 1
         </span><span class="kw">let </span>quorum_threshold = <span class="number">2 </span>* total_votes / <span class="number">3 </span>+ <span class="number">1</span>;
         <span class="kw">let </span>validity_threshold = (total_votes + <span class="number">2</span>) / <span class="number">3</span>;
 
