@@ -49,7 +49,7 @@
 
 <span class="kw">impl </span>MemoryStoreClient {
     <span class="kw">pub fn </span>new(wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;) -&gt; <span class="self">Self </span>{
-        DbStoreClient {
+        <span class="self">Self </span>{
             client: Arc::new(MemoryStore::new(wasm_runtime)),
         }
     }
