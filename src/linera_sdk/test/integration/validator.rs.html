@@ -252,7 +252,7 @@
     /// calling this method published on it.
     ///
     /// Returns the new [`TestValidator`] and the [`BytecodeId`] of the published bytecode.
-    </span><span class="kw">pub async fn </span>with_current_bytecode() -&gt; (TestValidator, BytecodeId) {
+    </span><span class="kw">pub async fn </span>with_current_bytecode&lt;Abi&gt;() -&gt; (TestValidator, BytecodeId&lt;Abi&gt;) {
         <span class="kw">let </span>validator = TestValidator::default();
         <span class="kw">let </span>publisher = validator.new_chain().<span class="kw">await</span>;
 
@@ -271,7 +271,7 @@
     </span><span class="kw">pub async fn </span>with_current_application&lt;A&gt;(
         parameters: A::Parameters,
         initialization_argument: A::InitializationArgument,
-    ) -&gt; (TestValidator, ApplicationId)
+    ) -&gt; (TestValidator, ApplicationId&lt;A&gt;)
     <span class="kw">where
         </span>A: ContractAbi,
     {
