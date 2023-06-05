@@ -862,7 +862,7 @@
 
 <span class="doccomment">/// A statement to be certified by the validators.
 </span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Deserialize, Serialize)]
-</span><span class="kw">pub enum </span>Value {
+</span><span class="kw">pub enum </span>CertificateValue {
     ValidatedBlock {
         executed_block: ExecutedBlock,
         round: RoundNumber,
@@ -876,12 +876,12 @@
 <span class="doccomment">/// A statement to be certified by the validators, with its hash.
 </span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 </span><span class="kw">pub struct </span>HashedValue {
-    value: Value,
+    value: CertificateValue,
     <span class="doccomment">/// Hash of the value (used as key for storage).
     </span>hash: CryptoHash,
 }
 
-<span class="doccomment">/// The hash and chain ID of a `Value`.
+<span class="doccomment">/// The hash and chain ID of a `CertificateValue`.
 </span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>LiteValue {
     <span class="kw">pub </span>value_hash: CryptoHash,
@@ -1039,24 +1039,24 @@
     <span class="kw">where
         </span>D: serde::de::Deserializer&lt;<span class="lifetime">&#39;a</span>&gt;,
     {
-        <span class="prelude-val">Ok</span>(Value::deserialize(deserializer)<span class="question-mark">?</span>.into())
+        <span class="prelude-val">Ok</span>(CertificateValue::deserialize(deserializer)<span class="question-mark">?</span>.into())
     }
 }
 
-<span class="kw">impl </span>From&lt;Value&gt; <span class="kw">for </span>HashedValue {
-    <span class="kw">fn </span>from(value: Value) -&gt; HashedValue {
+<span class="kw">impl </span>From&lt;CertificateValue&gt; <span class="kw">for </span>HashedValue {
+    <span class="kw">fn </span>from(value: CertificateValue) -&gt; HashedValue {
         <span class="kw">let </span>hash = CryptoHash::new(<span class="kw-2">&amp;</span>value);
         HashedValue { value, hash }
     }
 }
 
-<span class="kw">impl </span>From&lt;HashedValue&gt; <span class="kw">for </span>Value {
-    <span class="kw">fn </span>from(hv: HashedValue) -&gt; Value {
+<span class="kw">impl </span>From&lt;HashedValue&gt; <span class="kw">for </span>CertificateValue {
+    <span class="kw">fn </span>from(hv: HashedValue) -&gt; CertificateValue {
         hv.value
     }
 }
 
-<span class="kw">impl </span>Value {
+<span class="kw">impl </span>CertificateValue {
     <span class="kw">pub fn </span>chain_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ChainId {
         <span class="self">self</span>.executed_block().block.chain_id
     }
@@ -1097,11 +1097,11 @@
     }
 
     <span class="kw">pub fn </span>is_confirmed(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="macro">matches!</span>(<span class="self">self</span>, Value::ConfirmedBlock { .. })
+        <span class="macro">matches!</span>(<span class="self">self</span>, CertificateValue::ConfirmedBlock { .. })
     }
 
     <span class="kw">pub fn </span>is_validated(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="macro">matches!</span>(<span class="self">self</span>, Value::ValidatedBlock { .. })
+        <span class="macro">matches!</span>(<span class="self">self</span>, CertificateValue::ValidatedBlock { .. })
     }
 
     <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
@@ -1111,8 +1111,8 @@
 
     <span class="kw">fn </span>executed_block(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>ExecutedBlock {
         <span class="kw">match </span><span class="self">self </span>{
-            Value::ConfirmedBlock { executed_block, .. }
-            | Value::ValidatedBlock { executed_block, .. } =&gt; executed_block,
+            CertificateValue::ConfirmedBlock { executed_block, .. }
+            | CertificateValue::ValidatedBlock { executed_block, .. } =&gt; executed_block,
         }
     }
 }
@@ -1121,7 +1121,7 @@
     <span class="doccomment">/// Creates a `ConfirmedBlock` with round 0.
     </span><span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
     </span><span class="kw">pub fn </span>new_confirmed(executed_block: ExecutedBlock) -&gt; HashedValue {
-        Value::ConfirmedBlock {
+        CertificateValue::ConfirmedBlock {
             executed_block,
             round: RoundNumber(<span class="number">0</span>),
         }
@@ -1129,7 +1129,7 @@
     }
 
     <span class="kw">pub fn </span>new_validated(executed_block: ExecutedBlock, round: RoundNumber) -&gt; HashedValue {
-        Value::ValidatedBlock {
+        CertificateValue::ValidatedBlock {
             executed_block,
             round,
         }
@@ -1149,14 +1149,14 @@
 
     <span class="kw">pub fn </span>into_confirmed(<span class="self">self</span>) -&gt; HashedValue {
         <span class="kw">match </span><span class="self">self</span>.value {
-            value @ Value::ConfirmedBlock { .. } =&gt; HashedValue {
+            value @ CertificateValue::ConfirmedBlock { .. } =&gt; HashedValue {
                 hash: <span class="self">self</span>.hash,
                 value,
             },
-            Value::ValidatedBlock {
+            CertificateValue::ValidatedBlock {
                 executed_block,
                 round,
-            } =&gt; Value::ConfirmedBlock {
+            } =&gt; CertificateValue::ConfirmedBlock {
                 executed_block,
                 round,
             }
@@ -1164,11 +1164,11 @@
         }
     }
 
-    <span class="kw">pub fn </span>inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Value {
+    <span class="kw">pub fn </span>inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>CertificateValue {
         <span class="kw-2">&amp;</span><span class="self">self</span>.value
     }
 
-    <span class="kw">pub fn </span>into_inner(<span class="self">self</span>) -&gt; Value {
+    <span class="kw">pub fn </span>into_inner(<span class="self">self</span>) -&gt; CertificateValue {
         <span class="self">self</span>.value
     }
 
@@ -1287,7 +1287,7 @@
     }
 
     <span class="doccomment">/// Returns the certified value.
-    </span><span class="kw">pub fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Value {
+    </span><span class="kw">pub fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>CertificateValue {
         <span class="kw-2">&amp;</span><span class="self">self</span>.value.value
     }
 
@@ -1336,7 +1336,7 @@
 
 <span class="kw">impl </span>BcsSignable <span class="kw">for </span>BlockAndRound {}
 
-<span class="kw">impl </span>BcsHashable <span class="kw">for </span>Value {}
+<span class="kw">impl </span>BcsHashable <span class="kw">for </span>CertificateValue {}
 
 <span class="kw">impl </span>BcsSignable <span class="kw">for </span>LiteValue {}
 

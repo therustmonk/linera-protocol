@@ -123,14 +123,16 @@
 <a href="#123" id="123">123</a>
 <a href="#124" id="124">124</a>
 <a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use </span><span class="kw">super</span>::Outcome;
 <span class="kw">use crate</span>::{
     data_types::{
-        Block, BlockAndRound, BlockProposal, ExecutedBlock, HashedValue, LiteVote, OutgoingEffect,
-        Value, Vote,
+        Block, BlockAndRound, BlockProposal, CertificateValue, ExecutedBlock, HashedValue,
+        LiteVote, OutgoingEffect, Vote,
     },
     ChainError,
 };
@@ -178,8 +180,10 @@
         );
         <span class="kw">if let </span><span class="prelude-val">Some</span>(vote) = <span class="kw-2">&amp;</span><span class="self">self</span>.pending {
             <span class="kw">let </span>block = <span class="kw">match </span><span class="kw-2">&amp;</span>vote.value.inner() {
-                Value::ConfirmedBlock { executed_block, .. } =&gt; <span class="kw-2">&amp;</span>executed_block.block,
-                Value::ValidatedBlock { .. } =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(ChainError::InvalidBlockProposal),
+                CertificateValue::ConfirmedBlock { executed_block, .. } =&gt; <span class="kw-2">&amp;</span>executed_block.block,
+                CertificateValue::ValidatedBlock { .. } =&gt; {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(ChainError::InvalidBlockProposal)
+                }
             };
             <span class="kw">if </span>block == new_block {
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(Outcome::Skip);
@@ -210,7 +214,7 @@
                 effects,
                 state_hash,
             };
-            <span class="kw">let </span>value = HashedValue::from(Value::ConfirmedBlock {
+            <span class="kw">let </span>value = HashedValue::from(CertificateValue::ConfirmedBlock {
                 executed_block,
                 round: RoundNumber(<span class="number">0</span>),
             });

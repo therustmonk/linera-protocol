@@ -1549,7 +1549,8 @@
 };
 <span class="kw">use </span>linera_chain::{
     data_types::{
-        Block, BlockAndRound, BlockProposal, Certificate, HashedValue, LiteVote, Message, Value,
+        Block, BlockAndRound, BlockProposal, Certificate, CertificateValue, HashedValue, LiteVote,
+        Message,
     },
     ChainManagerInfo, ChainStateView,
 };
@@ -1629,7 +1630,7 @@
         </span>I: FromIterator&lt;(ValidatorName, <span class="self">Self</span>::Node)&gt;,
     {
         committee
-            .validators
+            .validators()
             .iter()
             .map(|(name, validator)| {
                 <span class="kw">let </span>node = <span class="self">self</span>.make_node(<span class="kw-2">&amp;</span>validator.network_address)<span class="question-mark">?</span>;
@@ -2135,7 +2136,7 @@
                 <span class="kw">let </span>block = proposal.content.block;
                 <span class="kw">let </span>round = proposal.content.round;
                 <span class="kw">let </span>(executed_block, <span class="kw">_</span>) = <span class="self">self</span>.node_client.stage_block_execution(block).<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>value = HashedValue::from(Value::ConfirmedBlock {
+                <span class="kw">let </span>value = HashedValue::from(CertificateValue::ConfirmedBlock {
                     executed_block,
                     round,
                 });
@@ -2166,7 +2167,7 @@
         certificate: Certificate,
         mode: ReceiveCertificateMode,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>Value::ConfirmedBlock { executed_block, .. } = certificate.value() <span class="kw">else </span>{
+        <span class="kw">let </span>CertificateValue::ConfirmedBlock { executed_block, .. } = certificate.value() <span class="kw">else </span>{
             <span class="macro">bail!</span>(<span class="string">&quot;Was expecting a confirmed chain operation&quot;</span>);
         };
         <span class="kw">let </span>block = <span class="kw-2">&amp;</span>executed_block.block;
@@ -2249,7 +2250,7 @@
                 .requested_sent_certificates.pop() <span class="kw">else </span>{
                 <span class="kw">break</span>;
             };
-            <span class="kw">let </span>Value::ConfirmedBlock { executed_block, .. } = certificate.value() <span class="kw">else </span>{
+            <span class="kw">let </span>CertificateValue::ConfirmedBlock { executed_block, .. } = certificate.value() <span class="kw">else </span>{
                 <span class="kw">return </span><span class="prelude-val">Err</span>(NodeError::InvalidChainInfoResponse);
             };
             <span class="kw">let </span>block = <span class="kw-2">&amp;</span>executed_block.block;
@@ -2545,7 +2546,7 @@
                     </span>.expect(<span class="string">&quot;a certificate&quot;</span>);
                 <span class="macro">assert!</span>(<span class="macro">matches!</span>(
                     certificate.value(),
-                    Value::ValidatedBlock { executed_block, .. }
+                    CertificateValue::ValidatedBlock { executed_block, .. }
                         <span class="kw">if </span>executed_block.block == proposal.content.block
                 ));
                 <span class="self">self</span>.communicate_chain_updates(
@@ -2571,7 +2572,7 @@
         <span class="comment">// By now the block should be final.
         </span><span class="macro">ensure!</span>(
             <span class="macro">matches!</span>(
-                final_certificate.value(), Value::ConfirmedBlock { executed_block, .. }
+                final_certificate.value(), CertificateValue::ConfirmedBlock { executed_block, .. }
                     <span class="kw">if </span>executed_block.block == proposal.content.block
             ),
             <span class="string">&quot;A different operation was executed in parallel (consider retrying the operation)&quot;
@@ -2710,8 +2711,7 @@
 
     <span class="doccomment">/// Attempts to update all validators about the local chain.
     </span><span class="kw">pub async fn </span>update_validators(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>committee = <span class="self">self</span>.local_committee().<span class="kw">await</span><span class="question-mark">?</span>;
-        committee.quorum_threshold = committee.total_votes;
+        <span class="kw">let </span>committee = <span class="self">self</span>.local_committee().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.communicate_chain_updates(
             <span class="kw-2">&amp;</span>committee,
             <span class="self">self</span>.chain_id,

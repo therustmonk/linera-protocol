@@ -147,22 +147,22 @@
 </span><span class="kw">impl </span>Committee {
     <span class="attr">#[graphql(derived(name = <span class="string">&quot;validators&quot;</span>))]
     </span><span class="kw">async fn </span>_validators(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>BTreeMap&lt;ValidatorName, ValidatorState&gt; {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.validators
+        <span class="self">self</span>.validators()
     }
 
     <span class="attr">#[graphql(derived(name = <span class="string">&quot;total_votes&quot;</span>))]
     </span><span class="kw">async fn </span>_total_votes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
-        <span class="self">self</span>.total_votes
+        <span class="self">self</span>.total_votes()
     }
 
     <span class="attr">#[graphql(derived(name = <span class="string">&quot;quorum_threshold&quot;</span>))]
     </span><span class="kw">async fn </span>_quorum_threshold(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
-        <span class="self">self</span>.quorum_threshold
+        <span class="self">self</span>.quorum_threshold()
     }
 
     <span class="attr">#[graphql(derived(name = <span class="string">&quot;validity_threshold&quot;</span>))]
     </span><span class="kw">async fn </span>_validity_threshold(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
-        <span class="self">self</span>.validity_threshold
+        <span class="self">self</span>.validity_threshold()
     }
 }
 

@@ -1116,7 +1116,7 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(ChainError::InactiveChain(chain_id));
         };
 
-        <span class="kw">let </span>pricing = committee.pricing.clone();
+        <span class="kw">let </span>pricing = committee.pricing().clone();
         <span class="kw">let </span>credit: Amount = block
             .incoming_messages
             .iter()

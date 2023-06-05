@@ -419,6 +419,39 @@
 <a href="#419" id="419">419</a>
 <a href="#420" id="420">420</a>
 <a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -432,7 +465,7 @@
     data_types::BlockHeight,
     identifiers::{ChainDescription, ChainId, EffectId},
 };
-<span class="kw">use </span>linera_chain::data_types::{BlockProposal, Certificate, LiteVote, Value};
+<span class="kw">use </span>linera_chain::data_types::{BlockProposal, Certificate, CertificateValue, LiteVote};
 <span class="kw">use </span>linera_execution::committee::{Committee, ValidatorName};
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;
@@ -440,11 +473,17 @@
     collections::{BTreeMap, HashMap, HashSet},
     hash::Hash,
     ops::Range,
-    time::Duration,
+    time::{Duration, Instant},
 };
 <span class="kw">use </span>tracing::{error, info, warn};
 
-<span class="doccomment">/// Used for `communicate_chain_updates`
+<span class="doccomment">/// The amount of time we wait for additional validators to contribute to the result, as a fraction
+/// of how long it took to reach a quorum.
+</span><span class="kw">const </span>GRACE_PERIOD: f64 = <span class="number">0.2</span>;
+<span class="doccomment">/// The maximum timeout for `communicate_with_quorum` if no quorum is reached.
+</span><span class="kw">const </span>MAX_TIMEOUT: Duration = Duration::from_secs(<span class="number">60 </span>* <span class="number">60 </span>* <span class="number">24</span>); <span class="comment">// 1 day.
+
+</span><span class="doccomment">/// Used for `communicate_chain_updates`
 </span><span class="attr">#[allow(clippy::large_enum_variant)]
 #[derive(Clone)]
 </span><span class="kw">pub enum </span>CommunicateAction {
@@ -473,7 +512,10 @@
 }
 
 <span class="doccomment">/// Executes a sequence of actions in parallel for all validators.
-/// Tries to stop early when a quorum is reached.
+///
+/// Tries to stop early when a quorum is reached. If `grace_period` is not zero, other validators
+/// are given this much additional time to contribute to the result, as a fraction of how long it
+/// took to reach the quorum.
 </span><span class="kw">pub async fn </span>communicate_with_quorum&lt;<span class="lifetime">&#39;a</span>, A, V, K, F, G&gt;(
     validator_clients: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[(ValidatorName, A)],
     committee: <span class="kw-2">&amp;</span>Committee,
@@ -502,19 +544,27 @@
         })
         .collect();
 
+    <span class="kw">let </span>start_time = Instant::now();
+    <span class="kw">let </span><span class="kw-2">mut </span>end_time: <span class="prelude-ty">Option</span>&lt;Instant&gt; = <span class="prelude-val">None</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>remaining_votes = committee.total_votes();
+    <span class="kw">let </span><span class="kw-2">mut </span>highest_key_score = <span class="number">0</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>value_scores = HashMap::new();
     <span class="kw">let </span><span class="kw-2">mut </span>error_scores = HashMap::new();
-    <span class="kw">while let </span><span class="prelude-val">Some</span>((name, result)) = responses.next().<span class="kw">await </span>{
+
+    <span class="kw">while let </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>((name, result))) = tokio::time::timeout(
+        end_time.map_or(MAX_TIMEOUT, |t| t.saturating_duration_since(Instant::now())),
+        responses.next(),
+    )
+    .<span class="kw">await
+    </span>{
+        remaining_votes -= committee.weight(<span class="kw-2">&amp;</span>name);
         <span class="kw">match </span>result {
             <span class="prelude-val">Ok</span>(value) =&gt; {
                 <span class="kw">let </span>key = group_by(<span class="kw-2">&amp;</span>value);
                 <span class="kw">let </span>entry = value_scores.entry(key.clone()).or_insert((<span class="number">0</span>, Vec::new()));
                 entry.<span class="number">0 </span>+= committee.weight(<span class="kw-2">&amp;</span>name);
                 entry.<span class="number">1</span>.push(value);
-                <span class="kw">if </span>entry.<span class="number">0 </span>&gt;= committee.quorum_threshold() {
-                    <span class="comment">// Success!
-                    </span><span class="kw">return </span><span class="prelude-val">Ok</span>((key, std::mem::take(<span class="kw-2">&amp;mut </span>entry.<span class="number">1</span>)));
-                }
+                highest_key_score = highest_key_score.max(entry.<span class="number">0</span>);
             }
             <span class="prelude-val">Err</span>(err) =&gt; {
                 <span class="kw">let </span>entry = error_scores.entry(err.clone()).or_insert(<span class="number">0</span>);
@@ -526,6 +576,22 @@
                 }
             }
         }
+        <span class="comment">// If a key reaches a quorum or it becomes clear that no key can, wait for the grace
+        // period to collect more values or error information and then stop.
+        </span><span class="kw">if </span>end_time.is_none()
+            &amp;&amp; (highest_key_score &gt;= committee.quorum_threshold()
+                || highest_key_score + remaining_votes &lt; committee.quorum_threshold())
+        {
+            end_time = <span class="prelude-val">Some</span>(Instant::now() + start_time.elapsed().mul_f64(GRACE_PERIOD));
+        }
+    }
+
+    <span class="comment">// If a key has a quorum, return it with its values.
+    </span><span class="kw">if let </span><span class="prelude-val">Some</span>((key, (<span class="kw">_</span>, values))) = value_scores
+        .into_iter()
+        .find(|(<span class="kw">_</span>, (score, <span class="kw">_</span>))| <span class="kw-2">*</span>score &gt;= committee.quorum_threshold())
+    {
+        <span class="kw">return </span><span class="prelude-val">Ok</span>((key, values));
     }
 
     <span class="comment">// No specific error is available to report reliably.
@@ -569,8 +635,8 @@
             </span>};
             <span class="kw">if let </span><span class="prelude-val">Err</span>(NodeError::ApplicationBytecodesNotFound(locations)) = <span class="kw-2">&amp;</span>result {
                 <span class="kw">let </span>required = <span class="kw">match </span>certificate.value() {
-                    Value::ConfirmedBlock { executed_block, .. }
-                    | Value::ValidatedBlock { executed_block, .. } =&gt; {
+                    CertificateValue::ConfirmedBlock { executed_block, .. }
+                    | CertificateValue::ValidatedBlock { executed_block, .. } =&gt; {
                         executed_block.block.bytecode_locations()
                     }
                 };

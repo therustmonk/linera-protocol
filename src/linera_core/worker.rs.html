@@ -1224,8 +1224,8 @@
 };
 <span class="kw">use </span>linera_chain::{
     data_types::{
-        Block, BlockAndRound, BlockProposal, Certificate, ExecutedBlock, HashedValue,
-        LiteCertificate, Medium, Message, Origin, Target, Value,
+        Block, BlockAndRound, BlockProposal, Certificate, CertificateValue, ExecutedBlock,
+        HashedValue, LiteCertificate, Medium, Message, Origin, Target,
     },
     ChainManagerOutcome, ChainStateView,
 };
@@ -1663,7 +1663,7 @@
         blobs: <span class="kw-2">&amp;</span>[HashedValue],
         notify_when_messages_are_delivered: <span class="prelude-ty">Option</span>&lt;oneshot::Sender&lt;()&gt;&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainInfoResponse, NetworkActions), WorkerError&gt; {
-        <span class="kw">let </span>Value::ConfirmedBlock { executed_block, .. } = certificate.value() <span class="kw">else </span>{
+        <span class="kw">let </span>CertificateValue::ConfirmedBlock { executed_block, .. } = certificate.value() <span class="kw">else </span>{
             <span class="macro">panic!</span>(<span class="string">&quot;Expecting a confirmation certificate&quot;</span>);
         };
         <span class="kw">let </span>ExecutedBlock {
@@ -1824,11 +1824,11 @@
         certificate: Certificate,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfoResponse, WorkerError&gt; {
         <span class="kw">let </span>(block, round) = <span class="kw">match </span>certificate.value() {
-            Value::ValidatedBlock {
+            CertificateValue::ValidatedBlock {
                 executed_block: ExecutedBlock { block, .. },
                 round,
             } =&gt; (block, <span class="kw-2">*</span>round),
-            Value::ConfirmedBlock { .. } =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Expecting a validation certificate&quot;</span>),
+            CertificateValue::ConfirmedBlock { .. } =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Expecting a validation certificate&quot;</span>),
         };
         <span class="comment">// Check that the chain is active and ready for this confirmation.
         // Verify the certificate. Returns a catch-all error to make client code more robust.
@@ -1898,7 +1898,7 @@
         <span class="kw">for </span>certificate <span class="kw">in </span>certificates {
             <span class="kw">let </span>hash = certificate.hash();
             <span class="kw">match </span>certificate.value.into_inner() {
-                Value::ConfirmedBlock {
+                CertificateValue::ConfirmedBlock {
                     executed_block: ExecutedBlock { block, effects, .. },
                     ..
                 } =&gt; {
@@ -2151,13 +2151,13 @@
             }
         );
         <span class="kw">let </span>(info, actions) = <span class="kw">match </span>certificate.value() {
-            Value::ValidatedBlock { .. } =&gt; {
+            CertificateValue::ValidatedBlock { .. } =&gt; {
                 <span class="comment">// Confirm the validated block.
                 </span><span class="self">self</span>.process_validated_block(certificate.clone())
                     .<span class="kw">await
                     </span>.map(|info| (info, NetworkActions::default()))<span class="question-mark">?
             </span>}
-            Value::ConfirmedBlock { .. } =&gt; {
+            CertificateValue::ConfirmedBlock { .. } =&gt; {
                 <span class="comment">// Execute the confirmed block.
                 </span><span class="self">self</span>.process_confirmed_block(
                     certificate.clone(),

@@ -1571,7 +1571,7 @@
     data_types::{Amount, BlockHeight, Timestamp},
     identifiers::{BytecodeId, ChainDescription, ChainId, EffectId},
 };
-<span class="kw">use </span>linera_chain::data_types::{Certificate, ExecutedBlock, Value <span class="kw">as </span>LineraValue};
+<span class="kw">use </span>linera_chain::data_types::{Certificate, CertificateValue, ExecutedBlock};
 <span class="kw">use </span>linera_core::{
     client::{ChainClient, ValidatorNodeProvider},
     data_types::ChainInfoQuery,
@@ -1580,7 +1580,7 @@
     worker::WorkerState,
 };
 <span class="kw">use </span>linera_execution::{
-    committee::{ValidatorName, ValidatorState},
+    committee::{Committee, ValidatorName, ValidatorState},
     pricing::Pricing,
     system::{Account, UserData},
     Bytecode, UserApplicationId, WasmRuntime, WithWasmDefault,
@@ -2520,7 +2520,7 @@
                 context.update_wallet_from_client(<span class="kw-2">&amp;mut </span>chain_client).<span class="kw">await</span>;
                 <span class="kw">let </span>id = ChainId::child(effect_id);
                 <span class="kw">let </span>timestamp = <span class="kw">match </span>certificate.value() {
-                    LineraValue::ConfirmedBlock {
+                    CertificateValue::ConfirmedBlock {
                         executed_block: ExecutedBlock { block, .. },
                         ..
                     } =&gt; block.timestamp,
@@ -2579,7 +2579,7 @@
                 <span class="kw">let </span>committee = chain_client.local_committee().<span class="kw">await</span>.unwrap();
                 <span class="kw">let </span>time_total = time_start.elapsed().as_micros();
                 <span class="macro">info!</span>(<span class="string">&quot;Validators obtained after {} us&quot;</span>, time_total);
-                <span class="macro">info!</span>(<span class="string">&quot;{:?}&quot;</span>, committee.validators);
+                <span class="macro">info!</span>(<span class="string">&quot;{:?}&quot;</span>, committee.validators());
                 context.update_wallet_from_client(<span class="kw-2">&amp;mut </span>chain_client).<span class="kw">await</span>;
                 context.save_wallet();
             }
@@ -2601,23 +2601,25 @@
                     </span>.unwrap()
                     .into_iter()
                     .map(|c| <span class="kw">match </span>c.value() {
-                        LineraValue::ConfirmedBlock { executed_block, .. } =&gt; {
+                        CertificateValue::ConfirmedBlock { executed_block, .. } =&gt; {
                             executed_block.effects.len()
                         }
-                        LineraValue::ValidatedBlock { .. } =&gt; <span class="number">0</span>,
+                        CertificateValue::ValidatedBlock { .. } =&gt; <span class="number">0</span>,
                     })
                     .sum::&lt;usize&gt;();
                 <span class="macro">info!</span>(<span class="string">&quot;Subscribed {} chains to new committees&quot;</span>, n);
 
                 <span class="comment">// Create the new committee.
                 </span><span class="kw">let </span><span class="kw-2">mut </span>committee = chain_client.local_committee().<span class="kw">await</span>.unwrap();
+                <span class="kw">let </span><span class="kw-2">mut </span>pricing = committee.pricing().clone();
+                <span class="kw">let </span><span class="kw-2">mut </span>validators = committee.validators().clone();
                 <span class="kw">match </span>command {
                     SetValidator {
                         name,
                         address,
                         votes,
                     } =&gt; {
-                        committee.validators.insert(
+                        validators.insert(
                             name,
                             ValidatorState {
                                 network_address: address,
@@ -2626,7 +2628,7 @@
                         );
                     }
                     RemoveValidator { name } =&gt; {
-                        <span class="kw">if </span>committee.validators.remove(<span class="kw-2">&amp;</span>name).is_none() {
+                        <span class="kw">if </span>validators.remove(<span class="kw-2">&amp;</span>name).is_none() {
                             <span class="macro">warn!</span>(<span class="string">&quot;Skipping removal of nonexistent validator&quot;</span>);
                             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
                         }
@@ -2638,16 +2640,16 @@
                         messages,
                     } =&gt; {
                         <span class="kw">if let </span><span class="prelude-val">Some</span>(certificate) = certificate {
-                            committee.pricing.certificate = certificate;
+                            pricing.certificate = certificate;
                         }
                         <span class="kw">if let </span><span class="prelude-val">Some</span>(fuel) = fuel {
-                            committee.pricing.fuel = fuel;
+                            pricing.fuel = fuel;
                         }
                         <span class="kw">if let </span><span class="prelude-val">Some</span>(storage) = storage {
-                            committee.pricing.storage = storage;
+                            pricing.storage = storage;
                         }
                         <span class="kw">if let </span><span class="prelude-val">Some</span>(messages) = messages {
-                            committee.pricing.messages = messages;
+                            pricing.messages = messages;
                         }
                         <span class="macro">println!</span>(
                             <span class="string">&quot;Pricing:\n\
@@ -2655,10 +2657,7 @@
                             {:.2} per unit of fuel used in executing user operations and effects\n\
                             {:.2} per byte of operations and incoming messages\n\
                             {:.2} per byte of outgoing messages&quot;</span>,
-                            committee.pricing.certificate,
-                            committee.pricing.fuel,
-                            committee.pricing.storage,
-                            committee.pricing.messages
+                            pricing.certificate, pricing.fuel, pricing.storage, pricing.messages
                         );
                         <span class="kw">if </span>certificate.is_none()
                             &amp;&amp; fuel.is_none()
@@ -2670,6 +2669,7 @@
                     }
                     <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
                 }
+                committee = Committee::new(validators, pricing);
                 <span class="kw">let </span>certificate = chain_client.stage_new_committee(committee).<span class="kw">await</span>.unwrap();
                 context.update_wallet_from_client(<span class="kw-2">&amp;mut </span>chain_client).<span class="kw">await</span>;
                 <span class="macro">info!</span>(<span class="string">&quot;Staging committee:\n{:?}&quot;</span>, certificate);
@@ -2713,7 +2713,7 @@
                             WorkerState::new(<span class="string">&quot;staging&quot;</span>.to_string(), <span class="prelude-val">None</span>, storage.clone())
                                 .stage_block_execution(proposal.content.block.clone())
                                 .<span class="kw">await</span><span class="question-mark">?</span>;
-                        <span class="kw">let </span>value = HashedValue::from(LineraValue::ConfirmedBlock {
+                        <span class="kw">let </span>value = HashedValue::from(CertificateValue::ConfirmedBlock {
                             executed_block,
                             round: RoundNumber(<span class="number">0</span>),
                         });
@@ -2956,7 +2956,7 @@
                     .<span class="kw">await
                     </span>.context(<span class="string">&quot;could not find OpenChain effect&quot;</span>)<span class="question-mark">?</span>;
                 <span class="kw">let </span>timestamp = <span class="kw">match </span>certificate.value() {
-                    LineraValue::ConfirmedBlock {
+                    CertificateValue::ConfirmedBlock {
                         executed_block: ExecutedBlock { block, .. },
                         ..
                     } =&gt; block.timestamp,

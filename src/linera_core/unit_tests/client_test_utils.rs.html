@@ -616,6 +616,7 @@
 <a href="#616" id="616">616</a>
 <a href="#617" id="617">617</a>
 <a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -984,7 +985,8 @@
     }
 
     <span class="kw">pub fn </span>with_pricing(<span class="kw-2">mut </span><span class="self">self</span>, pricing: Pricing) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.initial_committee.pricing = pricing;
+        <span class="kw">let </span>validators = <span class="self">self</span>.initial_committee.validators().clone();
+        <span class="self">self</span>.initial_committee = Committee::new(validators, pricing);
         <span class="self">self
     </span>}
 
