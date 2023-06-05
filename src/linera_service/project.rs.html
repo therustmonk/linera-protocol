@@ -242,10 +242,21 @@
 <a href="#242" id="242">242</a>
 <a href="#243" id="243">243</a>
 <a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use </span>anyhow::{anyhow, bail, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span>current_platform::CURRENT_PLATFORM;
 <span class="kw">use </span>std::{
     ffi::OsStr,
     fs::File,
@@ -314,7 +325,7 @@
             <span class="macro">debug!</span>(<span class="string">&quot;Linera test runner not found&quot;</span>);
             <span class="self">Self</span>::install_test_runner()<span class="question-mark">?</span>;
         }
-        <span class="kw">let </span>cargo_test = Command::new(<span class="string">&quot;cargo&quot;</span>)
+        <span class="kw">let </span>unit_tests = Command::new(<span class="string">&quot;cargo&quot;</span>)
             .env(
                 <span class="string">&quot;CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER&quot;</span>,
                 <span class="self">Self</span>::runner_path()<span class="question-mark">?</span>.display().to_string().as_str(),
@@ -324,8 +335,17 @@
             .current_dir(<span class="kw-2">&amp;</span><span class="self">self</span>.root)
             .spawn()<span class="question-mark">?
             </span>.wait()<span class="question-mark">?</span>;
-        <span class="kw">if </span>!cargo_test.success() {
-            <span class="macro">bail!</span>(<span class="string">&quot;tests failed&quot;</span>)
+        <span class="kw">if </span>!unit_tests.success() {
+            <span class="macro">bail!</span>(<span class="string">&quot;unit tests failed&quot;</span>)
+        }
+        <span class="kw">let </span>integration_tests = Command::new(<span class="string">&quot;cargo&quot;</span>)
+            .arg(<span class="string">&quot;test&quot;</span>)
+            .args([<span class="string">&quot;--target&quot;</span>, CURRENT_PLATFORM])
+            .current_dir(<span class="kw-2">&amp;</span><span class="self">self</span>.root)
+            .spawn()<span class="question-mark">?
+            </span>.wait()<span class="question-mark">?</span>;
+        <span class="kw">if </span>!integration_tests.success() {
+            <span class="macro">bail!</span>(<span class="string">&quot;integration tests failed&quot;</span>)
         }
         <span class="prelude-val">Ok</span>(())
     }

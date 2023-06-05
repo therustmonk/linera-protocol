@@ -77,6 +77,7 @@ var sourcesIndex = JSON.parse('{\
 "crossterm":["",[["cursor",[["sys",[],["unix.rs"]]],["sys.rs"]],["event",[["source",[],["unix.rs"]],["sys",[["unix",[],["file_descriptor.rs","parse.rs"]]],["unix.rs"]]],["filter.rs","read.rs","source.rs","sys.rs","timeout.rs"]],["style",[["types",[],["attribute.rs","color.rs","colored.rs","colors.rs"]]],["attributes.rs","content_style.rs","styled_content.rs","stylize.rs","sys.rs","types.rs"]],["terminal",[["sys",[],["unix.rs"]]],["sys.rs"]]],["command.rs","cursor.rs","error.rs","event.rs","lib.rs","macros.rs","style.rs","terminal.rs","tty.rs"]],\
 "crypto_common":["",[],["lib.rs"]],\
 "ct_logs":["",[],["lib.rs"]],\
+"current_platform":["",[],["lib.rs"]],\
 "curve25519_dalek":["",[["backend",[["serial",[["curve_models",[],["mod.rs"]],["scalar_mul",[],["mod.rs","pippenger.rs","precomputed_straus.rs","straus.rs","variable_base.rs","vartime_double_base.rs"]],["u64",[],["constants.rs","field.rs","mod.rs","scalar.rs"]]],["mod.rs"]]],["mod.rs"]]],["constants.rs","edwards.rs","field.rs","lib.rs","macros.rs","montgomery.rs","prelude.rs","ristretto.rs","scalar.rs","traits.rs","window.rs"]],\
 "custom_debug_derive":["",[],["lib.rs"]],\
 "dashmap":["",[["mapref",[],["entry.rs","mod.rs","multiple.rs","one.rs"]],["setref",[],["mod.rs","multiple.rs","one.rs"]]],["iter.rs","iter_set.rs","lib.rs","lock.rs","read_only.rs","set.rs","t.rs","try_result.rs","util.rs"]],\
