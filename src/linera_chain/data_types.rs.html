@@ -720,7 +720,7 @@
     </span><span class="kw">pub </span>epoch: Epoch,
     <span class="doccomment">/// A selection of incoming messages to be executed first. Successive messages of same
     /// sender and height are grouped together for conciseness.
-    </span><span class="kw">pub </span>incoming_messages: Vec&lt;Message&gt;,
+    </span><span class="kw">pub </span>incoming_messages: Vec&lt;IncomingMessage&gt;,
     <span class="doccomment">/// The operations to execute.
     </span><span class="kw">pub </span>operations: Vec&lt;Operation&gt;,
     <span class="doccomment">/// The block height.
@@ -770,7 +770,7 @@
 
 <span class="doccomment">/// A message received from a block of another chain.
 </span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
-</span><span class="kw">pub struct </span>Message {
+</span><span class="kw">pub struct </span>IncomingMessage {
     <span class="doccomment">/// The origin of the message (chain and channel if any).
     </span><span class="kw">pub </span>origin: Origin,
     <span class="doccomment">/// The content of the message to be delivered to the inbox identified by

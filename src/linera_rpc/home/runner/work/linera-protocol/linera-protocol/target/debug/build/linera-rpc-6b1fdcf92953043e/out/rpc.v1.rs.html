@@ -1510,7 +1510,7 @@
         </span>Error(::prost::alloc::vec::Vec&lt;u8&gt;),
     }
 }
-<span class="doccomment">/// An internal message between chains within a validator.
+<span class="doccomment">/// An internal request between chains within a validator.
 </span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>CrossChainRequest {
@@ -1553,7 +1553,7 @@
     <span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;3&quot;</span>)]
     </span><span class="kw">pub </span>latest_heights: ::prost::alloc::vec::Vec&lt;u8&gt;,
 }
-<span class="doccomment">/// Message to obtain information on a chain.
+<span class="doccomment">/// Request information on a chain.
 </span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 </span><span class="kw">pub struct </span>ChainInfoQuery {

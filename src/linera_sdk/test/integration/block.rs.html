@@ -171,7 +171,7 @@
     identifiers::{ApplicationId, ChainId, EffectId, Owner},
 };
 <span class="kw">use </span>linera_chain::data_types::{
-    Block, Certificate, HashedValue, LiteVote, Message, SignatureAggregator,
+    Block, Certificate, HashedValue, IncomingMessage, LiteVote, SignatureAggregator,
 };
 <span class="kw">use </span>linera_execution::{system::SystemOperation, Operation};
 <span class="kw">use </span>std::mem;
@@ -268,7 +268,7 @@
     /// present in the inboxes of the microchain that owns this block.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>with_raw_messages(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        messages: <span class="kw">impl </span>IntoIterator&lt;Item = Message&gt;,
+        messages: <span class="kw">impl </span>IntoIterator&lt;Item = IncomingMessage&gt;,
     ) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="self">self</span>.block.incoming_messages.extend(messages);
         <span class="self">self

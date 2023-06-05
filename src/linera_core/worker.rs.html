@@ -1225,7 +1225,7 @@
 <span class="kw">use </span>linera_chain::{
     data_types::{
         Block, BlockAndRound, BlockProposal, Certificate, CertificateValue, ExecutedBlock,
-        HashedValue, LiteCertificate, Medium, Message, Origin, Target,
+        HashedValue, IncomingMessage, LiteCertificate, Medium, Origin, Target,
     },
     ChainManagerOutcome, ChainStateView,
 };
@@ -1329,7 +1329,7 @@
 </span><span class="doccomment">/// Reason for the notification.
 </span><span class="kw">pub enum </span>Reason {
     NewBlock { height: BlockHeight },
-    NewMessage { origin: Origin, height: BlockHeight },
+    NewIncomingMessage { origin: Origin, height: BlockHeight },
 }
 
 <span class="doccomment">/// Error type for [`ValidatorWorker`].
@@ -1976,13 +1976,13 @@
         <span class="prelude-val">Ok</span>(chain.execution_state.system.registry)
     }
 
-    <span class="doccomment">/// Returns a [`Message`] that&#39;s awaiting to be received by the chain specified by `chain_id`.
+    <span class="doccomment">/// Returns a [`IncomingMessage`] that&#39;s awaiting to be received by the chain specified by `chain_id`.
     </span><span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
     </span><span class="kw">pub async fn </span>find_incoming_message(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         chain_id: ChainId,
         effect_id: EffectId,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Message&gt;, WorkerError&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;IncomingMessage&gt;, WorkerError&gt; {
         <span class="kw">let </span><span class="prelude-val">Some</span>(certificate) = <span class="self">self</span>.read_certificate(effect_id.chain_id, effect_id.height).<span class="kw">await</span><span class="question-mark">?
             </span><span class="kw">else </span>{ <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) };
 
@@ -2021,7 +2021,7 @@
 
         <span class="macro">assert_eq!</span>(event.effect, outgoing_effect.effect);
 
-        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Message { origin, event }))
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(IncomingMessage { origin, event }))
     }
 }
 
@@ -2200,7 +2200,7 @@
             <span class="kw">let </span>inboxes = chain.inboxes.try_load_entries(<span class="kw-2">&amp;</span>origins).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">for </span>(origin, inbox) <span class="kw">in </span>origins.into_iter().zip(inboxes) {
                 <span class="kw">for </span>event <span class="kw">in </span>inbox.added_events.elements().<span class="kw">await</span><span class="question-mark">? </span>{
-                    messages.push(Message {
+                    messages.push(IncomingMessage {
                         origin: origin.clone(),
                         event: event.clone(),
                     });
@@ -2279,7 +2279,7 @@
                     latest_heights.push((origin.medium.clone(), height));
                     notifications.push(Notification {
                         chain_id: recipient,
-                        reason: Reason::NewMessage { origin, height },
+                        reason: Reason::NewIncomingMessage { origin, height },
                     });
                 }
                 <span class="kw">let </span>cross_chain_requests = <span class="macro">vec!</span>[CrossChainRequest::ConfirmUpdatedRecipient {

@@ -264,7 +264,7 @@
     identifiers::{ChainDescription, ChainId},
 };
 <span class="kw">use </span>linera_chain::{
-    data_types::{Certificate, ChainAndHeight, HashedValue, Medium, Message},
+    data_types::{Certificate, ChainAndHeight, HashedValue, IncomingMessage, Medium},
     ChainManagerInfo, ChainStateView,
 };
 <span class="kw">use </span>linera_execution::{
@@ -297,7 +297,7 @@
     }
 }
 
-<span class="doccomment">/// Message to obtain information on a chain.
+<span class="doccomment">/// Request information about a chain.
 </span><span class="attr">#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Arbitrary, Eq, PartialEq))]
 </span><span class="kw">pub struct </span>ChainInfoQuery {
@@ -393,7 +393,7 @@
     <span class="doccomment">/// The current committees.
     </span><span class="kw">pub </span>requested_committees: <span class="prelude-ty">Option</span>&lt;BTreeMap&lt;Epoch, Committee&gt;&gt;,
     <span class="doccomment">/// The received messages that are waiting be picked in the next block (if requested).
-    </span><span class="kw">pub </span>requested_pending_messages: Vec&lt;Message&gt;,
+    </span><span class="kw">pub </span>requested_pending_messages: Vec&lt;IncomingMessage&gt;,
     <span class="doccomment">/// The response to `request_sent_certificates_in_range`
     </span><span class="kw">pub </span>requested_sent_certificates: Vec&lt;Certificate&gt;,
     <span class="doccomment">/// The current number of received certificates (useful for `request_received_log_excluding_first_nth`)
@@ -412,7 +412,7 @@
     <span class="kw">pub </span>signature: <span class="prelude-ty">Option</span>&lt;Signature&gt;,
 }
 
-<span class="doccomment">/// An internal message between chains within a validator.
+<span class="doccomment">/// An internal request between chains within a validator.
 </span><span class="attr">#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Eq, PartialEq))]
 </span><span class="kw">pub enum </span>CrossChainRequest {
