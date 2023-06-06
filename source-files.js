@@ -156,9 +156,11 @@ var sourcesIndex = JSON.parse('{\
 "linera_chain":["",[["manager",[],["mod.rs","multi.rs","single.rs"]]],["chain.rs","data_types.rs","inbox.rs","lib.rs","outbox.rs"]],\
 "linera_core":["",[["unit_tests",[],["client_test_utils.rs"]]],["client.rs","data_types.rs","lib.rs","node.rs","notifier.rs","tracker.rs","updater.rs","worker.rs"]],\
 "linera_execution":["",[["wasm",[],["async_boundary.rs","async_determinism.rs","common.rs","conversions_from_wit.rs","conversions_to_wit.rs","guest_futures.rs","mod.rs","sanitizer.rs","system_api.rs","wasmer.rs","wasmtime.rs"]]],["applications.rs","committee.rs","execution.rs","graphql.rs","lib.rs","ownership.rs","pricing.rs","runtime.rs","system.rs"]],\
+"linera_proxy":["",[],["proxy.rs"]],\
 "linera_rpc":["",[],["client.rs","codec.rs","config.rs","conversions.rs","grpc_network.rs","grpc_pool.rs","lib.rs","mass.rs","node_provider.rs","rpc.rs","simple_network.rs","transport.rs"]],\
 "linera_sdk":["",[["contract",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs","wit_types.rs"]],["service",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs","wit_types.rs"]],["test",[["integration",[],["block.rs","chain.rs","mod.rs","validator.rs"]]]],["views",[],["conversions_from_wit.rs","mod.rs","system_api.rs"]]],["base.rs","exported_future.rs","extensions.rs","lib.rs","log.rs"]],\
 "linera_sdk_wasm_tests":["",[],["lib.rs"]],\
+"linera_server":["",[],["server.rs"]],\
 "linera_service":["",[],["chain_listener.rs","config.rs","grpc_proxy.rs","lib.rs","node_service.rs","project.rs","storage.rs"]],\
 "linera_storage":["",[],["chain_guards.rs","dynamo_db.rs","lib.rs","memory.rs","rocksdb.rs"]],\
 "linera_views":["",[["test_utils",[],["mod.rs"]]],["batch.rs","collection_view.rs","common.rs","dynamo_db.rs","hashable_wrapper.rs","key_value_store_view.rs","lib.rs","localstack.rs","log_view.rs","lru_caching.rs","map_view.rs","memory.rs","queue_view.rs","reentrant_collection_view.rs","register_view.rs","rocksdb.rs","set_view.rs","views.rs"]],\
@@ -231,7 +233,6 @@ var sourcesIndex = JSON.parse('{\
 "proptest":["",[["arbitrary",[["_alloc",[],["borrow.rs","boxed.rs","char.rs","collections.rs","hash.rs","mod.rs","ops.rs","rc.rs","str.rs","sync.rs"]],["_core",[],["ascii.rs","cell.rs","cmp.rs","convert.rs","fmt.rs","iter.rs","marker.rs","mem.rs","mod.rs","num.rs","option.rs","result.rs"]],["_std",[],["env.rs","ffi.rs","fs.rs","io.rs","mod.rs","net.rs","panic.rs","path.rs","string.rs","sync.rs","thread.rs","time.rs"]]],["arrays.rs","functor.rs","macros.rs","mod.rs","non_zero.rs","primitives.rs","sample.rs","traits.rs","tuples.rs"]],["num",[],["float_samplers.rs"]],["strategy",[],["filter.rs","filter_map.rs","flatten.rs","fuse.rs","just.rs","lazy.rs","map.rs","mod.rs","recursive.rs","shuffle.rs","statics.rs","traits.rs","unions.rs"]],["test_runner",[["failure_persistence",[],["file.rs","map.rs","mod.rs","noop.rs"]]],["config.rs","errors.rs","mod.rs","reason.rs","replay.rs","result_cache.rs","rng.rs","runner.rs"]]],["array.rs","bits.rs","bool.rs","char.rs","collection.rs","lib.rs","macros.rs","num.rs","option.rs","prelude.rs","product_tuple.rs","result.rs","sample.rs","std_facade.rs","string.rs","sugar.rs","tuple.rs"]],\
 "prost":["",[],["encoding.rs","error.rs","lib.rs","message.rs","types.rs"]],\
 "prost_types":["",[],["compiler.rs","lib.rs","protobuf.rs"]],\
-"proxy":["",[],["proxy.rs"]],\
 "psm":["",[],["lib.rs"]],\
 "ptr_meta":["",[],["impls.rs","lib.rs"]],\
 "ptr_meta_derive":["",[],["lib.rs"]],\
@@ -272,7 +273,6 @@ var sourcesIndex = JSON.parse('{\
 "serde_path_to_error":["",[],["de.rs","lib.rs","path.rs","ser.rs","wrap.rs"]],\
 "serde_spanned":["",[],["lib.rs","spanned.rs"]],\
 "serde_urlencoded":["",[["ser",[],["key.rs","mod.rs","pair.rs","part.rs","value.rs"]]],["de.rs","lib.rs"]],\
-"server":["",[],["server.rs"]],\
 "sha1":["",[["compress",[],["soft.rs","x86.rs"]]],["compress.rs","lib.rs"]],\
 "sha2":["",[["sha256",[],["soft.rs","x86.rs"]],["sha512",[],["soft.rs","x86.rs"]]],["consts.rs","lib.rs","sha256.rs","sha512.rs"]],\
 "sha3":["",[],["lib.rs","macros.rs","state.rs"]],\
