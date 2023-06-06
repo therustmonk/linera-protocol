@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["ExecuteEffect","ExecuteOperation","HandleApplicationCall","HandleSessionCall","Initialize"],"trait":["ContractStateStorage"]};
+window.SIDEBAR_ITEMS = {"struct":["ExecuteMessage","ExecuteOperation","HandleApplicationCall","HandleSessionCall","Initialize"],"trait":["ContractStateStorage"]};

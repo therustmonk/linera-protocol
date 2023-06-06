@@ -462,7 +462,7 @@
 
 </span><span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>linera_sdk::{
-    base::{Amount, ApplicationId, BlockHeight, BytecodeId, ChainId, EffectId, Timestamp},
+    base::{Amount, ApplicationId, BlockHeight, BytecodeId, ChainId, MessageId, Timestamp},
     contract, service, test, ContractLogger, ServiceLogger,
 };
 <span class="kw">use </span>linera_views::{
@@ -488,12 +488,12 @@
 </span><span class="attr">#[webassembly_test]
 </span><span class="kw">fn </span>mock_application_id() {
     <span class="kw">let </span>application_id = ApplicationId {
-        bytecode_id: BytecodeId(EffectId {
+        bytecode_id: BytecodeId(MessageId {
             chain_id: ChainId([<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>].into()),
             height: BlockHeight::from(<span class="number">4</span>),
             index: <span class="number">5</span>,
         }),
-        creation: EffectId {
+        creation: MessageId {
             chain_id: ChainId([<span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>].into()),
             height: BlockHeight::from(<span class="number">10</span>),
             index: <span class="number">11</span>,
@@ -877,12 +877,12 @@
     });
 
     <span class="kw">let </span>application_id = ApplicationId {
-        bytecode_id: BytecodeId(EffectId {
+        bytecode_id: BytecodeId(MessageId {
             chain_id: ChainId([<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>].into()),
             height: BlockHeight::from(<span class="number">4</span>),
             index: <span class="number">5</span>,
         }),
-        creation: EffectId {
+        creation: MessageId {
             chain_id: ChainId([<span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>].into()),
             height: BlockHeight::from(<span class="number">10</span>),
             index: <span class="number">11</span>,

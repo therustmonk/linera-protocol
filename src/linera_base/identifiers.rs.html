@@ -345,8 +345,8 @@
 </span><span class="kw">pub enum </span>ChainDescription {
     <span class="doccomment">/// The chain was created by the genesis configuration.
     </span>Root(u32),
-    <span class="doccomment">/// The chain was created by an effect from another chain.
-    </span>Child(EffectId),
+    <span class="doccomment">/// The chain was created by a message from another chain.
+    </span>Child(MessageId),
 }
 
 <span class="doccomment">/// The unique identifier (UID) of a chain. This is currently computed as the hash value
@@ -355,10 +355,10 @@
 #[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Arbitrary, Default))]
 </span><span class="kw">pub struct </span>ChainId(<span class="kw">pub </span>CryptoHash);
 
-<span class="doccomment">/// The index of an effect in a chain.
+<span class="doccomment">/// The index of a message in a chain.
 </span><span class="attr">#[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Debug, Serialize, Deserialize)]
 #[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Default))]
-</span><span class="kw">pub struct </span>EffectId {
+</span><span class="kw">pub struct </span>MessageId {
     <span class="kw">pub </span>chain_id: ChainId,
     <span class="kw">pub </span>height: BlockHeight,
     <span class="kw">pub </span>index: u32,
@@ -372,14 +372,14 @@
     <span class="doccomment">/// The bytecode to use for the application.
     </span><span class="kw">pub </span>bytecode_id: BytecodeId&lt;A&gt;,
     <span class="doccomment">/// The unique ID of the application&#39;s creation.
-    </span><span class="kw">pub </span>creation: EffectId,
+    </span><span class="kw">pub </span>creation: MessageId,
 }
 
 <span class="doccomment">/// A unique identifier for an application bytecode.
 </span><span class="attr">#[derive(Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 #[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Default))]
 </span><span class="kw">pub struct </span>BytecodeId&lt;A = ()&gt; {
-    <span class="kw">pub </span>effect_id: EffectId,
+    <span class="kw">pub </span>message_id: MessageId,
     <span class="attr">#[serde(skip)]
     </span>_phantom: std::marker::PhantomData&lt;A&gt;,
 }
@@ -434,7 +434,7 @@
 </span><span class="kw">impl</span>&lt;A&gt; Clone <span class="kw">for </span>BytecodeId&lt;A&gt; {
     <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            effect_id: <span class="self">self</span>.effect_id,
+            message_id: <span class="self">self</span>.message_id,
             _phantom: std::marker::PhantomData,
         }
     }
@@ -443,16 +443,16 @@
 <span class="kw">impl</span>&lt;A&gt; Copy <span class="kw">for </span>BytecodeId&lt;A&gt; {}
 
 <span class="kw">impl </span>BytecodeId {
-    <span class="kw">pub fn </span>new(effect_id: EffectId) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(message_id: MessageId) -&gt; <span class="self">Self </span>{
         BytecodeId {
-            effect_id,
+            message_id,
             _phantom: std::marker::PhantomData,
         }
     }
 
     <span class="kw">pub fn </span>with_abi&lt;A&gt;(<span class="self">self</span>) -&gt; BytecodeId&lt;A&gt; {
         BytecodeId {
-            effect_id: <span class="self">self</span>.effect_id,
+            message_id: <span class="self">self</span>.message_id,
             _phantom: std::marker::PhantomData,
         }
     }
@@ -461,7 +461,7 @@
 <span class="kw">impl</span>&lt;A&gt; BytecodeId&lt;A&gt; {
     <span class="kw">pub fn </span>forget_abi(<span class="self">self</span>) -&gt; BytecodeId {
         BytecodeId {
-            effect_id: <span class="self">self</span>.effect_id,
+            message_id: <span class="self">self</span>.message_id,
             _phantom: std::marker::PhantomData,
         }
     }
@@ -592,7 +592,7 @@
         <span class="self">Self</span>(CryptoHash::new(<span class="kw-2">&amp;</span>ChainDescription::Root(index)))
     }
 
-    <span class="kw">pub fn </span>child(id: EffectId) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>child(id: MessageId) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>(CryptoHash::new(<span class="kw-2">&amp;</span>ChainDescription::Child(id)))
     }
 }
@@ -611,7 +611,7 @@
     ChainDescription.&quot;
 </span>);
 <span class="macro">doc_scalar!</span>(ChannelName, <span class="string">&quot;The name of a subscription channel&quot;</span>);
-<span class="macro">bcs_scalar!</span>(EffectId, <span class="string">&quot;The index of an effect in a chain&quot;</span>);
+<span class="macro">bcs_scalar!</span>(MessageId, <span class="string">&quot;The index of a message in a chain&quot;</span>);
 <span class="macro">doc_scalar!</span>(
     Owner,
     <span class="string">&quot;The owner of a chain. This is currently the hash of the owner&#39;s public key used to verify \

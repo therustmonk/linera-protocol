@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["ChainDescription","Destination"],"struct":["ApplicationId","BytecodeId","ChainId","ChannelName","EffectId","Owner","SessionId"]};
+window.SIDEBAR_ITEMS = {"enum":["ChainDescription","Destination"],"struct":["ApplicationId","BytecodeId","ChainId","ChannelName","MessageId","Owner","SessionId"]};

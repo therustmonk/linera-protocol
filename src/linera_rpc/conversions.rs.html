@@ -1273,7 +1273,7 @@
             HashedValue::new_validated(
                 ExecutedBlock {
                     block: get_block(),
-                    effects: <span class="macro">vec!</span>[],
+                    messages: <span class="macro">vec!</span>[],
                     state_hash: CryptoHash::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;test&quot;</span>.into())),
                 },
                 Default::default(),
@@ -1286,7 +1286,7 @@
         <span class="kw">let </span>blobs = <span class="macro">vec!</span>[HashedValue::new_validated(
             ExecutedBlock {
                 block: get_block(),
-                effects: <span class="macro">vec!</span>[],
+                messages: <span class="macro">vec!</span>[],
                 state_hash: CryptoHash::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;also test&quot;</span>.into())),
             },
             Default::default(),
@@ -1335,7 +1335,7 @@
             signature: Signature::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;test&quot;</span>.into()), <span class="kw-2">&amp;</span>KeyPair::generate()),
             blobs: <span class="macro">vec!</span>[HashedValue::new_confirmed(ExecutedBlock {
                 block: get_block(),
-                effects: <span class="macro">vec!</span>[],
+                messages: <span class="macro">vec!</span>[],
                 state_hash: CryptoHash::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;execution state&quot;</span>.into())),
             })],
         };

@@ -147,11 +147,11 @@
     /// application on their own chain.
     </span><span class="kw">type </span>Operation: Serialize + DeserializeOwned + Send + Sync + Debug + <span class="lifetime">&#39;static</span>;
 
-    <span class="doccomment">/// The type of effect executed by the application.
+    <span class="doccomment">/// The type of message executed by the application.
     ///
-    /// Effects are executed when a message created by the same application is received
+    /// Messages are executed when a message created by the same application is received
     /// from another chain and accepted in a block.
-    </span><span class="kw">type </span>Effect: Serialize + DeserializeOwned + Send + Sync + Debug + <span class="lifetime">&#39;static</span>;
+    </span><span class="kw">type </span>Message: Serialize + DeserializeOwned + Send + Sync + Debug + <span class="lifetime">&#39;static</span>;
 
     <span class="doccomment">/// The argument type when this application is called from another application on the same chain.
     </span><span class="kw">type </span>ApplicationCall: Serialize + DeserializeOwned + Send + Sync + Debug + <span class="lifetime">&#39;static</span>;
@@ -200,7 +200,7 @@
     <span class="kw">type </span>Parameters = &lt;&lt;A <span class="kw">as </span>WithContractAbi&gt;::Abi <span class="kw">as </span>ContractAbi&gt;::Parameters;
     <span class="kw">type </span>Operation = &lt;&lt;A <span class="kw">as </span>WithContractAbi&gt;::Abi <span class="kw">as </span>ContractAbi&gt;::Operation;
     <span class="kw">type </span>ApplicationCall = &lt;&lt;A <span class="kw">as </span>WithContractAbi&gt;::Abi <span class="kw">as </span>ContractAbi&gt;::ApplicationCall;
-    <span class="kw">type </span>Effect = &lt;&lt;A <span class="kw">as </span>WithContractAbi&gt;::Abi <span class="kw">as </span>ContractAbi&gt;::Effect;
+    <span class="kw">type </span>Message = &lt;&lt;A <span class="kw">as </span>WithContractAbi&gt;::Abi <span class="kw">as </span>ContractAbi&gt;::Message;
     <span class="kw">type </span>SessionCall = &lt;&lt;A <span class="kw">as </span>WithContractAbi&gt;::Abi <span class="kw">as </span>ContractAbi&gt;::SessionCall;
     <span class="kw">type </span>Response = &lt;&lt;A <span class="kw">as </span>WithContractAbi&gt;::Abi <span class="kw">as </span>ContractAbi&gt;::Response;
     <span class="kw">type </span>SessionState = &lt;&lt;A <span class="kw">as </span>WithContractAbi&gt;::Abi <span class="kw">as </span>ContractAbi&gt;::SessionState;

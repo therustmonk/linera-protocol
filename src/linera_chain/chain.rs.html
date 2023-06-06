@@ -681,7 +681,7 @@
 
 </span><span class="kw">use crate</span>::{
     data_types::{
-        Block, ChainAndHeight, ChannelFullName, Event, Medium, Origin, OutgoingEffect, Target,
+        Block, ChainAndHeight, ChannelFullName, Event, Medium, Origin, OutgoingMessage, Target,
     },
     inbox::{InboxError, InboxStateView},
     outbox::OutboxStateView,
@@ -692,12 +692,12 @@
     crypto::CryptoHash,
     data_types::{Amount, ArithmeticError, BlockHeight, Timestamp},
     ensure,
-    identifiers::{ChainId, Destination, EffectId},
+    identifiers::{ChainId, Destination, MessageId},
 };
 <span class="kw">use </span>linera_execution::{
-    system::{Account, SystemEffect},
-    ApplicationId, Effect, EffectContext, ExecutionResult, ExecutionRuntimeContext,
-    ExecutionStateView, OperationContext, Query, QueryContext, RawExecutionResult, Response,
+    system::{Account, SystemMessage},
+    ApplicationId, ExecutionResult, ExecutionRuntimeContext, ExecutionStateView, Message,
+    MessageContext, OperationContext, Query, QueryContext, RawExecutionResult, Response,
     UserApplicationDescription, UserApplicationId,
 };
 <span class="kw">use </span>linera_views::{
@@ -936,7 +936,7 @@
         origin: <span class="kw-2">&amp;</span>Origin,
         height: BlockHeight,
         timestamp: Timestamp,
-        effects: Vec&lt;OutgoingEffect&gt;,
+        messages: Vec&lt;OutgoingMessage&gt;,
         certificate_hash: CryptoHash,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt; {
         <span class="kw">let </span>chain_id = <span class="self">self</span>.chain_id();
@@ -950,15 +950,15 @@
             origin,
             height
         );
-        <span class="comment">// Process immediate effects and create inbox events.
+        <span class="comment">// Process immediate messages and create inbox events.
         </span><span class="kw">let </span><span class="kw-2">mut </span>events = Vec::new();
-        <span class="kw">for </span>(index, outgoing_effect) <span class="kw">in </span>effects.into_iter().enumerate() {
+        <span class="kw">for </span>(index, outgoing_message) <span class="kw">in </span>messages.into_iter().enumerate() {
             <span class="kw">let </span>index = u32::try_from(index).map_err(|<span class="kw">_</span>| ArithmeticError::Overflow)<span class="question-mark">?</span>;
-            <span class="kw">let </span>OutgoingEffect {
+            <span class="kw">let </span>OutgoingMessage {
                 destination,
                 authenticated_signer,
-                effect,
-            } = outgoing_effect;
+                message,
+            } = outgoing_message;
             <span class="comment">// Skip events that do not belong to this origin OR have no effect on this
             // recipient.
             </span><span class="kw">match </span>destination {
@@ -969,7 +969,7 @@
                 }
                 Destination::Subscribers(name) =&gt; {
                     <span class="kw">let </span>expected_medium = Medium::Channel(ChannelFullName {
-                        application_id: effect.application_id(),
+                        application_id: message.application_id(),
                         name,
                     });
                     <span class="kw">if </span>origin.medium != expected_medium {
@@ -977,14 +977,14 @@
                     }
                 }
             }
-            <span class="kw">if let </span>Effect::System(<span class="kw">_</span>) = effect {
-                <span class="comment">// Handle special effects to be executed immediately.
-                </span><span class="kw">let </span>effect_id = EffectId {
+            <span class="kw">if let </span>Message::System(<span class="kw">_</span>) = message {
+                <span class="comment">// Handle special messages to be executed immediately.
+                </span><span class="kw">let </span>message_id = MessageId {
                     chain_id: origin.sender,
                     height,
                     index,
                 };
-                <span class="self">self</span>.execute_immediate_effect(effect_id, <span class="kw-2">&amp;</span>effect, timestamp)
+                <span class="self">self</span>.execute_immediate_message(message_id, <span class="kw-2">&amp;</span>message, timestamp)
                     .<span class="kw">await</span><span class="question-mark">?</span>;
             }
             <span class="comment">// Record the inbox event to process it below.
@@ -994,7 +994,7 @@
                 index,
                 authenticated_signer,
                 timestamp,
-                effect,
+                message,
             });
         }
         <span class="comment">// There should be inbox events. Otherwise, this means the cross-chain request was
@@ -1013,7 +1013,7 @@
             inbox.add_event(event).<span class="kw">await</span>.map_err(|error| <span class="kw">match </span>error {
                 InboxError::ViewError(error) =&gt; ChainError::ViewError(error),
                 error =&gt; ChainError::InternalError(<span class="macro">format!</span>(
-                    <span class="string">&quot;while processing effects in certified block: {error}&quot;
+                    <span class="string">&quot;while processing messages in certified block: {error}&quot;
                 </span>)),
             })<span class="question-mark">?</span>;
         }
@@ -1025,22 +1025,22 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">async fn </span>execute_immediate_effect(
+    <span class="kw">async fn </span>execute_immediate_message(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        effect_id: EffectId,
-        effect: <span class="kw-2">&amp;</span>Effect,
+        message_id: MessageId,
+        message: <span class="kw-2">&amp;</span>Message,
         timestamp: Timestamp,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt; {
-        <span class="kw">if let </span>Effect::System(SystemEffect::OpenChain {
+        <span class="kw">if let </span>Message::System(SystemMessage::OpenChain {
             public_key,
             epoch,
             committees,
             admin_id,
-        }) = effect
+        }) = message
         {
             <span class="comment">// Initialize ourself.
             </span><span class="self">self</span>.execution_state.system.open_chain(
-                effect_id,
+                message_id,
                 <span class="kw-2">*</span>public_key,
                 <span class="kw-2">*</span>epoch,
                 committees.clone(),
@@ -1100,11 +1100,11 @@
     /// * Modifies the state of inboxes, outboxes, and channels, if needed.
     /// * As usual, in case of errors, `self` may not be consistent any more and should be thrown
     ///   away.
-    /// * Returns the list of effects caused by the block being executed.
+    /// * Returns the list of messages caused by the block being executed.
     </span><span class="kw">pub async fn </span>execute_block(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         block: <span class="kw-2">&amp;</span>Block,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(Vec&lt;OutgoingEffect&gt;, CryptoHash), ChainError&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(Vec&lt;OutgoingMessage&gt;, CryptoHash), ChainError&gt; {
         <span class="macro">assert_eq!</span>(block.chain_id, <span class="self">self</span>.chain_id());
         <span class="kw">let </span>chain_id = <span class="self">self</span>.chain_id();
         <span class="macro">ensure!</span>(
@@ -1120,8 +1120,8 @@
         <span class="kw">let </span>credit: Amount = block
             .incoming_messages
             .iter()
-            .filter_map(|msg| <span class="kw">match </span><span class="kw-2">&amp;</span>msg.event.effect {
-                Effect::System(SystemEffect::Credit { account, amount })
+            .filter_map(|msg| <span class="kw">match </span><span class="kw-2">&amp;</span>msg.event.message {
+                Message::System(SystemMessage::Credit { account, amount })
                     <span class="kw">if </span><span class="kw-2">*</span>account == Account::chain(chain_id) =&gt;
                 {
                     <span class="prelude-val">Some</span>(amount)
@@ -1136,16 +1136,16 @@
         <span class="self">Self</span>::sub_assign_fees(balance, pricing.storage_price(<span class="kw-2">&amp;</span>block.incoming_messages)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
         <span class="self">Self</span>::sub_assign_fees(balance, pricing.storage_price(<span class="kw-2">&amp;</span>block.operations)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span><span class="kw-2">mut </span>effects = Vec::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>messages = Vec::new();
         <span class="kw">let </span>available_fuel = pricing.remaining_fuel(<span class="kw-2">*</span>balance);
         <span class="kw">let </span><span class="kw-2">mut </span>remaining_fuel = available_fuel;
         <span class="kw">for </span>message <span class="kw">in </span><span class="kw-2">&amp;</span>block.incoming_messages {
-            <span class="comment">// Execute the received effect.
-            </span><span class="kw">let </span>context = EffectContext {
+            <span class="comment">// Execute the received message.
+            </span><span class="kw">let </span>context = MessageContext {
                 chain_id,
                 height: block.height,
                 certificate_hash: message.event.certificate_hash,
-                effect_id: EffectId {
+                message_id: MessageId {
                     chain_id: message.origin.sender,
                     height: message.event.height,
                     index: message.event.index,
@@ -1154,28 +1154,28 @@
             };
             <span class="kw">let </span>results = <span class="self">self
                 </span>.execution_state
-                .execute_effect(<span class="kw-2">&amp;</span>context, <span class="kw-2">&amp;</span>message.event.effect, <span class="kw-2">&amp;mut </span>remaining_fuel)
+                .execute_message(<span class="kw-2">&amp;</span>context, <span class="kw-2">&amp;</span>message.event.message, <span class="kw-2">&amp;mut </span>remaining_fuel)
                 .<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="self">self</span>.process_execution_results(<span class="kw-2">&amp;mut </span>effects, context.height, results)
+            <span class="self">self</span>.process_execution_results(<span class="kw-2">&amp;mut </span>messages, context.height, results)
                 .<span class="kw">await</span><span class="question-mark">?</span>;
         }
         <span class="comment">// Second, execute the operations in the block and remember the recipients to notify.
         </span><span class="kw">for </span>(index, operation) <span class="kw">in </span>block.operations.iter().enumerate() {
             <span class="kw">let </span>index = u32::try_from(index).map_err(|<span class="kw">_</span>| ArithmeticError::Overflow)<span class="question-mark">?</span>;
-            <span class="kw">let </span>next_effect_index =
-                u32::try_from(effects.len()).map_err(|<span class="kw">_</span>| ArithmeticError::Overflow)<span class="question-mark">?</span>;
+            <span class="kw">let </span>next_message_index =
+                u32::try_from(messages.len()).map_err(|<span class="kw">_</span>| ArithmeticError::Overflow)<span class="question-mark">?</span>;
             <span class="kw">let </span>context = OperationContext {
                 chain_id,
                 height: block.height,
                 index,
                 authenticated_signer: block.authenticated_signer,
-                next_effect_index,
+                next_message_index,
             };
             <span class="kw">let </span>results = <span class="self">self
                 </span>.execution_state
                 .execute_operation(<span class="kw-2">&amp;</span>context, operation, <span class="kw-2">&amp;mut </span>remaining_fuel)
                 .<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="self">self</span>.process_execution_results(<span class="kw-2">&amp;mut </span>effects, context.height, results)
+            <span class="self">self</span>.process_execution_results(<span class="kw-2">&amp;mut </span>messages, context.height, results)
                 .<span class="kw">await</span><span class="question-mark">?</span>;
         }
         <span class="kw">let </span>used_fuel = available_fuel.saturating_sub(remaining_fuel);
@@ -1183,7 +1183,7 @@
         <span class="kw">let </span>balance = <span class="self">self</span>.execution_state.system.balance.get_mut();
         <span class="self">Self</span>::sub_assign_fees(balance, credit)<span class="question-mark">?</span>;
         <span class="self">Self</span>::sub_assign_fees(balance, pricing.fuel_price(used_fuel))<span class="question-mark">?</span>;
-        <span class="self">Self</span>::sub_assign_fees(balance, pricing.messages_price(<span class="kw-2">&amp;</span>effects)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
+        <span class="self">Self</span>::sub_assign_fees(balance, pricing.messages_price(<span class="kw-2">&amp;</span>messages)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
 
         <span class="comment">// Recompute the state hash.
         </span><span class="kw">let </span>state_hash = <span class="self">self</span>.execution_state.crypto_hash().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1192,12 +1192,12 @@
         </span><span class="self">self</span>.manager
             .get_mut()
             .reset(<span class="self">self</span>.execution_state.system.ownership.get());
-        <span class="prelude-val">Ok</span>((effects, state_hash))
+        <span class="prelude-val">Ok</span>((messages, state_hash))
     }
 
     <span class="kw">async fn </span>process_execution_results(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        effects: <span class="kw-2">&amp;mut </span>Vec&lt;OutgoingEffect&gt;,
+        messages: <span class="kw-2">&amp;mut </span>Vec&lt;OutgoingMessage&gt;,
         height: BlockHeight,
         results: Vec&lt;ExecutionResult&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt; {
@@ -1206,8 +1206,8 @@
                 ExecutionResult::System(result) =&gt; {
                     <span class="self">self</span>.process_raw_execution_result(
                         ApplicationId::System,
-                        Effect::System,
-                        effects,
+                        Message::System,
+                        messages,
                         height,
                         result,
                     )
@@ -1216,11 +1216,11 @@
                 ExecutionResult::User(application_id, result) =&gt; {
                     <span class="self">self</span>.process_raw_execution_result(
                         ApplicationId::User(application_id),
-                        |bytes| Effect::User {
+                        |bytes| Message::User {
                             application_id,
                             bytes,
                         },
-                        effects,
+                        messages,
                         height,
                         result,
                     )
@@ -1235,18 +1235,18 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         application_id: ApplicationId,
         lift: F,
-        effects: <span class="kw-2">&amp;mut </span>Vec&lt;OutgoingEffect&gt;,
+        messages: <span class="kw-2">&amp;mut </span>Vec&lt;OutgoingMessage&gt;,
         height: BlockHeight,
         raw_result: RawExecutionResult&lt;E&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt;
     <span class="kw">where
-        </span>F: Fn(E) -&gt; Effect,
+        </span>F: Fn(E) -&gt; Message,
     {
-        <span class="comment">// Record the effects of the execution. Effects are understood within an
+        <span class="comment">// Record the messages of the execution. Messages are understood within an
         // application.
         </span><span class="kw">let </span><span class="kw-2">mut </span>recipients = HashSet::new();
         <span class="kw">let </span><span class="kw-2">mut </span>channel_broadcasts = HashSet::new();
-        <span class="kw">for </span>(destination, authenticated, effect) <span class="kw">in </span>raw_result.effects {
+        <span class="kw">for </span>(destination, authenticated, message) <span class="kw">in </span>raw_result.messages {
             <span class="kw">match </span><span class="kw-2">&amp;</span>destination {
                 Destination::Recipient(id) =&gt; {
                     recipients.insert(<span class="kw-2">*</span>id);
@@ -1260,10 +1260,10 @@
             } <span class="kw">else </span>{
                 <span class="prelude-val">None
             </span>};
-            effects.push(OutgoingEffect {
+            messages.push(OutgoingMessage {
                 destination,
                 authenticated_signer,
-                effect: lift(effect),
+                message: lift(message),
             });
         }
 

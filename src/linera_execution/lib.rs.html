@@ -757,7 +757,7 @@
 <span class="kw">pub use </span>execution::ExecutionStateView;
 <span class="kw">pub use </span>ownership::ChainOwnership;
 <span class="kw">pub use </span>system::{
-    SystemEffect, SystemExecutionError, SystemExecutionStateView, SystemOperation, SystemQuery,
+    SystemExecutionError, SystemExecutionStateView, SystemMessage, SystemOperation, SystemQuery,
     SystemResponse,
 };
 <span class="attr">#[cfg(all(
@@ -780,7 +780,7 @@
     crypto::CryptoHash,
     data_types::{Amount, ArithmeticError, BlockHeight, Timestamp},
     hex_debug,
-    identifiers::{BytecodeId, ChainId, ChannelName, Destination, EffectId, Owner, SessionId},
+    identifiers::{BytecodeId, ChainId, ChannelName, Destination, MessageId, Owner, SessionId},
 };
 <span class="kw">use </span>linera_views::{batch::Batch, views::ViewError};
 <span class="kw">use </span>serde::{Deserialize, Serialize};
@@ -808,8 +808,8 @@
     </span>SessionWasNotClosed,
     <span class="attr">#[error(<span class="string">&quot;Invalid operation for this application&quot;</span>)]
     </span>InvalidOperation,
-    <span class="attr">#[error(<span class="string">&quot;Invalid effect for this application&quot;</span>)]
-    </span>InvalidEffect,
+    <span class="attr">#[error(<span class="string">&quot;Invalid message for this application&quot;</span>)]
+    </span>InvalidMessage,
     <span class="attr">#[error(<span class="string">&quot;Invalid query for this application&quot;</span>)]
     </span>InvalidQuery,
     <span class="attr">#[error(<span class="string">&quot;Can&#39;t call another application during a query&quot;</span>)]
@@ -861,17 +861,17 @@
         operation: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;RawExecutionResult&lt;Vec&lt;u8&gt;&gt;, ExecutionError&gt;;
 
-    <span class="doccomment">/// Applies an effect originating from a cross-chain message.
-    </span><span class="kw">async fn </span>execute_effect(
+    <span class="doccomment">/// Applies a message originating from a cross-chain message.
+    </span><span class="kw">async fn </span>execute_message(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        context: <span class="kw-2">&amp;</span>EffectContext,
+        context: <span class="kw-2">&amp;</span>MessageContext,
         runtime: <span class="kw-2">&amp;</span><span class="kw">dyn </span>ContractRuntime,
-        effect: <span class="kw-2">&amp;</span>[u8],
+        message: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;RawExecutionResult&lt;Vec&lt;u8&gt;&gt;, ExecutionError&gt;;
 
     <span class="doccomment">/// Executes a call from another application.
     ///
-    /// When an application is executing an operation or an effect it may call other applications,
+    /// When an application is executing an operation or a message it may call other applications,
     /// which can in turn call other applications.
     </span><span class="kw">async fn </span>handle_application_call(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -948,23 +948,23 @@
     </span><span class="kw">pub </span>height: BlockHeight,
     <span class="doccomment">/// The current index of the operation.
     </span><span class="kw">pub </span>index: u32,
-    <span class="doccomment">/// The index of the next effect to be created.
-    </span><span class="kw">pub </span>next_effect_index: u32,
+    <span class="doccomment">/// The index of the next message to be created.
+    </span><span class="kw">pub </span>next_message_index: u32,
 }
 
 <span class="attr">#[derive(Clone, Copy, Debug)]
-</span><span class="kw">pub struct </span>EffectContext {
+</span><span class="kw">pub struct </span>MessageContext {
     <span class="doccomment">/// The current chain id.
     </span><span class="kw">pub </span>chain_id: ChainId,
-    <span class="doccomment">/// The authenticated signer of the operation that created the effect, if any.
+    <span class="doccomment">/// The authenticated signer of the operation that created the message, if any.
     </span><span class="kw">pub </span>authenticated_signer: <span class="prelude-ty">Option</span>&lt;Owner&gt;,
     <span class="doccomment">/// The current block height.
     </span><span class="kw">pub </span>height: BlockHeight,
-    <span class="doccomment">/// The hash of the remote certificate that created the effect.
+    <span class="doccomment">/// The hash of the remote certificate that created the message.
     </span><span class="kw">pub </span>certificate_hash: CryptoHash,
-    <span class="doccomment">/// The id of the effect (based on the operation height and index in the remote
+    <span class="doccomment">/// The id of the message (based on the operation height and index in the remote
     /// certificate).
-    </span><span class="kw">pub </span>effect_id: EffectId,
+    </span><span class="kw">pub </span>message_id: MessageId,
 }
 
 <span class="attr">#[derive(Clone, Copy, Debug)]
@@ -1099,12 +1099,12 @@
     },
 }
 
-<span class="doccomment">/// An effect to be sent and possibly executed in the receiver&#39;s block.
+<span class="doccomment">/// A message to be sent and possibly executed in the receiver&#39;s block.
 </span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
-</span><span class="kw">pub enum </span>Effect {
-    <span class="doccomment">/// A system effect.
-    </span>System(SystemEffect),
-    <span class="doccomment">/// A user effect (in serialized form).
+</span><span class="kw">pub enum </span>Message {
+    <span class="doccomment">/// A system message.
+    </span>System(SystemMessage),
+    <span class="doccomment">/// A user message (in serialized form).
     </span>User {
         application_id: UserApplicationId,
         <span class="attr">#[serde(with = <span class="string">&quot;serde_bytes&quot;</span>)]
@@ -1144,12 +1144,12 @@
 /// the application that created them.
 </span><span class="attr">#[derive(Debug)]
 #[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Eq, PartialEq))]
-</span><span class="kw">pub struct </span>RawExecutionResult&lt;Effect&gt; {
-    <span class="doccomment">/// The signer who created the effects.
+</span><span class="kw">pub struct </span>RawExecutionResult&lt;Message&gt; {
+    <span class="doccomment">/// The signer who created the messages.
     </span><span class="kw">pub </span>authenticated_signer: <span class="prelude-ty">Option</span>&lt;Owner&gt;,
     <span class="doccomment">/// Sends messages to the given destinations, possibly forwarding the authenticated
     /// signer.
-    </span><span class="kw">pub </span>effects: Vec&lt;(Destination, bool, Effect)&gt;,
+    </span><span class="kw">pub </span>messages: Vec&lt;(Destination, bool, Message)&gt;,
     <span class="doccomment">/// Subscribe chains to channels.
     </span><span class="kw">pub </span>subscribe: Vec&lt;(ChannelName, ChainId)&gt;,
     <span class="doccomment">/// Unsubscribe chains to channels.
@@ -1172,7 +1172,7 @@
 #[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Eq, PartialEq))]
 #[allow(clippy::large_enum_variant)]
 </span><span class="kw">pub enum </span>ExecutionResult {
-    System(RawExecutionResult&lt;SystemEffect&gt;),
+    System(RawExecutionResult&lt;SystemMessage&gt;),
     User(UserApplicationId, RawExecutionResult&lt;Vec&lt;u8&gt;&gt;),
 }
 
@@ -1185,18 +1185,18 @@
     }
 }
 
-<span class="kw">impl</span>&lt;Effect&gt; RawExecutionResult&lt;Effect&gt; {
+<span class="kw">impl</span>&lt;Message&gt; RawExecutionResult&lt;Message&gt; {
     <span class="kw">pub fn </span>with_authenticated_signer(<span class="kw-2">mut </span><span class="self">self</span>, authenticated_signer: <span class="prelude-ty">Option</span>&lt;Owner&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.authenticated_signer = authenticated_signer;
         <span class="self">self
     </span>}
 }
 
-<span class="kw">impl</span>&lt;Effect&gt; Default <span class="kw">for </span>RawExecutionResult&lt;Effect&gt; {
+<span class="kw">impl</span>&lt;Message&gt; Default <span class="kw">for </span>RawExecutionResult&lt;Message&gt; {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             authenticated_signer: <span class="prelude-val">None</span>,
-            effects: Vec::new(),
+            messages: Vec::new(),
             subscribe: Vec::new(),
             unsubscribe: Vec::new(),
         }
@@ -1204,11 +1204,11 @@
 }
 
 <span class="kw">impl </span>OperationContext {
-    <span class="kw">fn </span>next_effect_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; EffectId {
-        EffectId {
+    <span class="kw">fn </span>next_message_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MessageId {
+        MessageId {
             chain_id: <span class="self">self</span>.chain_id,
             height: <span class="self">self</span>.height,
-            index: <span class="self">self</span>.next_effect_index,
+            index: <span class="self">self</span>.next_message_index,
         }
     }
 }
@@ -1287,24 +1287,24 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;SystemEffect&gt; <span class="kw">for </span>Effect {
-    <span class="kw">fn </span>from(effect: SystemEffect) -&gt; <span class="self">Self </span>{
-        Effect::System(effect)
+<span class="kw">impl </span>From&lt;SystemMessage&gt; <span class="kw">for </span>Message {
+    <span class="kw">fn </span>from(message: SystemMessage) -&gt; <span class="self">Self </span>{
+        Message::System(message)
     }
 }
 
-<span class="kw">impl </span>Effect {
-    <span class="kw">pub fn </span>system(effect: SystemEffect) -&gt; <span class="self">Self </span>{
-        Effect::System(effect)
+<span class="kw">impl </span>Message {
+    <span class="kw">pub fn </span>system(message: SystemMessage) -&gt; <span class="self">Self </span>{
+        Message::System(message)
     }
 
     <span class="kw">pub fn </span>user&lt;A: Abi&gt;(
         application_id: UserApplicationId&lt;A&gt;,
-        effect: <span class="kw-2">&amp;</span>A::Effect,
+        message: <span class="kw-2">&amp;</span>A::Message,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, bcs::Error&gt; {
         <span class="kw">let </span>application_id = application_id.forget_abi();
-        <span class="kw">let </span>bytes = bcs::to_bytes(<span class="kw-2">&amp;</span>effect)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(Effect::User {
+        <span class="kw">let </span>bytes = bcs::to_bytes(<span class="kw-2">&amp;</span>message)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(Message::User {
             application_id,
             bytes,
         })

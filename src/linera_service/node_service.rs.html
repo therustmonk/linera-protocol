@@ -845,8 +845,8 @@
     /// This will automatically subscribe to the future committees created by `admin_id`.
     </span><span class="kw">async fn </span>open_chain(<span class="kw-2">&amp;</span><span class="self">self</span>, public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;ChainId, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
-        <span class="kw">let </span>(effect_id, <span class="kw">_</span>) = client.open_chain(public_key).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(ChainId::child(effect_id))
+        <span class="kw">let </span>(message_id, <span class="kw">_</span>) = client.open_chain(public_key).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(ChainId::child(message_id))
     }
 
     <span class="doccomment">/// Closes the chain.
@@ -947,7 +947,7 @@
         <span class="prelude-val">Ok</span>(application_id)
     }
 
-    <span class="doccomment">/// Requests a `RegisterApplications` effect from another chain so the application can be used
+    <span class="doccomment">/// Requests a `RegisterApplications` message from another chain so the application can be used
     /// on this one.
     </span><span class="kw">async fn </span>request_application(
         <span class="kw-2">&amp;</span><span class="self">self</span>,

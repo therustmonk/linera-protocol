@@ -425,9 +425,9 @@
 
 <span class="kw">use </span><span class="self">self</span>::sanitizer::sanitize;
 <span class="kw">use crate</span>::{
-    ApplicationCallResult, Bytecode, CalleeContext, ContractRuntime, EffectContext, ExecutionError,
-    OperationContext, QueryContext, RawExecutionResult, ServiceRuntime, SessionCallResult,
-    SessionId, UserApplication, WasmRuntime,
+    ApplicationCallResult, Bytecode, CalleeContext, ContractRuntime, ExecutionError,
+    MessageContext, OperationContext, QueryContext, RawExecutionResult, ServiceRuntime,
+    SessionCallResult, SessionId, UserApplication, WasmRuntime,
 };
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>std::path::Path;
@@ -594,11 +594,11 @@
         <span class="prelude-val">Ok</span>(result)
     }
 
-    <span class="kw">async fn </span>execute_effect(
+    <span class="kw">async fn </span>execute_message(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        context: <span class="kw-2">&amp;</span>EffectContext,
+        context: <span class="kw-2">&amp;</span>MessageContext,
         runtime: <span class="kw-2">&amp;</span><span class="kw">dyn </span>ContractRuntime,
-        effect: <span class="kw-2">&amp;</span>[u8],
+        message: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;RawExecutionResult&lt;Vec&lt;u8&gt;&gt;, ExecutionError&gt; {
         <span class="kw">let </span>result = <span class="kw">match </span><span class="self">self </span>{
             <span class="attr">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
@@ -612,7 +612,7 @@
                     contract_module,
                     runtime,
                 )<span class="question-mark">?
-                </span>.execute_effect(context, effect)
+                </span>.execute_message(context, message)
                 .<span class="kw">await</span><span class="question-mark">?
             </span>}
             <span class="attr">#[cfg(feature = <span class="string">&quot;wasmer&quot;</span>)]
@@ -626,7 +626,7 @@
                     contract_module,
                     runtime,
                 )<span class="question-mark">?
-                </span>.execute_effect(context, effect)
+                </span>.execute_message(context, message)
                 .<span class="kw">await</span><span class="question-mark">?
             </span>}
         };

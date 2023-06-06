@@ -1569,7 +1569,7 @@
 <span class="kw">use </span>linera_base::{
     crypto::{KeyPair, PublicKey},
     data_types::{Amount, BlockHeight, Timestamp},
-    identifiers::{BytecodeId, ChainDescription, ChainId, EffectId},
+    identifiers::{BytecodeId, ChainDescription, ChainId, MessageId},
 };
 <span class="kw">use </span>linera_chain::data_types::{Certificate, CertificateValue, ExecutedBlock};
 <span class="kw">use </span>linera_core::{
@@ -2220,7 +2220,7 @@
         </span><span class="attr">#[structopt(long)]
         </span>certificate: <span class="prelude-ty">Option</span>&lt;Amount&gt;,
 
-        <span class="doccomment">/// Set the price per unit of fuel when executing user effects and operations.
+        <span class="doccomment">/// Set the price per unit of fuel when executing user messages and operations.
         </span><span class="attr">#[structopt(long)]
         </span>fuel: <span class="prelude-ty">Option</span>&lt;Amount&gt;,
 
@@ -2276,7 +2276,7 @@
         </span><span class="attr">#[structopt(long, default_value = <span class="string">&quot;0&quot;</span>)]
         </span>certificate_price: Amount,
 
-        <span class="doccomment">/// Set the price per unit of fuel when executing user effects and operations.
+        <span class="doccomment">/// Set the price per unit of fuel when executing user messages and operations.
         </span><span class="attr">#[structopt(long, default_value = <span class="string">&quot;0&quot;</span>)]
         </span>fuel_price: Amount,
 
@@ -2412,10 +2412,10 @@
         </span><span class="attr">#[structopt(long)]
         </span>key: PublicKey,
 
-        <span class="doccomment">/// The ID of the effect that created the chain. (This uniquely describes the
+        <span class="doccomment">/// The ID of the message that created the chain. (This uniquely describes the
         /// chain and where it was created.)
         </span><span class="attr">#[structopt(long)]
-        </span>effect_id: EffectId,
+        </span>message_id: MessageId,
     },
 
     <span class="doccomment">/// Show the contents of the wallet.
@@ -2512,13 +2512,13 @@
                 };
                 <span class="macro">info!</span>(<span class="string">&quot;Starting operation to open a new chain&quot;</span>);
                 <span class="kw">let </span>time_start = Instant::now();
-                <span class="kw">let </span>(effect_id, certificate) =
+                <span class="kw">let </span>(message_id, certificate) =
                     chain_client.open_chain(new_public_key).<span class="kw">await</span>.unwrap();
                 <span class="kw">let </span>time_total = time_start.elapsed().as_micros();
                 <span class="macro">info!</span>(<span class="string">&quot;Operation confirmed after {} us&quot;</span>, time_total);
                 <span class="macro">info!</span>(<span class="string">&quot;{:#?}&quot;</span>, certificate);
                 context.update_wallet_from_client(<span class="kw-2">&amp;mut </span>chain_client).<span class="kw">await</span>;
-                <span class="kw">let </span>id = ChainId::child(effect_id);
+                <span class="kw">let </span>id = ChainId::child(message_id);
                 <span class="kw">let </span>timestamp = <span class="kw">match </span>certificate.value() {
                     CertificateValue::ConfirmedBlock {
                         executed_block: ExecutedBlock { block, .. },
@@ -2527,9 +2527,9 @@
                     <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unexpected certificate.&quot;</span>),
                 };
                 context.update_wallet_for_new_chain(id, key_pair, timestamp);
-                <span class="comment">// Print the new chain ID and effect ID on stdout for scripting purposes.
-                </span><span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, effect_id);
-                <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, ChainId::child(effect_id));
+                <span class="comment">// Print the new chain ID and message ID on stdout for scripting purposes.
+                </span><span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, message_id);
+                <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, ChainId::child(message_id));
                 context.save_wallet();
             }
 
@@ -2602,7 +2602,7 @@
                     .into_iter()
                     .map(|c| <span class="kw">match </span>c.value() {
                         CertificateValue::ConfirmedBlock { executed_block, .. } =&gt; {
-                            executed_block.effects.len()
+                            executed_block.messages.len()
                         }
                         CertificateValue::ValidatedBlock { .. } =&gt; <span class="number">0</span>,
                     })
@@ -2654,7 +2654,7 @@
                         <span class="macro">println!</span>(
                             <span class="string">&quot;Pricing:\n\
                             {:.2} base cost per block\n\
-                            {:.2} per unit of fuel used in executing user operations and effects\n\
+                            {:.2} per unit of fuel used in executing user operations and messages\n\
                             {:.2} per byte of operations and incoming messages\n\
                             {:.2} per byte of outgoing messages&quot;</span>,
                             pricing.certificate, pricing.fuel, pricing.storage, pricing.messages
@@ -2928,7 +2928,7 @@
                 context.save_wallet();
             }
 
-            Assign { key, effect_id } =&gt; {
+            Assign { key, message_id } =&gt; {
                 <span class="kw">let </span>state = WorkerState::new(<span class="string">&quot;Local node&quot;</span>.to_string(), <span class="prelude-val">None</span>, storage)
                     .with_allow_inactive_chains(<span class="bool-val">true</span>)
                     .with_allow_messages_from_deprecated_epochs(<span class="bool-val">true</span>);
@@ -2944,17 +2944,17 @@
                 <span class="kw">let </span>nodes = context.make_node_provider().make_nodes(committee)<span class="question-mark">?</span>;
 
                 <span class="comment">// Download the parent chain.
-                </span><span class="kw">let </span>target_height = effect_id.height.try_add_one()<span class="question-mark">?</span>;
+                </span><span class="kw">let </span>target_height = message_id.height.try_add_one()<span class="question-mark">?</span>;
                 node_client
-                    .download_certificates(nodes, effect_id.chain_id, target_height)
+                    .download_certificates(nodes, message_id.chain_id, target_height)
                     .<span class="kw">await
                     </span>.context(<span class="string">&quot;failed to download parent chain&quot;</span>)<span class="question-mark">?</span>;
 
-                <span class="comment">// The initial timestamp for the new chain is taken from the block with the effect.
+                <span class="comment">// The initial timestamp for the new chain is taken from the block with the message.
                 </span><span class="kw">let </span>certificate = node_client
-                    .certificate_for(<span class="kw-2">&amp;</span>effect_id)
+                    .certificate_for(<span class="kw-2">&amp;</span>message_id)
                     .<span class="kw">await
-                    </span>.context(<span class="string">&quot;could not find OpenChain effect&quot;</span>)<span class="question-mark">?</span>;
+                    </span>.context(<span class="string">&quot;could not find OpenChain message&quot;</span>)<span class="question-mark">?</span>;
                 <span class="kw">let </span>timestamp = <span class="kw">match </span>certificate.value() {
                     CertificateValue::ConfirmedBlock {
                         executed_block: ExecutedBlock { block, .. },
@@ -2962,7 +2962,7 @@
                     } =&gt; block.timestamp,
                     <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unexpected certificate.&quot;</span>),
                 };
-                <span class="kw">let </span>chain_id = ChainId::child(effect_id);
+                <span class="kw">let </span>chain_id = ChainId::child(message_id);
                 context
                     .wallet_state
                     .assign_new_chain_to_key(key, chain_id, timestamp)

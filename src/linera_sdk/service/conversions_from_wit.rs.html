@@ -103,7 +103,7 @@
 <span class="kw">use </span>linera_base::{
     crypto::CryptoHash,
     data_types::{Amount, BlockHeight},
-    identifiers::{ApplicationId, BytecodeId, ChainId, EffectId},
+    identifiers::{ApplicationId, BytecodeId, ChainId, MessageId},
 };
 <span class="kw">use </span>linera_views::views::ViewError;
 <span class="kw">use </span>std::task::Poll;
@@ -147,12 +147,12 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;wit_system_api::EffectId&gt; <span class="kw">for </span>EffectId {
-    <span class="kw">fn </span>from(effect_id: wit_system_api::EffectId) -&gt; <span class="self">Self </span>{
-        EffectId {
-            chain_id: ChainId(effect_id.chain_id.into()),
-            height: BlockHeight(effect_id.height),
-            index: effect_id.index,
+<span class="kw">impl </span>From&lt;wit_system_api::MessageId&gt; <span class="kw">for </span>MessageId {
+    <span class="kw">fn </span>from(message_id: wit_system_api::MessageId) -&gt; <span class="self">Self </span>{
+        MessageId {
+            chain_id: ChainId(message_id.chain_id.into()),
+            height: BlockHeight(message_id.height),
+            index: message_id.index,
         }
     }
 }

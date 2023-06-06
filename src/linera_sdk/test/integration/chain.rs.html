@@ -486,13 +486,13 @@
 <span class="kw">use </span>linera_base::{
     crypto::{KeyPair, PublicKey},
     data_types::BlockHeight,
-    identifiers::{ApplicationId, BytecodeId, ChainDescription, ChainId, EffectId},
+    identifiers::{ApplicationId, BytecodeId, ChainDescription, ChainId, MessageId},
 };
 <span class="kw">use </span>linera_chain::data_types::Certificate;
 <span class="kw">use </span>linera_core::{data_types::ChainInfoQuery, worker::ValidatorWorker};
 <span class="kw">use </span>linera_execution::{
-    system::{SystemChannel, SystemEffect, SystemExecutionError, SystemOperation},
-    Bytecode, Effect, Query, Response,
+    system::{SystemChannel, SystemExecutionError, SystemMessage, SystemOperation},
+    Bytecode, Message, Query, Response,
 };
 <span class="kw">use </span>std::{
     path::{Path, PathBuf},
@@ -548,7 +548,7 @@
     ///
     /// The `block_builder` parameter is a closure that should use the [`BlockBuilder`] parameter
     /// to provide the block&#39;s contents.
-    </span><span class="kw">pub async fn </span>add_block(<span class="kw-2">&amp;</span><span class="self">self</span>, block_builder: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;mut </span>BlockBuilder)) -&gt; Vec&lt;EffectId&gt; {
+    </span><span class="kw">pub async fn </span>add_block(<span class="kw-2">&amp;</span><span class="self">self</span>, block_builder: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;mut </span>BlockBuilder)) -&gt; Vec&lt;MessageId&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>tip = <span class="self">self</span>.tip.lock().<span class="kw">await</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>block = BlockBuilder::new(
             <span class="self">self</span>.description.into(),
@@ -559,7 +559,7 @@
 
         block_builder(<span class="kw-2">&amp;mut </span>block);
 
-        <span class="kw">let </span>(certificate, effect_ids) = block.sign().<span class="kw">await</span>;
+        <span class="kw">let </span>(certificate, message_ids) = block.sign().<span class="kw">await</span>;
 
         <span class="self">self</span>.validator
             .worker()
@@ -570,14 +570,14 @@
 
         <span class="kw-2">*</span>tip = <span class="prelude-val">Some</span>(certificate);
 
-        effect_ids
+        message_ids
     }
 
     <span class="doccomment">/// Receives all queued messages in all inboxes of this microchain.
     ///
     /// Adds a block to this microchain that receives all queued messages in the microchains
     /// inboxes.
-    </span><span class="kw">pub async fn </span>handle_received_effects(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+    </span><span class="kw">pub async fn </span>handle_received_messages(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="kw">let </span>chain_id = <span class="self">self</span>.id();
         <span class="kw">let </span>(information, <span class="kw">_</span>) = <span class="self">self
             </span>.validator
@@ -618,20 +618,20 @@
         <span class="self">Self</span>::build_bytecodes_in(<span class="kw-2">&amp;</span>repository_path).<span class="kw">await</span>;
         <span class="kw">let </span>(contract, service) = <span class="self">self</span>.find_bytecodes_in(<span class="kw-2">&amp;</span>repository_path).<span class="kw">await</span>;
 
-        <span class="kw">let </span>publish_effects = <span class="self">self
+        <span class="kw">let </span>publish_messages = <span class="self">self
             </span>.add_block(|block| {
                 block.with_system_operation(SystemOperation::PublishBytecode { contract, service });
             })
             .<span class="kw">await</span>;
 
-        <span class="macro">assert_eq!</span>(publish_effects.len(), <span class="number">1</span>);
+        <span class="macro">assert_eq!</span>(publish_messages.len(), <span class="number">1</span>);
 
         <span class="self">self</span>.add_block(|block| {
-            block.with_incoming_message(publish_effects[<span class="number">0</span>]);
+            block.with_incoming_message(publish_messages[<span class="number">0</span>]);
         })
         .<span class="kw">await</span>;
 
-        BytecodeId::new(publish_effects[<span class="number">0</span>]).with_abi()
+        BytecodeId::new(publish_messages[<span class="number">0</span>]).with_abi()
     }
 
     <span class="doccomment">/// Compiles the crate in the `repository` path.
@@ -709,7 +709,7 @@
     </span><span class="kw">pub async fn </span>subscribe_to_published_bytecodes_from(<span class="kw-2">&amp;mut </span><span class="self">self</span>, publisher_id: ChainId) {
         <span class="kw">let </span>publisher = <span class="self">self</span>.validator.get_chain(<span class="kw-2">&amp;</span>publisher_id);
 
-        <span class="kw">let </span>request_effects = <span class="self">self
+        <span class="kw">let </span>request_messages = <span class="self">self
             </span>.add_block(|block| {
                 block.with_system_operation(SystemOperation::Subscribe {
                     chain_id: publisher.id(),
@@ -718,18 +718,18 @@
             })
             .<span class="kw">await</span>;
 
-        <span class="macro">assert_eq!</span>(request_effects.len(), <span class="number">1</span>);
+        <span class="macro">assert_eq!</span>(request_messages.len(), <span class="number">1</span>);
 
-        <span class="kw">let </span>accept_effects = publisher
+        <span class="kw">let </span>accept_messages = publisher
             .add_block(|block| {
-                block.with_incoming_message(request_effects[<span class="number">0</span>]);
+                block.with_incoming_message(request_messages[<span class="number">0</span>]);
             })
             .<span class="kw">await</span>;
 
-        <span class="macro">assert_eq!</span>(accept_effects.len(), <span class="number">1</span>);
+        <span class="macro">assert_eq!</span>(accept_messages.len(), <span class="number">1</span>);
 
         <span class="self">self</span>.add_block(|block| {
-            block.with_incoming_message(accept_effects[<span class="number">0</span>]);
+            block.with_incoming_message(accept_messages[<span class="number">0</span>]);
         })
         .<span class="kw">await</span>;
     }
@@ -754,8 +754,8 @@
     <span class="kw">where
         </span>A: ContractAbi,
     {
-        <span class="kw">let </span>bytecode_location_effect = <span class="kw">if </span><span class="self">self</span>.needs_bytecode_location(bytecode_id).<span class="kw">await </span>{
-            <span class="self">self</span>.subscribe_to_published_bytecodes_from(bytecode_id.effect_id.chain_id)
+        <span class="kw">let </span>bytecode_location_message = <span class="kw">if </span><span class="self">self</span>.needs_bytecode_location(bytecode_id).<span class="kw">await </span>{
+            <span class="self">self</span>.subscribe_to_published_bytecodes_from(bytecode_id.message_id.chain_id)
                 .<span class="kw">await</span>;
             <span class="prelude-val">Some</span>(<span class="self">self</span>.find_bytecode_location(bytecode_id).<span class="kw">await</span>)
         } <span class="kw">else </span>{
@@ -769,10 +769,10 @@
             <span class="self">self</span>.register_application(dependency).<span class="kw">await</span>;
         }
 
-        <span class="kw">let </span>creation_effects = <span class="self">self
+        <span class="kw">let </span>creation_messages = <span class="self">self
             </span>.add_block(|block| {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(effect_id) = bytecode_location_effect {
-                    block.with_incoming_message(effect_id);
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(message_id) = bytecode_location_message {
+                    block.with_incoming_message(message_id);
                 }
 
                 block.with_system_operation(SystemOperation::CreateApplication {
@@ -784,11 +784,11 @@
             })
             .<span class="kw">await</span>;
 
-        <span class="macro">assert_eq!</span>(creation_effects.len(), <span class="number">1</span>);
+        <span class="macro">assert_eq!</span>(creation_messages.len(), <span class="number">1</span>);
 
         ApplicationId {
             bytecode_id,
-            creation: creation_effects[<span class="number">0</span>],
+            creation: creation_messages[<span class="number">0</span>],
         }
     }
 
@@ -809,32 +809,32 @@
             .is_empty()
     }
 
-    <span class="doccomment">/// Finds the effect that sends the message with the bytecode location of `bytecode_id`.
-    </span><span class="kw">async fn </span>find_bytecode_location&lt;Abi&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, bytecode_id: BytecodeId&lt;Abi&gt;) -&gt; EffectId {
-        <span class="kw">for </span>height <span class="kw">in </span>bytecode_id.effect_id.height.<span class="number">0</span>.. {
+    <span class="doccomment">/// Finds the message that sends the message with the bytecode location of `bytecode_id`.
+    </span><span class="kw">async fn </span>find_bytecode_location&lt;Abi&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, bytecode_id: BytecodeId&lt;Abi&gt;) -&gt; MessageId {
+        <span class="kw">for </span>height <span class="kw">in </span>bytecode_id.message_id.height.<span class="number">0</span>.. {
             <span class="kw">let </span>certificate = <span class="self">self
                 </span>.validator
                 .worker()
                 .<span class="kw">await
-                </span>.read_certificate(bytecode_id.effect_id.chain_id, height.into())
+                </span>.read_certificate(bytecode_id.message_id.chain_id, height.into())
                 .<span class="kw">await
                 </span>.expect(<span class="string">&quot;Failed to load certificate to search for bytecode location&quot;</span>)
                 .expect(<span class="string">&quot;Bytecode location not found&quot;</span>);
 
-            <span class="kw">let </span>effect_index = certificate.value().effects().iter().position(|effect| {
+            <span class="kw">let </span>message_index = certificate.value().messages().iter().position(|message| {
                 <span class="macro">matches!</span>(
-                    <span class="kw-2">&amp;</span>effect.effect,
-                    Effect::System(SystemEffect::BytecodeLocations { locations })
+                    <span class="kw-2">&amp;</span>message.message,
+                    Message::System(SystemMessage::BytecodeLocations { locations })
                         <span class="kw">if </span>locations.iter().any(|(id, <span class="kw">_</span>)| id == <span class="kw-2">&amp;</span>bytecode_id.forget_abi())
                 )
             });
 
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(index) = effect_index {
-                <span class="kw">return </span>EffectId {
-                    chain_id: bytecode_id.effect_id.chain_id,
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(index) = message_index {
+                <span class="kw">return </span>MessageId {
+                    chain_id: bytecode_id.message_id.chain_id,
                     height: BlockHeight(height),
                     index: index.try_into().expect(
-                        <span class="string">&quot;Incompatible `EffectId` index types in \
+                        <span class="string">&quot;Incompatible `MessageId` index types in \
                         `linera-sdk` and `linera-execution`&quot;</span>,
                     ),
                 };
@@ -849,29 +849,29 @@
         <span class="kw">if </span><span class="self">self</span>.needs_application_description(application_id).<span class="kw">await </span>{
             <span class="kw">let </span>source_chain = <span class="self">self</span>.validator.get_chain(<span class="kw-2">&amp;</span>application_id.creation.chain_id);
 
-            <span class="kw">let </span>request_effects = <span class="self">self
+            <span class="kw">let </span>request_messages = <span class="self">self
                 </span>.add_block(|block| {
                     block.with_request_for_application(application_id);
                 })
                 .<span class="kw">await</span>;
 
-            <span class="macro">assert_eq!</span>(request_effects.len(), <span class="number">1</span>);
+            <span class="macro">assert_eq!</span>(request_messages.len(), <span class="number">1</span>);
 
-            <span class="kw">let </span>register_effects = source_chain
+            <span class="kw">let </span>register_messages = source_chain
                 .add_block(|block| {
-                    block.with_incoming_message(request_effects[<span class="number">0</span>]);
+                    block.with_incoming_message(request_messages[<span class="number">0</span>]);
                 })
                 .<span class="kw">await</span>;
 
-            <span class="macro">assert_eq!</span>(register_effects.len(), <span class="number">1</span>);
+            <span class="macro">assert_eq!</span>(register_messages.len(), <span class="number">1</span>);
 
-            <span class="kw">let </span>final_effects = <span class="self">self
+            <span class="kw">let </span>final_messages = <span class="self">self
                 </span>.add_block(|block| {
-                    block.with_incoming_message(register_effects[<span class="number">0</span>]);
+                    block.with_incoming_message(register_messages[<span class="number">0</span>]);
                 })
                 .<span class="kw">await</span>;
 
-            <span class="macro">assert_eq!</span>(final_effects.len(), <span class="number">0</span>);
+            <span class="macro">assert_eq!</span>(final_messages.len(), <span class="number">0</span>);
         }
     }
 

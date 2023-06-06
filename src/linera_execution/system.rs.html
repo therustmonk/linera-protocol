@@ -935,7 +935,7 @@
 </span><span class="kw">use crate</span>::{
     committee::{Committee, Epoch},
     ApplicationRegistryView, Bytecode, BytecodeLocation, ChainOwnership, ChannelName,
-    ChannelSubscription, Destination, EffectContext, OperationContext, QueryContext,
+    ChannelSubscription, Destination, MessageContext, OperationContext, QueryContext,
     RawExecutionResult, UserApplicationDescription, UserApplicationId,
 };
 <span class="kw">use </span>async_graphql::Enum;
@@ -944,7 +944,7 @@
     crypto::{CryptoHash, PublicKey},
     data_types::{Amount, ArithmeticError, Timestamp},
     ensure, hex_debug,
-    identifiers::{BytecodeId, ChainDescription, ChainId, EffectId, Owner},
+    identifiers::{BytecodeId, ChainDescription, ChainId, MessageId, Owner},
 };
 <span class="kw">use </span>linera_views::{
     common::Context,
@@ -1089,13 +1089,13 @@
     },
 }
 
-<span class="doccomment">/// The effect of a system operation to be performed on a remote chain.
+<span class="doccomment">/// A system message meant to be executed on a remote chain.
 </span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
-</span><span class="kw">pub enum </span>SystemEffect {
+</span><span class="kw">pub enum </span>SystemMessage {
     <span class="doccomment">/// Credits `amount` units of value to the account.
     </span>Credit { account: Account, amount: Amount },
     <span class="doccomment">/// Withdraws `amount` units of value from the account and starts a transfer to credit
-    /// the recipient. The effect must be properly authenticated. Receiver chains may
+    /// the recipient. The message must be properly authenticated. Receiver chains may
     /// refuse it depending on their configuration.
     </span>Withdraw {
         account: Account,
@@ -1146,35 +1146,35 @@
     </span>RequestApplication(UserApplicationId),
 }
 
-<span class="kw">impl </span>SystemEffect {
-    <span class="doccomment">/// Returns an iterator over all bytecode locations this effect introduces to the receiving
+<span class="kw">impl </span>SystemMessage {
+    <span class="doccomment">/// Returns an iterator over all bytecode locations this message introduces to the receiving
     /// chain, given the hash of the certificate that it originates from.
     </span><span class="kw">pub fn </span>bytecode_locations(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         certificate_hash: CryptoHash,
     ) -&gt; Box&lt;<span class="kw">dyn </span>Iterator&lt;Item = BytecodeLocation&gt; + <span class="lifetime">&#39;_</span>&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            SystemEffect::BytecodePublished { operation_index } =&gt; {
+            SystemMessage::BytecodePublished { operation_index } =&gt; {
                 Box::new(iter::once(BytecodeLocation {
                     certificate_hash,
                     operation_index: <span class="kw-2">*</span>operation_index,
                 }))
             }
-            SystemEffect::BytecodeLocations {
+            SystemMessage::BytecodeLocations {
                 locations: new_locations,
             } =&gt; Box::new(new_locations.iter().map(|(_id, location)| <span class="kw-2">*</span>location)),
-            SystemEffect::RegisterApplications { applications } =&gt; {
+            SystemMessage::RegisterApplications { applications } =&gt; {
                 Box::new(applications.iter().map(|app| app.bytecode_location))
             }
-            SystemEffect::Credit { .. }
-            | SystemEffect::Withdraw { .. }
-            | SystemEffect::OpenChain { .. }
-            | SystemEffect::SetCommittees { .. }
-            | SystemEffect::Subscribe { .. }
-            | SystemEffect::Unsubscribe { .. }
-            | SystemEffect::ApplicationCreated { .. }
-            | SystemEffect::Notify { .. }
-            | SystemEffect::RequestApplication(<span class="kw">_</span>) =&gt; Box::new(iter::empty()),
+            SystemMessage::Credit { .. }
+            | SystemMessage::Withdraw { .. }
+            | SystemMessage::OpenChain { .. }
+            | SystemMessage::SetCommittees { .. }
+            | SystemMessage::Subscribe { .. }
+            | SystemMessage::Unsubscribe { .. }
+            | SystemMessage::ApplicationCreated { .. }
+            | SystemMessage::Notify { .. }
+            | SystemMessage::RequestApplication(<span class="kw">_</span>) =&gt; Box::new(iter::empty()),
         }
     }
 }
@@ -1377,7 +1377,7 @@
         operation: <span class="kw-2">&amp;</span>SystemOperation,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;
         (
-            RawExecutionResult&lt;SystemEffect&gt;,
+            RawExecutionResult&lt;SystemMessage&gt;,
             <span class="prelude-ty">Option</span>&lt;(UserApplicationId, Vec&lt;u8&gt;)&gt;,
         ),
         SystemExecutionError,
@@ -1392,7 +1392,7 @@
                 admin_id,
                 epoch,
             } =&gt; {
-                <span class="kw">let </span>child_id = ChainId::child(context.next_effect_id());
+                <span class="kw">let </span>child_id = ChainId::child(context.next_message_id());
                 <span class="macro">ensure!</span>(
                     <span class="self">self</span>.admin_id.get().as_ref() == <span class="prelude-val">Some</span>(admin_id),
                     SystemExecutionError::InvalidNewChainAdminId(child_id)
@@ -1411,7 +1411,7 @@
                 <span class="kw">let </span>e1 = (
                     Destination::Recipient(child_id),
                     <span class="bool-val">false</span>,
-                    SystemEffect::OpenChain {
+                    SystemMessage::OpenChain {
                         public_key: <span class="kw-2">*</span>public_key,
                         committees: committees.clone(),
                         admin_id: <span class="kw-2">*</span>admin_id,
@@ -1425,12 +1425,12 @@
                 <span class="kw">let </span>e2 = (
                     Destination::Recipient(<span class="kw-2">*</span>admin_id),
                     <span class="bool-val">false</span>,
-                    SystemEffect::Subscribe {
+                    SystemMessage::Subscribe {
                         id: child_id,
                         subscription,
                     },
                 );
-                result.effects.extend([e1, e2]);
+                result.messages.extend([e1, e2]);
             }
             ChangeOwner { new_public_key } =&gt; {
                 <span class="self">self</span>.ownership.set(ChainOwnership::single(<span class="kw-2">*</span>new_public_key));
@@ -1444,10 +1444,10 @@
                 <span class="comment">// Unsubscribe to all channels.
                 </span><span class="self">self</span>.subscriptions
                     .for_each_index(|subscription| {
-                        result.effects.push((
+                        result.messages.push((
                             Destination::Recipient(subscription.chain_id),
                             <span class="bool-val">false</span>,
-                            SystemEffect::Unsubscribe {
+                            SystemMessage::Unsubscribe {
                                 id: context.chain_id,
                                 subscription,
                             },
@@ -1485,10 +1485,10 @@
                 );
                 balance.try_sub_assign(<span class="kw-2">*</span>amount)<span class="question-mark">?</span>;
                 <span class="kw">if let </span>Recipient::Account(account) = recipient {
-                    result.effects.push((
+                    result.messages.push((
                         Destination::Recipient(account.chain_id),
                         <span class="bool-val">false</span>,
-                        SystemEffect::Credit {
+                        SystemMessage::Credit {
                             amount: <span class="kw-2">*</span>amount,
                             account: <span class="kw-2">*</span>account,
                         },
@@ -1510,10 +1510,10 @@
                     <span class="kw-2">*</span>amount &gt; Amount::zero(),
                     SystemExecutionError::IncorrectClaimAmount
                 );
-                result.effects.push((
+                result.messages.push((
                     Destination::Recipient(<span class="kw-2">*</span>target),
                     <span class="bool-val">true</span>,
-                    SystemEffect::Withdraw {
+                    SystemMessage::Withdraw {
                         amount: <span class="kw-2">*</span>amount,
                         account: Account {
                             chain_id: <span class="kw-2">*</span>target,
@@ -1544,10 +1544,10 @@
                 );
                 <span class="self">self</span>.committees.get_mut().insert(<span class="kw-2">*</span>epoch, committee.clone());
                 <span class="self">self</span>.epoch.set(<span class="prelude-val">Some</span>(<span class="kw-2">*</span>epoch));
-                result.effects.push((
+                result.messages.push((
                     Destination::Subscribers(SystemChannel::Admin.name()),
                     <span class="bool-val">false</span>,
-                    SystemEffect::SetCommittees {
+                    SystemMessage::SetCommittees {
                         admin_id: <span class="kw-2">*</span>admin_id,
                         epoch: <span class="self">self</span>.epoch.get().expect(<span class="string">&quot;chain is active&quot;</span>),
                         committees: <span class="self">self</span>.committees.get().clone(),
@@ -1568,10 +1568,10 @@
                     <span class="self">self</span>.committees.get_mut().remove(epoch).is_some(),
                     SystemExecutionError::InvalidCommitteeRemoval
                 );
-                result.effects.push((
+                result.messages.push((
                     Destination::Subscribers(SystemChannel::Admin.name()),
                     <span class="bool-val">false</span>,
-                    SystemEffect::SetCommittees {
+                    SystemMessage::SetCommittees {
                         admin_id: <span class="kw-2">*</span>admin_id,
                         epoch: <span class="self">self</span>.epoch.get().expect(<span class="string">&quot;chain is active&quot;</span>),
                         committees: <span class="self">self</span>.committees.get().clone(),
@@ -1598,10 +1598,10 @@
                     SystemExecutionError::NoSuchChannel(context.chain_id, <span class="kw-2">*</span>channel)
                 );
                 <span class="self">self</span>.subscriptions.insert(<span class="kw-2">&amp;</span>subscription)<span class="question-mark">?</span>;
-                result.effects.push((
+                result.messages.push((
                     Destination::Recipient(<span class="kw-2">*</span>chain_id),
                     <span class="bool-val">false</span>,
-                    SystemEffect::Subscribe {
+                    SystemMessage::Subscribe {
                         id: context.chain_id,
                         subscription,
                     },
@@ -1617,22 +1617,22 @@
                     SystemExecutionError::InvalidUnsubscription(context.chain_id, <span class="kw-2">*</span>channel)
                 );
                 <span class="self">self</span>.subscriptions.remove(<span class="kw-2">&amp;</span>subscription)<span class="question-mark">?</span>;
-                result.effects.push((
+                result.messages.push((
                     Destination::Recipient(<span class="kw-2">*</span>chain_id),
                     <span class="bool-val">false</span>,
-                    SystemEffect::Unsubscribe {
+                    SystemMessage::Unsubscribe {
                         id: context.chain_id,
                         subscription,
                     },
                 ));
             }
             PublishBytecode { .. } =&gt; {
-                <span class="comment">// Send a `BytecodePublished` effect to ourself so that we can broadcast
+                <span class="comment">// Send a `BytecodePublished` message to ourself so that we can broadcast
                 // the bytecode-id next.
-                </span>result.effects.push((
+                </span>result.messages.push((
                     Destination::Recipient(context.chain_id),
                     <span class="bool-val">false</span>,
-                    SystemEffect::BytecodePublished {
+                    SystemMessage::BytecodePublished {
                         operation_index: context.index,
                     },
                 ));
@@ -1645,7 +1645,7 @@
             } =&gt; {
                 <span class="kw">let </span>id = UserApplicationId {
                     bytecode_id: <span class="kw-2">*</span>bytecode_id,
-                    creation: context.next_effect_id(),
+                    creation: context.next_message_id(),
                 };
                 <span class="self">self</span>.registry
                     .register_new_application(
@@ -1654,44 +1654,44 @@
                         required_application_ids.clone(),
                     )
                     .<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="comment">// Send an effect to ourself to increment the effect ID.
-                </span>result.effects.push((
+                <span class="comment">// Send a message to ourself to increment the message ID.
+                </span>result.messages.push((
                     Destination::Recipient(context.chain_id),
                     <span class="bool-val">false</span>,
-                    SystemEffect::ApplicationCreated,
+                    SystemMessage::ApplicationCreated,
                 ));
                 new_application = <span class="prelude-val">Some</span>((id, initialization_argument.clone()));
             }
             RequestApplication {
                 chain_id,
                 application_id,
-            } =&gt; result.effects.push((
+            } =&gt; result.messages.push((
                 Destination::Recipient(<span class="kw-2">*</span>chain_id),
                 <span class="bool-val">false</span>,
-                SystemEffect::RequestApplication(<span class="kw-2">*</span>application_id),
+                SystemMessage::RequestApplication(<span class="kw-2">*</span>application_id),
             )),
         }
 
         <span class="prelude-val">Ok</span>((result, new_application))
     }
 
-    <span class="doccomment">/// Executes the recipient&#39;s side of an operation, aka a &quot;remote effect&quot;.
+    <span class="doccomment">/// Executes a cross-chain message that represents the recipient&#39;s side of an operation.
     ///
-    /// * Effects should not return an error unless it is a temporary failure (e.g.
+    /// * Messages should not return an error unless it is a temporary failure (e.g.
     /// storage) or a global system failure. An error will fail the entire cross-chain
     /// request, allowing it to be retried later.
     ///
     /// * If execution is impossible for a deterministic reason (e.g. insufficient
-    /// funds), effects should fail silently and be skipped (similar to a transaction in
+    /// funds), messages should fail silently and be skipped (similar to a transaction in
     /// traditional blockchains).
-    </span><span class="kw">pub async fn </span>execute_effect(
+    </span><span class="kw">pub async fn </span>execute_message(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        context: <span class="kw-2">&amp;</span>EffectContext,
-        effect: <span class="kw-2">&amp;</span>SystemEffect,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;RawExecutionResult&lt;SystemEffect&gt;, SystemExecutionError&gt; {
+        context: <span class="kw-2">&amp;</span>MessageContext,
+        message: <span class="kw-2">&amp;</span>SystemMessage,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;RawExecutionResult&lt;SystemMessage&gt;, SystemExecutionError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>result = RawExecutionResult::default();
-        <span class="kw">use </span>SystemEffect::<span class="kw-2">*</span>;
-        <span class="kw">match </span>effect {
+        <span class="kw">use </span>SystemMessage::<span class="kw-2">*</span>;
+        <span class="kw">match </span>message {
             Credit { amount, account } <span class="kw">if </span>context.chain_id == account.chain_id =&gt; {
                 <span class="kw">match </span><span class="kw-2">&amp;</span>account.owner {
                     <span class="prelude-val">None </span>=&gt; {
@@ -1719,10 +1719,10 @@
                 <span class="kw">let </span>balance = <span class="self">self</span>.balances.get_mut_or_default(owner).<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="kw">if </span>balance.try_sub_assign(<span class="kw-2">*</span>amount).is_ok() {
                     <span class="kw">if let </span>Recipient::Account(account) = recipient {
-                        result.effects.push((
+                        result.messages.push((
                             Destination::Recipient(account.chain_id),
                             <span class="bool-val">false</span>,
-                            SystemEffect::Credit {
+                            SystemMessage::Credit {
                                 amount: <span class="kw-2">*</span>amount,
                                 account: <span class="kw-2">*</span>account,
                             },
@@ -1747,23 +1747,23 @@
             Subscribe { id, subscription } <span class="kw">if </span>subscription.chain_id == context.chain_id =&gt; {
                 <span class="comment">// Notify the subscriber about this block, so that it is included in the
                 // receive_log of the subscriber and correctly synchronized.
-                </span>result.effects.push((
+                </span>result.messages.push((
                     Destination::Recipient(<span class="kw-2">*</span>id),
                     <span class="bool-val">false</span>,
-                    SystemEffect::Notify { id: <span class="kw-2">*</span>id },
+                    SystemMessage::Notify { id: <span class="kw-2">*</span>id },
                 ));
                 result.subscribe.push((subscription.name.clone(), <span class="kw-2">*</span>id));
             }
             Unsubscribe { id, subscription } <span class="kw">if </span>subscription.chain_id == context.chain_id =&gt; {
-                result.effects.push((
+                result.messages.push((
                     Destination::Recipient(<span class="kw-2">*</span>id),
                     <span class="bool-val">false</span>,
-                    SystemEffect::Notify { id: <span class="kw-2">*</span>id },
+                    SystemMessage::Notify { id: <span class="kw-2">*</span>id },
                 ));
                 result.unsubscribe.push((subscription.name.clone(), <span class="kw-2">*</span>id));
             }
             BytecodePublished { operation_index } =&gt; {
-                <span class="kw">let </span>bytecode_id = BytecodeId::new(context.effect_id);
+                <span class="kw">let </span>bytecode_id = BytecodeId::new(context.message_id);
                 <span class="kw">let </span>bytecode_location = BytecodeLocation {
                     certificate_hash: context.certificate_hash,
                     operation_index: <span class="kw-2">*</span>operation_index,
@@ -1771,10 +1771,10 @@
                 <span class="self">self</span>.registry
                     .register_published_bytecode(bytecode_id, bytecode_location)<span class="question-mark">?</span>;
                 <span class="kw">let </span>locations = <span class="self">self</span>.registry.bytecode_locations().<span class="kw">await</span><span class="question-mark">?</span>;
-                result.effects.push((
+                result.messages.push((
                     Destination::Subscribers(SystemChannel::PublishedBytecodes.name()),
                     <span class="bool-val">false</span>,
-                    SystemEffect::BytecodeLocations { locations },
+                    SystemMessage::BytecodeLocations { locations },
                 ));
             }
             BytecodeLocations { locations } =&gt; {
@@ -1784,7 +1784,7 @@
             }
             ApplicationCreated { .. } | Notify { .. } =&gt; (),
             OpenChain { .. } =&gt; {
-                <span class="comment">// This special effect is executed immediately when cross-chain requests are received.
+                <span class="comment">// This special message is executed immediately when cross-chain requests are received.
             </span>}
             RegisterApplications { applications } =&gt; {
                 <span class="kw">for </span>application <span class="kw">in </span>applications {
@@ -1801,15 +1801,15 @@
                         <span class="kw-2">&amp;</span>Default::default(),
                     )
                     .<span class="kw">await</span><span class="question-mark">?</span>;
-                result.effects.push((
-                    Destination::Recipient(context.effect_id.chain_id),
+                result.messages.push((
+                    Destination::Recipient(context.message_id.chain_id),
                     <span class="bool-val">false</span>,
-                    SystemEffect::RegisterApplications { applications },
+                    SystemMessage::RegisterApplications { applications },
                 ));
             }
             <span class="kw">_ </span>=&gt; {
                 <span class="macro">tracing::error!</span>(
-                    <span class="string">&quot;Skipping unexpected received effect: {effect:?} with context: {context:?}&quot;
+                    <span class="string">&quot;Skipping unexpected received message: {message:?} with context: {context:?}&quot;
                 </span>);
             }
         }
@@ -1820,7 +1820,7 @@
     </span><span class="attr">#[allow(clippy::too_many_arguments)]
     </span><span class="kw">pub fn </span>open_chain(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        effect_id: EffectId,
+        message_id: MessageId,
         public_key: PublicKey,
         epoch: Epoch,
         committees: BTreeMap&lt;Epoch, Committee&gt;,
@@ -1831,7 +1831,7 @@
         </span><span class="macro">assert!</span>(<span class="self">self</span>.description.get().is_none());
         <span class="macro">assert!</span>(!<span class="self">self</span>.ownership.get().is_active());
         <span class="macro">assert!</span>(<span class="self">self</span>.committees.get().is_empty());
-        <span class="kw">let </span>description = ChainDescription::Child(effect_id);
+        <span class="kw">let </span>description = ChainDescription::Child(message_id);
         <span class="self">self</span>.description.set(<span class="prelude-val">Some</span>(description));
         <span class="self">self</span>.epoch.set(<span class="prelude-val">Some</span>(epoch));
         <span class="self">self</span>.committees.set(committees);

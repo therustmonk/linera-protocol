@@ -1209,6 +1209,12 @@
 <a href="#1209" id="1209">1209</a>
 <a href="#1210" id="1210">1210</a>
 <a href="#1211" id="1211">1211</a>
+<a href="#1212" id="1212">1212</a>
+<a href="#1213" id="1213">1213</a>
+<a href="#1214" id="1214">1214</a>
+<a href="#1215" id="1215">1215</a>
+<a href="#1216" id="1216">1216</a>
+<a href="#1217" id="1217">1217</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1252,7 +1258,7 @@
 
 <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
 </span><span class="kw">use </span>{
-    linera_base::identifiers::{Destination, EffectId},
+    linera_base::identifiers::{Destination, MessageId},
     linera_chain::data_types::ChannelFullName,
     linera_execution::ApplicationRegistryView,
 };
@@ -1371,8 +1377,8 @@
     </span>InvalidBlockChaining,
     <span class="attr">#[error(<span class="string">&quot;The given state hash is not what we computed after executing the block&quot;</span>)]
     </span>IncorrectStateHash,
-    <span class="attr">#[error(<span class="string">&quot;The given effects are not what we computed after executing the block&quot;</span>)]
-    </span>IncorrectEffects,
+    <span class="attr">#[error(<span class="string">&quot;The given messages are not what we computed after executing the block&quot;</span>)]
+    </span>IncorrectMessages,
     <span class="attr">#[error(<span class="string">&quot;The timestamp of a Tick operation is in the future.&quot;</span>)]
     </span>InvalidTimestamp,
     <span class="attr">#[error(<span class="string">&quot;We don&#39;t have the value for the certificate.&quot;</span>)]
@@ -1532,11 +1538,11 @@
         block: Block,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(ExecutedBlock, ChainInfoResponse), WorkerError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>chain = <span class="self">self</span>.storage.load_active_chain(block.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>(effects, state_hash) = chain.execute_block(<span class="kw-2">&amp;</span>block).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>(messages, state_hash) = chain.execute_block(<span class="kw-2">&amp;</span>block).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>response = ChainInfoResponse::new(<span class="kw-2">&amp;</span>chain, <span class="prelude-val">None</span>);
         <span class="kw">let </span>executed_block = ExecutedBlock {
             block,
-            effects,
+            messages,
             state_hash,
         };
         <span class="comment">// Do not save the new state.
@@ -1668,7 +1674,7 @@
         };
         <span class="kw">let </span>ExecutedBlock {
             block,
-            effects,
+            messages,
             state_hash,
         } = executed_block;
         <span class="kw">let </span><span class="kw-2">mut </span>chain = <span class="self">self</span>.storage.load_active_chain(block.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1733,9 +1739,12 @@
         result_certificate<span class="question-mark">?</span>;
         <span class="comment">// Execute the block and update inboxes.
         </span>chain.remove_events_from_inboxes(block).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="comment">// We should always agree on the effects and state hash.
-        </span><span class="kw">let </span>(verified_effects, verified_state_hash) = chain.execute_block(block).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="macro">ensure!</span>(<span class="kw-2">*</span>effects == verified_effects, WorkerError::IncorrectEffects);
+        <span class="comment">// We should always agree on the messages and state hash.
+        </span><span class="kw">let </span>(verified_messages, verified_state_hash) = chain.execute_block(block).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="macro">ensure!</span>(
+            <span class="kw-2">*</span>messages == verified_messages,
+            WorkerError::IncorrectMessages
+        );
         <span class="macro">ensure!</span>(
             <span class="kw-2">*</span>state_hash == verified_state_hash,
             WorkerError::IncorrectStateHash
@@ -1899,12 +1908,15 @@
             <span class="kw">let </span>hash = certificate.hash();
             <span class="kw">match </span>certificate.value.into_inner() {
                 CertificateValue::ConfirmedBlock {
-                    executed_block: ExecutedBlock { block, effects, .. },
+                    executed_block:
+                        ExecutedBlock {
+                            block, messages, ..
+                        },
                     ..
                 } =&gt; {
                     <span class="comment">// Update the staged chain state with the received block.
                     </span>chain
-                        .receive_block(origin, block.height, block.timestamp, effects, hash)
+                        .receive_block(origin, block.height, block.timestamp, messages, hash)
                         .<span class="kw">await</span><span class="question-mark">?
                 </span>}
                 value =&gt; {
@@ -1976,24 +1988,24 @@
         <span class="prelude-val">Ok</span>(chain.execution_state.system.registry)
     }
 
-    <span class="doccomment">/// Returns a [`IncomingMessage`] that&#39;s awaiting to be received by the chain specified by `chain_id`.
+    <span class="doccomment">/// Returns an [`IncomingMessage`] that&#39;s awaiting to be received by the chain specified by `chain_id`.
     </span><span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
     </span><span class="kw">pub async fn </span>find_incoming_message(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         chain_id: ChainId,
-        effect_id: EffectId,
+        message_id: MessageId,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;IncomingMessage&gt;, WorkerError&gt; {
-        <span class="kw">let </span><span class="prelude-val">Some</span>(certificate) = <span class="self">self</span>.read_certificate(effect_id.chain_id, effect_id.height).<span class="kw">await</span><span class="question-mark">?
+        <span class="kw">let </span><span class="prelude-val">Some</span>(certificate) = <span class="self">self</span>.read_certificate(message_id.chain_id, message_id.height).<span class="kw">await</span><span class="question-mark">?
             </span><span class="kw">else </span>{ <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) };
 
-        <span class="kw">let </span>index = usize::try_from(effect_id.index).map_err(|<span class="kw">_</span>| ArithmeticError::Overflow)<span class="question-mark">?</span>;
-        <span class="kw">let </span><span class="prelude-val">Some</span>(outgoing_effect) = certificate.value().effects().get(index).cloned()
+        <span class="kw">let </span>index = usize::try_from(message_id.index).map_err(|<span class="kw">_</span>| ArithmeticError::Overflow)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="prelude-val">Some</span>(outgoing_message) = certificate.value().messages().get(index).cloned()
             <span class="kw">else </span>{ <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) };
 
-        <span class="kw">let </span>application_id = outgoing_effect.effect.application_id();
+        <span class="kw">let </span>application_id = outgoing_message.message.application_id();
         <span class="kw">let </span>origin = Origin {
-            sender: effect_id.chain_id,
-            medium: <span class="kw">match </span>outgoing_effect.destination {
+            sender: message_id.chain_id,
+            medium: <span class="kw">match </span>outgoing_message.destination {
                 Destination::Recipient(<span class="kw">_</span>) =&gt; Medium::Direct,
                 Destination::Subscribers(name) =&gt; Medium::Channel(ChannelFullName {
                     application_id,
@@ -2013,13 +2025,13 @@
                 .<span class="kw">await</span><span class="question-mark">?
                 </span>.find(|event| {
                     event.certificate_hash == certificate_hash
-                        &amp;&amp; event.height == effect_id.height
-                        &amp;&amp; event.index == effect_id.index
+                        &amp;&amp; event.height == message_id.height
+                        &amp;&amp; event.index == message_id.index
                 })
                 .cloned()
             <span class="kw">else </span>{ <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) };
 
-        <span class="macro">assert_eq!</span>(event.effect, outgoing_effect.effect);
+        <span class="macro">assert_eq!</span>(event.message, outgoing_message.message);
 
         <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(IncomingMessage { origin, event }))
     }
@@ -2096,17 +2108,17 @@
         <span class="kw">if </span>time_till_block &gt; <span class="number">0 </span>{
             tokio::time::sleep(Duration::from_micros(time_till_block)).<span class="kw">await</span>;
         }
-        <span class="kw">let </span>(effects, state_hash) = {
-            <span class="kw">let </span>(effects, state_hash) = chain.execute_block(block).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>(messages, state_hash) = {
+            <span class="kw">let </span>(messages, state_hash) = chain.execute_block(block).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="comment">// Verify that the resulting chain would have no unconfirmed incoming messages.
             </span>chain.validate_incoming_messages().<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="comment">// Reset all the staged changes as we were only validating things.
             </span>chain.rollback();
-            (effects, state_hash)
+            (messages, state_hash)
         };
         <span class="comment">// Create the vote and store it in the chain state.
         </span><span class="kw">let </span>manager = chain.manager.get_mut();
-        manager.create_vote(proposal, effects, state_hash, <span class="self">self</span>.key_pair());
+        manager.create_vote(proposal, messages, state_hash, <span class="self">self</span>.key_pair());
         <span class="comment">// Cache the value we voted on, so the client doesn&#39;t have to send it again.
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(vote) = manager.pending() {
             <span class="self">self</span>.cache_recent_value(<span class="kw-2">&amp;</span>vote.value).<span class="kw">await</span>;
@@ -2350,7 +2362,7 @@
     /// * Returns a range of certificates that are both new to us and not relying on an
     /// untrusted set of validators.
     /// * In the case of validators, if the epoch(s) of the highest certificates are not
-    /// trusted, we only accept certificates that contain effects that were already
+    /// trusted, we only accept certificates that contain messages that were already
     /// executed by anticipation (i.e. received in certified blocks).
     /// * Basic invariants are checked for good measure. We still crucially trust
     /// the worker of the sending chain to have verified and executed the blocks

@@ -689,11 +689,11 @@
     crypto::{BcsHashable, BcsSignable, CryptoHash, KeyPair, Signature},
     data_types::{BlockHeight, RoundNumber, Timestamp},
     doc_scalar, ensure,
-    identifiers::{ChainId, ChannelName, Destination, EffectId, Owner},
+    identifiers::{ChainId, ChannelName, Destination, MessageId, Owner},
 };
 <span class="kw">use </span>linera_execution::{
     committee::{Committee, Epoch, ValidatorName},
-    ApplicationId, BytecodeLocation, Effect, Operation,
+    ApplicationId, BytecodeLocation, Message, Operation,
 };
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>std::{
@@ -742,9 +742,9 @@
     </span><span class="kw">pub fn </span>bytecode_locations(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; HashMap&lt;BytecodeLocation, ChainId&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>locations = HashMap::new();
         <span class="kw">for </span>message <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.incoming_messages {
-            <span class="kw">if let </span>Effect::System(sys_effect) = <span class="kw-2">&amp;</span>message.event.effect {
+            <span class="kw">if let </span>Message::System(sys_message) = <span class="kw-2">&amp;</span>message.event.message {
                 locations.extend(
-                    sys_effect
+                    sys_message
                         .bytecode_locations(message.event.certificate_hash)
                         .map(|location| (location, message.origin.sender)),
                 );
@@ -778,7 +778,7 @@
     </span><span class="kw">pub </span>event: Event,
 }
 
-<span class="doccomment">/// An effect together with non replayable information to ensure uniqueness in a
+<span class="doccomment">/// A message together with non replayable information to ensure uniqueness in a
 /// particular inbox.
 </span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>Event {
@@ -786,14 +786,14 @@
     </span><span class="kw">pub </span>certificate_hash: CryptoHash,
     <span class="doccomment">/// The height of the block that created the event.
     </span><span class="kw">pub </span>height: BlockHeight,
-    <span class="doccomment">/// The index of the effect.
+    <span class="doccomment">/// The index of the message.
     </span><span class="kw">pub </span>index: u32,
     <span class="doccomment">/// The authenticated signer for the operation that created the event, if any
     </span><span class="kw">pub </span>authenticated_signer: <span class="prelude-ty">Option</span>&lt;Owner&gt;,
-    <span class="doccomment">/// The timestamp of the block that caused the effect.
+    <span class="doccomment">/// The timestamp of the block that caused the message.
     </span><span class="kw">pub </span>timestamp: Timestamp,
-    <span class="doccomment">/// The effect of the event (i.e. the actual payload of a message).
-    </span><span class="kw">pub </span>effect: Effect,
+    <span class="doccomment">/// The message of the event (i.e. the actual payload of a message).
+    </span><span class="kw">pub </span>message: Message,
 }
 
 <span class="doccomment">/// The origin of a message, relative to a particular application. Used to identify each inbox.
@@ -844,19 +844,19 @@
     <span class="kw">pub </span>blobs: Vec&lt;HashedValue&gt;,
 }
 
-<span class="doccomment">/// An effect together with routing information.
+<span class="doccomment">/// A message together with routing information.
 </span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
-</span><span class="kw">pub struct </span>OutgoingEffect {
+</span><span class="kw">pub struct </span>OutgoingMessage {
     <span class="kw">pub </span>destination: Destination,
     <span class="kw">pub </span>authenticated_signer: <span class="prelude-ty">Option</span>&lt;Owner&gt;,
-    <span class="kw">pub </span>effect: Effect,
+    <span class="kw">pub </span>message: Message,
 }
 
-<span class="doccomment">/// A block, together with the effects and the state hash resulting from its execution.
+<span class="doccomment">/// A block, together with the messages and the state hash resulting from its execution.
 </span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>ExecutedBlock {
     <span class="kw">pub </span>block: Block,
-    <span class="kw">pub </span>effects: Vec&lt;OutgoingEffect&gt;,
+    <span class="kw">pub </span>messages: Vec&lt;OutgoingMessage&gt;,
     <span class="kw">pub </span>state_hash: CryptoHash,
 }
 
@@ -1074,23 +1074,23 @@
         HashedValue { value: <span class="self">self</span>, hash }
     }
 
-    <span class="doccomment">/// Returns whether this value contains the effect with the specified ID.
-    </span><span class="kw">pub fn </span>has_effect(<span class="kw-2">&amp;</span><span class="self">self</span>, effect_id: <span class="kw-2">&amp;</span>EffectId) -&gt; bool {
-        <span class="self">self</span>.height() == effect_id.height
-            &amp;&amp; <span class="self">self</span>.chain_id() == effect_id.chain_id
-            &amp;&amp; <span class="self">self</span>.executed_block().effects.len()
-                &gt; usize::try_from(effect_id.index).unwrap_or(usize::MAX)
+    <span class="doccomment">/// Returns whether this value contains the message with the specified ID.
+    </span><span class="kw">pub fn </span>has_message(<span class="kw-2">&amp;</span><span class="self">self</span>, message_id: <span class="kw-2">&amp;</span>MessageId) -&gt; bool {
+        <span class="self">self</span>.height() == message_id.height
+            &amp;&amp; <span class="self">self</span>.chain_id() == message_id.chain_id
+            &amp;&amp; <span class="self">self</span>.executed_block().messages.len()
+                &gt; usize::try_from(message_id.index).unwrap_or(usize::MAX)
     }
 
-    <span class="doccomment">/// Skip `n-1` effects from the end of the block and return the effect ID, if any.
-    </span><span class="kw">pub fn </span>nth_last_effect_id(<span class="kw-2">&amp;</span><span class="self">self</span>, n: u32) -&gt; <span class="prelude-ty">Option</span>&lt;EffectId&gt; {
+    <span class="doccomment">/// Skip `n-1` messages from the end of the block and return the message ID, if any.
+    </span><span class="kw">pub fn </span>nth_last_message_id(<span class="kw-2">&amp;</span><span class="self">self</span>, n: u32) -&gt; <span class="prelude-ty">Option</span>&lt;MessageId&gt; {
         <span class="kw">if </span>n == <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
-        <span class="prelude-val">Some</span>(EffectId {
+        <span class="prelude-val">Some</span>(MessageId {
             chain_id: <span class="self">self</span>.chain_id(),
             height: <span class="self">self</span>.height(),
-            index: u32::try_from(<span class="self">self</span>.executed_block().effects.len())
+            index: u32::try_from(<span class="self">self</span>.executed_block().messages.len())
                 .ok()<span class="question-mark">?
                 </span>.checked_sub(n)<span class="question-mark">?</span>,
         })
@@ -1105,8 +1105,8 @@
     }
 
     <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
-    </span><span class="kw">pub fn </span>effects(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Vec&lt;OutgoingEffect&gt; {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.executed_block().effects
+    </span><span class="kw">pub fn </span>messages(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Vec&lt;OutgoingMessage&gt; {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.executed_block().messages
     }
 
     <span class="kw">fn </span>executed_block(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>ExecutedBlock {
@@ -1172,9 +1172,9 @@
         <span class="self">self</span>.value
     }
 
-    <span class="doccomment">/// Skip `n-1` effects from the end of the block and return the effect ID, if any.
-    </span><span class="kw">pub fn </span>nth_last_effect_id(<span class="kw-2">&amp;</span><span class="self">self</span>, n: u32) -&gt; <span class="prelude-ty">Option</span>&lt;EffectId&gt; {
-        <span class="self">self</span>.value.nth_last_effect_id(n)
+    <span class="doccomment">/// Skip `n-1` messages from the end of the block and return the message ID, if any.
+    </span><span class="kw">pub fn </span>nth_last_message_id(<span class="kw-2">&amp;</span><span class="self">self</span>, n: u32) -&gt; <span class="prelude-ty">Option</span>&lt;MessageId&gt; {
+        <span class="self">self</span>.value.nth_last_message_id(n)
     }
 }
 
@@ -1346,7 +1346,7 @@
 </span>);
 <span class="macro">doc_scalar!</span>(
     Event,
-    <span class="string">&quot;An effect together with non replayable information to ensure uniqueness in a particular inbox&quot;
+    <span class="string">&quot;A message together with non replayable information to ensure uniqueness in a particular inbox&quot;
 </span>);
 <span class="macro">doc_scalar!</span>(
     Medium,

@@ -208,7 +208,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::ToBcsBytes;
 <span class="kw">use </span>linera_base::{
     data_types::Timestamp,
-    identifiers::{ApplicationId, ChainId, EffectId, Owner},
+    identifiers::{ApplicationId, ChainId, MessageId, Owner},
 };
 <span class="kw">use </span>linera_chain::data_types::{
     Block, Certificate, HashedValue, IncomingMessage, LiteVote, SignatureAggregator,
@@ -220,7 +220,7 @@
 /// [`Certificate`]s using a [`TestValidator`].
 </span><span class="kw">pub struct </span>BlockBuilder {
     block: Block,
-    incoming_messages: Vec&lt;EffectId&gt;,
+    incoming_messages: Vec&lt;MessageId&gt;,
     validator: TestValidator,
 }
 
@@ -310,28 +310,28 @@
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Adds a message sent by the effect referenced by the [`EffectId`] to this block.
+    <span class="doccomment">/// Receives an incoming message referenced by the [`MessageId`].
     ///
-    /// The block that produces the effect must have already been executed by the test validator,
+    /// The block that produces the message must have already been executed by the test validator,
     /// so that the message is already in the inbox of the microchain this block belongs to.
-    </span><span class="kw">pub fn </span>with_incoming_message(<span class="kw-2">&amp;mut </span><span class="self">self</span>, effect_id: EffectId) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.incoming_messages.push(effect_id);
+    </span><span class="kw">pub fn </span>with_incoming_message(<span class="kw-2">&amp;mut </span><span class="self">self</span>, message_id: MessageId) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+        <span class="self">self</span>.incoming_messages.push(message_id);
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Adds multiple messages sent by the effects referenced by the [`EffectId`]s to this block.
+    <span class="doccomment">/// Receives multiple incoming messages referenced by the [`MessageId`]s.
     ///
-    /// The blocks that produce the effects must have already been executed by the test validator,
+    /// The blocks that produce the messages must have already been executed by the test validator,
     /// so that the messages are already in the inbox of the microchain this block belongs to.
     </span><span class="kw">pub fn </span>with_incoming_messages(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        effect_ids: <span class="kw">impl </span>IntoIterator&lt;Item = EffectId&gt;,
+        message_ids: <span class="kw">impl </span>IntoIterator&lt;Item = MessageId&gt;,
     ) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.incoming_messages.extend(effect_ids);
+        <span class="self">self</span>.incoming_messages.extend(message_ids);
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Adds the `messages` directly to this block.
+    <span class="doccomment">/// Receives incoming messages by specifying them directly.
     ///
     /// This is an internal method that bypasses the check to see if the messages are already
     /// present in the inboxes of the microchain that owns this block.
@@ -345,7 +345,7 @@
 
     <span class="doccomment">/// Signs the prepared [`Block`] with the [`TestValidator`]&#39;s keys and returns the resulting
     /// [`Certificate`].
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>sign(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; (Certificate, Vec&lt;EffectId&gt;) {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>sign(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; (Certificate, Vec&lt;MessageId&gt;) {
         <span class="self">self</span>.collect_incoming_messages().<span class="kw">await</span>;
 
         <span class="kw">let </span>(executed_block, <span class="kw">_</span>) = <span class="self">self
@@ -356,8 +356,8 @@
             .<span class="kw">await
             </span>.expect(<span class="string">&quot;Failed to execute block&quot;</span>);
 
-        <span class="kw">let </span>effect_ids = (<span class="number">0</span>..executed_block.effects.len() <span class="kw">as </span>u32)
-            .map(|index| EffectId {
+        <span class="kw">let </span>message_ids = (<span class="number">0</span>..executed_block.messages.len() <span class="kw">as </span>u32)
+            .map(|index| MessageId {
                 chain_id: executed_block.block.chain_id,
                 height: executed_block.block.height,
                 index,
@@ -372,7 +372,7 @@
             .expect(<span class="string">&quot;Failed to sign block&quot;</span>)
             .expect(<span class="string">&quot;Committee has more than one test validator&quot;</span>);
 
-        (certificate, effect_ids)
+        (certificate, message_ids)
     }
 
     <span class="doccomment">/// Collects and adds the previously requested messages to this block.
@@ -382,12 +382,12 @@
     </span><span class="kw">async fn </span>collect_incoming_messages(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">let </span>chain_id = <span class="self">self</span>.block.chain_id;
 
-        <span class="kw">for </span>effect_id <span class="kw">in </span>mem::take(<span class="kw-2">&amp;mut </span><span class="self">self</span>.incoming_messages) {
+        <span class="kw">for </span>message_id <span class="kw">in </span>mem::take(<span class="kw-2">&amp;mut </span><span class="self">self</span>.incoming_messages) {
             <span class="kw">let </span>message = <span class="self">self
                 </span>.validator
                 .worker()
                 .<span class="kw">await
-                </span>.find_incoming_message(chain_id, effect_id)
+                </span>.find_incoming_message(chain_id, message_id)
                 .<span class="kw">await
                 </span>.expect(<span class="string">&quot;Failed to find message to receive in block&quot;</span>)
                 .expect(<span class="string">&quot;Message that block should consume has not been emitted&quot;</span>);

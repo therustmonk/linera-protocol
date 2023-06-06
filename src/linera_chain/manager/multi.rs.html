@@ -213,7 +213,7 @@
 <span class="kw">use crate</span>::{
     data_types::{
         Block, BlockAndRound, BlockProposal, Certificate, CertificateValue, ExecutedBlock,
-        HashedValue, LiteVote, OutgoingEffect, Vote,
+        HashedValue, LiteVote, OutgoingMessage, Vote,
     },
     ChainError,
 };
@@ -335,7 +335,7 @@
     <span class="kw">pub fn </span>create_vote(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         proposal: BlockProposal,
-        effects: Vec&lt;OutgoingEffect&gt;,
+        messages: Vec&lt;OutgoingMessage&gt;,
         state_hash: CryptoHash,
         key_pair: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>KeyPair&gt;,
     ) {
@@ -347,7 +347,7 @@
             </span><span class="kw">let </span>BlockAndRound { block, round } = proposal.content;
             <span class="kw">let </span>executed_block = ExecutedBlock {
                 block,
-                effects,
+                messages,
                 state_hash,
             };
             <span class="kw">let </span>vote = Vote::new(HashedValue::new_validated(executed_block, round), key_pair);

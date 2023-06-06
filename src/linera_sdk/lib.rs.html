@@ -495,7 +495,7 @@
 <span class="kw">use </span>linera_base::{
     abi::{ContractAbi, ServiceAbi, WithContractAbi, WithServiceAbi},
     data_types::BlockHeight,
-    identifiers::{ApplicationId, ChainId, ChannelName, Destination, EffectId, Owner, SessionId},
+    identifiers::{ApplicationId, ChainId, ChannelName, Destination, MessageId, Owner, SessionId},
 };
 <span class="kw">use </span>serde::{de::DeserializeOwned, Deserialize, Serialize};
 <span class="kw">use </span>std::{error::Error, fmt::Debug, sync::Arc};
@@ -521,7 +521,7 @@
 /// are triggered by the execution of blocks in a chain. Their execution may modify
 /// storage and is gas-metered.
 ///
-/// Below we use the word &quot;transaction&quot; to refer to the current operation or effect being
+/// Below we use the word &quot;transaction&quot; to refer to the current operation or message being
 /// executed.
 </span><span class="attr">#[async_trait]
 </span><span class="kw">pub trait </span>Contract: WithContractAbi + ContractAbi + Send + Sized {
@@ -549,12 +549,12 @@
     /// created the application.
     ///
     /// Returns an [`ExecutionResult`], which can contain subscription or unsubscription requests
-    /// to channels and effects to be sent to this application on another chain.
+    /// to channels and messages to be sent to this application on another chain.
     </span><span class="kw">async fn </span>initialize(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         context: <span class="kw-2">&amp;</span>OperationContext,
         argument: <span class="self">Self</span>::InitializationArgument,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;ExecutionResult&lt;<span class="self">Self</span>::Effect&gt;, <span class="self">Self</span>::Error&gt;;
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ExecutionResult&lt;<span class="self">Self</span>::Message&gt;, <span class="self">Self</span>::Error&gt;;
 
     <span class="doccomment">/// Applies an operation from the current block.
     ///
@@ -562,32 +562,32 @@
     /// application&#39;s execution.
     ///
     /// Returns an [`ExecutionResult`], which can contain subscription or unsubscription requests
-    /// to channels and effects to be sent to this application on another chain.
+    /// to channels and messages to be sent to this application on another chain.
     </span><span class="kw">async fn </span>execute_operation(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         context: <span class="kw-2">&amp;</span>OperationContext,
         operation: <span class="self">Self</span>::Operation,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;ExecutionResult&lt;<span class="self">Self</span>::Effect&gt;, <span class="self">Self</span>::Error&gt;;
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ExecutionResult&lt;<span class="self">Self</span>::Message&gt;, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Applies an effect originating from a cross-chain message.
+    <span class="doccomment">/// Applies a message originating from a cross-chain message.
     ///
-    /// Effects are messages sent across chains. These messages are created and received by
-    /// the same application. Effects can be either single-sender and single-receiver, or
+    /// Messages are messages sent across chains. These messages are created and received by
+    /// the same application. Messages can be either single-sender and single-receiver, or
     /// single-sender and multiple-receivers. The former allows sending cross-chain messages to the
     /// application on some other specific chain, while the latter uses broadcast channels to
     /// send a message to multiple other chains where the application is subscribed to a
     /// sender channel on this chain.
     ///
-    /// For an effect to be executed, a user must mark it to be received in a block of the receiver
+    /// For a message to be executed, a user must mark it to be received in a block of the receiver
     /// chain.
     ///
-    /// Returns an [`ExecutionResult`], which can contain effects to be sent to this application
+    /// Returns an [`ExecutionResult`], which can contain messages to be sent to this application
     /// on another chain and subscription or unsubscription requests to channels.
-    </span><span class="kw">async fn </span>execute_effect(
+    </span><span class="kw">async fn </span>execute_message(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        context: <span class="kw-2">&amp;</span>EffectContext,
-        effect: <span class="self">Self</span>::Effect,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;ExecutionResult&lt;<span class="self">Self</span>::Effect&gt;, <span class="self">Self</span>::Error&gt;;
+        context: <span class="kw-2">&amp;</span>MessageContext,
+        message: <span class="self">Self</span>::Message,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ExecutionResult&lt;<span class="self">Self</span>::Message&gt;, <span class="self">Self</span>::Error&gt;;
 
     <span class="doccomment">/// Handles a call from another application.
     ///
@@ -602,7 +602,7 @@
     ///
     /// - a return value sent to the caller application;
     /// - a list of new session states; the newly-created sessions will be owned by the caller application;
-    /// - an [`ExecutionResult`] with effects to be sent to this application on other chains
+    /// - an [`ExecutionResult`] with messages to be sent to this application on other chains
     ///   and channel subscription and unsubscription requests.
     ///
     /// See [`Self::handle_session_call`] for more information on
@@ -611,7 +611,7 @@
         context: <span class="kw-2">&amp;</span>CalleeContext,
         argument: <span class="self">Self</span>::ApplicationCall,
         forwarded_sessions: Vec&lt;SessionId&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;ApplicationCallResult&lt;<span class="self">Self</span>::Effect, <span class="self">Self</span>::Response, <span class="self">Self</span>::SessionState&gt;, <span class="self">Self</span>::Error&gt;;
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ApplicationCallResult&lt;<span class="self">Self</span>::Message, <span class="self">Self</span>::Response, <span class="self">Self</span>::SessionState&gt;, <span class="self">Self</span>::Error&gt;;
 
     <span class="doccomment">/// Handles a call into a session created by this application.
     ///
@@ -645,7 +645,7 @@
     /// - an [`ApplicationCallResult`], which contains:
     ///   - a return value sent to the caller application;
     ///   - a list of new session states; the newly-created sessions will be owned by the caller application;
-    ///   - an [`ExecutionResult`] with effects to be sent to this application on other
+    ///   - an [`ExecutionResult`] with messages to be sent to this application on other
     ///     chains and channel subscription and unsubscription requests.
     </span><span class="kw">async fn </span>handle_session_call(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -653,7 +653,7 @@
         session: <span class="self">Self</span>::SessionState,
         argument: <span class="self">Self</span>::SessionCall,
         forwarded_sessions: Vec&lt;SessionId&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;SessionCallResult&lt;<span class="self">Self</span>::Effect, <span class="self">Self</span>::Response, <span class="self">Self</span>::SessionState&gt;, <span class="self">Self</span>::Error&gt;;
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;SessionCallResult&lt;<span class="self">Self</span>::Message, <span class="self">Self</span>::Response, <span class="self">Self</span>::SessionState&gt;, <span class="self">Self</span>::Error&gt;;
 
     <span class="doccomment">/// Calls another application.
     </span><span class="comment">// TODO(#488): Currently, the application state is persisted before the call and restored after the call in
@@ -765,18 +765,18 @@
     </span><span class="kw">pub </span>index: u32,
 }
 
-<span class="doccomment">/// The context of the execution of an application&#39;s effect.
+<span class="doccomment">/// The context of the execution of an application&#39;s message.
 </span><span class="attr">#[derive(Debug, Clone, Deserialize, Serialize)]
-</span><span class="kw">pub struct </span>EffectContext {
+</span><span class="kw">pub struct </span>MessageContext {
     <span class="doccomment">/// The current chain id.
     </span><span class="kw">pub </span>chain_id: ChainId,
     <span class="doccomment">/// The authenticated signer of the operation, if any.
     </span><span class="kw">pub </span>authenticated_signer: <span class="prelude-ty">Option</span>&lt;Owner&gt;,
     <span class="doccomment">/// The current block height.
     </span><span class="kw">pub </span>height: BlockHeight,
-    <span class="doccomment">/// The id of the effect (based on the operation height and index in the remote
-    /// chain that created the effect).
-    </span><span class="kw">pub </span>effect_id: EffectId,
+    <span class="doccomment">/// The id of the message (based on the operation height and index in the remote
+    /// chain that created the message).
+    </span><span class="kw">pub </span>message_id: MessageId,
 }
 
 <span class="doccomment">/// The context of the execution of an application&#39;s cross-application call or session call handler.
@@ -802,40 +802,40 @@
 /// the application that created them.
 </span><span class="attr">#[derive(Debug, Deserialize, Serialize)]
 #[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Eq, PartialEq))]
-</span><span class="kw">pub struct </span>ExecutionResult&lt;Effect&gt; {
+</span><span class="kw">pub struct </span>ExecutionResult&lt;Message&gt; {
     <span class="doccomment">/// Sends messages to the given destinations, possibly forwarding the authenticated
     /// signer.
-    </span><span class="kw">pub </span>effects: Vec&lt;(Destination, bool, Effect)&gt;,
+    </span><span class="kw">pub </span>messages: Vec&lt;(Destination, bool, Message)&gt;,
     <span class="doccomment">/// Subscribe chains to channels.
     </span><span class="kw">pub </span>subscribe: Vec&lt;(ChannelName, ChainId)&gt;,
     <span class="doccomment">/// Unsubscribe chains to channels.
     </span><span class="kw">pub </span>unsubscribe: Vec&lt;(ChannelName, ChainId)&gt;,
 }
 
-<span class="kw">impl</span>&lt;Effect&gt; Default <span class="kw">for </span>ExecutionResult&lt;Effect&gt; {
+<span class="kw">impl</span>&lt;Message&gt; Default <span class="kw">for </span>ExecutionResult&lt;Message&gt; {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            effects: <span class="macro">vec!</span>[],
+            messages: <span class="macro">vec!</span>[],
             subscribe: <span class="macro">vec!</span>[],
             unsubscribe: <span class="macro">vec!</span>[],
         }
     }
 }
 
-<span class="kw">impl</span>&lt;Effect: Serialize + Debug + DeserializeOwned&gt; ExecutionResult&lt;Effect&gt; {
-    <span class="doccomment">/// Adds an effect to the execution result.
-    </span><span class="kw">pub fn </span>with_effect(<span class="kw-2">mut </span><span class="self">self</span>, destination: <span class="kw">impl </span>Into&lt;Destination&gt;, effect: Effect) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.effects.push((destination.into(), <span class="bool-val">false</span>, effect));
+<span class="kw">impl</span>&lt;Message: Serialize + Debug + DeserializeOwned&gt; ExecutionResult&lt;Message&gt; {
+    <span class="doccomment">/// Adds a message to the execution result.
+    </span><span class="kw">pub fn </span>with_message(<span class="kw-2">mut </span><span class="self">self</span>, destination: <span class="kw">impl </span>Into&lt;Destination&gt;, message: Message) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.messages.push((destination.into(), <span class="bool-val">false</span>, message));
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Adds an authenticated effect to the execution result.
-    </span><span class="kw">pub fn </span>with_authenticated_effect(
+    <span class="doccomment">/// Adds an authenticated message to the execution result.
+    </span><span class="kw">pub fn </span>with_authenticated_message(
         <span class="kw-2">mut </span><span class="self">self</span>,
         destination: <span class="kw">impl </span>Into&lt;Destination&gt;,
-        effect: Effect,
+        message: Message,
     ) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.effects.push((destination.into(), <span class="bool-val">true</span>, effect));
+        <span class="self">self</span>.messages.push((destination.into(), <span class="bool-val">true</span>, message));
         <span class="self">self
     </span>}
 }
@@ -843,16 +843,16 @@
 <span class="doccomment">/// The result of calling into an application.
 </span><span class="attr">#[derive(Debug, Deserialize, Serialize)]
 #[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Eq, PartialEq))]
-</span><span class="kw">pub struct </span>ApplicationCallResult&lt;Effect, Value, SessionState&gt; {
+</span><span class="kw">pub struct </span>ApplicationCallResult&lt;Message, Value, SessionState&gt; {
     <span class="doccomment">/// The return value, if any.
     </span><span class="kw">pub </span>value: Value,
     <span class="doccomment">/// The externally-visible result.
-    </span><span class="kw">pub </span>execution_result: ExecutionResult&lt;Effect&gt;,
+    </span><span class="kw">pub </span>execution_result: ExecutionResult&lt;Message&gt;,
     <span class="doccomment">/// New sessions were created with the following new states.
     </span><span class="kw">pub </span>create_sessions: Vec&lt;SessionState&gt;,
 }
 
-<span class="kw">impl</span>&lt;Effect, Value, SessionState&gt; Default <span class="kw">for </span>ApplicationCallResult&lt;Effect, Value, SessionState&gt;
+<span class="kw">impl</span>&lt;Message, Value, SessionState&gt; Default <span class="kw">for </span>ApplicationCallResult&lt;Message, Value, SessionState&gt;
 <span class="kw">where
     </span>Value: Default,
 {
@@ -867,9 +867,9 @@
 
 <span class="doccomment">/// The result of calling into a session.
 </span><span class="attr">#[derive(Default, Deserialize, Serialize)]
-</span><span class="kw">pub struct </span>SessionCallResult&lt;Effect, Value, SessionState&gt; {
+</span><span class="kw">pub struct </span>SessionCallResult&lt;Message, Value, SessionState&gt; {
     <span class="doccomment">/// The result of the application call.
-    </span><span class="kw">pub </span>inner: ApplicationCallResult&lt;Effect, Value, SessionState&gt;,
+    </span><span class="kw">pub </span>inner: ApplicationCallResult&lt;Message, Value, SessionState&gt;,
     <span class="doccomment">/// The new state of the session, if any. `None` means that the session was consumed
     /// by the call.
     </span><span class="kw">pub </span>new_state: <span class="prelude-ty">Option</span>&lt;SessionState&gt;,

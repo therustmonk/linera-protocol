@@ -105,7 +105,7 @@
         </span><span class="kw">impl </span><span class="macro-nonterminal">$crate::contract::wit_types::Contract </span><span class="kw">for </span><span class="macro-nonterminal">$application </span>{
             <span class="kw">type </span>Initialize = Initialize;
             <span class="kw">type </span>ExecuteOperation = ExecuteOperation;
-            <span class="kw">type </span>ExecuteEffect = ExecuteEffect;
+            <span class="kw">type </span>ExecuteMessage = ExecuteMessage;
             <span class="kw">type </span>HandleApplicationCall = HandleApplicationCall;
             <span class="kw">type </span>HandleSessionCall = HandleSessionCall;
         }
@@ -125,9 +125,9 @@
         }
 
         <span class="macro-nonterminal">$</span><span class="macro">crate::instance_exported_future! </span>{
-            <span class="macro-nonterminal">contract::ExecuteEffect</span>&lt;<span class="macro-nonterminal">$application</span>&gt;(
-                context: <span class="macro-nonterminal">$crate::contract::wit_types::EffectContext</span>,
-                effect: Vec&lt;u8&gt;,
+            <span class="macro-nonterminal">contract::ExecuteMessage</span>&lt;<span class="macro-nonterminal">$application</span>&gt;(
+                context: <span class="macro-nonterminal">$crate::contract::wit_types::MessageContext</span>,
+                message: Vec&lt;u8&gt;,
             ) -&gt; PollExecutionResult
         }
 

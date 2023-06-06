@@ -212,7 +212,7 @@
 <span class="kw">pub use </span>single::{SingleOwnerManager, SingleOwnerManagerInfo};
 
 <span class="kw">use crate</span>::{
-    data_types::{Block, BlockProposal, Certificate, LiteVote, OutgoingEffect, Vote},
+    data_types::{Block, BlockProposal, Certificate, LiteVote, OutgoingMessage, Vote},
     ChainError,
 };
 <span class="kw">use </span>linera_base::{
@@ -333,16 +333,16 @@
     <span class="kw">pub fn </span>create_vote(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         proposal: BlockProposal,
-        effects: Vec&lt;OutgoingEffect&gt;,
+        messages: Vec&lt;OutgoingMessage&gt;,
         state_hash: CryptoHash,
         key_pair: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>KeyPair&gt;,
     ) {
         <span class="kw">match </span><span class="self">self </span>{
             ChainManager::Single(manager) =&gt; {
-                manager.create_vote(proposal, effects, state_hash, key_pair)
+                manager.create_vote(proposal, messages, state_hash, key_pair)
             }
             ChainManager::Multi(manager) =&gt; {
-                manager.create_vote(proposal, effects, state_hash, key_pair)
+                manager.create_vote(proposal, messages, state_hash, key_pair)
             }
             <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected chain manager&quot;</span>),
         }

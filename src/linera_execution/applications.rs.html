@@ -301,7 +301,7 @@
 <span class="kw">use </span>linera_base::{
     crypto::CryptoHash,
     hex_debug,
-    identifiers::{BytecodeId, EffectId},
+    identifiers::{BytecodeId, MessageId},
 };
 <span class="kw">use </span>linera_views::{
     common::Context,
@@ -353,7 +353,7 @@
     <span class="doccomment">/// The location of the bytecode to use for the application.
     </span><span class="kw">pub </span>bytecode_location: BytecodeLocation,
     <span class="doccomment">/// The unique ID of the application&#39;s creation.
-    </span><span class="kw">pub </span>creation: EffectId,
+    </span><span class="kw">pub </span>creation: MessageId,
     <span class="doccomment">/// The parameters of the application.
     </span><span class="attr">#[serde(with = <span class="string">&quot;serde_bytes&quot;</span>)]
     #[debug(with = <span class="string">&quot;hex_debug&quot;</span>)]
@@ -382,7 +382,7 @@
 </span><span class="kw">pub struct </span>BytecodeLocation {
     <span class="doccomment">/// The certificate that published the bytecode.
     </span><span class="kw">pub </span>certificate_hash: CryptoHash,
-    <span class="doccomment">/// The index in the certificate of the operation that published the bytecode (not the effect!).
+    <span class="doccomment">/// The index in the certificate of the operation that published the bytecode (not the message!).
     </span><span class="kw">pub </span>operation_index: u32,
 }
 

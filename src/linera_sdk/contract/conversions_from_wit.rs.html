@@ -176,10 +176,10 @@
 <span class="kw">use </span>linera_base::{
     crypto::CryptoHash,
     data_types::{Amount, BlockHeight},
-    identifiers::{ApplicationId, BytecodeId, ChainId, EffectId, Owner, SessionId},
+    identifiers::{ApplicationId, BytecodeId, ChainId, MessageId, Owner, SessionId},
 };
 
-<span class="kw">use crate</span>::{CalleeContext, EffectContext, OperationContext};
+<span class="kw">use crate</span>::{CalleeContext, MessageContext, OperationContext};
 <span class="kw">use </span>std::task::Poll;
 
 <span class="kw">impl </span>From&lt;wit_types::OperationContext&gt; <span class="kw">for </span>OperationContext {
@@ -193,23 +193,23 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;wit_types::EffectContext&gt; <span class="kw">for </span>EffectContext {
-    <span class="kw">fn </span>from(application_context: wit_types::EffectContext) -&gt; <span class="self">Self </span>{
-        EffectContext {
+<span class="kw">impl </span>From&lt;wit_types::MessageContext&gt; <span class="kw">for </span>MessageContext {
+    <span class="kw">fn </span>from(application_context: wit_types::MessageContext) -&gt; <span class="self">Self </span>{
+        MessageContext {
             chain_id: ChainId(application_context.chain_id.into()),
             authenticated_signer: application_context.authenticated_signer.map(Owner::from),
             height: BlockHeight(application_context.height),
-            effect_id: application_context.effect_id.into(),
+            message_id: application_context.message_id.into(),
         }
     }
 }
 
-<span class="kw">impl </span>From&lt;wit_types::EffectId&gt; <span class="kw">for </span>EffectId {
-    <span class="kw">fn </span>from(effect_id: wit_types::EffectId) -&gt; <span class="self">Self </span>{
-        EffectId {
-            chain_id: ChainId(effect_id.chain_id.into()),
-            height: BlockHeight(effect_id.height),
-            index: effect_id.index,
+<span class="kw">impl </span>From&lt;wit_types::MessageId&gt; <span class="kw">for </span>MessageId {
+    <span class="kw">fn </span>from(message_id: wit_types::MessageId) -&gt; <span class="self">Self </span>{
+        MessageId {
+            chain_id: ChainId(message_id.chain_id.into()),
+            height: BlockHeight(message_id.height),
+            index: message_id.index,
         }
     }
 }
@@ -261,12 +261,12 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;wit_system_api::EffectId&gt; <span class="kw">for </span>EffectId {
-    <span class="kw">fn </span>from(effect_id: wit_system_api::EffectId) -&gt; <span class="self">Self </span>{
-        EffectId {
-            chain_id: ChainId(effect_id.chain_id.into()),
-            height: BlockHeight(effect_id.height),
-            index: effect_id.index,
+<span class="kw">impl </span>From&lt;wit_system_api::MessageId&gt; <span class="kw">for </span>MessageId {
+    <span class="kw">fn </span>from(message_id: wit_system_api::MessageId) -&gt; <span class="self">Self </span>{
+        MessageId {
+            chain_id: ChainId(message_id.chain_id.into()),
+            height: BlockHeight(message_id.height),
+            index: message_id.index,
         }
     }
 }

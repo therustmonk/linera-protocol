@@ -79,7 +79,7 @@
         ExecutionError,
     },
     contract::{
-        ExecuteEffect, ExecuteOperation, HandleApplicationCall, HandleSessionCall, Initialize,
+        ExecuteMessage, ExecuteOperation, HandleApplicationCall, HandleSessionCall, Initialize,
         PollCallApplication, PollCallSession, PollExecutionResult,
     },
     service::{PollQuery, QueryApplication},
@@ -125,7 +125,7 @@
 <span class="macro">impl_guest_future_interface! </span>{
     Initialize: initialize_poll -&gt; PollExecutionResult -&gt; Contract =&gt; RawExecutionResult&lt;Vec&lt;u8&gt;&gt;,
     ExecuteOperation: execute_operation_poll -&gt; PollExecutionResult -&gt; Contract =&gt; RawExecutionResult&lt;Vec&lt;u8&gt;&gt;,
-    ExecuteEffect: execute_effect_poll -&gt; PollExecutionResult -&gt; Contract =&gt; RawExecutionResult&lt;Vec&lt;u8&gt;&gt;,
+    ExecuteMessage: execute_message_poll -&gt; PollExecutionResult -&gt; Contract =&gt; RawExecutionResult&lt;Vec&lt;u8&gt;&gt;,
     HandleApplicationCall: handle_application_call_poll -&gt; PollCallApplication -&gt; Contract =&gt; ApplicationCallResult,
     HandleSessionCall: handle_session_call_poll -&gt; PollCallSession -&gt; Contract =&gt; (SessionCallResult, Vec&lt;u8&gt;),
     QueryApplication: query_application_poll -&gt; PollQuery -&gt; Service =&gt; Vec&lt;u8&gt;,

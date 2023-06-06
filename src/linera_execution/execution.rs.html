@@ -387,15 +387,17 @@
 <a href="#387" id="387">387</a>
 <a href="#388" id="388">388</a>
 <a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use crate</span>::{
     runtime::{ApplicationStatus, ExecutionRuntime, SessionManager},
     system::SystemExecutionStateView,
-    ContractRuntime, Effect, EffectContext, ExecutionError, ExecutionResult,
-    ExecutionRuntimeContext, Operation, OperationContext, Query, QueryContext, RawExecutionResult,
-    Response, SystemEffect, UserApplicationDescription, UserApplicationId,
+    ContractRuntime, ExecutionError, ExecutionResult, ExecutionRuntimeContext, Message,
+    MessageContext, Operation, OperationContext, Query, QueryContext, RawExecutionResult, Response,
+    SystemMessage, UserApplicationDescription, UserApplicationId,
 };
 <span class="kw">use </span>linera_base::{
     ensure,
@@ -501,7 +503,7 @@
             authenticated_signer: <span class="prelude-val">None</span>,
             height: application_description.creation.height,
             index: application_description.creation.index,
-            next_effect_index: <span class="number">0</span>,
+            next_message_index: <span class="number">0</span>,
         };
 
         <span class="kw">let </span>action = UserAction::Initialize(<span class="kw-2">&amp;</span>context, initialization_argument);
@@ -527,7 +529,7 @@
 <span class="kw">enum </span>UserAction&lt;<span class="lifetime">&#39;a</span>&gt; {
     Initialize(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>OperationContext, Vec&lt;u8&gt;),
     Operation(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>OperationContext, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]),
-    Effect(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>EffectContext, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]),
+    Message(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>MessageContext, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]),
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; UserAction&lt;<span class="lifetime">&#39;a</span>&gt; {
@@ -536,7 +538,7 @@
         <span class="kw">match </span><span class="self">self </span>{
             Initialize(context, <span class="kw">_</span>) =&gt; context.authenticated_signer,
             Operation(context, <span class="kw">_</span>) =&gt; context.authenticated_signer,
-            Effect(context, <span class="kw">_</span>) =&gt; context.authenticated_signer,
+            Message(context, <span class="kw">_</span>) =&gt; context.authenticated_signer,
         }
     }
 }
@@ -593,15 +595,17 @@
                     .execute_operation(context, <span class="kw-2">&amp;</span>runtime, operation)
                     .<span class="kw">await
             </span>}
-            UserAction::Effect(context, effect) =&gt; {
-                application.execute_effect(context, <span class="kw-2">&amp;</span>runtime, effect).<span class="kw">await
+            UserAction::Message(context, message) =&gt; {
+                application
+                    .execute_message(context, <span class="kw-2">&amp;</span>runtime, message)
+                    .<span class="kw">await
             </span>}
         };
         <span class="kw">if let </span><span class="prelude-val">Err</span>(ExecutionError::UserError(message)) = <span class="kw-2">&amp;</span>call_result {
             <span class="macro">tracing::error!</span>(<span class="string">&quot;User application reported an error: {message}&quot;</span>);
         }
         <span class="kw">let </span><span class="kw-2">mut </span>result = call_result<span class="question-mark">?</span>;
-        <span class="comment">// Set the authenticated signer to be used in outgoing effects.
+        <span class="comment">// Set the authenticated signer to be used in outgoing messages.
         </span>result.authenticated_signer = signer;
         <span class="kw-2">*</span>remaining_fuel = runtime.remaining_fuel();
 
@@ -616,16 +620,16 @@
             .registry
             .describe_applications_with_dependencies(<span class="macro">vec!</span>[application_id], <span class="kw-2">&amp;</span>Default::default())
             .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">for </span>effect <span class="kw">in </span><span class="kw-2">&amp;</span>result.effects {
-            system_result.effects.push((
-                effect.<span class="number">0</span>.clone(),
+        <span class="kw">for </span>message <span class="kw">in </span><span class="kw-2">&amp;</span>result.messages {
+            system_result.messages.push((
+                message.<span class="number">0</span>.clone(),
                 <span class="bool-val">false</span>,
-                SystemEffect::RegisterApplications {
+                SystemMessage::RegisterApplications {
                     applications: applications.clone(),
                 },
             ));
         }
-        <span class="kw">if </span>!system_result.effects.is_empty() {
+        <span class="kw">if </span>!system_result.messages.is_empty() {
             results.push(ExecutionResult::System(system_result));
         }
         <span class="comment">// Update externally-visible results.
@@ -680,26 +684,26 @@
         }
     }
 
-    <span class="kw">pub async fn </span>execute_effect(
+    <span class="kw">pub async fn </span>execute_message(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        context: <span class="kw-2">&amp;</span>EffectContext,
-        effect: <span class="kw-2">&amp;</span>Effect,
+        context: <span class="kw-2">&amp;</span>MessageContext,
+        message: <span class="kw-2">&amp;</span>Message,
         remaining_fuel: <span class="kw-2">&amp;mut </span>u64,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;ExecutionResult&gt;, ExecutionError&gt; {
         <span class="macro">assert_eq!</span>(context.chain_id, <span class="self">self</span>.context().extra().chain_id());
-        <span class="kw">match </span>effect {
-            Effect::System(effect) =&gt; {
-                <span class="kw">let </span>result = <span class="self">self</span>.system.execute_effect(context, effect).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">match </span>message {
+            Message::System(message) =&gt; {
+                <span class="kw">let </span>result = <span class="self">self</span>.system.execute_message(context, message).<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[ExecutionResult::System(result)])
             }
-            Effect::User {
+            Message::User {
                 application_id,
                 bytes,
             } =&gt; {
                 <span class="self">self</span>.run_user_action(
                     <span class="kw-2">*</span>application_id,
                     context.chain_id,
-                    UserAction::Effect(context, bytes),
+                    UserAction::Message(context, bytes),
                     remaining_fuel,
                 )
                 .<span class="kw">await

@@ -1206,7 +1206,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use </span>anyhow::Result;
-<span class="kw">use </span>linera_base::identifiers::{ApplicationId, BytecodeId, ChainId, EffectId};
+<span class="kw">use </span>linera_base::identifiers::{ApplicationId, BytecodeId, ChainId, MessageId};
 <span class="kw">use </span>linera_views::batch::WriteOperation;
 <span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>wasmtime::{Caller, Extern, Func, Linker};
@@ -1964,12 +1964,12 @@
                 );
 
                 <span class="kw">let </span>application_id = ApplicationId {
-                    bytecode_id: BytecodeId::new(EffectId {
+                    bytecode_id: BytecodeId::new(MessageId {
                         chain_id: bytecode_chain_id,
                         height: (application_bytecode_height <span class="kw">as </span>u64).into(),
                         index: application_bytecode_index <span class="kw">as </span>u32,
                     }),
-                    creation: EffectId {
+                    creation: MessageId {
                         chain_id: creation_chain_id,
                         height: (application_creation_height <span class="kw">as </span>u64).into(),
                         index: application_creation_index <span class="kw">as </span>u32,
@@ -2039,7 +2039,7 @@
                 <span class="kw">let </span>application_id = caller.data().get::&lt;Query&gt;(handle).application_id;
 
                 <span class="kw">let </span>application_id_bytecode_chain_id: [u64; <span class="number">4</span>] =
-                    application_id.bytecode_id.effect_id.chain_id.<span class="number">0</span>.into();
+                    application_id.bytecode_id.message_id.chain_id.<span class="number">0</span>.into();
 
                 <span class="kw">let </span>application_id_creation_chain_id: [u64; <span class="number">4</span>] =
                     application_id.creation.chain_id.<span class="number">0</span>.into();
@@ -2069,8 +2069,8 @@
                             application_id_bytecode_chain_id[<span class="number">1</span>] <span class="kw">as </span>i64,
                             application_id_bytecode_chain_id[<span class="number">2</span>] <span class="kw">as </span>i64,
                             application_id_bytecode_chain_id[<span class="number">3</span>] <span class="kw">as </span>i64,
-                            application_id.bytecode_id.effect_id.height.<span class="number">0 </span><span class="kw">as </span>i64,
-                            application_id.bytecode_id.effect_id.index <span class="kw">as </span>i32,
+                            application_id.bytecode_id.message_id.height.<span class="number">0 </span><span class="kw">as </span>i64,
+                            application_id.bytecode_id.message_id.index <span class="kw">as </span>i32,
                             application_id_creation_chain_id[<span class="number">0</span>] <span class="kw">as </span>i64,
                             application_id_creation_chain_id[<span class="number">1</span>] <span class="kw">as </span>i64,
                             application_id_creation_chain_id[<span class="number">2</span>] <span class="kw">as </span>i64,

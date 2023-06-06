@@ -1545,7 +1545,7 @@
     abi::{Abi, ContractAbi},
     crypto::{CryptoHash, KeyPair, PublicKey},
     data_types::{Amount, BlockHeight, RoundNumber, Timestamp},
-    identifiers::{BytecodeId, ChainId, EffectId, Owner},
+    identifiers::{BytecodeId, ChainId, MessageId, Owner},
 };
 <span class="kw">use </span>linera_chain::{
     data_types::{
@@ -1557,7 +1557,7 @@
 <span class="kw">use </span>linera_execution::{
     committee::{Committee, Epoch, ValidatorName},
     system::{Account, Recipient, SystemChannel, SystemOperation, UserData},
-    Bytecode, Effect, Operation, Query, Response, SystemEffect, SystemQuery, SystemResponse,
+    Bytecode, Message, Operation, Query, Response, SystemMessage, SystemQuery, SystemResponse,
     UserApplicationId,
 };
 <span class="kw">use </span>linera_storage::Store;
@@ -1739,7 +1739,7 @@
 
     <span class="doccomment">/// Obtains up to `self.max_pending_messages` pending messages for the local chain.
     ///
-    /// Messages known to be redundant are filtered out: A `RegisterApplications` effect whose
+    /// Messages known to be redundant are filtered out: A `RegisterApplications` message whose
     /// entries are already known never needs to be included in a block.
     </span><span class="kw">async fn </span>pending_messages(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;IncomingMessage&gt;, NodeError&gt; {
         <span class="kw">let </span>query = ChainInfoQuery::new(<span class="self">self</span>.chain_id).with_pending_messages();
@@ -1754,8 +1754,8 @@
                 );
                 <span class="kw">break</span>;
             }
-            <span class="kw">if let </span>Effect::System(SystemEffect::RegisterApplications { applications }) =
-                <span class="kw-2">&amp;</span>message.event.effect
+            <span class="kw">if let </span>Message::System(SystemMessage::RegisterApplications { applications }) =
+                <span class="kw-2">&amp;</span>message.event.message
             {
                 <span class="kw">let </span>chain_id = <span class="self">self</span>.chain_id;
                 <span class="kw">if </span>applications
@@ -1768,7 +1768,7 @@
                     .all(|result| <span class="kw">async move </span>{ result.is_ok() })
                     .<span class="kw">await
                 </span>{
-                    <span class="kw">continue</span>; <span class="comment">// These applications are already registered; skip register effect.
+                    <span class="kw">continue</span>; <span class="comment">// These applications are already registered; skip register message.
                 </span>}
             }
             pending_messages.push(message);
@@ -2721,7 +2721,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Requests a `RegisterApplications` effect from another chain so the application can be used
+    <span class="doccomment">/// Requests a `RegisterApplications` message from another chain so the application can be used
     /// on this one.
     </span><span class="kw">pub async fn </span>request_application(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -2823,7 +2823,7 @@
     </span>}
 
     <span class="doccomment">/// Opens a new chain with a derived UID.
-    </span><span class="kw">pub async fn </span>open_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>, public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;(EffectId, Certificate)&gt; {
+    </span><span class="kw">pub async fn </span>open_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>, public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;(MessageId, Certificate)&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>(epoch, committees) = <span class="self">self</span>.epoch_and_committees(<span class="self">self</span>.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>epoch = epoch.ok_or(NodeError::InactiveLocalChain(<span class="self">self</span>.chain_id))<span class="question-mark">?</span>;
@@ -2839,12 +2839,12 @@
                 })],
             )
             .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="comment">// The second last effect created the new chain.
-        </span><span class="kw">let </span>effect_id = certificate
+        <span class="comment">// The second last message created the new chain.
+        </span><span class="kw">let </span>message_id = certificate
             .value
-            .nth_last_effect_id(<span class="number">2</span>)
+            .nth_last_message_id(<span class="number">2</span>)
             .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;Failed to open a new chain&quot;</span>))<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>((effect_id, certificate))
+        <span class="prelude-val">Ok</span>((message_id, certificate))
     }
 
     <span class="doccomment">/// Closes the chain (and loses everything in it!!).
@@ -2870,12 +2870,12 @@
                 })],
             )
             .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="comment">// The last effect published the bytecode.
-        </span><span class="kw">let </span>effect_id = certificate
+        <span class="comment">// The last message published the bytecode.
+        </span><span class="kw">let </span>message_id = certificate
             .value
-            .nth_last_effect_id(<span class="number">1</span>)
+            .nth_last_message_id(<span class="number">1</span>)
             .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;Failed to publish bytecode&quot;</span>))<span class="question-mark">?</span>;
-        <span class="kw">let </span>id = BytecodeId::new(effect_id);
+        <span class="kw">let </span>id = BytecodeId::new(message_id);
         <span class="prelude-val">Ok</span>((id, certificate))
     }
 
@@ -2921,10 +2921,10 @@
                 })],
             )
             .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="comment">// The last effect created the application.
+        <span class="comment">// The last message created the application.
         </span><span class="kw">let </span>creation = certificate
             .value
-            .nth_last_effect_id(<span class="number">1</span>)
+            .nth_last_message_id(<span class="number">1</span>)
             .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;Failed to create application&quot;</span>))<span class="question-mark">?</span>;
         <span class="kw">let </span>id = UserApplicationId {
             bytecode_id,

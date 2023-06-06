@@ -463,7 +463,7 @@
 <span class="kw">use </span>futures::{future, StreamExt};
 <span class="kw">use </span>linera_base::{
     data_types::BlockHeight,
-    identifiers::{ChainDescription, ChainId, EffectId},
+    identifiers::{ChainDescription, ChainId, MessageId},
 };
 <span class="kw">use </span>linera_chain::data_types::{BlockProposal, Certificate, CertificateValue, LiteVote};
 <span class="kw">use </span>linera_execution::committee::{Committee, ValidatorName};
@@ -789,7 +789,7 @@
                         .description
                         .get();
                     <span class="kw">match </span>description {
-                        <span class="prelude-val">Some</span>(ChainDescription::Child(EffectId {
+                        <span class="prelude-val">Some</span>(ChainDescription::Child(MessageId {
                             chain_id: parent_id,
                             height,
                             index: <span class="kw">_</span>,

@@ -237,6 +237,7 @@
 <a href="#237" id="237">237</a>
 <a href="#238" id="238">238</a>
 <a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -247,7 +248,7 @@
 <span class="kw">use crate</span>::{ApplicationCallResult, ExecutionResult, SessionCallResult};
 <span class="kw">use </span>linera_base::{
     crypto::CryptoHash,
-    identifiers::{ApplicationId, ChannelName, Destination, EffectId, SessionId},
+    identifiers::{ApplicationId, ChannelName, Destination, MessageId, SessionId},
 };
 <span class="kw">use </span>serde::{de::DeserializeOwned, Serialize};
 <span class="kw">use </span>std::{fmt::Debug, task::Poll};
@@ -281,7 +282,7 @@
 <span class="kw">impl </span>From&lt;ApplicationId&gt; <span class="kw">for </span>wit_system_api::ApplicationId {
     <span class="kw">fn </span>from(application_id: ApplicationId) -&gt; wit_system_api::ApplicationId {
         wit_system_api::ApplicationId {
-            bytecode_id: application_id.bytecode_id.effect_id.into(),
+            bytecode_id: application_id.bytecode_id.message_id.into(),
             creation: application_id.creation.into(),
         }
     }
@@ -296,12 +297,12 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;EffectId&gt; <span class="kw">for </span>wit_system_api::EffectId {
-    <span class="kw">fn </span>from(effect_id: EffectId) -&gt; <span class="self">Self </span>{
-        wit_system_api::EffectId {
-            chain_id: effect_id.chain_id.<span class="number">0</span>.into(),
-            height: effect_id.height.<span class="number">0</span>,
-            index: effect_id.index,
+<span class="kw">impl </span>From&lt;MessageId&gt; <span class="kw">for </span>wit_system_api::MessageId {
+    <span class="kw">fn </span>from(message_id: MessageId) -&gt; <span class="self">Self </span>{
+        wit_system_api::MessageId {
+            chain_id: message_id.chain_id.<span class="number">0</span>.into(),
+            height: message_id.height.<span class="number">0</span>,
+            index: message_id.index,
         }
     }
 }
@@ -318,14 +319,14 @@
     }
 }
 
-<span class="kw">impl</span>&lt;Effect, Value, SessionState&gt; From&lt;ApplicationCallResult&lt;Effect, Value, SessionState&gt;&gt;
+<span class="kw">impl</span>&lt;Message, Value, SessionState&gt; From&lt;ApplicationCallResult&lt;Message, Value, SessionState&gt;&gt;
     <span class="kw">for </span>wit_types::ApplicationCallResult
 <span class="kw">where
-    </span>Effect: Serialize + DeserializeOwned + Debug,
+    </span>Message: Serialize + DeserializeOwned + Debug,
     Value: Serialize,
     SessionState: Serialize,
 {
-    <span class="kw">fn </span>from(result: ApplicationCallResult&lt;Effect, Value, SessionState&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>from(result: ApplicationCallResult&lt;Message, Value, SessionState&gt;) -&gt; <span class="self">Self </span>{
         <span class="comment">// TODO(#743): Do we need explicit error handling?
         </span><span class="kw">let </span>value = bcs::to_bytes(<span class="kw-2">&amp;</span>result.value)
             .expect(<span class="string">&quot;failed to serialize Value for ApplicationCallResult&quot;</span>);
@@ -347,14 +348,14 @@
     }
 }
 
-<span class="kw">impl</span>&lt;Effect, Value, SessionState&gt; From&lt;SessionCallResult&lt;Effect, Value, SessionState&gt;&gt;
+<span class="kw">impl</span>&lt;Message, Value, SessionState&gt; From&lt;SessionCallResult&lt;Message, Value, SessionState&gt;&gt;
     <span class="kw">for </span>wit_types::SessionCallResult
 <span class="kw">where
-    </span>Effect: Serialize + DeserializeOwned + Debug,
+    </span>Message: Serialize + DeserializeOwned + Debug,
     Value: Serialize,
     SessionState: Serialize,
 {
-    <span class="kw">fn </span>from(result: SessionCallResult&lt;Effect, Value, SessionState&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>from(result: SessionCallResult&lt;Message, Value, SessionState&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>new_state = result.new_state.as_ref().map(|state| {
             <span class="comment">// TODO(#743): Do we need explicit error handling?
             </span>bcs::to_bytes(state).expect(<span class="string">&quot;session type serialization failed&quot;</span>)
@@ -366,20 +367,20 @@
     }
 }
 
-<span class="kw">impl</span>&lt;Effect&gt; From&lt;ExecutionResult&lt;Effect&gt;&gt; <span class="kw">for </span>wit_types::ExecutionResult
+<span class="kw">impl</span>&lt;Message&gt; From&lt;ExecutionResult&lt;Message&gt;&gt; <span class="kw">for </span>wit_types::ExecutionResult
 <span class="kw">where
-    </span>Effect: Debug + Serialize + DeserializeOwned,
+    </span>Message: Debug + Serialize + DeserializeOwned,
 {
-    <span class="kw">fn </span>from(result: ExecutionResult&lt;Effect&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>effects = result
-            .effects
+    <span class="kw">fn </span>from(result: ExecutionResult&lt;Message&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>messages = result
+            .messages
             .into_iter()
-            .map(|(destination, authenticated, effect)| {
+            .map(|(destination, authenticated, message)| {
                 (
                     destination.into(),
                     authenticated,
                     <span class="comment">// TODO(#743): Do we need explicit error handling?
-                    </span>bcs::to_bytes(<span class="kw-2">&amp;</span>effect).expect(<span class="string">&quot;effect serialization failed&quot;</span>),
+                    </span>bcs::to_bytes(<span class="kw-2">&amp;</span>message).expect(<span class="string">&quot;message serialization failed&quot;</span>),
                 )
             })
             .collect();
@@ -397,7 +398,7 @@
             .collect();
 
         wit_types::ExecutionResult {
-            effects,
+            messages,
             subscribe,
             unsubscribe,
         }
@@ -425,11 +426,12 @@
     }
 }
 
-<span class="kw">impl</span>&lt;Effect&gt; From&lt;Poll&lt;<span class="prelude-ty">Result</span>&lt;ExecutionResult&lt;Effect&gt;, String&gt;&gt;&gt; <span class="kw">for </span>wit_types::PollExecutionResult
+<span class="kw">impl</span>&lt;Message&gt; From&lt;Poll&lt;<span class="prelude-ty">Result</span>&lt;ExecutionResult&lt;Message&gt;, String&gt;&gt;&gt;
+    <span class="kw">for </span>wit_types::PollExecutionResult
 <span class="kw">where
-    </span>Effect: DeserializeOwned + Serialize + Debug,
+    </span>Message: DeserializeOwned + Serialize + Debug,
 {
-    <span class="kw">fn </span>from(poll: Poll&lt;<span class="prelude-ty">Result</span>&lt;ExecutionResult&lt;Effect&gt;, String&gt;&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>from(poll: Poll&lt;<span class="prelude-ty">Result</span>&lt;ExecutionResult&lt;Message&gt;, String&gt;&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">use </span>wit_types::PollExecutionResult;
         <span class="kw">match </span>poll {
             Poll::Pending =&gt; PollExecutionResult::Pending,
@@ -439,16 +441,16 @@
     }
 }
 
-<span class="kw">impl</span>&lt;Effect, Value, SessionState&gt;
-    From&lt;Poll&lt;<span class="prelude-ty">Result</span>&lt;ApplicationCallResult&lt;Effect, Value, SessionState&gt;, String&gt;&gt;&gt;
+<span class="kw">impl</span>&lt;Message, Value, SessionState&gt;
+    From&lt;Poll&lt;<span class="prelude-ty">Result</span>&lt;ApplicationCallResult&lt;Message, Value, SessionState&gt;, String&gt;&gt;&gt;
     <span class="kw">for </span>wit_types::PollCallApplication
 <span class="kw">where
-    </span>Effect: Serialize + DeserializeOwned + Debug,
+    </span>Message: Serialize + DeserializeOwned + Debug,
     Value: Serialize,
     SessionState: Serialize,
 {
     <span class="kw">fn </span>from(
-        poll: Poll&lt;<span class="prelude-ty">Result</span>&lt;ApplicationCallResult&lt;Effect, Value, SessionState&gt;, String&gt;&gt;,
+        poll: Poll&lt;<span class="prelude-ty">Result</span>&lt;ApplicationCallResult&lt;Message, Value, SessionState&gt;, String&gt;&gt;,
     ) -&gt; <span class="self">Self </span>{
         <span class="kw">use </span>wit_types::PollCallApplication;
         <span class="kw">match </span>poll {
@@ -459,15 +461,15 @@
     }
 }
 
-<span class="kw">impl</span>&lt;Effect, Value, SessionState&gt;
-    From&lt;Poll&lt;<span class="prelude-ty">Result</span>&lt;SessionCallResult&lt;Effect, Value, SessionState&gt;, String&gt;&gt;&gt;
+<span class="kw">impl</span>&lt;Message, Value, SessionState&gt;
+    From&lt;Poll&lt;<span class="prelude-ty">Result</span>&lt;SessionCallResult&lt;Message, Value, SessionState&gt;, String&gt;&gt;&gt;
     <span class="kw">for </span>wit_types::PollCallSession
 <span class="kw">where
-    </span>Effect: Serialize + DeserializeOwned + Debug,
+    </span>Message: Serialize + DeserializeOwned + Debug,
     Value: Serialize,
     SessionState: Serialize,
 {
-    <span class="kw">fn </span>from(poll: Poll&lt;<span class="prelude-ty">Result</span>&lt;SessionCallResult&lt;Effect, Value, SessionState&gt;, String&gt;&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>from(poll: Poll&lt;<span class="prelude-ty">Result</span>&lt;SessionCallResult&lt;Message, Value, SessionState&gt;, String&gt;&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">use </span>wit_types::PollCallSession;
         <span class="kw">match </span>poll {
             Poll::Pending =&gt; PollCallSession::Pending,
