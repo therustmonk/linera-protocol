@@ -1556,7 +1556,7 @@
 };
 <span class="kw">use </span>linera_execution::{
     committee::{Committee, Epoch, ValidatorName},
-    system::{Account, Recipient, SystemChannel, SystemOperation, UserData},
+    system::{Account, AdminOperation, Recipient, SystemChannel, SystemOperation, UserData},
     Bytecode, Message, Operation, Query, Response, SystemMessage, SystemQuery, SystemResponse,
     UserApplicationId,
 };
@@ -2940,11 +2940,12 @@
         <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.execute_block(
             messages,
-            <span class="macro">vec!</span>[Operation::System(SystemOperation::CreateCommittee {
-                admin_id: <span class="self">self</span>.chain_id,
-                epoch: epoch.try_add_one()<span class="question-mark">?</span>,
-                committee,
-            })],
+            <span class="macro">vec!</span>[Operation::System(SystemOperation::Admin(
+                AdminOperation::CreateCommittee {
+                    epoch: epoch.try_add_one()<span class="question-mark">?</span>,
+                    committee,
+                },
+            ))],
         )
         .<span class="kw">await
     </span>}
@@ -3020,10 +3021,9 @@
             .keys()
             .filter_map(|epoch| {
                 <span class="kw">if </span><span class="kw-2">*</span>epoch != current_epoch {
-                    <span class="prelude-val">Some</span>(Operation::System(SystemOperation::RemoveCommittee {
-                        admin_id: <span class="self">self</span>.admin_id,
-                        epoch: <span class="kw-2">*</span>epoch,
-                    }))
+                    <span class="prelude-val">Some</span>(Operation::System(SystemOperation::Admin(
+                        AdminOperation::RemoveCommittee { epoch: <span class="kw-2">*</span>epoch },
+                    )))
                 } <span class="kw">else </span>{
                     <span class="prelude-val">None
                 </span>}

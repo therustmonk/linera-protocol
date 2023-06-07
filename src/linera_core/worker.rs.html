@@ -1215,6 +1215,7 @@
 <a href="#1215" id="1215">1215</a>
 <a href="#1216" id="1216">1216</a>
 <a href="#1217" id="1217">1217</a>
+<a href="#1218" id="1218">1218</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1988,7 +1989,8 @@
         <span class="prelude-val">Ok</span>(chain.execution_state.system.registry)
     }
 
-    <span class="doccomment">/// Returns an [`IncomingMessage`] that&#39;s awaiting to be received by the chain specified by `chain_id`.
+    <span class="doccomment">/// Returns an [`IncomingMessage`] that&#39;s awaiting to be received by the chain specified by
+    /// `chain_id`.
     </span><span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
     </span><span class="kw">pub async fn </span>find_incoming_message(
         <span class="kw-2">&amp;</span><span class="self">self</span>,

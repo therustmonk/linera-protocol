@@ -640,10 +640,6 @@
 <a href="#640" id="640">640</a>
 <a href="#641" id="641">641</a>
 <a href="#642" id="642">642</a>
-<a href="#643" id="643">643</a>
-<a href="#644" id="644">644</a>
-<a href="#645" id="645">645</a>
-<a href="#646" id="646">646</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -677,7 +673,7 @@
 };
 <span class="kw">use </span>linera_execution::{
     committee::{Committee, Epoch},
-    system::{Recipient, SystemChannel, UserData},
+    system::{AdminOperation, Recipient, SystemChannel, UserData},
     Bytecode, Operation, Query, Response, SystemOperation, UserApplicationDescription,
     UserApplicationId,
 };
@@ -876,15 +872,11 @@
     /// notification as an &quot;incoming message&quot; in a next block).
     </span><span class="kw">async fn </span>create_committee(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        admin_id: ChainId,
         epoch: Epoch,
         committee: Committee,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;CryptoHash, Error&gt; {
-        <span class="kw">let </span>operation = SystemOperation::CreateCommittee {
-            admin_id,
-            epoch,
-            committee,
-        };
+        <span class="kw">let </span>operation =
+            SystemOperation::Admin(AdminOperation::CreateCommittee { epoch, committee });
         <span class="self">self</span>.execute_system_operation(operation).<span class="kw">await
     </span>}
 
@@ -911,8 +903,8 @@
     <span class="doccomment">/// (admin chain only) Removes a committee. Once this message is accepted by a chain,
     /// blocks from the retired epoch will not be accepted until they are followed (hence
     /// re-certified) by a block certified by a recent committee.
-    </span><span class="kw">async fn </span>remove_committee(<span class="kw-2">&amp;</span><span class="self">self</span>, admin_id: ChainId, epoch: Epoch) -&gt; <span class="prelude-ty">Result</span>&lt;CryptoHash, Error&gt; {
-        <span class="kw">let </span>operation = SystemOperation::RemoveCommittee { admin_id, epoch };
+    </span><span class="kw">async fn </span>remove_committee(<span class="kw-2">&amp;</span><span class="self">self</span>, epoch: Epoch) -&gt; <span class="prelude-ty">Result</span>&lt;CryptoHash, Error&gt; {
+        <span class="kw">let </span>operation = SystemOperation::Admin(AdminOperation::RemoveCommittee { epoch });
         <span class="self">self</span>.execute_system_operation(operation).<span class="kw">await
     </span>}
 

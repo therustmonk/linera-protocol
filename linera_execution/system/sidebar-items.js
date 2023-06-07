@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Recipient","SystemChannel","SystemExecutionError","SystemMessage","SystemOperation"],"struct":["Account","SystemExecutionState","SystemExecutionStateView","SystemQuery","SystemResponse","UserData"]};
+window.SIDEBAR_ITEMS = {"enum":["AdminOperation","Recipient","SystemChannel","SystemExecutionError","SystemMessage","SystemOperation"],"struct":["Account","SystemExecutionState","SystemExecutionStateView","SystemQuery","SystemResponse","UserData"]};

@@ -912,22 +912,6 @@
 <a href="#912" id="912">912</a>
 <a href="#913" id="913">913</a>
 <a href="#914" id="914">914</a>
-<a href="#915" id="915">915</a>
-<a href="#916" id="916">916</a>
-<a href="#917" id="917">917</a>
-<a href="#918" id="918">918</a>
-<a href="#919" id="919">919</a>
-<a href="#920" id="920">920</a>
-<a href="#921" id="921">921</a>
-<a href="#922" id="922">922</a>
-<a href="#923" id="923">923</a>
-<a href="#924" id="924">924</a>
-<a href="#925" id="925">925</a>
-<a href="#926" id="926">926</a>
-<a href="#927" id="927">927</a>
-<a href="#928" id="928">928</a>
-<a href="#929" id="929">929</a>
-<a href="#930" id="930">930</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1044,14 +1028,6 @@
     </span>ChangeOwner { new_public_key: PublicKey },
     <span class="doccomment">/// Changes the authentication key of the chain.
     </span>ChangeMultipleOwners { new_public_keys: Vec&lt;PublicKey&gt; },
-    <span class="doccomment">/// (admin chain only) Registers a new committee. This will notify the subscribers of
-    /// the admin chain so that they can migrate to the new epoch (by accepting the
-    /// notification as an &quot;incoming message&quot; in a next block).
-    </span>CreateCommittee {
-        admin_id: ChainId,
-        epoch: Epoch,
-        committee: Committee,
-    },
     <span class="doccomment">/// Subscribes to a system channel.
     </span>Subscribe {
         chain_id: ChainId,
@@ -1062,10 +1038,6 @@
         chain_id: ChainId,
         channel: SystemChannel,
     },
-    <span class="doccomment">/// (admin chain only) Removes a committee. Once this message is accepted by a chain,
-    /// blocks from the retired epoch will not be accepted until they are followed (hence
-    /// re-certified) by a block certified by a recent committee.
-    </span>RemoveCommittee { admin_id: ChainId, epoch: Epoch },
     <span class="doccomment">/// Publishes a new application bytecode.
     </span>PublishBytecode {
         contract: Bytecode,
@@ -1087,6 +1059,21 @@
         chain_id: ChainId,
         application_id: UserApplicationId,
     },
+    <span class="doccomment">/// Operations that are only allowed on the admin chain.
+    </span>Admin(AdminOperation),
+}
+
+<span class="doccomment">/// Operations that are only allowed on the admin chain.
+</span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
+</span><span class="kw">pub enum </span>AdminOperation {
+    <span class="doccomment">/// Registers a new committee. This will notify the subscribers of the admin chain so that they
+    /// can migrate to the new epoch by accepting the resulting `SetCommittees` as an incoming
+    /// message in a block.
+    </span>CreateCommittee { epoch: Epoch, committee: Committee },
+    <span class="doccomment">/// Removes a committee. Once the resulting `SetCommittees` message is accepted by a chain,
+    /// blocks from the retired epoch will not be accepted until they are followed (hence
+    /// re-certified) by a block certified by a recent committee.
+    </span>RemoveCommittee { epoch: Epoch },
 }
 
 <span class="doccomment">/// A system message meant to be executed on a remote chain.
@@ -1112,7 +1099,6 @@
     },
     <span class="doccomment">/// Sets the current epoch and the recognized committees.
     </span>SetCommittees {
-        admin_id: ChainId,
         epoch: Epoch,
         committees: BTreeMap&lt;Epoch, Committee&gt;,
     },
@@ -1313,6 +1299,8 @@
     </span>IncorrectClaimAmount,
     <span class="attr">#[error(<span class="string">&quot;Claim must be authenticated by the right signer&quot;</span>)]
     </span>UnauthenticatedClaimOwner,
+    <span class="attr">#[error(<span class="string">&quot;Admin operations are only allowed on the admin chain.&quot;</span>)]
+    </span>AdminOperationOnNonAdminChain,
     <span class="attr">#[error(<span class="string">&quot;Failed to create new committee&quot;</span>)]
     </span>InvalidCommitteeCreation,
     <span class="attr">#[error(<span class="string">&quot;Failed to remove committee&quot;</span>)]
@@ -1524,59 +1512,43 @@
                     },
                 ));
             }
-            CreateCommittee {
-                admin_id,
-                epoch,
-                committee,
-            } =&gt; {
-                <span class="comment">// We are the admin chain and want to create a committee.
-                </span><span class="macro">ensure!</span>(
-                    <span class="kw-2">*</span>admin_id == context.chain_id,
-                    SystemExecutionError::InvalidCommitteeCreation
-                );
+            Admin(admin_operation) =&gt; {
                 <span class="macro">ensure!</span>(
-                    <span class="prelude-val">Some</span>(admin_id) == <span class="self">self</span>.admin_id.get().as_ref(),
-                    SystemExecutionError::InvalidCommitteeCreation
+                    <span class="kw-2">*</span><span class="self">self</span>.admin_id.get() == <span class="prelude-val">Some</span>(context.chain_id),
+                    SystemExecutionError::AdminOperationOnNonAdminChain
                 );
-                <span class="macro">ensure!</span>(
-                    <span class="kw-2">*</span>epoch == <span class="self">self</span>.epoch.get().expect(<span class="string">&quot;chain is active&quot;</span>).try_add_one()<span class="question-mark">?</span>,
-                    SystemExecutionError::InvalidCommitteeCreation
-                );
-                <span class="self">self</span>.committees.get_mut().insert(<span class="kw-2">*</span>epoch, committee.clone());
-                <span class="self">self</span>.epoch.set(<span class="prelude-val">Some</span>(<span class="kw-2">*</span>epoch));
-                result.messages.push((
-                    Destination::Subscribers(SystemChannel::Admin.name()),
-                    <span class="bool-val">false</span>,
-                    SystemMessage::SetCommittees {
-                        admin_id: <span class="kw-2">*</span>admin_id,
-                        epoch: <span class="self">self</span>.epoch.get().expect(<span class="string">&quot;chain is active&quot;</span>),
-                        committees: <span class="self">self</span>.committees.get().clone(),
-                    },
-                ));
-            }
-            RemoveCommittee { admin_id, epoch } =&gt; {
-                <span class="comment">// We are the admin chain and want to remove a committee.
-                </span><span class="macro">ensure!</span>(
-                    <span class="kw-2">*</span>admin_id == context.chain_id,
-                    SystemExecutionError::InvalidCommitteeRemoval
-                );
-                <span class="macro">ensure!</span>(
-                    <span class="prelude-val">Some</span>(admin_id) == <span class="self">self</span>.admin_id.get().as_ref(),
-                    SystemExecutionError::InvalidCommitteeRemoval
-                );
-                <span class="macro">ensure!</span>(
-                    <span class="self">self</span>.committees.get_mut().remove(epoch).is_some(),
-                    SystemExecutionError::InvalidCommitteeRemoval
-                );
-                result.messages.push((
-                    Destination::Subscribers(SystemChannel::Admin.name()),
-                    <span class="bool-val">false</span>,
-                    SystemMessage::SetCommittees {
-                        admin_id: <span class="kw-2">*</span>admin_id,
-                        epoch: <span class="self">self</span>.epoch.get().expect(<span class="string">&quot;chain is active&quot;</span>),
-                        committees: <span class="self">self</span>.committees.get().clone(),
-                    },
-                ));
+                <span class="kw">match </span>admin_operation {
+                    AdminOperation::CreateCommittee { epoch, committee } =&gt; {
+                        <span class="macro">ensure!</span>(
+                            <span class="kw-2">*</span>epoch == <span class="self">self</span>.epoch.get().expect(<span class="string">&quot;chain is active&quot;</span>).try_add_one()<span class="question-mark">?</span>,
+                            SystemExecutionError::InvalidCommitteeCreation
+                        );
+                        <span class="self">self</span>.committees.get_mut().insert(<span class="kw-2">*</span>epoch, committee.clone());
+                        <span class="self">self</span>.epoch.set(<span class="prelude-val">Some</span>(<span class="kw-2">*</span>epoch));
+                        result.messages.push((
+                            Destination::Subscribers(SystemChannel::Admin.name()),
+                            <span class="bool-val">false</span>,
+                            SystemMessage::SetCommittees {
+                                epoch: <span class="self">self</span>.epoch.get().expect(<span class="string">&quot;chain is active&quot;</span>),
+                                committees: <span class="self">self</span>.committees.get().clone(),
+                            },
+                        ));
+                    }
+                    AdminOperation::RemoveCommittee { epoch } =&gt; {
+                        <span class="macro">ensure!</span>(
+                            <span class="self">self</span>.committees.get_mut().remove(epoch).is_some(),
+                            SystemExecutionError::InvalidCommitteeRemoval
+                        );
+                        result.messages.push((
+                            Destination::Subscribers(SystemChannel::Admin.name()),
+                            <span class="bool-val">false</span>,
+                            SystemMessage::SetCommittees {
+                                epoch: <span class="self">self</span>.epoch.get().expect(<span class="string">&quot;chain is active&quot;</span>),
+                                committees: <span class="self">self</span>.committees.get().clone(),
+                            },
+                        ));
+                    }
+                }
             }
             Subscribe { chain_id, channel } =&gt; {
                 <span class="macro">ensure!</span>(
@@ -1732,11 +1704,7 @@
                     <span class="macro">tracing::info!</span>(<span class="string">&quot;Withdrawal request was skipped due to lack of funds.&quot;</span>);
                 }
             }
-            SetCommittees {
-                admin_id,
-                epoch,
-                committees,
-            } <span class="kw">if </span><span class="self">self</span>.admin_id.get().as_ref() == <span class="prelude-val">Some</span>(admin_id) =&gt; {
+            SetCommittees { epoch, committees } =&gt; {
                 <span class="macro">ensure!</span>(
                     <span class="kw-2">*</span>epoch &gt;= <span class="self">self</span>.epoch.get().expect(<span class="string">&quot;chain is active&quot;</span>),
                     SystemExecutionError::CannotRewindEpoch
