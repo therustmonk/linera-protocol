@@ -548,6 +548,10 @@
 <a href="#548" id="548">548</a>
 <a href="#549" id="549">549</a>
 <a href="#550" id="550">550</a>
+<a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -589,13 +593,35 @@
     async_boundary::{HostFuture, WakerForwarder},
     async_determinism::{HostFutureQueue, QueuedHostFutureFactory},
     common::{<span class="self">self</span>, ApplicationRuntimeContext, WasmRuntimeContext},
+    module_cache::ModuleCache,
     WasmApplication, WasmExecutionError,
 };
 <span class="kw">use crate</span>::{Bytecode, ContractRuntime, ExecutionError, ServiceRuntime, SessionId};
 <span class="kw">use </span>linera_views::{batch::Batch, views::ViewError};
+<span class="kw">use </span>once_cell::sync::Lazy;
 <span class="kw">use </span>std::{error::Error, future::Future, task::Poll};
+<span class="kw">use </span>tokio::sync::Mutex;
 <span class="kw">use </span>wasmtime::{Config, Engine, Linker, Module, Store, Trap};
 <span class="kw">use </span>wit_bindgen_host_wasmtime_rust::Le;
+
+<span class="doccomment">/// An [`Engine`] instance configured to run application contracts.
+</span><span class="kw">static </span>CONTRACT_ENGINE: Lazy&lt;Engine&gt; = Lazy::new(|| {
+    <span class="kw">let </span><span class="kw-2">mut </span>config = Config::default();
+    config
+        .consume_fuel(<span class="bool-val">true</span>)
+        .cranelift_nan_canonicalization(<span class="bool-val">true</span>);
+
+    Engine::new(<span class="kw-2">&amp;</span>config).expect(<span class="string">&quot;Failed to create Wasmtime `Engine` for contracts&quot;</span>)
+});
+
+<span class="doccomment">/// An [`Engine`] instance configured to run application services.
+</span><span class="kw">static </span>SERVICE_ENGINE: Lazy&lt;Engine&gt; = Lazy::new(Engine::default);
+
+<span class="doccomment">/// A cache of compiled contract modules.
+</span><span class="kw">static </span>CONTRACT_CACHE: Lazy&lt;Mutex&lt;ModuleCache&lt;Module&gt;&gt;&gt; = Lazy::new(Mutex::default);
+
+<span class="doccomment">/// A cache of compiled service modules.
+</span><span class="kw">static </span>SERVICE_CACHE: Lazy&lt;Mutex&lt;ModuleCache&lt;Module&gt;&gt;&gt; = Lazy::new(Mutex::default);
 
 <span class="doccomment">/// Type representing the [Wasmtime](https://wasmtime.dev/) runtime for contracts.
 ///
@@ -632,46 +658,29 @@
 
 <span class="kw">impl </span>WasmApplication {
     <span class="doccomment">/// Creates a new [`WasmApplication`] using Wasmtime with the provided bytecodes.
-    </span><span class="kw">pub fn </span>new_with_wasmtime(
+    </span><span class="kw">pub async fn </span>new_with_wasmtime(
         contract_bytecode: Bytecode,
         service_bytecode: Bytecode,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, WasmExecutionError&gt; {
-        <span class="kw">let </span>contract_engine = <span class="self">Self</span>::create_wasmtime_engine_for_contracts()<span class="question-mark">?</span>;
-        <span class="kw">let </span>contract_module = Module::new(<span class="kw-2">&amp;</span>contract_engine, contract_bytecode)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>contract_cache = CONTRACT_CACHE.lock().<span class="kw">await</span>;
+        <span class="kw">let </span>contract = contract_cache.get_or_insert_with(contract_bytecode, |bytecode| {
+            Module::new(<span class="kw-2">&amp;</span>CONTRACT_ENGINE, bytecode)
+        })<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>service_engine = <span class="self">Self</span>::create_wasmtime_engine_for_services()<span class="question-mark">?</span>;
-        <span class="kw">let </span>service_module = Module::new(<span class="kw-2">&amp;</span>service_engine, service_bytecode)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>service_cache = SERVICE_CACHE.lock().<span class="kw">await</span>;
+        <span class="kw">let </span>service = service_cache.get_or_insert_with(service_bytecode, |bytecode| {
+            Module::new(<span class="kw-2">&amp;</span>SERVICE_ENGINE, bytecode)
+        })<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(WasmApplication::Wasmtime {
-            contract_engine,
-            contract_module,
-            service_module,
-            service_engine,
-        })
-    }
-
-    <span class="doccomment">/// Creates an [`Engine`] instance configured to run application contracts.
-    </span><span class="kw">fn </span>create_wasmtime_engine_for_contracts() -&gt; <span class="prelude-ty">Result</span>&lt;Engine, WasmExecutionError&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>config = Config::default();
-        config
-            .consume_fuel(<span class="bool-val">true</span>)
-            .cranelift_nan_canonicalization(<span class="bool-val">true</span>);
-
-        Engine::new(<span class="kw-2">&amp;</span>config).map_err(WasmExecutionError::CreateWasmtimeEngine)
-    }
-
-    <span class="doccomment">/// Creates an [`Engine`] instance configured to run application services.
-    </span><span class="kw">fn </span>create_wasmtime_engine_for_services() -&gt; <span class="prelude-ty">Result</span>&lt;Engine, WasmExecutionError&gt; {
-        <span class="prelude-val">Ok</span>(Engine::default())
+        <span class="prelude-val">Ok</span>(WasmApplication::Wasmtime { contract, service })
     }
 
     <span class="doccomment">/// Prepares a runtime instance to call into the WASM contract.
     </span><span class="kw">pub fn </span>prepare_contract_runtime_with_wasmtime&lt;<span class="lifetime">&#39;runtime</span>&gt;(
-        contract_engine: <span class="kw-2">&amp;</span>Engine,
         contract_module: <span class="kw-2">&amp;</span>Module,
         runtime: <span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ContractRuntime,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;WasmRuntimeContext&lt;<span class="lifetime">&#39;runtime</span>, Contract&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;, WasmExecutionError&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>linker = Linker::new(contract_engine);
+        <span class="kw">let </span><span class="kw-2">mut </span>linker = Linker::new(<span class="kw-2">&amp;</span>CONTRACT_ENGINE);
 
         contract_system_api::add_to_linker(<span class="kw-2">&amp;mut </span>linker, ContractState::system_api)<span class="question-mark">?</span>;
         view_system_api::add_to_linker(<span class="kw-2">&amp;mut </span>linker, ContractState::views_api)<span class="question-mark">?</span>;
@@ -679,7 +688,7 @@
         <span class="kw">let </span>waker_forwarder = WakerForwarder::default();
         <span class="kw">let </span>(future_queue, queued_future_factory) = HostFutureQueue::new();
         <span class="kw">let </span>state = ContractState::new(runtime, waker_forwarder.clone(), queued_future_factory);
-        <span class="kw">let </span><span class="kw-2">mut </span>store = Store::new(contract_engine, state);
+        <span class="kw">let </span><span class="kw-2">mut </span>store = Store::new(<span class="kw-2">&amp;</span>CONTRACT_ENGINE, state);
         <span class="kw">let </span>(contract, _instance) = contract::Contract::instantiate(
             <span class="kw-2">&amp;mut </span>store,
             contract_module,
@@ -703,11 +712,10 @@
 
     <span class="doccomment">/// Prepares a runtime instance to call into the WASM service.
     </span><span class="kw">pub fn </span>prepare_service_runtime_with_wasmtime&lt;<span class="lifetime">&#39;runtime</span>&gt;(
-        service_engine: <span class="kw-2">&amp;</span>Engine,
         service_module: <span class="kw-2">&amp;</span>Module,
         runtime: <span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw">dyn </span>ServiceRuntime,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;WasmRuntimeContext&lt;<span class="lifetime">&#39;runtime</span>, Service&lt;<span class="lifetime">&#39;runtime</span>&gt;&gt;, WasmExecutionError&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>linker = Linker::new(service_engine);
+        <span class="kw">let </span><span class="kw-2">mut </span>linker = Linker::new(<span class="kw-2">&amp;</span>SERVICE_ENGINE);
 
         service_system_api::add_to_linker(<span class="kw-2">&amp;mut </span>linker, ServiceState::system_api)<span class="question-mark">?</span>;
         view_system_api::add_to_linker(<span class="kw-2">&amp;mut </span>linker, ServiceState::views_api)<span class="question-mark">?</span>;
@@ -715,7 +723,7 @@
         <span class="kw">let </span>waker_forwarder = WakerForwarder::default();
         <span class="kw">let </span>(future_queue, _queued_future_factory) = HostFutureQueue::new();
         <span class="kw">let </span>state = ServiceState::new(runtime, waker_forwarder.clone());
-        <span class="kw">let </span><span class="kw-2">mut </span>store = Store::new(service_engine, state);
+        <span class="kw">let </span><span class="kw-2">mut </span>store = Store::new(<span class="kw-2">&amp;</span>SERVICE_ENGINE, state);
         <span class="kw">let </span>(service, _instance) = service::Service::instantiate(
             <span class="kw-2">&amp;mut </span>store,
             service_module,
