@@ -617,6 +617,14 @@
 <a href="#617" id="617">617</a>
 <a href="#618" id="618">618</a>
 <a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a>
+<a href="#624" id="624">624</a>
+<a href="#625" id="625">625</a>
+<a href="#626" id="626">626</a>
+<a href="#627" id="627">627</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -639,9 +647,7 @@
     pricing::Pricing,
     WasmRuntime,
 };
-<span class="kw">use </span>linera_storage::{MemoryStoreClient, RocksdbStoreClient, Store};
-<span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
-</span><span class="kw">use </span>linera_views::lru_caching::TEST_CACHE_SIZE;
+<span class="kw">use </span>linera_storage::{MemoryStoreClient, Store};
 <span class="kw">use </span>linera_views::views::ViewError;
 <span class="kw">use </span>std::{
     collections::{BTreeMap, HashMap, HashSet},
@@ -649,10 +655,16 @@
     str::FromStr,
     sync::Arc,
 };
-<span class="kw">use </span>tokio::sync::{oneshot, Semaphore};
+<span class="kw">use </span>tokio::sync::oneshot;
+
+<span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
+</span><span class="kw">use </span>{linera_storage::RocksdbStoreClient, tokio::sync::Semaphore};
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
-</span><span class="kw">use </span>{linera_storage::DynamoDbStoreClient, linera_views::test_utils::LocalStackTestContext};
+</span><span class="kw">use </span>{
+    linera_storage::DynamoDbStoreClient, linera_views::lru_caching::TEST_CACHE_SIZE,
+    linera_views::test_utils::LocalStackTestContext,
+};
 
 <span class="attr">#[derive(Debug, PartialEq, Clone, Copy)]
 </span><span class="kw">pub enum </span>FaultType {
@@ -1134,7 +1146,8 @@
     }
 }
 
-<span class="doccomment">/// Limit concurrency for rocksdb tests to avoid &quot;too many open files&quot; errors.
+<span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
+</span><span class="doccomment">/// Limit concurrency for rocksdb tests to avoid &quot;too many open files&quot; errors.
 </span><span class="kw">pub static </span>ROCKSDB_SEMAPHORE: Semaphore = Semaphore::const_new(<span class="number">5</span>);
 
 <span class="attr">#[derive(Default)]
@@ -1162,13 +1175,15 @@
     }
 }
 
-<span class="attr">#[derive(Default)]
+<span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
+#[derive(Default)]
 </span><span class="kw">pub struct </span>MakeRocksdbStoreClient {
     temp_dirs: Vec&lt;tempfile::TempDir&gt;,
     wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
 }
 
-<span class="kw">impl </span>MakeRocksdbStoreClient {
+<span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
+</span><span class="kw">impl </span>MakeRocksdbStoreClient {
     <span class="doccomment">/// Creates a [`MakeRocksdbStoreClient`] that uses the specified [`WasmRuntime`] to run WASM
     /// applications.
     </span><span class="attr">#[allow(dead_code)]
@@ -1180,7 +1195,8 @@
     }
 }
 
-<span class="attr">#[async_trait]
+<span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
+#[async_trait]
 </span><span class="kw">impl </span>StoreBuilder <span class="kw">for </span>MakeRocksdbStoreClient {
     <span class="kw">type </span>Store = RocksdbStoreClient;
 

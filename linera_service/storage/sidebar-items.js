@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["StorageConfig"],"trait":["Runnable"]};
+window.SIDEBAR_ITEMS = {"enum":["StorageConfig"],"trait":["Runnable","RunnableJob"]};

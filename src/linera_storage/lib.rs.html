@@ -411,6 +411,9 @@
 <a href="#411" id="411">411</a>
 <a href="#412" id="412">412</a>
 <a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -420,11 +423,14 @@
 <span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
 </span><span class="kw">mod </span>dynamo_db;
 <span class="kw">mod </span>memory;
-<span class="kw">mod </span>rocksdb;
+<span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
+</span><span class="kw">mod </span>rocksdb;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
 </span><span class="kw">pub use </span><span class="kw">crate</span>::dynamo_db::DynamoDbStoreClient;
-<span class="kw">pub use crate</span>::{memory::MemoryStoreClient, rocksdb::RocksdbStoreClient};
+<span class="kw">pub use </span><span class="kw">crate</span>::memory::MemoryStoreClient;
+<span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
+</span><span class="kw">pub use </span><span class="kw">crate</span>::rocksdb::RocksdbStoreClient;
 
 <span class="kw">use </span><span class="kw">crate</span>::chain_guards::ChainGuards;
 <span class="kw">use </span>async_trait::async_trait;

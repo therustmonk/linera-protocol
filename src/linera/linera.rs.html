@@ -1575,6 +1575,9 @@
 <a href="#1575" id="1575">1575</a>
 <a href="#1576" id="1576">1576</a>
 <a href="#1577" id="1577">1577</a>
+<a href="#1578" id="1578">1578</a>
+<a href="#1579" id="1579">1579</a>
+<a href="#1580" id="1580">1580</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1737,10 +1740,13 @@
 
     <span class="kw">fn </span>storage_config(options: <span class="kw-2">&amp;</span>ClientOptions) -&gt; <span class="prelude-ty">Result</span>&lt;StorageConfig, anyhow::Error&gt; {
         <span class="kw">match </span><span class="kw-2">&amp;</span>options.storage_config {
-            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(StorageConfig::Rocksdb {
+            <span class="prelude-val">Some</span>(config) =&gt; config.parse(),
+            <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
+            </span><span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(StorageConfig::Rocksdb {
                 path: <span class="self">Self</span>::create_default_config_path()<span class="question-mark">?</span>.join(<span class="string">&quot;wallet.db&quot;</span>),
             }),
-            <span class="prelude-val">Some</span>(config) =&gt; config.parse(),
+            <span class="attr">#[cfg(not(feature = <span class="string">&quot;rocksdb&quot;</span>))]
+            </span><span class="prelude-val">None </span>=&gt; <span class="macro">bail!</span>(<span class="string">&quot;A storage option must be provided&quot;</span>),
         }
     }
 
