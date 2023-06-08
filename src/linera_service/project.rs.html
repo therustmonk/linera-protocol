@@ -252,6 +252,9 @@
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
 <a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -392,7 +395,7 @@
         <span class="kw">let </span>(linera_sdk_dep, linera_sdk_dev_dep, linera_views_dep) =
             <span class="self">Self</span>::linera_sdk_dependencies();
         <span class="kw">let </span>toml_contents = <span class="macro">format!</span>(
-            <span class="macro">include_str!</span>(<span class="string">&quot;../template/Cargo.toml&quot;</span>),
+            <span class="macro">include_str!</span>(<span class="string">&quot;../template/Cargo.toml.template&quot;</span>),
             project_name = project_name,
             linera_sdk_dep = linera_sdk_dep,
             linera_sdk_dev_dep = linera_sdk_dev_dep,
@@ -435,7 +438,10 @@
         <span class="kw">let </span>config_dir_path = project_root.join(<span class="string">&quot;.cargo&quot;</span>);
         <span class="kw">let </span>config_file_path = config_dir_path.join(<span class="string">&quot;config.toml&quot;</span>);
         std::fs::create_dir(<span class="kw-2">&amp;</span>config_dir_path)<span class="question-mark">?</span>;
-        <span class="self">Self</span>::write_string_to_file(<span class="kw-2">&amp;</span>config_file_path, <span class="macro">include_str!</span>(<span class="string">&quot;../template/config.toml&quot;</span>))
+        <span class="self">Self</span>::write_string_to_file(
+            <span class="kw-2">&amp;</span>config_file_path,
+            <span class="macro">include_str!</span>(<span class="string">&quot;../template/config.toml.template&quot;</span>),
+        )
     }
 
     <span class="kw">fn </span>write_string_to_file(path: <span class="kw-2">&amp;</span>Path, content: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
