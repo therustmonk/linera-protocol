@@ -197,6 +197,7 @@
 <a href="#197" id="197">197</a>
 <a href="#198" id="198">198</a>
 <a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -207,7 +208,7 @@
 </span><span class="kw">use </span><span class="kw">super</span>::TestValidator;
 <span class="kw">use </span><span class="kw">crate</span>::ToBcsBytes;
 <span class="kw">use </span>linera_base::{
-    data_types::Timestamp,
+    data_types::{RoundNumber, Timestamp},
     identifiers::{ApplicationId, ChainId, MessageId, Owner},
 };
 <span class="kw">use </span>linera_chain::data_types::{
@@ -365,8 +366,9 @@
             .collect();
 
         <span class="kw">let </span>value = HashedValue::new_confirmed(executed_block);
-        <span class="kw">let </span>vote = LiteVote::new(value.lite(), <span class="self">self</span>.validator.key_pair());
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = SignatureAggregator::new(value, <span class="self">self</span>.validator.committee());
+        <span class="kw">let </span>vote = LiteVote::new(value.lite(), RoundNumber(<span class="number">0</span>), <span class="self">self</span>.validator.key_pair());
+        <span class="kw">let </span><span class="kw-2">mut </span>builder =
+            SignatureAggregator::new(value, RoundNumber(<span class="number">0</span>), <span class="self">self</span>.validator.committee());
         <span class="kw">let </span>certificate = builder
             .append(vote.validator, vote.signature)
             .expect(<span class="string">&quot;Failed to sign block&quot;</span>)

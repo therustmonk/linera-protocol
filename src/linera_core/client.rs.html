@@ -1523,8 +1523,6 @@
 <a href="#1523" id="1523">1523</a>
 <a href="#1524" id="1524">1524</a>
 <a href="#1525" id="1525">1525</a>
-<a href="#1526" id="1526">1526</a>
-<a href="#1527" id="1527">1527</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -2136,11 +2134,8 @@
                 <span class="kw">let </span>block = proposal.content.block;
                 <span class="kw">let </span>round = proposal.content.round;
                 <span class="kw">let </span>(executed_block, <span class="kw">_</span>) = <span class="self">self</span>.node_client.stage_block_execution(block).<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>value = HashedValue::from(CertificateValue::ConfirmedBlock {
-                    executed_block,
-                    round,
-                });
-                <span class="kw">let </span>certificate = Certificate::new(value, signatures);
+                <span class="kw">let </span>value = HashedValue::from(CertificateValue::ConfirmedBlock { executed_block });
+                <span class="kw">let </span>certificate = Certificate::new(value, round, signatures);
                 <span class="comment">// Certificate is valid because
                 // * `communicate_with_quorum` ensured a sufficient &quot;weight&quot; of
                 // (non-error) answers were returned by validators.
@@ -2150,13 +2145,14 @@
             CommunicateAction::SubmitBlockForValidation(proposal) =&gt; {
                 <span class="kw">let </span>BlockAndRound { block, round } = proposal.content;
                 <span class="kw">let </span>(executed_block, <span class="kw">_</span>) = <span class="self">self</span>.node_client.stage_block_execution(block).<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>value = HashedValue::new_validated(executed_block, round);
-                <span class="kw">let </span>certificate = Certificate::new(value, signatures);
+                <span class="kw">let </span>value = HashedValue::new_validated(executed_block);
+                <span class="kw">let </span>certificate = Certificate::new(value, round, signatures);
                 <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(certificate))
             }
             CommunicateAction::FinalizeBlock(validity_certificate) =&gt; {
+                <span class="kw">let </span>round = validity_certificate.round;
                 <span class="kw">let </span>conf_value = validity_certificate.value.into_confirmed();
-                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Certificate::new(conf_value, signatures)))
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Certificate::new(conf_value, round, signatures)))
             }
             CommunicateAction::AdvanceToNextBlockHeight(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
         }

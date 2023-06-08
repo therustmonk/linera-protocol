@@ -1576,8 +1576,6 @@
 <a href="#1576" id="1576">1576</a>
 <a href="#1577" id="1577">1577</a>
 <a href="#1578" id="1578">1578</a>
-<a href="#1579" id="1579">1579</a>
-<a href="#1580" id="1580">1580</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1897,9 +1895,9 @@
                 chain_id,
                 vote.validator,
             );
-            <span class="kw">let </span>aggregator = aggregators
-                .entry(chain_id)
-                .or_insert_with(|| SignatureAggregator::new(vote.value, <span class="kw-2">&amp;</span>committee));
+            <span class="kw">let </span>aggregator = aggregators.entry(chain_id).or_insert_with(|| {
+                SignatureAggregator::new(vote.value, RoundNumber(<span class="number">0</span>), <span class="kw-2">&amp;</span>committee)
+            });
             <span class="kw">match </span>aggregator.append(vote.validator, vote.signature) {
                 <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(certificate)) =&gt; {
                     <span class="macro">trace!</span>(<span class="string">&quot;Found certificate: {:?}&quot;</span>, certificate);
@@ -2755,10 +2753,8 @@
                             WorkerState::new(<span class="string">&quot;staging&quot;</span>.to_string(), <span class="prelude-val">None</span>, storage.clone())
                                 .stage_block_execution(proposal.content.block.clone())
                                 .<span class="kw">await</span><span class="question-mark">?</span>;
-                        <span class="kw">let </span>value = HashedValue::from(CertificateValue::ConfirmedBlock {
-                            executed_block,
-                            round: RoundNumber(<span class="number">0</span>),
-                        });
+                        <span class="kw">let </span>value =
+                            HashedValue::from(CertificateValue::ConfirmedBlock { executed_block });
                         values.insert(value.hash(), value);
                     }
                 }

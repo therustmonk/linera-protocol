@@ -674,8 +674,6 @@
 <a href="#674" id="674">674</a>
 <a href="#675" id="675">675</a>
 <a href="#676" id="676">676</a>
-<a href="#677" id="677">677</a>
-<a href="#678" id="678">678</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -686,7 +684,7 @@
 <span class="kw">use </span>ed25519::signature::Signature <span class="kw">as </span>edSignature;
 <span class="kw">use </span>linera_base::{
     crypto::{CryptoError, CryptoHash, PublicKey, Signature},
-    data_types::BlockHeight,
+    data_types::{BlockHeight, RoundNumber},
     ensure,
     identifiers::{ChainId, Owner},
 };
@@ -883,7 +881,7 @@
         };
         <span class="kw">let </span>signatures = bincode::deserialize(<span class="kw-2">&amp;</span>certificate.signatures)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
-            certificate: LiteCertificate::new(value, signatures),
+            certificate: LiteCertificate::new(value, RoundNumber(certificate.round), signatures),
             wait_for_outgoing_messages: certificate.wait_for_outgoing_messages,
         })
     }
@@ -895,6 +893,7 @@
     <span class="kw">fn </span>try_from(request: HandleLiteCertificateRequest) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             hash: request.certificate.value.value_hash.as_bytes().to_vec(),
+            round: request.certificate.round.<span class="number">0</span>,
             chain_id: <span class="prelude-val">Some</span>(request.certificate.value.chain_id.into()),
             signatures: bincode::serialize(<span class="kw-2">&amp;</span>request.certificate.signatures)<span class="question-mark">?</span>,
             wait_for_outgoing_messages: request.wait_for_outgoing_messages,
@@ -914,7 +913,7 @@
         <span class="kw">let </span>signatures = bincode::deserialize(<span class="kw-2">&amp;</span>cert_request.signatures)<span class="question-mark">?</span>;
         <span class="kw">let </span>blobs = bincode::deserialize(<span class="kw-2">&amp;</span>cert_request.blobs)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(HandleCertificateRequest {
-            certificate: Certificate::new(value, signatures),
+            certificate: Certificate::new(value, RoundNumber(cert_request.round), signatures),
             wait_for_outgoing_messages: cert_request.wait_for_outgoing_messages,
             blobs,
         })
@@ -928,6 +927,7 @@
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             chain_id: <span class="prelude-val">Some</span>(request.certificate.value().chain_id().into()),
             value: bincode::serialize(<span class="kw-2">&amp;</span>request.certificate.value)<span class="question-mark">?</span>,
+            round: request.certificate.round.<span class="number">0</span>,
             signatures: bincode::serialize(<span class="kw-2">&amp;</span>request.certificate.signatures)<span class="question-mark">?</span>,
             blobs: bincode::serialize(<span class="kw-2">&amp;</span>request.blobs)<span class="question-mark">?</span>,
             wait_for_outgoing_messages: request.wait_for_outgoing_messages,
@@ -1253,6 +1253,7 @@
                 value_hash: CryptoHash::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;value&quot;</span>.into())),
                 chain_id: ChainId::root(<span class="number">0</span>),
             },
+            round: RoundNumber(<span class="number">2</span>),
             signatures: Cow::Owned(<span class="macro">vec!</span>[(
                 ValidatorName::from(key_pair.public()),
                 Signature::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;test&quot;</span>.into()), <span class="kw-2">&amp;</span>key_pair),
@@ -1270,27 +1271,22 @@
     </span><span class="kw">pub fn </span>test_certificate() {
         <span class="kw">let </span>key_pair = KeyPair::generate();
         <span class="kw">let </span>certificate = Certificate::new(
-            HashedValue::new_validated(
-                ExecutedBlock {
-                    block: get_block(),
-                    messages: <span class="macro">vec!</span>[],
-                    state_hash: CryptoHash::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;test&quot;</span>.into())),
-                },
-                Default::default(),
-            ),
+            HashedValue::new_validated(ExecutedBlock {
+                block: get_block(),
+                messages: <span class="macro">vec!</span>[],
+                state_hash: CryptoHash::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;test&quot;</span>.into())),
+            }),
+            RoundNumber(<span class="number">3</span>),
             <span class="macro">vec!</span>[(
                 ValidatorName::from(key_pair.public()),
                 Signature::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;test&quot;</span>.into()), <span class="kw-2">&amp;</span>key_pair),
             )],
         );
-        <span class="kw">let </span>blobs = <span class="macro">vec!</span>[HashedValue::new_validated(
-            ExecutedBlock {
-                block: get_block(),
-                messages: <span class="macro">vec!</span>[],
-                state_hash: CryptoHash::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;also test&quot;</span>.into())),
-            },
-            Default::default(),
-        )];
+        <span class="kw">let </span>blobs = <span class="macro">vec!</span>[HashedValue::new_validated(ExecutedBlock {
+            block: get_block(),
+            messages: <span class="macro">vec!</span>[],
+            state_hash: CryptoHash::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;also test&quot;</span>.into())),
+        })];
         <span class="kw">let </span>request = HandleCertificateRequest {
             certificate,
             blobs,

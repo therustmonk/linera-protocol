@@ -1475,6 +1475,12 @@
 <a href="#1475" id="1475">1475</a>
 <a href="#1476" id="1476">1476</a>
 <a href="#1477" id="1477">1477</a>
+<a href="#1478" id="1478">1478</a>
+<a href="#1479" id="1479">1479</a>
+<a href="#1480" id="1480">1480</a>
+<a href="#1481" id="1481">1481</a>
+<a href="#1482" id="1482">1482</a>
+<a href="#1483" id="1483">1483</a>
 </pre><pre class="rust"><code><span class="doccomment">/// A request for client to subscribe to notifications for a given `ChainId`
 </span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -1614,12 +1620,15 @@
     <span class="doccomment">/// The certified value&#39;s hash
     </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;2&quot;</span>)]
     </span><span class="kw">pub </span>hash: ::prost::alloc::vec::Vec&lt;u8&gt;,
-    <span class="doccomment">/// Signatures on the value
-    </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;3&quot;</span>)]
+    <span class="doccomment">/// The round in which the value was certified.
+    </span><span class="attr">#[prost(uint64, tag = <span class="string">&quot;3&quot;</span>)]
+    </span><span class="kw">pub </span>round: u64,
+    <span class="doccomment">/// Signatures on the value hash and round
+    </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;4&quot;</span>)]
     </span><span class="kw">pub </span>signatures: ::prost::alloc::vec::Vec&lt;u8&gt;,
     <span class="doccomment">/// Wait until all outgoing cross-chain messages from this certificate have
     /// been received by the target chains.
-    </span><span class="attr">#[prost(bool, tag = <span class="string">&quot;4&quot;</span>)]
+    </span><span class="attr">#[prost(bool, tag = <span class="string">&quot;5&quot;</span>)]
     </span><span class="kw">pub </span>wait_for_outgoing_messages: bool,
 }
 <span class="doccomment">/// A certified statement from the committee, together with other certificates
@@ -1630,18 +1639,21 @@
     <span class="doccomment">/// The ID of the chain (used for routing).
     </span><span class="attr">#[prost(message, optional, tag = <span class="string">&quot;1&quot;</span>)]
     </span><span class="kw">pub </span>chain_id: ::core::option::Option&lt;ChainId&gt;,
-    <span class="doccomment">/// The certified value (BCS signable)
+    <span class="doccomment">/// The certified value
     </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;2&quot;</span>)]
     </span><span class="kw">pub </span>value: ::prost::alloc::vec::Vec&lt;u8&gt;,
-    <span class="doccomment">/// Signatures on the value
-    </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;3&quot;</span>)]
+    <span class="doccomment">/// The round in which the value was certified.
+    </span><span class="attr">#[prost(uint64, tag = <span class="string">&quot;3&quot;</span>)]
+    </span><span class="kw">pub </span>round: u64,
+    <span class="doccomment">/// Signatures on the value hash and round
+    </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;4&quot;</span>)]
     </span><span class="kw">pub </span>signatures: ::prost::alloc::vec::Vec&lt;u8&gt;,
     <span class="doccomment">/// Other certificates containing bytecode required by the first one
-    </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;4&quot;</span>)]
+    </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;5&quot;</span>)]
     </span><span class="kw">pub </span>blobs: ::prost::alloc::vec::Vec&lt;u8&gt;,
     <span class="doccomment">/// Wait until all outgoing cross-chain messages from this certificate have
     /// been received by the target chains.
-    </span><span class="attr">#[prost(bool, tag = <span class="string">&quot;5&quot;</span>)]
+    </span><span class="attr">#[prost(bool, tag = <span class="string">&quot;6&quot;</span>)]
     </span><span class="kw">pub </span>wait_for_outgoing_messages: bool,
 }
 <span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]

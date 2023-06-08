@@ -1215,7 +1215,6 @@
 <a href="#1215" id="1215">1215</a>
 <a href="#1216" id="1216">1216</a>
 <a href="#1217" id="1217">1217</a>
-<a href="#1218" id="1218">1218</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1833,11 +1832,10 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         certificate: Certificate,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfoResponse, WorkerError&gt; {
-        <span class="kw">let </span>(block, round) = <span class="kw">match </span>certificate.value() {
+        <span class="kw">let </span>block = <span class="kw">match </span>certificate.value() {
             CertificateValue::ValidatedBlock {
                 executed_block: ExecutedBlock { block, .. },
-                round,
-            } =&gt; (block, <span class="kw-2">*</span>round),
+            } =&gt; block,
             CertificateValue::ConfirmedBlock { .. } =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Expecting a validation certificate&quot;</span>),
         };
         <span class="comment">// Check that the chain is active and ready for this confirmation.
@@ -1860,7 +1858,7 @@
             </span>|| chain
                 .manager
                 .get_mut()
-                .check_validated_block(block, round)<span class="question-mark">?
+                .check_validated_block(block, certificate.round)<span class="question-mark">?
                 </span>== ChainManagerOutcome::Skip
         {
             <span class="comment">// If we just processed the same pending block, return the chain info

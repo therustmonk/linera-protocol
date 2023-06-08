@@ -125,6 +125,8 @@
 <a href="#125" id="125">125</a>
 <a href="#126" id="126">126</a>
 <a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -143,6 +145,7 @@
     identifiers::Owner,
 };
 <span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="kw">use </span>tracing::info;
 
 <span class="doccomment">/// The specific state of a chain managed by one owner.
 </span><span class="attr">#[derive(Clone, Debug, Serialize, Deserialize)]
@@ -208,17 +211,18 @@
     ) {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(key_pair) = key_pair {
             <span class="comment">// Vote to confirm.
-            </span><span class="kw">let </span>BlockAndRound { block, .. } = proposal.content;
+            </span><span class="kw">let </span>BlockAndRound { block, round } = proposal.content;
+            <span class="kw">if </span>round != RoundNumber(<span class="number">0</span>) {
+                <span class="macro">info!</span>(<span class="string">&quot;Single-owner chains always have round number 0.&quot;</span>);
+                <span class="kw">return</span>;
+            }
             <span class="kw">let </span>executed_block = ExecutedBlock {
                 block,
                 messages,
                 state_hash,
             };
-            <span class="kw">let </span>value = HashedValue::from(CertificateValue::ConfirmedBlock {
-                executed_block,
-                round: RoundNumber(<span class="number">0</span>),
-            });
-            <span class="kw">let </span>vote = Vote::new(value, key_pair);
+            <span class="kw">let </span>value = HashedValue::from(CertificateValue::ConfirmedBlock { executed_block });
+            <span class="kw">let </span>vote = Vote::new(value, round, key_pair);
             <span class="self">self</span>.pending = <span class="prelude-val">Some</span>(vote);
         }
     }
