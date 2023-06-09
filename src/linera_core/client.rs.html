@@ -1506,23 +1506,6 @@
 <a href="#1506" id="1506">1506</a>
 <a href="#1507" id="1507">1507</a>
 <a href="#1508" id="1508">1508</a>
-<a href="#1509" id="1509">1509</a>
-<a href="#1510" id="1510">1510</a>
-<a href="#1511" id="1511">1511</a>
-<a href="#1512" id="1512">1512</a>
-<a href="#1513" id="1513">1513</a>
-<a href="#1514" id="1514">1514</a>
-<a href="#1515" id="1515">1515</a>
-<a href="#1516" id="1516">1516</a>
-<a href="#1517" id="1517">1517</a>
-<a href="#1518" id="1518">1518</a>
-<a href="#1519" id="1519">1519</a>
-<a href="#1520" id="1520">1520</a>
-<a href="#1521" id="1521">1521</a>
-<a href="#1522" id="1522">1522</a>
-<a href="#1523" id="1523">1523</a>
-<a href="#1524" id="1524">1524</a>
-<a href="#1525" id="1525">1525</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -2425,16 +2408,12 @@
         user_data: UserData,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="comment">// TODO(#467): check the balance of `owner` before signing any block proposal.
-        </span><span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="self">self</span>.execute_block(
-            messages,
-            <span class="macro">vec!</span>[Operation::System(SystemOperation::Transfer {
-                owner,
-                recipient,
-                amount,
-                user_data,
-            })],
-        )
+        </span><span class="self">self</span>.execute_operation(Operation::System(SystemOperation::Transfer {
+            owner,
+            recipient,
+            amount,
+            user_data,
+        }))
         .<span class="kw">await
     </span>}
 
@@ -2447,17 +2426,13 @@
         amount: Amount,
         user_data: UserData,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
-        <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="self">self</span>.execute_block(
-            messages,
-            <span class="macro">vec!</span>[Operation::System(SystemOperation::Claim {
-                owner,
-                target,
-                recipient,
-                amount,
-                user_data,
-            })],
-        )
+        <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::Claim {
+            owner,
+            target,
+            recipient,
+            amount,
+            user_data,
+        }))
         .<span class="kw">await
     </span>}
 
@@ -2612,7 +2587,9 @@
         <span class="self">self</span>.execute_operations(<span class="macro">vec!</span>[operation]).<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Executes a new block
+    <span class="doccomment">/// Executes a new block.
+    ///
+    /// This must be preceded by a call to `prepare_chain()`.
     </span><span class="kw">async fn </span>execute_block(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         incoming_messages: Vec&lt;IncomingMessage&gt;,
@@ -2725,12 +2702,11 @@
         chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="kw">let </span>chain_id = chain_id.unwrap_or(application_id.creation.chain_id);
-        <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>operations = <span class="macro">vec!</span>[Operation::System(SystemOperation::RequestApplication {
+        <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::RequestApplication {
             application_id,
             chain_id,
-        })];
-        <span class="self">self</span>.execute_block(messages, operations).<span class="kw">await
+        }))
+        .<span class="kw">await
     </span>}
 
     <span class="doccomment">/// Sends tokens to a chain.
@@ -2855,16 +2831,11 @@
         contract: Bytecode,
         service: Bytecode,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(BytecodeId, Certificate)&gt; {
-        <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>certificate = <span class="self">self
-            </span>.execute_block(
-                messages,
-                <span class="macro">vec!</span>[Operation::System(SystemOperation::PublishBytecode {
-                    contract,
-                    service,
-                })],
-            )
+            </span>.execute_operation(Operation::System(SystemOperation::PublishBytecode {
+                contract,
+                service,
+            }))
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="comment">// The last message published the bytecode.
         </span><span class="kw">let </span>message_id = certificate
@@ -2904,18 +2875,13 @@
         initialization_argument: Vec&lt;u8&gt;,
         required_application_ids: Vec&lt;UserApplicationId&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(UserApplicationId, Certificate)&gt; {
-        <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>certificate = <span class="self">self
-            </span>.execute_block(
-                messages,
-                <span class="macro">vec!</span>[Operation::System(SystemOperation::CreateApplication {
-                    bytecode_id,
-                    parameters,
-                    initialization_argument,
-                    required_application_ids,
-                })],
-            )
+            </span>.execute_operation(Operation::System(SystemOperation::CreateApplication {
+                bytecode_id,
+                parameters,
+                initialization_argument,
+                required_application_ids,
+            }))
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="comment">// The last message created the application.
         </span><span class="kw">let </span>creation = certificate
