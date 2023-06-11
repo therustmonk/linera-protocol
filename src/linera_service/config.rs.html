@@ -433,6 +433,9 @@
 <a href="#433" id="433">433</a>
 <a href="#434" id="434">434</a>
 <a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -762,13 +765,16 @@
                 Cell::new(<span class="string">&quot;Latest Block&quot;</span>).add_attribute(Attribute::Bold),
             ]);
         <span class="kw">if let </span><span class="prelude-val">Some</span>(chain_id) = chain_id {
-            <span class="kw">let </span>user_chain = <span class="self">self</span>.inner.chains.get(<span class="kw-2">&amp;</span>chain_id).unwrap();
-            <span class="self">Self</span>::update_table_with_chain(
-                <span class="kw-2">&amp;mut </span>table,
-                chain_id,
-                user_chain,
-                <span class="prelude-val">Some</span>(chain_id) == <span class="self">self</span>.inner.default,
-            );
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(user_chain) = <span class="self">self</span>.inner.chains.get(<span class="kw-2">&amp;</span>chain_id) {
+                <span class="self">Self</span>::update_table_with_chain(
+                    <span class="kw-2">&amp;mut </span>table,
+                    chain_id,
+                    user_chain,
+                    <span class="prelude-val">Some</span>(chain_id) == <span class="self">self</span>.inner.default,
+                );
+            } <span class="kw">else </span>{
+                <span class="macro">panic!</span>(<span class="string">&quot;Chain {} not found.&quot;</span>, chain_id);
+            }
         } <span class="kw">else </span>{
             <span class="kw">for </span>(chain_id, user_chain) <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.inner.chains {
                 <span class="self">Self</span>::update_table_with_chain(

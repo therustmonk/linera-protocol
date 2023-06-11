@@ -187,24 +187,6 @@
 <a href="#187" id="187">187</a>
 <a href="#188" id="188">188</a>
 <a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
-<a href="#194" id="194">194</a>
-<a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a>
-<a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
-<a href="#200" id="200">200</a>
-<a href="#201" id="201">201</a>
-<a href="#202" id="202">202</a>
-<a href="#203" id="203">203</a>
-<a href="#204" id="204">204</a>
-<a href="#205" id="205">205</a>
-<a href="#206" id="206">206</a>
-<a href="#207" id="207">207</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -299,14 +281,8 @@
 
 <span class="kw">impl </span>From&lt;contract::CryptoHash&gt; <span class="kw">for </span>CryptoHash {
     <span class="kw">fn </span>from(guest: contract::CryptoHash) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>bytes = [<span class="number">0u8</span>; <span class="number">32</span>];
-
-        bytes[<span class="number">0</span>..<span class="number">8</span>].copy_from_slice(<span class="kw-2">&amp;</span>guest.part1.to_le_bytes());
-        bytes[<span class="number">8</span>..<span class="number">16</span>].copy_from_slice(<span class="kw-2">&amp;</span>guest.part2.to_le_bytes());
-        bytes[<span class="number">16</span>..<span class="number">24</span>].copy_from_slice(<span class="kw-2">&amp;</span>guest.part3.to_le_bytes());
-        bytes[<span class="number">24</span>..<span class="number">32</span>].copy_from_slice(<span class="kw-2">&amp;</span>guest.part4.to_le_bytes());
-
-        CryptoHash::try_from(<span class="kw-2">&amp;</span>bytes[..]).expect(<span class="string">&quot;Incorrect byte count for `CryptoHash`&quot;</span>)
+        <span class="kw">let </span>integers = [guest.part1, guest.part2, guest.part3, guest.part4];
+        CryptoHash::from(integers)
     }
 }
 
@@ -358,14 +334,8 @@
 
 <span class="kw">impl </span>From&lt;contract_system_api::CryptoHash&gt; <span class="kw">for </span>CryptoHash {
     <span class="kw">fn </span>from(guest: contract_system_api::CryptoHash) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>bytes = [<span class="number">0u8</span>; <span class="number">32</span>];
-
-        bytes[<span class="number">0</span>..<span class="number">8</span>].copy_from_slice(<span class="kw-2">&amp;</span>guest.part1.to_le_bytes());
-        bytes[<span class="number">8</span>..<span class="number">16</span>].copy_from_slice(<span class="kw-2">&amp;</span>guest.part2.to_le_bytes());
-        bytes[<span class="number">16</span>..<span class="number">24</span>].copy_from_slice(<span class="kw-2">&amp;</span>guest.part3.to_le_bytes());
-        bytes[<span class="number">24</span>..<span class="number">32</span>].copy_from_slice(<span class="kw-2">&amp;</span>guest.part4.to_le_bytes());
-
-        CryptoHash::try_from(<span class="kw-2">&amp;</span>bytes[..]).expect(<span class="string">&quot;Incorrect byte count for `CryptoHash`&quot;</span>)
+        <span class="kw">let </span>integers = [guest.part1, guest.part2, guest.part3, guest.part4];
+        CryptoHash::from(integers)
     }
 }
 
@@ -402,14 +372,8 @@
 
 <span class="kw">impl </span>From&lt;service_system_api::CryptoHash&gt; <span class="kw">for </span>CryptoHash {
     <span class="kw">fn </span>from(guest: service_system_api::CryptoHash) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>bytes = [<span class="number">0u8</span>; <span class="number">32</span>];
-
-        bytes[<span class="number">0</span>..<span class="number">8</span>].copy_from_slice(<span class="kw-2">&amp;</span>guest.part1.to_le_bytes());
-        bytes[<span class="number">8</span>..<span class="number">16</span>].copy_from_slice(<span class="kw-2">&amp;</span>guest.part2.to_le_bytes());
-        bytes[<span class="number">16</span>..<span class="number">24</span>].copy_from_slice(<span class="kw-2">&amp;</span>guest.part3.to_le_bytes());
-        bytes[<span class="number">24</span>..<span class="number">32</span>].copy_from_slice(<span class="kw-2">&amp;</span>guest.part4.to_le_bytes());
-
-        CryptoHash::try_from(<span class="kw-2">&amp;</span>bytes[..]).expect(<span class="string">&quot;Incorrect byte count for `CryptoHash`&quot;</span>)
+        <span class="kw">let </span>integers = [guest.part1, guest.part2, guest.part3, guest.part4];
+        CryptoHash::from(integers)
     }
 }
 </code></pre></div>

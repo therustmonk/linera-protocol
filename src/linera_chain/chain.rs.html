@@ -668,20 +668,13 @@
 <a href="#668" id="668">668</a>
 <a href="#669" id="669">669</a>
 <a href="#670" id="670">670</a>
-<a href="#671" id="671">671</a>
-<a href="#672" id="672">672</a>
-<a href="#673" id="673">673</a>
-<a href="#674" id="674">674</a>
-<a href="#675" id="675">675</a>
-<a href="#676" id="676">676</a>
-<a href="#677" id="677">677</a>
-<a href="#678" id="678">678</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use crate</span>::{
     data_types::{
-        Block, ChainAndHeight, ChannelFullName, Event, Medium, Origin, OutgoingMessage, Target,
+        Block, ChainAndHeight, ChannelFullName, Event, IncomingMessage, Medium, Origin,
+        OutgoingMessage, Target,
     },
     inbox::{InboxError, InboxStateView},
     outbox::OutboxStateView,
@@ -709,7 +702,7 @@
     views::{CryptoHashView, GraphQLView, RootView, View, ViewError},
 };
 <span class="kw">use </span>serde::{Deserialize, Serialize};
-<span class="kw">use </span>std::collections::{BTreeMap, HashMap, HashSet};
+<span class="kw">use </span>std::collections::{BTreeMap, HashSet};
 
 <span class="doccomment">/// A view accessing the state of a chain.
 </span><span class="attr">#[derive(Debug, RootView, GraphQLView)]
@@ -893,15 +886,13 @@
         <span class="kw">let </span>stream = origins.into_iter().zip(inboxes);
         <span class="kw">let </span>stream = stream::iter(stream)
             .map(|(origin, inbox)| <span class="kw">async move </span>{
-                <span class="kw">let </span>event = inbox.removed_events.front().<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="macro">ensure!</span>(
-                    event.is_none(),
-                    ChainError::MissingCrossChainUpdate {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(event) = inbox.removed_events.front().<span class="kw">await</span><span class="question-mark">? </span>{
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(ChainError::MissingCrossChainUpdate {
                         chain_id,
                         origin: origin.into(),
-                        height: event.unwrap().height,
-                    }
-                );
+                        height: event.height,
+                    });
+                }
                 <span class="prelude-val">Ok</span>::&lt;(), ChainError&gt;(())
             })
             .buffer_unordered(C::MAX_CONNECTIONS);
@@ -1061,37 +1052,30 @@
     <span class="doccomment">/// Removes the incoming messages in the block from the inboxes.
     </span><span class="kw">pub async fn </span>remove_events_from_inboxes(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: <span class="kw-2">&amp;</span>Block) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainError&gt; {
         <span class="kw">let </span>chain_id = <span class="self">self</span>.chain_id();
-        <span class="kw">let </span>origins = block
-            .incoming_messages
-            .iter()
-            .map(|message| message.origin.clone())
-            .collect::&lt;HashSet&lt;<span class="kw">_</span>&gt;&gt;();
-        <span class="kw">let </span>inboxes = <span class="self">self</span>.inboxes.try_load_entries_mut(<span class="kw-2">&amp;</span>origins).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>map = HashMap::new();
-        <span class="kw">for </span>(origin, inbox) <span class="kw">in </span>origins.into_iter().zip(inboxes) {
-            map.insert(origin, inbox);
-        }
-        <span class="kw">for </span>message <span class="kw">in </span><span class="kw-2">&amp;</span>block.incoming_messages {
-            <span class="macro">tracing::trace!</span>(
-                <span class="string">&quot;Updating inbox {:?} in chain {:?}&quot;</span>,
-                message.origin,
-                chain_id
-            );
-            <span class="kw">if </span>message.event.timestamp &gt; block.timestamp {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(ChainError::IncorrectEventTimestamp {
+        <span class="kw">let </span><span class="kw-2">mut </span>events_by_origin: BTreeMap&lt;<span class="kw">_</span>, Vec&lt;<span class="kw-2">&amp;</span>Event&gt;&gt; = Default::default();
+        <span class="kw">for </span>IncomingMessage { event, origin, .. } <span class="kw">in </span><span class="kw-2">&amp;</span>block.incoming_messages {
+            <span class="macro">ensure!</span>(
+                event.timestamp &lt;= block.timestamp,
+                ChainError::IncorrectEventTimestamp {
                     chain_id,
-                    message_timestamp: message.event.timestamp,
+                    message_timestamp: event.timestamp,
                     block_timestamp: block.timestamp,
-                });
+                }
+            );
+            <span class="kw">let </span>events = events_by_origin.entry(origin).or_default();
+            events.push(event);
+        }
+        <span class="kw">let </span>origins = events_by_origin.keys().copied();
+        <span class="kw">let </span>inboxes = <span class="self">self</span>.inboxes.try_load_entries_mut(origins).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">for </span>((origin, events), <span class="kw-2">mut </span>inbox) <span class="kw">in </span>events_by_origin.into_iter().zip(inboxes) {
+            <span class="macro">tracing::trace!</span>(<span class="string">&quot;Updating inbox {:?} in chain {:?}&quot;</span>, origin, chain_id);
+            <span class="kw">for </span>event <span class="kw">in </span>events {
+                <span class="comment">// Mark the message as processed in the inbox.
+                </span>inbox
+                    .remove_event(event)
+                    .<span class="kw">await
+                    </span>.map_err(|error| ChainError::from((chain_id, origin.clone(), error)))<span class="question-mark">?</span>;
             }
-            <span class="comment">// Mark the message as processed in the inbox.
-            </span><span class="kw">let </span>inbox = map
-                .get_mut(<span class="kw-2">&amp;</span>message.origin)
-                .expect(<span class="string">&quot;Message origin was added to the map above&quot;</span>);
-            inbox
-                .remove_event(<span class="kw-2">&amp;</span>message.event)
-                .<span class="kw">await
-                </span>.map_err(|error| ChainError::from((chain_id, message.origin.clone(), error)))<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }

@@ -908,10 +908,6 @@
 <a href="#908" id="908">908</a>
 <a href="#909" id="909">909</a>
 <a href="#910" id="910">910</a>
-<a href="#911" id="911">911</a>
-<a href="#912" id="912">912</a>
-<a href="#913" id="913">913</a>
-<a href="#914" id="914">914</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1342,11 +1338,7 @@
     </span><span class="kw">pub fn </span>is_active(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.description.get().is_some()
             &amp;&amp; <span class="self">self</span>.ownership.get().is_active()
-            &amp;&amp; <span class="self">self</span>.epoch.get().is_some()
-            &amp;&amp; <span class="self">self
-                </span>.committees
-                .get()
-                .contains_key(<span class="kw-2">&amp;</span><span class="self">self</span>.epoch.get().unwrap())
+            &amp;&amp; <span class="self">self</span>.current_committee().is_some()
             &amp;&amp; <span class="self">self</span>.admin_id.get().is_some()
     }
 
@@ -1529,7 +1521,7 @@
                             Destination::Subscribers(SystemChannel::Admin.name()),
                             <span class="bool-val">false</span>,
                             SystemMessage::SetCommittees {
-                                epoch: <span class="self">self</span>.epoch.get().expect(<span class="string">&quot;chain is active&quot;</span>),
+                                epoch: <span class="kw-2">*</span>epoch,
                                 committees: <span class="self">self</span>.committees.get().clone(),
                             },
                         ));

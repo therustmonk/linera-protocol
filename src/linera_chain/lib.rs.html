@@ -111,6 +111,7 @@
 <a href="#111" id="111">111</a>
 <a href="#112" id="112">112</a>
 <a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -169,8 +170,9 @@
         previous_event: Event,
     },
     <span class="attr">#[error(
-        <span class="string">&quot;Message in block proposed to {chain_id:?} is out of order compared to previous messages from \
-         origin {origin:?}: {event:?}. Block and height should be at least: {next_height}, {next_index}&quot;
+        <span class="string">&quot;Message in block proposed to {chain_id:?} is out of order compared to previous messages \
+         from origin {origin:?}: {event:?}. Block and height should be at least: \
+         {next_height}, {next_index}&quot;
     </span>)]
     </span>IncorrectMessageOrder {
         chain_id: ChainId,
