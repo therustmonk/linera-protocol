@@ -255,10 +255,46 @@
 <a href="#255" id="255">255</a>
 <a href="#256" id="256">256</a>
 <a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="kw">use </span>anyhow::{anyhow, bail, <span class="prelude-ty">Result</span>};
+</span><span class="kw">use </span>anyhow::{anyhow, bail, Context, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span>cargo_toml::Manifest;
 <span class="kw">use </span>current_platform::CURRENT_PLATFORM;
 <span class="kw">use </span>std::{
     ffi::OsStr,
@@ -510,6 +546,40 @@
         <span class="kw">let </span>sdk_version = cargo_toml[<span class="string">&quot;package&quot;</span>][<span class="string">&quot;version&quot;</span>].as_str()
             .expect(<span class="string">&quot;there was an error finding the version in a TOML file included at compile-time - this should never happen.&quot;</span>);
         sdk_version.to_string()
+    }
+
+    <span class="kw">pub fn </span>build(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="prelude-ty">Option</span>&lt;String&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(PathBuf, PathBuf), anyhow::Error&gt; {
+        <span class="kw">let </span>name = name.unwrap_or(<span class="self">self</span>.project_package_name()<span class="question-mark">?</span>);
+        <span class="kw">let </span>contract_name = <span class="macro">format!</span>(<span class="string">&quot;{}_contract&quot;</span>, name);
+        <span class="kw">let </span>service_name = <span class="macro">format!</span>(<span class="string">&quot;{}_service&quot;</span>, name);
+        <span class="kw">let </span>cargo_build = Command::new(<span class="string">&quot;cargo&quot;</span>)
+            .arg(<span class="string">&quot;build&quot;</span>)
+            .arg(<span class="string">&quot;--release&quot;</span>)
+            .args([<span class="string">&quot;--target&quot;</span>, <span class="string">&quot;wasm32-unknown-unknown&quot;</span>])
+            .current_dir(<span class="kw-2">&amp;</span><span class="self">self</span>.root)
+            .spawn()<span class="question-mark">?
+            </span>.wait()<span class="question-mark">?</span>;
+        <span class="kw">if </span>!cargo_build.success() {
+            <span class="macro">bail!</span>(<span class="string">&quot;build failed&quot;</span>)
+        }
+        <span class="kw">let </span>build_path = <span class="self">self</span>.root.join(<span class="string">&quot;target/wasm32-unknown-unknown/release&quot;</span>);
+        <span class="prelude-val">Ok</span>((
+            build_path.join(contract_name).with_extension(<span class="string">&quot;wasm&quot;</span>),
+            build_path.join(service_name).with_extension(<span class="string">&quot;wasm&quot;</span>),
+        ))
+    }
+
+    <span class="kw">fn </span>project_package_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
+        <span class="kw">let </span>manifest = Manifest::from_path(<span class="self">self</span>.cargo_toml_path())<span class="question-mark">?</span>;
+        <span class="kw">let </span>name = manifest
+            .package
+            .context(<span class="string">&quot;Cargo.toml is missing `[package]`&quot;</span>)<span class="question-mark">?
+            </span>.name;
+        <span class="prelude-val">Ok</span>(name)
+    }
+
+    <span class="kw">fn </span>cargo_toml_path(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; PathBuf {
+        <span class="self">self</span>.root.join(<span class="string">&quot;Cargo.toml&quot;</span>)
     }
 }
 </code></pre></div>
