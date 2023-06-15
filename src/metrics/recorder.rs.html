@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/metrics-0.20.1/src/recorder.rs`."><title>recorder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-c4dbdcde0fbd8430.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-db279b6232be9c13.css"><link rel="stylesheet" disabled href="../../static.files/dark-cf923f49f397b216.css"><link rel="stylesheet" disabled href="../../static.files/ayu-be46fdc453a55015.css"><script src="../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../static.files/source-script-1b95b7cca98b26e5.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-98a684e84ae5b08b.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../metrics/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/metrics-0.21.0/src/recorder.rs`."><title>recorder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-c4dbdcde0fbd8430.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-db279b6232be9c13.css"><link rel="stylesheet" disabled href="../../static.files/dark-cf923f49f397b216.css"><link rel="stylesheet" disabled href="../../static.files/ayu-be46fdc453a55015.css"><script src="../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../static.files/source-script-1b95b7cca98b26e5.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-98a684e84ae5b08b.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../metrics/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -266,40 +266,46 @@
 <a href="#266" id="266">266</a>
 <a href="#267" id="267">267</a>
 <a href="#268" id="268">268</a>
-</pre><pre class="rust"><code><span class="kw">use </span><span class="self">self</span>::cell::RecorderOnceCell;
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+</pre><pre class="rust"><code><span class="kw">use </span>std::fmt;
+
+<span class="kw">use </span><span class="self">self</span>::cell::RecorderOnceCell;
 <span class="kw">use crate</span>::{Counter, Gauge, Histogram, Key, KeyName, SharedString, Unit};
-<span class="kw">use </span>core::fmt;
 
 <span class="kw">mod </span>cell {
     <span class="kw">use super</span>::{Recorder, SetRecorderError};
-    <span class="kw">use </span>std::cell::UnsafeCell;
-    <span class="kw">use </span>std::sync::atomic::{AtomicUsize, Ordering};
-
-    <span class="comment">// FIXME: This can&#39;t be a const new function because trait objects aren&#39;t allowed in const fns
-    // This was stabilized in 1.61, so it can be cleaned up when it becomes the MSRV
-    </span><span class="attr">#[allow(clippy::declare_interior_mutable_const)]
-    </span><span class="kw">pub const </span>INIT: RecorderOnceCell = RecorderOnceCell {
-        recorder: UnsafeCell::new(<span class="prelude-val">None</span>),
-        state: AtomicUsize::new(UNINITIALIZED),
+    <span class="kw">use </span>std::{
+        cell::UnsafeCell,
+        sync::atomic::{AtomicUsize, Ordering},
     };
 
-    <span class="doccomment">/// The global Recorder instance with a `once_cell`-like API.
+    <span class="doccomment">/// The recorder is uninitialized.
+    </span><span class="kw">const </span>UNINITIALIZED: usize = <span class="number">0</span>;
+
+    <span class="doccomment">/// The recorder is currently being initialized.
+    </span><span class="kw">const </span>INITIALIZING: usize = <span class="number">1</span>;
+
+    <span class="doccomment">/// The recorder has been initialized successfully and can be read.
+    </span><span class="kw">const </span>INITIALIZED: usize = <span class="number">2</span>;
+
+    <span class="doccomment">/// An specialized version of `OnceCell` for `Recorder`.
     </span><span class="kw">pub struct </span>RecorderOnceCell {
         recorder: UnsafeCell&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>Recorder&gt;&gt;,
         state: AtomicUsize,
     }
 
-    <span class="doccomment">/// The recorder is uninit and can be set.
-    </span><span class="kw">const </span>UNINITIALIZED: usize = <span class="number">0</span>;
-    <span class="doccomment">/// The recorder is currently being initialized.
-    </span><span class="kw">const </span>INITIALIZING: usize = <span class="number">1</span>;
-    <span class="doccomment">/// The recorder has been initialized successfully and can be read.
-    </span><span class="kw">const </span>INITIALIZED: usize = <span class="number">2</span>;
-
     <span class="kw">impl </span>RecorderOnceCell {
+        <span class="doccomment">/// Creates an uninitialized `RecorderOnceCell`.
+        </span><span class="kw">pub const fn </span>new() -&gt; <span class="self">Self </span>{
+            <span class="self">Self </span>{ recorder: UnsafeCell::new(<span class="prelude-val">None</span>), state: AtomicUsize::new(UNINITIALIZED) }
+        }
+
         <span class="attr">#[cfg(atomic_cas)]
         </span><span class="kw">pub fn </span>set(<span class="kw-2">&amp;</span><span class="self">self</span>, recorder: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>Recorder) -&gt; <span class="prelude-ty">Result</span>&lt;(), SetRecorderError&gt; {
-            <span class="comment">// Acquire the lock because the write below must not be reordered above the CAS.
+            <span class="comment">// Try and transition the cell from `UNINITIALIZED` to `INITIALIZING`, which would give
+            // us exclusive access to set the recorder.
             </span><span class="kw">match </span><span class="self">self</span>.state.compare_exchange(
                 UNINITIALIZED,
                 INITIALIZING,
@@ -308,10 +314,12 @@
             ) {
                 <span class="prelude-val">Ok</span>(UNINITIALIZED) =&gt; {
                     <span class="kw">unsafe </span>{
-                        <span class="comment">// SAFETY: Access is unique because we CASed the state to INITIALIZING above
+                        <span class="comment">// SAFETY: Access is unique because we can only be here if we won the race
+                        // to transition from `UNINITIALIZED` to `INITIALIZING` above.
                         </span><span class="self">self</span>.recorder.get().write(<span class="prelude-val">Some</span>(recorder));
                     }
-                    <span class="comment">// Release the lock, others can now read it - but not write
+
+                    <span class="comment">// Mark the recorder as initialized, which will make it visible to readers.
                     </span><span class="self">self</span>.state.store(INITIALIZED, Ordering::Release);
                     <span class="prelude-val">Ok</span>(())
                 }
@@ -320,13 +328,14 @@
         }
 
         <span class="doccomment">/// Clears the currently installed recorder, allowing a new writer to override it.
+        ///
         /// # Safety
+        ///
         /// The caller must guarantee that no reader has read the state before we do this and then
         /// reads the recorder after another writer has written to it after us.
         </span><span class="kw">pub unsafe fn </span>clear(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-            <span class="comment">// Set the state to `UNINIT` to allow the next writer to write again.
-            // This is not a problem for readers since their `&amp;&#39;static` refs will remain
-            // valid forever.
+            <span class="comment">// Set the state to `UNINITIALIZED` to allow the next writer to write again. This is not
+            // a problem for readers since their `&amp;&#39;static` refs will remain valid forever.
             </span><span class="self">self</span>.state.store(UNINITIALIZED, Ordering::Relaxed);
         }
 
@@ -334,8 +343,8 @@
             <span class="kw">if </span><span class="self">self</span>.state.load(Ordering::Acquire) != INITIALIZED {
                 <span class="prelude-val">None
             </span>} <span class="kw">else </span>{
-                <span class="comment">// SAFETY: Thanks to `Acquire` above we make sure that this doesn&#39;t get
-                // reordered above this and therefore no writer is here
+                <span class="comment">// SAFETY: If the state is `INITIALIZED`, then we know that the recorder has been
+                // installed and is safe to read.
                 </span><span class="kw">unsafe </span>{ <span class="self">self</span>.recorder.get().read() }
             }
         }
@@ -346,7 +355,7 @@
         ) -&gt; <span class="prelude-ty">Result</span>&lt;(), SetRecorderError&gt; {
             <span class="kw">match </span><span class="self">self</span>.state.load(Ordering::Relaxed) {
                 UNINITIALIZED =&gt; {
-                    <span class="comment">// SAFETY: Caller guarantees that access is unique
+                    <span class="comment">// SAFETY: Caller guarantees that access is unique.
                     </span><span class="self">self</span>.recorder.get().write(<span class="prelude-val">Some</span>(recorder));
                     <span class="self">self</span>.state.store(INITIALIZED, Ordering::Release);
                     <span class="prelude-val">Ok</span>(())
@@ -362,13 +371,13 @@
         }
     }
 
-    <span class="comment">// SAFETY: We can only mutate through `set` - which is protected by the `state` and unsafe
-    // function where the caller has to guarantee synced-ness
+    <span class="comment">// SAFETY: We can only mutate through `set`, which is protected by the `state` and unsafe
+    // function where the caller has to guarantee synced-ness.
     </span><span class="kw">unsafe impl </span>Send <span class="kw">for </span>RecorderOnceCell {}
     <span class="kw">unsafe impl </span>Sync <span class="kw">for </span>RecorderOnceCell {}
 }
 
-<span class="kw">static </span>RECORDER: RecorderOnceCell = cell::INIT;
+<span class="kw">static </span>RECORDER: RecorderOnceCell = RecorderOnceCell::new();
 
 <span class="kw">static </span>SET_RECORDER_ERROR: <span class="kw-2">&amp;</span>str =
     <span class="string">&quot;attempted to set a recorder after the metrics system was already initialized&quot;</span>;
@@ -452,10 +461,8 @@
 <span class="doccomment">/// Sets the global recorder to a `Box&lt;Recorder&gt;`.
 ///
 /// This is a simple convenience wrapper over `set_recorder`, which takes a `Box&lt;Recorder&gt;`
-/// rather than a `&amp;&#39;static Recorder`.  See the document for [`set_recorder`] for more
+/// rather than a `&amp;&#39;static Recorder`.  See the documentation for [`set_recorder`] for more
 /// details.
-///
-/// Requires the `std` feature.
 ///
 /// # Errors
 ///
@@ -488,16 +495,16 @@
 
 <span class="doccomment">/// Clears the currently configured recorder.
 ///
-/// As we give out a reference to the recorder with a static lifetime, we cannot safely reclaim
-/// and drop the installed recorder when clearing.  Thus, any existing recorder will stay leaked.
+/// This will leak the currently installed recorder, as we cannot safely drop it due to it being
+/// provided via a reference with a `&#39;static` lifetime.
 ///
 /// This method is typically only useful for testing or benchmarking.
 ///
 /// # Safety
 ///
-/// This function must not be called during any readers reading or writers writing.
-/// The caller can cause readers and writers to race if they are in reading/writing while
-/// this function is called.
+/// The caller must ensure that this method is not being called while other threads are either
+/// loading a reference to the global recorder, or attempting to initialize the global recorder, as
+/// it can cause a data race.
 </span><span class="attr">#[doc(hidden)]
 </span><span class="kw">pub unsafe fn </span>clear_recorder() {
     RECORDER.clear();
@@ -513,8 +520,7 @@
     }
 }
 
-<span class="comment">// The Error trait is not available in libcore
-</span><span class="kw">impl </span>std::error::Error <span class="kw">for </span>SetRecorderError {
+<span class="kw">impl </span>std::error::Error <span class="kw">for </span>SetRecorderError {
     <span class="kw">fn </span>description(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
         SET_RECORDER_ERROR
     }

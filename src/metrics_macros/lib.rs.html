@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/metrics-macros-0.6.0/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-c4dbdcde0fbd8430.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-db279b6232be9c13.css"><link rel="stylesheet" disabled href="../../static.files/dark-cf923f49f397b216.css"><link rel="stylesheet" disabled href="../../static.files/ayu-be46fdc453a55015.css"><script src="../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../static.files/source-script-1b95b7cca98b26e5.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-98a684e84ae5b08b.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../metrics_macros/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/metrics-macros-0.7.0/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-c4dbdcde0fbd8430.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-db279b6232be9c13.css"><link rel="stylesheet" disabled href="../../static.files/dark-cf923f49f397b216.css"><link rel="stylesheet" disabled href="../../static.files/ayu-be46fdc453a55015.css"><script src="../../static.files/storage-3891ce972e3a2bf8.js"></script><script defer src="../../static.files/source-script-1b95b7cca98b26e5.js"></script><script defer src="../../source-files.js"></script><script defer src="../../static.files/main-98a684e84ae5b08b.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../metrics_macros/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -468,6 +468,12 @@
 <a href="#468" id="468">468</a>
 <a href="#469" id="469">469</a>
 <a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
 </pre><pre class="rust"><code><span class="kw">extern crate </span>proc_macro;
 
 <span class="kw">use </span><span class="self">self</span>::proc_macro::TokenStream;
@@ -531,7 +537,7 @@
 
         <span class="comment">// We accept two possible parameters: unit, and description.
         //
-        // There is only one specific requirement that must be met, and that is that the unit _must_
+        // There is only one specific requirement that must be met, and that is that the || _must_
         // have a qualified path of either `metrics::Unit::...` or `Unit::..` for us to properly
         // distinguish it amongst the macro parameters.
 
@@ -550,7 +556,10 @@
                         .map(|x| x.ident.to_string())
                         .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
                         .join(<span class="string">&quot;::&quot;</span>);
-                    <span class="kw">if </span>qname.starts_with(<span class="string">&quot;metrics::Unit&quot;</span>) || qname.starts_with(<span class="string">&quot;Unit&quot;</span>) {
+                    <span class="kw">if </span>qname.starts_with(<span class="string">&quot;::metrics::Unit&quot;</span>)
+                        || qname.starts_with(<span class="string">&quot;metrics::Unit&quot;</span>)
+                        || qname.starts_with(<span class="string">&quot;Unit&quot;</span>)
+                    {
                         <span class="prelude-val">Some</span>(Expr::Path(path))
                     } <span class="kw">else </span>{
                         <span class="prelude-val">None
@@ -684,7 +693,7 @@
     <span class="macro">quote! </span>{
         {
             <span class="comment">// Only do this work if there&#39;s a recorder installed.
-            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(recorder) = metrics::try_recorder() {
+            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(recorder) = ::metrics::try_recorder() {
                 recorder.#describe_ident(#name.into(), #unit, #description.into());
             }
         }
@@ -707,7 +716,7 @@
         <span class="prelude-val">Some</span>((op_type, op_value)) =&gt; {
             <span class="kw">let </span>op_ident = <span class="macro">format_ident!</span>(<span class="string">&quot;{}&quot;</span>, op_type);
             <span class="kw">let </span>op_value = <span class="kw">if </span>metric_type == <span class="string">&quot;histogram&quot; </span>{
-                <span class="macro">quote! </span>{ metrics::__into_f64(#op_value) }
+                <span class="macro">quote! </span>{ ::metrics::__into_f64(#op_value) }
             } <span class="kw">else </span>{
                 <span class="macro">quote! </span>{ #op_value }
             };
@@ -718,7 +727,7 @@
                 {
                     #statics
                     <span class="comment">// Only do this work if there&#39;s a recorder installed.
-                    </span><span class="kw">if let </span><span class="prelude-val">Some</span>(recorder) = metrics::try_recorder() {
+                    </span><span class="kw">if let </span><span class="prelude-val">Some</span>(recorder) = ::metrics::try_recorder() {
                         #locals
                         <span class="kw">let </span>handle = recorder.#register_ident(#metric_key);
                         handle.#op_ident(#op_value);
@@ -732,7 +741,7 @@
                 {
                     #statics
                     #locals
-                    metrics::recorder().#register_ident(#metric_key)
+                    ::metrics::recorder().#register_ident(#metric_key)
                 }
             }
         }
@@ -780,13 +789,15 @@
                 <span class="kw">if let </span>Labels::Inline(pairs) = labels {
                     <span class="kw">let </span>labels = pairs
                         .iter()
-                        .map(|(key, val)| <span class="macro">quote! </span>{ metrics::Label::from_static_parts(#key, #val) })
+                        .map(
+                            |(key, val)| <span class="macro">quote! </span>{ ::metrics::Label::from_static_parts(#key, #val) },
+                        )
                         .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
                     <span class="kw">let </span>labels_len = labels.len();
                     <span class="kw">let </span>labels_len = <span class="macro">quote! </span>{ #labels_len };
 
                     <span class="macro">quote! </span>{
-                        <span class="kw">static </span>METRIC_LABELS: [metrics::Label; #labels_len] = [#(#labels),<span class="kw-2">*</span>];
+                        <span class="kw">static </span>METRIC_LABELS: [::metrics::Label; #labels_len] = [#(#labels),<span class="kw-2">*</span>];
                     }
                 } <span class="kw">else </span>{
                     <span class="macro">quote! </span>{}
@@ -801,11 +812,11 @@
     <span class="kw">let </span>key_static = <span class="kw">if </span>use_name_static &amp;&amp; use_labels_static {
         <span class="kw">if </span>has_labels {
             <span class="macro">quote! </span>{
-                <span class="kw">static </span>METRIC_KEY: metrics::Key = metrics::Key::from_static_parts(METRIC_NAME, <span class="kw-2">&amp;</span>METRIC_LABELS);
+                <span class="kw">static </span>METRIC_KEY: ::metrics::Key = ::metrics::Key::from_static_parts(METRIC_NAME, <span class="kw-2">&amp;</span>METRIC_LABELS);
             }
         } <span class="kw">else </span>{
             <span class="macro">quote! </span>{
-                <span class="kw">static </span>METRIC_KEY: metrics::Key = metrics::Key::from_static_name(METRIC_NAME);
+                <span class="kw">static </span>METRIC_KEY: ::metrics::Key = ::metrics::Key::from_static_name(METRIC_NAME);
             }
         }
     } <span class="kw">else </span>{
@@ -840,7 +851,7 @@
         </span><span class="kw">let </span>labels = labels.as_ref().unwrap();
         <span class="kw">let </span>quoted_labels = labels_to_quoted(labels);
         <span class="macro">quote! </span>{
-            <span class="kw">let </span>key = metrics::Key::from_parts(METRIC_NAME, #quoted_labels);
+            <span class="kw">let </span>key = ::metrics::Key::from_parts(METRIC_NAME, #quoted_labels);
         }
     } <span class="kw">else if </span>!use_name_static &amp;&amp; !use_labels_static {
         <span class="comment">// The name is not static, and neither are the labels. Since `use_labels_static`
@@ -848,7 +859,7 @@
         </span><span class="kw">let </span>labels = labels.as_ref().unwrap();
         <span class="kw">let </span>quoted_labels = labels_to_quoted(labels);
         <span class="macro">quote! </span>{
-            <span class="kw">let </span>key = metrics::Key::from_parts(#name, #quoted_labels);
+            <span class="kw">let </span>key = ::metrics::Key::from_parts(#name, #quoted_labels);
         }
     } <span class="kw">else </span>{
         <span class="comment">// The name is not static, but the labels are.  This could technically mean that there
@@ -856,11 +867,11 @@
         // to figure out the correct key.
         </span><span class="kw">if </span>has_labels {
             <span class="macro">quote! </span>{
-                <span class="kw">let </span>key = metrics::Key::from_static_labels(#name, <span class="kw-2">&amp;</span>METRIC_LABELS);
+                <span class="kw">let </span>key = ::metrics::Key::from_static_labels(#name, <span class="kw-2">&amp;</span>METRIC_LABELS);
             }
         } <span class="kw">else </span>{
             <span class="macro">quote! </span>{
-                <span class="kw">let </span>key = metrics::Key::from_name(#name);
+                <span class="kw">let </span>key = ::metrics::Key::from_name(#name);
             }
         }
     };
@@ -871,7 +882,8 @@
 <span class="kw">fn </span>labels_to_quoted(labels: <span class="kw-2">&amp;</span>Labels) -&gt; proc_macro2::TokenStream {
     <span class="kw">match </span>labels {
         Labels::Inline(pairs) =&gt; {
-            <span class="kw">let </span>labels = pairs.iter().map(|(key, val)| <span class="macro">quote! </span>{ metrics::Label::new(#key, #val) });
+            <span class="kw">let </span>labels =
+                pairs.iter().map(|(key, val)| <span class="macro">quote! </span>{ ::metrics::Label::new(#key, #val) });
             <span class="macro">quote! </span>{ <span class="macro">vec!</span>[#(#labels),<span class="kw-2">*</span>] }
         }
         Labels::Existing(e) =&gt; <span class="macro">quote! </span>{ #e },
