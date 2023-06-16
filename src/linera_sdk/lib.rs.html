@@ -866,7 +866,7 @@
 }
 
 <span class="doccomment">/// The result of calling into a session.
-</span><span class="attr">#[derive(Default, Deserialize, Serialize)]
+</span><span class="attr">#[derive(Debug, Default, Deserialize, Serialize)]
 </span><span class="kw">pub struct </span>SessionCallResult&lt;Message, Value, SessionState&gt; {
     <span class="doccomment">/// The result of the application call.
     </span><span class="kw">pub </span>inner: ApplicationCallResult&lt;Message, Value, SessionState&gt;,
