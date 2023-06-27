@@ -803,10 +803,10 @@
             </span>.expect(<span class="string">&quot;Failed to load application registry&quot;</span>);
 
         applications
-            .bytecode_locations_for([bytecode_id.forget_abi()])
+            .bytecode_location_for(<span class="kw-2">&amp;</span>bytecode_id.forget_abi())
             .<span class="kw">await
             </span>.expect(<span class="string">&quot;Failed to check known bytecode locations&quot;</span>)
-            .is_empty()
+            .is_none()
     }
 
     <span class="doccomment">/// Finds the message that sends the message with the bytecode location of `bytecode_id`.
