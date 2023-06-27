@@ -290,6 +290,17 @@
 <a href="#290" id="290">290</a>
 <a href="#291" id="291">291</a>
 <a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -333,6 +344,9 @@
 
         <span class="macro">debug!</span>(<span class="string">&quot;writing Cargo.toml&quot;</span>);
         <span class="self">Self</span>::create_cargo_toml(<span class="kw-2">&amp;</span>root, <span class="kw-2">&amp;</span>project_name)<span class="question-mark">?</span>;
+
+        <span class="macro">debug!</span>(<span class="string">&quot;writing rust-toolchain&quot;</span>);
+        <span class="self">Self</span>::create_rust_toolchain(<span class="kw-2">&amp;</span>root)<span class="question-mark">?</span>;
 
         <span class="macro">debug!</span>(<span class="string">&quot;writing state.rs&quot;</span>);
         <span class="self">Self</span>::create_state_file(<span class="kw-2">&amp;</span>source_directory)<span class="question-mark">?</span>;
@@ -438,6 +452,14 @@
             linera_views_dep = linera_views_dep
         );
         <span class="self">Self</span>::write_string_to_file(<span class="kw-2">&amp;</span>toml_path, <span class="kw-2">&amp;</span>toml_contents)
+    }
+
+    <span class="kw">fn </span>create_rust_toolchain(project_root: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>toolchain_path = project_root.join(<span class="string">&quot;rust-toolchain&quot;</span>);
+        <span class="self">Self</span>::write_string_to_file(
+            <span class="kw-2">&amp;</span>toolchain_path,
+            <span class="macro">include_str!</span>(<span class="string">&quot;../template/rust-toolchain.template&quot;</span>),
+        )
     }
 
     <span class="kw">fn </span>create_state_file(source_directory: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
