@@ -29,19 +29,13 @@
 <a href="#29" id="29">29</a>
 <a href="#30" id="30">30</a>
 <a href="#31" id="31">31</a>
-<a href="#32" id="32">32</a>
-<a href="#33" id="33">33</a>
-<a href="#34" id="34">34</a>
-<a href="#35" id="35">35</a>
-<a href="#36" id="36">36</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use crate</span>::{chain_guards::ChainGuards, DbStore, DbStoreClient};
-<span class="kw">use </span>async_lock::{Mutex, RwLock};
 <span class="kw">use </span>linera_execution::WasmRuntime;
-<span class="kw">use </span>linera_views::memory::MemoryClient;
-<span class="kw">use </span>std::{collections::BTreeMap, sync::Arc};
+<span class="kw">use </span>linera_views::memory::{create_test_memory_client, MemoryClient};
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">type </span>MemoryStore = DbStore&lt;MemoryClient&gt;;
 
@@ -57,11 +51,7 @@
 
 <span class="kw">impl </span>MemoryStore {
     <span class="kw">pub fn </span>new(wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>state = Arc::new(Mutex::new(BTreeMap::new()));
-        <span class="kw">let </span>guard = state
-            .try_lock_arc()
-            .expect(<span class="string">&quot;We should be able to acquire what we just created&quot;</span>);
-        <span class="kw">let </span>client = Arc::new(RwLock::new(guard));
+        <span class="kw">let </span>client = create_test_memory_client();
         <span class="self">Self </span>{
             client,
             guards: ChainGuards::default(),

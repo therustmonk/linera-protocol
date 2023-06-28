@@ -264,7 +264,7 @@
     <span class="kw">crate</span>::common::ContextFromDb,
     <span class="kw">crate</span>::memory::{MemoryClient, MemoryStoreMap},
     <span class="kw">crate</span>::views::ViewError,
-    async_lock::{MutexGuardArc, RwLock},
+    async_lock::MutexGuardArc,
 };
 
 <span class="doccomment">/// The LruPrefixCache store the data for a simple read_keys queries
@@ -475,7 +475,7 @@
         extra: E,
         n: usize,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ViewError&gt; {
-        <span class="kw">let </span>client = Arc::new(RwLock::new(guard));
+        <span class="kw">let </span>client = MemoryClient::new(guard.into());
         <span class="kw">let </span>lru_client = LruCachingKeyValueClient::new(client, n);
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             db: lru_client,

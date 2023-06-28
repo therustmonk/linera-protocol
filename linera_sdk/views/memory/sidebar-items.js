@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["MemoryContextError"],"fn":["create_test_context"],"type":["MemoryClient","MemoryContext","MemoryStoreMap"]};
+window.SIDEBAR_ITEMS = {"enum":["MemoryContextError"],"fn":["create_test_context","create_test_memory_client"],"type":["MemoryClient","MemoryContext","MemoryStoreMap"]};

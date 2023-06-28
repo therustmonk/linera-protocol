@@ -558,6 +558,8 @@
 <a href="#558" id="558">558</a>
 <a href="#559" id="559">559</a>
 <a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -620,7 +622,9 @@
     Unbounded
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_interval(key_prefix: Vec&lt;u8&gt;) -&gt; (Bound&lt;Vec&lt;u8&gt;&gt;, Bound&lt;Vec&lt;u8&gt;&gt;) {
+<span class="doccomment">/// Computes an interval so that a vector has `key_prefix` as a prefix
+/// if and only if it belongs to the range.
+</span><span class="kw">pub fn </span>get_interval(key_prefix: Vec&lt;u8&gt;) -&gt; (Bound&lt;Vec&lt;u8&gt;&gt;, Bound&lt;Vec&lt;u8&gt;&gt;) {
     <span class="kw">let </span>upper_bound = get_upper_bound(<span class="kw-2">&amp;</span>key_prefix);
     (Included(key_prefix), upper_bound)
 }
@@ -708,7 +712,7 @@
     /// The journal is located at the `base_key`.
     </span><span class="kw">async fn </span>clear_journal(<span class="kw-2">&amp;</span><span class="self">self</span>, base_key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Reads a single `key` and deserialize the result if present.
+    <span class="doccomment">/// Reads a single `key` and deserializes the result if present.
     </span><span class="kw">async fn </span>read_key&lt;V: DeserializeOwned&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;V&gt;, <span class="self">Self</span>::Error&gt;
     <span class="kw">where
         </span><span class="self">Self</span>::Error: From&lt;bcs::Error&gt;,
@@ -840,7 +844,7 @@
         keys: Vec&lt;Vec&lt;u8&gt;&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt;, <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Finds keys matching the `key_prefix`. The `key_prefix` is not included in the returned keys.
+    <span class="doccomment">/// Finds the keys matching the `key_prefix`. The `key_prefix` is not included in the returned keys.
     </span><span class="kw">async fn </span>find_keys_by_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Keys, <span class="self">Self</span>::Error&gt;;
 
     <span class="doccomment">/// Finds the `(key,value)` pairs matching the `key_prefix`. The `key_prefix` is not included in the returned keys.

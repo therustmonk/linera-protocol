@@ -274,6 +274,35 @@
 <a href="#274" id="274">274</a>
 <a href="#275" id="275">275</a>
 <a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -281,11 +310,14 @@
     WriteOperation,
     WriteOperation::{Delete, Put},
 };
+
 <span class="kw">use </span>rand::{Rng, RngCore};
 <span class="kw">use </span>std::collections::HashSet;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
 </span><span class="kw">use </span>{
+    <span class="kw">crate</span>::dynamo_db::DynamoDbClient,
+    <span class="kw">crate</span>::lru_caching::TEST_CACHE_SIZE,
     anyhow::{Context, Error},
     aws_sdk_s3::Endpoint,
     aws_types::SdkConfig,
@@ -410,6 +442,20 @@
     }
 }
 
+<span class="doccomment">/// Creates a basic client that can be used for tests.
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
+</span><span class="kw">pub async fn </span>create_dynamodb_test_client() -&gt; DynamoDbClient {
+    <span class="kw">let </span>localstack = LocalStackTestContext::new().<span class="kw">await</span>.unwrap();
+    <span class="kw">let </span>(key_value_operation, <span class="kw">_</span>) = DynamoDbClient::from_config(
+        localstack.dynamo_db_config(),
+        <span class="string">&quot;test_table&quot;</span>.parse().expect(<span class="string">&quot;Invalid table name&quot;</span>),
+        TEST_CACHE_SIZE,
+    )
+    .<span class="kw">await
+    </span>.unwrap();
+    key_value_operation
+}
+
 <span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
 </span><span class="doccomment">/// Helper function to list the names of buckets registered on S3.
 </span><span class="kw">pub async fn </span>list_buckets(client: <span class="kw-2">&amp;</span>aws_sdk_s3::Client) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;String&gt;, Error&gt; {
@@ -460,6 +506,16 @@
     v
 }
 
+<span class="doccomment">/// Appends a small value to a key to make collisions likely.
+</span><span class="kw">pub fn </span>get_small_key_space&lt;R: RngCore&gt;(rng: <span class="kw-2">&amp;mut </span>R, key_prefix: <span class="kw-2">&amp;</span>[u8], n: usize) -&gt; Vec&lt;u8&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>key = key_prefix.to_vec();
+    <span class="kw">for _ in </span><span class="number">0</span>..n {
+        <span class="kw">let </span>byte = rng.gen_range(<span class="number">0</span>..<span class="number">4</span>) <span class="kw">as </span>u8;
+        key.push(byte);
+    }
+    key
+}
+
 <span class="doccomment">/// Builds a random k element subset of n
 </span><span class="kw">pub fn </span>get_random_kset&lt;R: RngCore&gt;(rng: <span class="kw-2">&amp;mut </span>R, n: usize, k: usize) -&gt; Vec&lt;usize&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>values = Vec::new();
@@ -477,14 +533,16 @@
 </span><span class="kw">pub fn </span>get_random_key_value_vec_prefix&lt;R: RngCore&gt;(
     rng: <span class="kw-2">&amp;mut </span>R,
     key_prefix: Vec&lt;u8&gt;,
+    len_key: usize,
+    len_value: usize,
     n: usize,
 ) -&gt; Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt; {
     <span class="kw">loop </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>v_ret = Vec::new();
         <span class="kw">let </span><span class="kw-2">mut </span>vector_set = HashSet::new();
         <span class="kw">for _ in </span><span class="number">0</span>..n {
-            <span class="kw">let </span>v1 = get_random_byte_vector(rng, <span class="kw-2">&amp;</span>key_prefix, <span class="number">8</span>);
-            <span class="kw">let </span>v2 = get_random_byte_vector(rng, <span class="kw-2">&amp;</span>Vec::new(), <span class="number">8</span>);
+            <span class="kw">let </span>v1 = get_random_byte_vector(rng, <span class="kw-2">&amp;</span>key_prefix, len_key);
+            <span class="kw">let </span>v2 = get_random_byte_vector(rng, <span class="kw-2">&amp;</span>Vec::new(), len_value);
             <span class="kw">let </span>v12 = (v1.clone(), v2);
             vector_set.insert(v1);
             v_ret.push(v12);
@@ -498,7 +556,7 @@
 <span class="doccomment">/// Takes a random number generator rng, a number n and returns n random (key,value)
 /// which are all distinct with key and value are of length 8.
 </span><span class="kw">pub fn </span>get_random_key_value_vec&lt;R: RngCore&gt;(rng: <span class="kw-2">&amp;mut </span>R, n: usize) -&gt; Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt; {
-    get_random_key_value_vec_prefix(rng, Vec::new(), n)
+    get_random_key_value_vec_prefix(rng, Vec::new(), <span class="number">8</span>, <span class="number">8</span>, n)
 }
 
 <span class="kw">type </span>VectorPutDelete = (Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt;, usize);
@@ -509,7 +567,7 @@
     n: usize,
     k: usize,
 ) -&gt; VectorPutDelete {
-    <span class="kw">let </span>key_value_vector = get_random_key_value_vec_prefix(rng, Vec::new(), n);
+    <span class="kw">let </span>key_value_vector = get_random_key_value_vec_prefix(rng, Vec::new(), <span class="number">8</span>, <span class="number">8</span>, n);
     (key_value_vector, k)
 }
 

@@ -246,13 +246,20 @@
 <a href="#246" id="246">246</a>
 <a href="#247" id="247">247</a>
 <a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use crate</span>::{
     batch::{Batch, WriteOperation},
     common::{get_upper_bound, ContextFromDb, KeyValueStoreClient},
-    lru_caching::LruCachingKeyValueClient,
+    lru_caching::{LruCachingKeyValueClient, TEST_CACHE_SIZE},
 };
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>std::{
@@ -260,38 +267,17 @@
     path::Path,
     sync::Arc,
 };
+<span class="kw">use </span>tempfile::TempDir;
 <span class="kw">use </span>thiserror::Error;
 
 <span class="doccomment">/// The RocksDb client in use.
 </span><span class="kw">pub type </span>DB = rocksdb::DBWithThreadMode&lt;rocksdb::MultiThreaded&gt;;
 
 <span class="doccomment">/// The internal client
-</span><span class="kw">pub type </span>DbInternal = Arc&lt;DB&gt;;
-
-<span class="doccomment">/// A shared DB client for RocksDB implementing LruCaching
-</span><span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>RocksdbClient {
-    client: LruCachingKeyValueClient&lt;DbInternal&gt;,
-}
-
-<span class="kw">impl </span>RocksdbClient {
-    <span class="doccomment">/// Creates a rocksdb database from a specified path
-    </span><span class="kw">pub fn </span>new&lt;P: AsRef&lt;Path&gt;&gt;(path: P, cache_size: usize) -&gt; RocksdbClient {
-        <span class="kw">let </span><span class="kw-2">mut </span>options = rocksdb::Options::default();
-        options.create_if_missing(<span class="bool-val">true</span>);
-        <span class="kw">let </span>db = DB::open(<span class="kw-2">&amp;</span>options, path).unwrap();
-        <span class="kw">let </span>client = Arc::new(db);
-        <span class="self">Self </span>{
-            client: LruCachingKeyValueClient::new(client, cache_size),
-        }
-    }
-}
-
-<span class="doccomment">/// An implementation of [`crate::common::Context`] based on Rocksdb
-</span><span class="kw">pub type </span>RocksdbContext&lt;E&gt; = ContextFromDb&lt;E, RocksdbClient&gt;;
+</span><span class="kw">pub type </span>RocksdbClientInternal = Arc&lt;DB&gt;;
 
 <span class="attr">#[async_trait]
-</span><span class="kw">impl </span>KeyValueStoreClient <span class="kw">for </span>DbInternal {
+</span><span class="kw">impl </span>KeyValueStoreClient <span class="kw">for </span>RocksdbClientInternal {
     <span class="kw">const </span>MAX_CONNECTIONS: usize = <span class="number">1</span>;
     <span class="kw">type </span>Error = RocksdbContextError;
     <span class="kw">type </span>Keys = Vec&lt;Vec&lt;u8&gt;&gt;;
@@ -417,6 +403,34 @@
         <span class="prelude-val">Ok</span>(())
     }
 }
+
+<span class="doccomment">/// A shared DB client for RocksDB implementing LruCaching
+</span><span class="attr">#[derive(Clone)]
+</span><span class="kw">pub struct </span>RocksdbClient {
+    client: LruCachingKeyValueClient&lt;RocksdbClientInternal&gt;,
+}
+
+<span class="kw">impl </span>RocksdbClient {
+    <span class="doccomment">/// Creates a RocksDB database from a specified path.
+    </span><span class="kw">pub fn </span>new&lt;P: AsRef&lt;Path&gt;&gt;(path: P, cache_size: usize) -&gt; RocksdbClient {
+        <span class="kw">let </span><span class="kw-2">mut </span>options = rocksdb::Options::default();
+        options.create_if_missing(<span class="bool-val">true</span>);
+        <span class="kw">let </span>db = DB::open(<span class="kw-2">&amp;</span>options, path).unwrap();
+        <span class="kw">let </span>client = Arc::new(db);
+        <span class="self">Self </span>{
+            client: LruCachingKeyValueClient::new(client, cache_size),
+        }
+    }
+}
+
+<span class="doccomment">/// Creates a RocksDB database client to be used for tests.
+</span><span class="kw">pub fn </span>create_rocksdb_test_client() -&gt; RocksdbClient {
+    <span class="kw">let </span>dir = TempDir::new().unwrap();
+    RocksdbClient::new(dir, TEST_CACHE_SIZE)
+}
+
+<span class="doccomment">/// An implementation of [`crate::common::Context`] based on RocksDB
+</span><span class="kw">pub type </span>RocksdbContext&lt;E&gt; = ContextFromDb&lt;E, RocksdbClient&gt;;
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>KeyValueStoreClient <span class="kw">for </span>RocksdbClient {

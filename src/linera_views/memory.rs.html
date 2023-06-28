@@ -137,6 +137,15 @@
 <a href="#137" id="137">137</a>
 <a href="#138" id="138">138</a>
 <a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -178,6 +187,15 @@
         .try_lock_arc()
         .expect(<span class="string">&quot;We should acquire the lock just after creating the object&quot;</span>);
     MemoryContext::new(guard, ())
+}
+
+<span class="doccomment">/// Creates a test memory client.
+</span><span class="kw">pub fn </span>create_test_memory_client() -&gt; MemoryClient {
+    <span class="kw">let </span>state = Arc::new(Mutex::new(BTreeMap::new()));
+    <span class="kw">let </span>guard = state
+        .try_lock_arc()
+        .expect(<span class="string">&quot;We should acquire the lock just after creating the object&quot;</span>);
+    Arc::new(RwLock::new(guard))
 }
 
 <span class="attr">#[async_trait]
