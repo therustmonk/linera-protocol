@@ -903,6 +903,7 @@
 <a href="#903" id="903">903</a>
 <a href="#904" id="904">904</a>
 <a href="#905" id="905">905</a>
+<a href="#906" id="906">906</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -931,15 +932,15 @@
     std::sync::Arc,
 };
 
-<span class="doccomment">/// We actually implement two types:
-/// 1) The first type KeyValueStoreView that implements View and the function of KeyValueStoreClient
+<span class="doccomment">/// We implement two types:
+/// 1) The first type KeyValueStoreView implements View and the function of KeyValueStoreClient
 /// (though not KeyValueStoreClient).
 ///
 /// 2) The second type ViewContainer encapsulates KeyValueStoreView and provides the following functionalities:
 /// * The Clone trait
 /// * a write_batch that takes a &amp;self instead of a &quot;&amp;mut self&quot;
 /// * a write_batch that writes in the context instead of writing of the view.
-/// At the present time, that second type is only used for tests.
+/// Currently, that second type is only used for tests.
 
 /// Key tags to create the sub-keys of a KeyValueStoreView on top of the base key.
 </span><span class="attr">#[repr(u8)]
@@ -957,15 +958,16 @@
 /// The updates and deleted_prefixes have to be coherent. This means:
 /// * If an index is deleted by one in deleted_prefixes then it should not be present
 ///   in updates at al.
-/// * deleted prefix in deleteprefix should not dominate anyone. That is if
-///   we have `[0,2]` then we should not have `[0,2,3]` since it would be dominated
-///   by the preceding.
+/// * [`DeletePrefix::key_prefix`][entry1] should not dominate anyone. That is if we have `[0,2]`
+///   then we should not have `[0,2,3]` since it would be dominated by the preceding.
 ///
 /// With that we have:
-/// * in order to test if an index is deleted by a prefix we compute the highest deleteprefix dp
-///   such that dp &lt;= index.
+/// * in order to test if an index is deleted by a prefix we compute the highest deleted prefix `prefix`
+///   such that prefix &lt;= index.
 ///   If dp is indeed a prefix then we conclude from that.index is deleted, otherwise not.
 ///   The no domination is essential here.
+///
+/// [entry1]: crate::batch::WriteOperation::DeletePrefix
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>KeyValueStoreView&lt;C&gt; {
     context: C,
@@ -1698,11 +1700,11 @@
 }
 
 <span class="doccomment">/// NextLowerKeyIterator iterates over the entries of a BTreeSet.
-/// The function get_lower_bound(val) returns a Some(x) where x is the highest
-/// entry such that x &lt;= val. If none exists then None is returned.
+/// The function call `get_lower_bound(val)` returns a `Some(x)` where `x` is the highest
+/// entry such that `x &lt;= val`. If none exists then None is returned.
 ///
-/// the function calls get_lower_bound have to be called with increasing
-/// values.
+/// The function calls `get_lower_bound` have to be called with increasing
+/// values in order to get correct results.
 </span><span class="kw">struct </span>NextLowerKeyIterator&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;static</span>&gt; {
     prec1: <span class="prelude-ty">Option</span>&lt;T&gt;,
     prec2: <span class="prelude-ty">Option</span>&lt;T&gt;,

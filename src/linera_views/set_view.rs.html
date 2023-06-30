@@ -850,7 +850,7 @@
 <span class="doccomment">/// Key tags to create the sub-keys of a SetView on top of the base key.
 </span><span class="attr">#[repr(u8)]
 </span><span class="kw">enum </span>KeyTag {
-    <span class="doccomment">/// Prefix for the indices of the setview
+    <span class="doccomment">/// Prefix for the indices of the `SetView`
     </span>Index = MIN_VIEW_TAG,
     <span class="doccomment">/// Prefix for the hash
     </span>Hash,
@@ -1320,7 +1320,7 @@
     ViewError: From&lt;C::Error&gt;,
     I: Sync + Clone + Send + Serialize + DeserializeOwned,
 {
-    <span class="doccomment">/// Returns the list of indices in the set. The order is determined by the serialization.
+    <span class="doccomment">/// Returns the list of indices in the set. The order is determined by serialization.
     /// ```rust
     /// # tokio_test::block_on(async {
     /// # use linera_views::{memory::create_test_context, set_view::SetView};

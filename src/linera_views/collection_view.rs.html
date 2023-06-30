@@ -1614,7 +1614,7 @@
         .<span class="kw">await
     </span>}
 
-    <span class="doccomment">/// Returns the list of jeys in the collection. The order is lexicographic.
+    <span class="doccomment">/// Returns the list of keys in the collection. The order is lexicographic.
     /// ```rust
     /// # tokio_test::block_on(async {
     /// # use linera_views::memory::{create_test_context, MemoryContext};
@@ -2006,7 +2006,7 @@
     </span>}
 }
 
-<span class="doccomment">/// A MapView that serialize the indices.
+<span class="doccomment">/// A MapView that serializes the indices.
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>CustomCollectionView&lt;C, I, W&gt; {
     collection: ByteCollectionView&lt;C, W&gt;,
@@ -2231,8 +2231,8 @@
     W: View&lt;C&gt; + Sync,
 {
     <span class="doccomment">/// Applies a function f on each index. Indices are visited in an order
-    /// determined by the custom serialization. If the function f returns false
-    /// then the loops ends prematurely.
+    /// determined by the custom serialization. If the function f returns false,
+    /// then the loop ends prematurely.
     /// ```rust
     /// # tokio_test::block_on(async {
     /// # use linera_views::memory::{create_test_context, MemoryContext};

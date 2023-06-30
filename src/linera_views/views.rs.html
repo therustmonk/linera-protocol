@@ -174,7 +174,6 @@
 <a href="#174" id="174">174</a>
 <a href="#175" id="175">175</a>
 <a href="#176" id="176">176</a>
-<a href="#177" id="177">177</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -192,7 +191,7 @@
 #[path = <span class="string">&quot;unit_tests/views.rs&quot;</span>]
 </span><span class="kw">mod </span>tests;
 
-<span class="doccomment">/// A view gives an exclusive access to read and write the data stored at an underlying
+<span class="doccomment">/// A view gives exclusive access to read and write the data stored at an underlying
 /// address in storage.
 </span><span class="attr">#[async_trait]
 </span><span class="kw">pub trait </span>View&lt;C&gt;: Sized {
@@ -219,8 +218,7 @@
     <span class="doccomment">/// Instead of persisting changes, clears all the data that belong to this view and its
     /// subviews. Crash-resistant storage implementations are expected to accumulate the
     /// desired changes into the `batch` variable first.
-    /// No data/metadata at all is left after delete. The view is consumed by delete
-    /// and cannot be used in any way after delete.
+    /// No data/metadata at all is left after deletion. The view is consumed by `delete`.
     </span><span class="kw">fn </span>delete(<span class="self">self</span>, batch: <span class="kw-2">&amp;mut </span>Batch);
 }
 
@@ -291,14 +289,14 @@
     <span class="doccomment">/// Computes the hash of the values.
     ///
     /// Implementations do not need to include a type tag. However, the usual precautions
-    /// to enforce collision-resistance must be applied (e.g. including the length of a
+    /// to enforce collision resistance must be applied (e.g. including the length of a
     /// collection of values).
     </span><span class="kw">async fn </span>hash_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;&lt;<span class="self">Self</span>::Hasher <span class="kw">as </span>Hasher&gt;::Output, ViewError&gt;;
 
     <span class="doccomment">/// Computes the hash of the values.
     ///
     /// Implementations do not need to include a type tag. However, the usual precautions
-    /// to enforce collision-resistance must be applied (e.g. including the length of a
+    /// to enforce collision resistance must be applied (e.g. including the length of a
     /// collection of values).
     </span><span class="kw">async fn </span>hash(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;&lt;<span class="self">Self</span>::Hasher <span class="kw">as </span>Hasher&gt;::Output, ViewError&gt;;
 }
@@ -308,10 +306,10 @@
     <span class="doccomment">/// The output type.
     </span><span class="kw">type </span>Output: Debug + Clone + Eq + AsRef&lt;[u8]&gt; + <span class="lifetime">&#39;static</span>;
 
-    <span class="doccomment">/// Finishes the hashing process and return its output.
+    <span class="doccomment">/// Finishes the hashing process and returns its output.
     </span><span class="kw">fn </span>finalize(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Output;
 
-    <span class="doccomment">/// Serializes a value with BCS and include it in the hash.
+    <span class="doccomment">/// Serializes a value with BCS and includes it in the hash.
     </span><span class="kw">fn </span>update_with_bcs_bytes(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw-2">&amp;</span><span class="kw">impl </span>Serialize) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; {
         bcs::serialize_into(<span class="self">self</span>, value)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())

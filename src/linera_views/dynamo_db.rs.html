@@ -1231,7 +1231,7 @@
     <span class="prelude-val">Ok</span>((key, value))
 }
 
-<span class="doccomment">/// Extracts the `(key,value)` pair attributes from an item (returned by value).
+<span class="doccomment">/// Extracts the `(key, value)` pair attributes from an item (returned by value).
 </span><span class="kw">fn </span>extract_key_value_owned(
     prefix_len: usize,
     attributes: <span class="kw-2">&amp;mut </span>HashMap&lt;String, AttributeValue&gt;,
@@ -1319,7 +1319,7 @@
     <span class="prelude-val">Ok</span>(key)
 }
 
-<span class="doccomment">/// The header containing the current state of the journal.
+<span class="doccomment">/// The header that contains the current state of the journal.
 </span><span class="attr">#[derive(Serialize, Deserialize)]
 </span><span class="kw">struct </span>JournalHeader {
     block_count: u32,
@@ -1388,7 +1388,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Writes blocks to the database so as to be resolved later.
+    <span class="doccomment">/// Writes blocks to the database and resolves them later.
     </span><span class="kw">pub async fn </span>write_journal(
         <span class="self">self</span>,
         db: <span class="kw-2">&amp;</span>DynamoDbClientInternal,
@@ -1466,7 +1466,7 @@
         db: <span class="kw-2">&amp;</span>DynamoDbClientInternal,
         batch: Batch,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, DynamoDbContextError&gt; {
-        <span class="comment">// As a matter of fact the DynamoDB does not support the deleteprefix operation.
+        <span class="comment">// The DynamoDB does not support the `DeletePrefix` operation.
         // Therefore it does not make sense to have a delete prefix and they have to
         // be downloaded for making a list.
         // Also we remove the deletes that are followed by inserts on the same key because
@@ -1548,7 +1548,7 @@
     }
 }
 
-<span class="doccomment">/// A set of key-values returned by a search query on DynamoDb.
+<span class="doccomment">/// A set of `(key, value)` returned by a search query on DynamoDb.
 </span><span class="kw">pub struct </span>DynamoDbKeyValues {
     prefix_len: usize,
     response: Box&lt;QueryOutput&gt;,
@@ -2006,19 +2006,19 @@
 <span class="doccomment">/// Errors that occur when using [`DynamoDbContext`].
 </span><span class="attr">#[derive(Debug, Error)]
 </span><span class="kw">pub enum </span>DynamoDbContextError {
-    <span class="doccomment">/// An error occurred while getting the item
+    <span class="doccomment">/// An error occurred while getting the item.
     </span><span class="attr">#[error(transparent)]
     </span>Get(<span class="attr">#[from] </span>Box&lt;SdkError&lt;aws_sdk_dynamodb::error::GetItemError&gt;&gt;),
 
-    <span class="doccomment">/// An error occurred while writing a batch of item.
+    <span class="doccomment">/// An error occurred while writing a batch of items.
     </span><span class="attr">#[error(transparent)]
     </span>BatchWriteItem(<span class="attr">#[from] </span>Box&lt;SdkError&lt;aws_sdk_dynamodb::error::BatchWriteItemError&gt;&gt;),
 
-    <span class="doccomment">/// An error occurred while writing a transact of items.
+    <span class="doccomment">/// An error occurred while writing a transaction of items.
     </span><span class="attr">#[error(transparent)]
     </span>TransactWriteItem(<span class="attr">#[from] </span>Box&lt;SdkError&lt;aws_sdk_dynamodb::error::TransactWriteItemsError&gt;&gt;),
 
-    <span class="doccomment">/// An error occurred while doing a Query
+    <span class="doccomment">/// An error occurred while doing a Query.
     </span><span class="attr">#[error(transparent)]
     </span>Query(<span class="attr">#[from] </span>Box&lt;SdkError&lt;aws_sdk_dynamodb::error::QueryError&gt;&gt;),
 
@@ -2026,11 +2026,11 @@
     </span><span class="attr">#[error(<span class="string">&quot;The transact must have length at most MAX_TRANSACT_WRITE_ITEM_SIZE&quot;</span>)]
     </span>TransactUpperLimitSize,
 
-    <span class="doccomment">/// Key have to be of non-zero length.
+    <span class="doccomment">/// Keys have to be of non-zero length.
     </span><span class="attr">#[error(<span class="string">&quot;The key must be of strictly positive length&quot;</span>)]
     </span>ZeroLengthKey,
 
-    <span class="doccomment">/// Key prefix have to be of non-zero length.
+    <span class="doccomment">/// Key prefixes have to be of non-zero length.
     </span><span class="attr">#[error(<span class="string">&quot;The key_prefix must be of strictly positive length&quot;</span>)]
     </span>ZeroLengthKeyPrefix,
 

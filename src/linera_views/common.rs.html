@@ -566,7 +566,7 @@
 </span><span class="doccomment">//! This provides several functionalities for the handling of data.
 //! The most important traits are:
 //! * [`KeyValueStoreClient`][trait1] which manages the access to a database and is clonable. It has a minimal interface
-//! * [`Context`][trait2] which provides the access to a database plus a `base_key` and some extra type `E` which is carried along
+//! * [`Context`][trait2] which provides access to a database plus a `base_key` and some extra type `E` which is carried along
 //! and has no impact on the running of the system. There is also a bunch of other helper functions.
 //!
 //! [trait1]: common::KeyValueStoreClient
@@ -606,7 +606,7 @@
 <span class="doccomment">/// When wanting to find the entries in a BTreeMap with a specific prefix,
 /// one option is to iterate over all keys. Another is to select an interval
 /// that represents exactly the keys having that prefix. Which fortunately
-/// is possible with the way the comparison operators for vectors is built.
+/// is possible with the way the comparison operators for vectors are built.
 ///
 /// The statement is that p is a prefix of v if and only if p &lt;= v &lt; upper_bound(p).
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_upper_bound(key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; Bound&lt;Vec&lt;u8&gt;&gt; {
@@ -657,12 +657,12 @@
 
 <span class="doccomment">/// How to iterate over the key-value pairs returned by a search query.
 </span><span class="kw">pub trait </span>KeyValueIterable&lt;Error&gt; {
-    <span class="doccomment">/// The iterator returning key-value pairs by reference.
+    <span class="doccomment">/// The iterator that returns key-value pairs by reference.
     </span><span class="kw">type </span>Iterator&lt;<span class="lifetime">&#39;a</span>&gt;: Iterator&lt;Item = <span class="prelude-ty">Result</span>&lt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]), Error&gt;&gt;
     <span class="kw">where
         </span><span class="self">Self</span>: <span class="lifetime">&#39;a</span>;
 
-    <span class="doccomment">/// The iterator returning key-value pairs by value.
+    <span class="doccomment">/// The iterator that returns key-value pairs by value.
     </span><span class="kw">type </span>IteratorOwned: Iterator&lt;Item = <span class="prelude-ty">Result</span>&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;), Error&gt;&gt;;
 
     <span class="doccomment">/// Iterates keys and values by reference.
@@ -821,7 +821,7 @@
     <span class="doccomment">/// Maximum number of simultaneous connections
     </span><span class="kw">const </span>MAX_CONNECTIONS: usize;
 
-    <span class="doccomment">/// User provided data to be carried along.
+    <span class="doccomment">/// User-provided data to be carried along.
     </span><span class="kw">type </span>Extra: Clone + Send + Sync;
 
     <span class="doccomment">/// The error type in use by internal operations.
@@ -856,7 +856,7 @@
     <span class="doccomment">/// Applies the operations from the `batch`, persisting the changes.
     </span><span class="kw">async fn </span>write_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, batch: Batch) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;;
 
-    <span class="doccomment">/// Getter for the user provided data.
+    <span class="doccomment">/// Getter for the user-provided data.
     </span><span class="kw">fn </span>extra(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Extra;
 
     <span class="doccomment">/// Obtains a similar [`Context`] implementation with a different base key.
@@ -943,7 +943,7 @@
 /// [`KeyValueStoreClient`].
 </span><span class="attr">#[derive(Debug, Default, Clone)]
 </span><span class="kw">pub struct </span>ContextFromDb&lt;E, DB&gt; {
-    <span class="doccomment">/// The DB client, usually shared between views.
+    <span class="doccomment">/// The DB client that is shared between views.
     </span><span class="kw">pub </span>db: DB,
     <span class="doccomment">/// The base key for the current view.
     </span><span class="kw">pub </span>base_key: Vec&lt;u8&gt;,

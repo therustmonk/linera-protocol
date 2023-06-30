@@ -3,7 +3,7 @@
 configuration.</p>
 <p>An address to the LocalStack instance must be specified using a <code>LOCALSTACK_ENDPOINT</code>
 environment variable.</p>
-<p>This also locks the <code>LOCALSTACK_GUARD</code> to enforce only one test has access to the
+<p>This also locks the <code>LOCALSTACK_GUARD</code> to enforce that only one test has access to the
 LocalStack instance.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.s3_config" class="method"><a class="srclink rightside" href="../../src/linera_views/test_utils/mod.rs.html#83-87">source</a><h4 class="code-header">pub fn <a href="#method.s3_config" class="fn">s3_config</a>(&amp;self) -&gt; <a class="struct" href="../../aws_sdk_s3/config/struct.Config.html" title="struct aws_sdk_s3::config::Config">Config</a></h4></section></summary><div class="docblock"><p>Creates a new <a href="../../aws_sdk_s3/config/struct.Config.html" title="struct aws_sdk_s3::config::Config"><code>aws_sdk_s3::Config</code></a> for tests, using a LocalStack instance.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.dynamo_db_config" class="method"><a class="srclink rightside" href="../../src/linera_views/test_utils/mod.rs.html#90-94">source</a><h4 class="code-header">pub fn <a href="#method.dynamo_db_config" class="fn">dynamo_db_config</a>(&amp;self) -&gt; <a class="struct" href="../../aws_sdk_dynamodb/config/struct.Config.html" title="struct aws_sdk_dynamodb::config::Config">Config</a></h4></section></summary><div class="docblock"><p>Creates a new <a href="../../aws_sdk_dynamodb/config/struct.Config.html" title="struct aws_sdk_dynamodb::config::Config"><code>aws_sdk_dynamodb::Config</code></a> for tests, using a LocalStack instance.</p>

@@ -1323,13 +1323,13 @@
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="doccomment">//! The `MapView` allows to implement a map that can be modified.
+</span><span class="doccomment">//! The `MapView` implements a map that can be modified.
 //!
 //! This reproduces more or less the functionalities of the `BTreeMap`.
 //! There are 3 different variants:
 //! * The [`ByteMapView`][class1] whose keys are the `Vec&lt;u8&gt;` and the values are a serializable type `V`.
 //!   The ordering of the entries is via the lexicographic order of the keys.
-//! * The [`MapView`][class2] whose keys are a serializable type `K`and the value a serializable type `V`.
+//! * The [`MapView`][class2] whose keys are a serializable type `K` and the value a serializable type `V`.
 //!   The ordering is via the order of the BCS serialized keys.
 //! * The [`CustomMapView`][class3] whose keys are a serializable type `K` and the value a serializable type `V`.
 //!   The ordering is via the order of the custom serialized keys.
@@ -1534,7 +1534,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Obtainw a mutable reference to a value at a given position if available.
+    <span class="doccomment">/// Obtains a mutable reference to a value at a given position if available.
     /// ```rust
     /// # tokio_test::block_on(async {
     /// # use linera_views::memory::create_test_context;
@@ -1886,7 +1886,7 @@
     }
 }
 
-<span class="doccomment">/// A View that actually has a type for keys. The ordering of the entries
+<span class="doccomment">/// A `View` that has a type for keys. The ordering of the entries
 /// is determined by the serialization of the context.
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>MapView&lt;C, I, V&gt; {
@@ -2048,7 +2048,7 @@
     I: Sync + Send + Serialize + DeserializeOwned,
     V: Sync + Serialize + DeserializeOwned + <span class="lifetime">&#39;static</span>,
 {
-    <span class="doccomment">/// Returns the list of indices in the map. The order is determined by the serialization.
+    <span class="doccomment">/// Returns the list of indices in the map. The order is determined by serialization.
     /// ```rust
     /// # tokio_test::block_on(async {
     /// # use linera_views::memory::create_test_context;
@@ -2105,7 +2105,7 @@
     }
 
     <span class="doccomment">/// Applies a function f on each index. Indices are visited in the order
-    /// determined by the serialization.
+    /// determined by serialization.
     /// ```rust
     /// # tokio_test::block_on(async {
     /// # use linera_views::memory::create_test_context;
@@ -2136,7 +2136,7 @@
     }
 
     <span class="doccomment">/// Applies a function f on each index/value pair. Indices and values are
-    /// visited in an order determined by the serialization.
+    /// visited in an order determined by serialization.
     /// If the function returns false, then the loop ends prematurely.
     /// ```rust
     /// # tokio_test::block_on(async {
@@ -2171,7 +2171,7 @@
     }
 
     <span class="doccomment">/// Applies a function on each index/value pair. Indices and values are
-    /// visited in an order determined by the serialization.
+    /// visited in an order determined by serialization.
     /// ```rust
     /// # tokio_test::block_on(async {
     /// # use linera_views::memory::create_test_context;

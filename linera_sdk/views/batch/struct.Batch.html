@@ -30,7 +30,7 @@ or matched by a delete prefix.</p>
     &amp;mut self,
     key: <a class="struct" href="https://doc.rust-lang.org/1.69.0/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.69.0/std/primitive.u8.html">u8</a>, <a class="struct" href="https://doc.rust-lang.org/1.69.0/alloc/alloc/struct.Global.html" title="struct alloc::alloc::Global">Global</a>&gt;,
     value: <a class="struct" href="https://doc.rust-lang.org/1.69.0/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.69.0/std/primitive.u8.html">u8</a>, <a class="struct" href="https://doc.rust-lang.org/1.69.0/alloc/alloc/struct.Global.html" title="struct alloc::alloc::Global">Global</a>&gt;
-)</h4></section></summary><div class="docblock"><p>Adds the insertion of a <code>(key,value)</code> pair into the batch with value a vector of <code>u8</code>.</p>
+)</h4></section></summary><div class="docblock"><p>Adds the insertion of a <code>(key, value)</code> pair into the batch with <code>value</code> a vector of <code>u8</code>.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code>  <span class="kw">let </span><span class="kw-2">mut </span>batch = Batch::new();
   batch.put_key_value_bytes(<span class="macro">vec!</span>[<span class="number">0</span>,<span class="number">1</span>], <span class="macro">vec!</span>[<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>]);</code></pre></div>

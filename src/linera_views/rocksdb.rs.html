@@ -270,7 +270,7 @@
 <span class="kw">use </span>tempfile::TempDir;
 <span class="kw">use </span>thiserror::Error;
 
-<span class="doccomment">/// The RocksDb client in use.
+<span class="doccomment">/// The RocksDb client that we use.
 </span><span class="kw">pub type </span>DB = rocksdb::DBWithThreadMode&lt;rocksdb::MultiThreaded&gt;;
 
 <span class="doccomment">/// The internal client
@@ -359,7 +359,7 @@
         _base_key: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), RocksdbContextError&gt; {
         <span class="kw">let </span>db = <span class="self">self</span>.clone();
-        <span class="comment">// NOTE: The delete_range functionality of rocksdb needs to have an upper bound in order to work.
+        <span class="comment">// NOTE: The delete_range functionality of RocksDB needs to have an upper bound in order to work.
         // Thus in order to have the system working, we need to handle the unlikely case of having to
         // delete a key starting with [255, ...., 255]
         </span><span class="kw">let </span>len = batch.operations.len();

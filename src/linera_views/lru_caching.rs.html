@@ -267,12 +267,12 @@
     async_lock::MutexGuardArc,
 };
 
-<span class="doccomment">/// The LruPrefixCache store the data for a simple read_keys queries
-/// It is inspired from lru-cache crate.
+<span class="doccomment">/// The `LruPrefixCache` stores the data for simple `read_keys` queries
+/// It is inspired by the crate `lru-cache`.
 ///
 /// We cannot apply this crate directly because the batch operation
-/// need to update the cache. In the case of DeletePrefix we have to
-/// handle the keys by prefix. And so we need to have a BTreeMap to
+/// need to update the cache. In the case of `DeletePrefix` we have to
+/// handle the keys by prefixes. And so we need to have a BTreeMap to
 /// keep track of this.
 
 /// The data structures
@@ -325,7 +325,7 @@
     }
 }
 
-<span class="doccomment">/// We take a client, a maximum size and build a LRU based system.
+<span class="doccomment">/// We take a client, a maximum size and build a LRU-based system.
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>LruCachingKeyValueClient&lt;K&gt; {
     client: K,
@@ -445,7 +445,7 @@
 <span class="kw">where
     </span>K: KeyValueStoreClient,
 {
-    <span class="doccomment">/// Creates a new Key Value Store Client that implements LRU caching.
+    <span class="doccomment">/// Creates a new key-value store client that implements LRU caching.
     </span><span class="kw">pub fn </span>new(client: K, max_size: usize) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>max_size == <span class="number">0 </span>{
             <span class="self">Self </span>{

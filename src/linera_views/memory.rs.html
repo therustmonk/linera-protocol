@@ -159,8 +159,8 @@
 <span class="kw">use </span>std::{collections::BTreeMap, fmt::Debug, sync::Arc};
 <span class="kw">use </span>thiserror::Error;
 
-<span class="doccomment">/// The data is serialized in memory just like for rocksdb / dynamodb
-/// The analogue of the database is the BTreeMap
+<span class="doccomment">/// The data is serialized in memory just like for RocksDB / DynamoDB
+/// The analog of the database is the BTreeMap
 </span><span class="kw">pub type </span>MemoryStoreMap = BTreeMap&lt;Vec&lt;u8&gt;, Vec&lt;u8&gt;&gt;;
 
 <span class="doccomment">/// A virtual DB client where data are persisted in memory.
