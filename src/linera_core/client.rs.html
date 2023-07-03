@@ -2478,8 +2478,6 @@
             block.previous_block_hash == <span class="self">self</span>.block_hash,
             <span class="string">&quot;Unexpected previous block hash&quot;
         </span>);
-        <span class="comment">// Remember what we are trying to do
-        </span><span class="self">self</span>.pending_block = <span class="prelude-val">Some</span>(block.clone());
         <span class="comment">// Collect blobs required for execution.
         </span><span class="kw">let </span>committee = <span class="self">self</span>.local_committee().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>nodes = <span class="self">self</span>.validator_node_provider.make_nodes(<span class="kw-2">&amp;</span>committee)<span class="question-mark">?</span>;
@@ -2491,7 +2489,7 @@
         </span><span class="kw">let </span>key_pair = <span class="self">self</span>.key_pair().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>proposal = BlockProposal::new(
             BlockAndRound {
-                block,
+                block: block.clone(),
                 round: next_round,
             },
             key_pair,
@@ -2501,6 +2499,8 @@
         </span><span class="self">self</span>.node_client
             .handle_block_proposal(proposal.clone())
             .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="comment">// Remember what we are trying to do, before sending the proposal to the validators.
+        </span><span class="self">self</span>.pending_block = <span class="prelude-val">Some</span>(block);
         <span class="comment">// Send the query to validators.
         </span><span class="kw">let </span>final_certificate = <span class="kw">match </span><span class="self">self</span>.chain_info().<span class="kw">await</span><span class="question-mark">?</span>.manager {
             ChainManagerInfo::Multi(<span class="kw">_</span>) =&gt; {
