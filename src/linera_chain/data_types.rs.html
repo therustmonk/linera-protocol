@@ -699,6 +699,10 @@
 <a href="#699" id="699">699</a>
 <a href="#700" id="700">700</a>
 <a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -936,6 +940,11 @@
             signature: <span class="self">self</span>.signature,
         }
     }
+
+    <span class="doccomment">/// Returns the value this vote is for.
+    </span><span class="kw">pub fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>CertificateValue {
+        <span class="self">self</span>.value.inner()
+    }
 }
 
 <span class="doccomment">/// A vote on a statement from a validator, represented as a `LiteValue`.
@@ -1124,12 +1133,11 @@
         <span class="kw">if </span>n == <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
+        <span class="kw">let </span>message_count = <span class="self">self</span>.executed_block().messages.len();
         <span class="prelude-val">Some</span>(MessageId {
             chain_id: <span class="self">self</span>.chain_id(),
             height: <span class="self">self</span>.height(),
-            index: u32::try_from(<span class="self">self</span>.executed_block().messages.len())
-                .ok()<span class="question-mark">?
-                </span>.checked_sub(n)<span class="question-mark">?</span>,
+            index: u32::try_from(message_count).ok()<span class="question-mark">?</span>.checked_sub(n)<span class="question-mark">?</span>,
         })
     }
 

@@ -781,14 +781,14 @@
 
     <span class="doccomment">/// Returns `true` if the validated block&#39;s height is below the tip height. Returns an error if
     /// it is higher than the tip.
-    </span><span class="kw">pub fn </span>already_validated_block(<span class="kw-2">&amp;</span><span class="self">self</span>, new_block: <span class="kw-2">&amp;</span>Block) -&gt; <span class="prelude-ty">Result</span>&lt;bool, ChainError&gt; {
+    </span><span class="kw">pub fn </span>already_validated_block(<span class="kw-2">&amp;</span><span class="self">self</span>, height: BlockHeight) -&gt; <span class="prelude-ty">Result</span>&lt;bool, ChainError&gt; {
         <span class="macro">ensure!</span>(
-            <span class="self">self</span>.next_block_height &gt;= new_block.height,
+            <span class="self">self</span>.next_block_height &gt;= height,
             ChainError::MissingEarlierBlocks {
                 current_block_height: <span class="self">self</span>.next_block_height,
             }
         );
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.next_block_height &gt; new_block.height)
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.next_block_height &gt; height)
     }
 }
 

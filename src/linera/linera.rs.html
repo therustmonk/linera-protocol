@@ -1974,7 +1974,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>done_senders = HashSet::new();
         <span class="kw">for </span>vote <span class="kw">in </span>votes {
             <span class="comment">// We aggregate votes indexed by sender.
-            </span><span class="kw">let </span>chain_id = vote.value.inner().chain_id();
+            </span><span class="kw">let </span>chain_id = vote.value().chain_id();
             <span class="kw">if </span>done_senders.contains(<span class="kw-2">&amp;</span>chain_id) {
                 <span class="kw">continue</span>;
             }

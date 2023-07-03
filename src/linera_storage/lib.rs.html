@@ -779,7 +779,7 @@
         certificate: <span class="kw-2">&amp;</span>Certificate,
         batch: <span class="kw-2">&amp;mut </span>Batch,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ViewError&gt; {
-        <span class="kw">let </span>id = certificate.value.inner().chain_id().to_string();
+        <span class="kw">let </span>id = certificate.value().chain_id().to_string();
         <span class="macro">increment_counter!</span>(WRITE_CERTIFICATE_COUNTER, <span class="kw-2">&amp;</span>[(<span class="string">&quot;chain_id&quot;</span>, id)]);
         <span class="kw">let </span>hash = certificate.hash();
         <span class="kw">let </span>cert_key = bcs::to_bytes(<span class="kw-2">&amp;</span>BaseKey::Certificate(hash))<span class="question-mark">?</span>;

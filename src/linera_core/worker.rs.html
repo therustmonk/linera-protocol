@@ -1207,6 +1207,11 @@
 <a href="#1207" id="1207">1207</a>
 <a href="#1208" id="1208">1208</a>
 <a href="#1209" id="1209">1209</a>
+<a href="#1210" id="1210">1210</a>
+<a href="#1211" id="1211">1211</a>
+<a href="#1212" id="1212">1212</a>
+<a href="#1213" id="1213">1213</a>
+<a href="#1214" id="1214">1214</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1239,6 +1244,7 @@
 <span class="kw">use </span>lru::LruCache;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>std::{
+    borrow::Cow,
     collections::{hash_map, BTreeMap, BTreeSet, HashMap, HashSet, VecDeque},
     num::NonZeroUsize,
     sync::Arc,
@@ -1713,7 +1719,7 @@
         </span><span class="self">self</span>.check_no_missing_bytecode(block, blobs).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="comment">// Persist certificate and blobs.
         </span><span class="kw">for </span>value <span class="kw">in </span>blobs {
-            <span class="self">self</span>.cache_recent_value(value).<span class="kw">await</span>;
+            <span class="self">self</span>.cache_recent_value(Cow::Borrowed(value)).<span class="kw">await</span>;
         }
         <span class="kw">let </span>(result_blob, result_certificate) = <span class="macro">tokio::join!</span>(
             <span class="self">self</span>.storage.write_values(blobs),
@@ -1756,6 +1762,7 @@
             notify_when_messages_are_delivered,
         )
         .<span class="kw">await</span>;
+        <span class="self">self</span>.cache_recent_value(Cow::Owned(certificate.value)).<span class="kw">await</span>;
         <span class="prelude-val">Ok</span>((info, actions))
     }
 
@@ -1820,7 +1827,7 @@
             CertificateValue::ValidatedBlock {
                 executed_block: ExecutedBlock { block, .. },
             } =&gt; block,
-            CertificateValue::ConfirmedBlock { .. } =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Expecting a validation certificate&quot;</span>),
+            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Expecting a validation certificate&quot;</span>),
         };
         <span class="comment">// Check that the chain is active and ready for this confirmation.
         // Verify the certificate. Returns a catch-all error to make client code more robust.
@@ -1838,16 +1845,25 @@
             }
         );
         certificate.check(committee)<span class="question-mark">?</span>;
-        <span class="kw">if </span>chain.tip_state.get().already_validated_block(block)<span class="question-mark">?
+        <span class="kw">if </span>chain
+            .tip_state
+            .get()
+            .already_validated_block(block.height)<span class="question-mark">?
             </span>|| chain
                 .manager
                 .get_mut()
                 .check_validated_block(block, certificate.round)<span class="question-mark">?
                 </span>== ChainManagerOutcome::Skip
         {
-            <span class="comment">// If we just processed the same pending block, return the chain info
-            // unchanged.
+            <span class="comment">// If we just processed the same pending block, return the chain info unchanged.
             </span><span class="kw">return </span><span class="prelude-val">Ok</span>(ChainInfoResponse::new(<span class="kw-2">&amp;</span>chain, <span class="self">self</span>.key_pair()));
+        }
+        <span class="kw">if </span><span class="self">self
+            </span>.cache_recent_value(Cow::Borrowed(<span class="kw-2">&amp;</span>certificate.value))
+            .<span class="kw">await
+        </span>{
+            <span class="kw">let </span>value = certificate.value.clone().into_confirmed();
+            <span class="self">self</span>.cache_recent_value(Cow::Owned(value)).<span class="kw">await</span>;
         }
         chain
             .manager
@@ -1924,21 +1940,16 @@
         <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(last_updated_height))
     }
 
-    <span class="kw">pub async fn </span>cache_recent_value(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw-2">&amp;</span>HashedValue) {
+    <span class="kw">pub async fn </span>cache_recent_value&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: Cow&lt;<span class="lifetime">&#39;a</span>, HashedValue&gt;) -&gt; bool {
         <span class="kw">let </span>hash = value.hash();
         <span class="kw">let </span><span class="kw-2">mut </span>recent_values = <span class="self">self</span>.recent_values.lock().<span class="kw">await</span>;
         <span class="kw">if </span>recent_values.contains(<span class="kw-2">&amp;</span>hash) {
-            <span class="kw">return</span>;
-        }
-        <span class="kw">if </span>value.inner().is_validated() {
-            <span class="comment">// Cache the corresponding confirmed block, too, in case we get a certificate.
-            </span><span class="kw">let </span>conf_value = value.clone().into_confirmed();
-            <span class="kw">let </span>conf_hash = conf_value.hash();
-            recent_values.push(conf_hash, conf_value);
+            <span class="kw">return </span><span class="bool-val">false</span>;
         }
         <span class="comment">// Cache the certificate so that clients don&#39;t have to send the value again.
-        </span>recent_values.push(hash, value.clone());
-    }
+        </span>recent_values.push(hash, value.into_owned());
+        <span class="bool-val">true
+    </span>}
 
     <span class="doccomment">/// Returns a stored [`Certificate`] for a chain&#39;s block.
     </span><span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
@@ -2105,7 +2116,7 @@
         manager.create_vote(proposal, messages, state_hash, <span class="self">self</span>.key_pair());
         <span class="comment">// Cache the value we voted on, so the client doesn&#39;t have to send it again.
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(vote) = manager.pending() {
-            <span class="self">self</span>.cache_recent_value(<span class="kw-2">&amp;</span>vote.value).<span class="kw">await</span>;
+            <span class="self">self</span>.cache_recent_value(Cow::Borrowed(<span class="kw-2">&amp;</span>vote.value)).<span class="kw">await</span>;
         }
         <span class="kw">let </span>info = ChainInfoResponse::new(<span class="kw-2">&amp;</span>chain, <span class="self">self</span>.key_pair());
         chain.save().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -2149,21 +2160,20 @@
         <span class="kw">let </span>(info, actions) = <span class="kw">match </span>certificate.value() {
             CertificateValue::ValidatedBlock { .. } =&gt; {
                 <span class="comment">// Confirm the validated block.
-                </span><span class="self">self</span>.process_validated_block(certificate.clone())
+                </span><span class="self">self</span>.process_validated_block(certificate)
                     .<span class="kw">await
                     </span>.map(|info| (info, NetworkActions::default()))<span class="question-mark">?
             </span>}
             CertificateValue::ConfirmedBlock { .. } =&gt; {
                 <span class="comment">// Execute the confirmed block.
                 </span><span class="self">self</span>.process_confirmed_block(
-                    certificate.clone(),
+                    certificate,
                     <span class="kw-2">&amp;</span>blobs,
                     notify_when_messages_are_delivered,
                 )
                 .<span class="kw">await</span><span class="question-mark">?
             </span>}
         };
-        <span class="self">self</span>.cache_recent_value(<span class="kw-2">&amp;</span>certificate.value).<span class="kw">await</span>;
         <span class="prelude-val">Ok</span>((info, actions))
     }
 
