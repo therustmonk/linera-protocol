@@ -928,7 +928,7 @@
             chain_id: <span class="prelude-val">Some</span>(request.certificate.value().chain_id().into()),
             value: bincode::serialize(<span class="kw-2">&amp;</span>request.certificate.value)<span class="question-mark">?</span>,
             round: request.certificate.round.<span class="number">0</span>,
-            signatures: bincode::serialize(<span class="kw-2">&amp;</span>request.certificate.signatures)<span class="question-mark">?</span>,
+            signatures: bincode::serialize(request.certificate.signatures())<span class="question-mark">?</span>,
             blobs: bincode::serialize(<span class="kw-2">&amp;</span>request.blobs)<span class="question-mark">?</span>,
             wait_for_outgoing_messages: request.wait_for_outgoing_messages,
         })
