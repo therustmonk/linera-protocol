@@ -224,6 +224,9 @@
 <a href="#224" id="224">224</a>
 <a href="#225" id="225">225</a>
 <a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -316,16 +319,19 @@
                 job.run(client).<span class="kw">await
             </span>}
             <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
-            </span>Rocksdb { path } <span class="kw">if </span>path.is_dir() =&gt; {
-                <span class="macro">tracing::warn!</span>(<span class="string">&quot;Using existing database {:?}&quot;</span>, path);
-                <span class="kw">let </span>client = RocksdbStoreClient::new(path.clone(), wasm_runtime, cache_size);
-                job.run(client).<span class="kw">await
-            </span>}
-            <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
             </span>Rocksdb { path } =&gt; {
-                std::fs::create_dir_all(path)<span class="question-mark">?</span>;
+                <span class="kw">let </span>is_new_dir = <span class="kw">if </span>path.is_dir() {
+                    <span class="macro">tracing::warn!</span>(<span class="string">&quot;Using existing database {:?}&quot;</span>, path);
+                    <span class="bool-val">false
+                </span>} <span class="kw">else </span>{
+                    std::fs::create_dir_all(path)<span class="question-mark">?</span>;
+                    <span class="bool-val">true
+                </span>};
+
                 <span class="kw">let </span><span class="kw-2">mut </span>client = RocksdbStoreClient::new(path.clone(), wasm_runtime, cache_size);
-                config.initialize_store(<span class="kw-2">&amp;mut </span>client).<span class="kw">await</span><span class="question-mark">?</span>;
+                <span class="kw">if </span>is_new_dir {
+                    config.initialize_store(<span class="kw-2">&amp;mut </span>client).<span class="kw">await</span><span class="question-mark">?</span>;
+                }
                 job.run(client).<span class="kw">await
             </span>}
             <span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
