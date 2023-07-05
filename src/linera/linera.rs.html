@@ -1664,6 +1664,9 @@
 <a href="#1664" id="1664">1664</a>
 <a href="#1665" id="1665">1665</a>
 <a href="#1666" id="1666">1666</a>
+<a href="#1667" id="1667">1667</a>
+<a href="#1668" id="1668">1668</a>
+<a href="#1669" id="1669">1669</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -2284,9 +2287,9 @@
 
     <span class="doccomment">/// Open (i.e. activate) a new chain deriving the UID from an existing one.
     </span>OpenChain {
-        <span class="doccomment">/// Sending chain id (must be one of our chains).
+        <span class="doccomment">/// Chain id (must be one of our chains).
         </span><span class="attr">#[structopt(long = <span class="string">&quot;from&quot;</span>)]
-        </span>sender: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
+        </span>chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
 
         <span class="doccomment">/// Public key of the new owner (otherwise create a key pair and remember it)
         </span><span class="attr">#[structopt(long = <span class="string">&quot;to-public-key&quot;</span>)]
@@ -2296,9 +2299,9 @@
     <span class="doccomment">/// Close (i.e. deactivate) an existing chain.
     </span><span class="comment">// TODO: Consider `spend-and-transfer` instead for real-life use cases.
     </span>CloseChain {
-        <span class="doccomment">/// Sending chain id (must be one of our chains)
+        <span class="doccomment">/// Chain id (must be one of our chains)
         </span><span class="attr">#[structopt(long = <span class="string">&quot;from&quot;</span>)]
-        </span>sender: ChainId,
+        </span>chain_id: ChainId,
     },
 
     <span class="doccomment">/// Read the balance of the chain from the local state of the client.
@@ -2666,8 +2669,11 @@
                 context.save_wallet();
             }
 
-            OpenChain { sender, public_key } =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, sender);
+            OpenChain {
+                chain_id,
+                public_key,
+            } =&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, chain_id);
                 <span class="kw">let </span>(new_public_key, key_pair) = <span class="kw">match </span>public_key {
                     <span class="prelude-val">Some</span>(key) =&gt; (key, <span class="prelude-val">None</span>),
                     <span class="prelude-val">None </span>=&gt; {
@@ -2698,8 +2704,8 @@
                 context.save_wallet();
             }
 
-            CloseChain { sender } =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, sender);
+            CloseChain { chain_id } =&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>chain_client = context.make_chain_client(storage, chain_id);
                 <span class="macro">info!</span>(<span class="string">&quot;Starting operation to close the chain&quot;</span>);
                 <span class="kw">let </span>time_start = Instant::now();
                 <span class="kw">let </span>certificate = chain_client.close_chain().<span class="kw">await</span>.unwrap();
