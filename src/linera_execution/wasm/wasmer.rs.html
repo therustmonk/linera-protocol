@@ -731,6 +731,8 @@
 <a href="#731" id="731">731</a>
 <a href="#732" id="732">732</a>
 <a href="#733" id="733">733</a>
+<a href="#734" id="734">734</a>
+<a href="#735" id="735">735</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -851,14 +853,18 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, WasmExecutionError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>contract_cache = CONTRACT_CACHE.lock().<span class="kw">await</span>;
         <span class="kw">let </span>contract = contract_cache
-            .get_or_insert_with(contract_bytecode, CachedContractModule::new)<span class="question-mark">?
-            </span>.create_execution_instance()<span class="question-mark">?</span>;
+            .get_or_insert_with(contract_bytecode, CachedContractModule::new)
+            .map_err(WasmExecutionError::LoadContractModule)<span class="question-mark">?
+            </span>.create_execution_instance()
+            .map_err(WasmExecutionError::LoadContractModule)<span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>service_cache = SERVICE_CACHE.lock().<span class="kw">await</span>;
-        <span class="kw">let </span>service = service_cache.get_or_insert_with(service_bytecode, |bytecode| {
-            Module::new(<span class="kw-2">&amp;*</span>SERVICE_ENGINE, bytecode)
-                .map_err(wit_bindgen_host_wasmer_rust::anyhow::Error::from)
-        })<span class="question-mark">?</span>;
+        <span class="kw">let </span>service = service_cache
+            .get_or_insert_with(service_bytecode, |bytecode| {
+                Module::new(<span class="kw-2">&amp;*</span>SERVICE_ENGINE, bytecode)
+                    .map_err(wit_bindgen_host_wasmer_rust::anyhow::Error::from)
+            })
+            .map_err(WasmExecutionError::LoadServiceModule)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(WasmApplication::Wasmer { contract, service })
     }
@@ -883,7 +889,8 @@
         <span class="kw">let </span>views_api_setup =
             view_system_api::add_to_imports(<span class="kw-2">&amp;mut </span>store, <span class="kw-2">&amp;mut </span>imports, view_system_api);
         <span class="kw">let </span>(contract, instance) =
-            contract::Contract::instantiate(<span class="kw-2">&amp;mut </span>store, contract_module, <span class="kw-2">&amp;mut </span>imports)<span class="question-mark">?</span>;
+            contract::Contract::instantiate(<span class="kw-2">&amp;mut </span>store, contract_module, <span class="kw-2">&amp;mut </span>imports)
+                .map_err(WasmExecutionError::LoadContractModule)<span class="question-mark">?</span>;
         <span class="kw">let </span>application = Contract {
             contract,
             _lifetime: PhantomData,
@@ -891,8 +898,8 @@
 
         metering::set_remaining_points(<span class="kw-2">&amp;mut </span>store, <span class="kw-2">&amp;</span>instance, runtime.remaining_fuel());
 
-        system_api_setup(<span class="kw-2">&amp;</span>instance, <span class="kw-2">&amp;</span>store)<span class="question-mark">?</span>;
-        views_api_setup(<span class="kw-2">&amp;</span>instance, <span class="kw-2">&amp;</span>store)<span class="question-mark">?</span>;
+        system_api_setup(<span class="kw-2">&amp;</span>instance, <span class="kw-2">&amp;</span>store).map_err(WasmExecutionError::LoadContractModule)<span class="question-mark">?</span>;
+        views_api_setup(<span class="kw-2">&amp;</span>instance, <span class="kw-2">&amp;</span>store).map_err(WasmExecutionError::LoadContractModule)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(WasmRuntimeContext {
             waker_forwarder,
@@ -924,14 +931,15 @@
         <span class="kw">let </span>views_api_setup =
             view_system_api::add_to_imports(<span class="kw-2">&amp;mut </span>store, <span class="kw-2">&amp;mut </span>imports, view_system_api);
         <span class="kw">let </span>(service, instance) =
-            service::Service::instantiate(<span class="kw-2">&amp;mut </span>store, service_module, <span class="kw-2">&amp;mut </span>imports)<span class="question-mark">?</span>;
+            service::Service::instantiate(<span class="kw-2">&amp;mut </span>store, service_module, <span class="kw-2">&amp;mut </span>imports)
+                .map_err(WasmExecutionError::LoadServiceModule)<span class="question-mark">?</span>;
         <span class="kw">let </span>application = Service {
             service,
             _lifetime: PhantomData,
         };
 
-        system_api_setup(<span class="kw-2">&amp;</span>instance, <span class="kw-2">&amp;</span>store)<span class="question-mark">?</span>;
-        views_api_setup(<span class="kw-2">&amp;</span>instance, <span class="kw-2">&amp;</span>store)<span class="question-mark">?</span>;
+        system_api_setup(<span class="kw-2">&amp;</span>instance, <span class="kw-2">&amp;</span>store).map_err(WasmExecutionError::LoadServiceModule)<span class="question-mark">?</span>;
+        views_api_setup(<span class="kw-2">&amp;</span>instance, <span class="kw-2">&amp;</span>store).map_err(WasmExecutionError::LoadServiceModule)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(WasmRuntimeContext {
             waker_forwarder,
@@ -1436,12 +1444,9 @@
 
 <span class="kw">impl </span>CachedContractModule {
     <span class="doccomment">/// Creates a new [`CachedContractModule`] by compiling a `contract_bytecode`.
-    </span><span class="kw">pub fn </span>new(contract_bytecode: Bytecode) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, WasmExecutionError&gt; {
-        <span class="kw">let </span>module = Module::new(<span class="kw-2">&amp;</span><span class="self">Self</span>::create_compilation_engine(), contract_bytecode)
-            .map_err(wit_bindgen_host_wasmer_rust::anyhow::Error::from)<span class="question-mark">?</span>;
-        <span class="kw">let </span>compiled_bytecode = module
-            .serialize()
-            .map_err(wit_bindgen_host_wasmer_rust::anyhow::Error::from)<span class="question-mark">?</span>;
+    </span><span class="kw">pub fn </span>new(contract_bytecode: Bytecode) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, anyhow::Error&gt; {
+        <span class="kw">let </span>module = Module::new(<span class="kw-2">&amp;</span><span class="self">Self</span>::create_compilation_engine(), contract_bytecode)<span class="question-mark">?</span>;
+        <span class="kw">let </span>compiled_bytecode = module.serialize()<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(CachedContractModule { compiled_bytecode })
     }
 
@@ -1456,11 +1461,10 @@
     }
 
     <span class="doccomment">/// Creates a [`Module`] from a compiled contract using a headless [`Engine`].
-    </span><span class="kw">pub fn </span>create_execution_instance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(Engine, Module), WasmExecutionError&gt; {
+    </span><span class="kw">pub fn </span>create_execution_instance(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(Engine, Module), anyhow::Error&gt; {
         <span class="kw">let </span>engine = Engine::headless();
         <span class="kw">let </span>store = Store::new(<span class="kw-2">&amp;</span>engine);
-        <span class="kw">let </span>module = <span class="kw">unsafe </span>{ Module::deserialize(<span class="kw-2">&amp;</span>store, <span class="kw-2">&amp;*</span><span class="self">self</span>.compiled_bytecode) }
-            .map_err(wit_bindgen_host_wasmer_rust::anyhow::Error::from)<span class="question-mark">?</span>;
+        <span class="kw">let </span>module = <span class="kw">unsafe </span>{ Module::deserialize(<span class="kw-2">&amp;</span>store, <span class="kw-2">&amp;*</span><span class="self">self</span>.compiled_bytecode) }<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>((engine, module))
     }
 }

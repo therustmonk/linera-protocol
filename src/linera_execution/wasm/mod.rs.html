@@ -304,6 +304,10 @@
 <a href="#304" id="304">304</a>
 <a href="#305" id="305">305</a>
 <a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -364,7 +368,7 @@
         <span class="kw">let </span>contract_bytecode = <span class="kw">if </span>runtime.needs_sanitizer() {
             <span class="comment">// Ensure bytecode normalization whenever wasmer and wasmtime are possibly
             // compared.
-            </span>sanitize(contract_bytecode)<span class="question-mark">?
+            </span>sanitize(contract_bytecode).map_err(WasmExecutionError::LoadContractModule)<span class="question-mark">?
         </span>} <span class="kw">else </span>{
             contract_bytecode
         };
@@ -389,10 +393,12 @@
         WasmApplication::new(
             Bytecode::load_from_file(contract_bytecode_file)
                 .<span class="kw">await
-                </span>.map_err(anyhow::Error::from)<span class="question-mark">?</span>,
+                </span>.map_err(anyhow::Error::from)
+                .map_err(WasmExecutionError::LoadContractModule)<span class="question-mark">?</span>,
             Bytecode::load_from_file(service_bytecode_file)
                 .<span class="kw">await
-                </span>.map_err(anyhow::Error::from)<span class="question-mark">?</span>,
+                </span>.map_err(anyhow::Error::from)
+                .map_err(WasmExecutionError::LoadServiceModule)<span class="question-mark">?</span>,
             runtime,
         )
         .<span class="kw">await
@@ -403,8 +409,10 @@
 </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;wasmer&quot;</span>, feature = <span class="string">&quot;wasmtime&quot;</span>))]
 #[derive(Debug, Error)]
 </span><span class="kw">pub enum </span>WasmExecutionError {
-    <span class="attr">#[error(<span class="string">&quot;Failed to load WASM module&quot;</span>)]
-    </span>LoadModule(<span class="attr">#[from] </span>anyhow::Error),
+    <span class="attr">#[error(<span class="string">&quot;Failed to load contract WASM module: {_0}&quot;</span>)]
+    </span>LoadContractModule(<span class="attr">#[source] </span>anyhow::Error),
+    <span class="attr">#[error(<span class="string">&quot;Failed to load service WASM module: {_0}&quot;</span>)]
+    </span>LoadServiceModule(<span class="attr">#[source] </span>anyhow::Error),
     <span class="attr">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
     #[error(<span class="string">&quot;Failed to create and configure Wasmtime runtime&quot;</span>)]
     </span>CreateWasmtimeEngine(<span class="attr">#[source] </span>anyhow::Error),
