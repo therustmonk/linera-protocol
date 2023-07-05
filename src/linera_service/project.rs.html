@@ -301,6 +301,29 @@
 <a href="#301" id="301">301</a>
 <a href="#302" id="302">302</a>
 <a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -335,6 +358,9 @@
 
         <span class="macro">debug!</span>(<span class="string">&quot;creating the source directory&quot;</span>);
         <span class="kw">let </span>source_directory = <span class="self">Self</span>::create_source_directory(<span class="kw-2">&amp;</span>root)<span class="question-mark">?</span>;
+
+        <span class="macro">debug!</span>(<span class="string">&quot;initializing git repository&quot;</span>);
+        <span class="self">Self</span>::initialize_git_repository(<span class="kw-2">&amp;</span>root)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>project_name = root
             .file_name()
@@ -438,6 +464,26 @@
         <span class="kw">let </span>source_directory = project_root.join(<span class="string">&quot;src&quot;</span>);
         std::fs::create_dir(<span class="kw-2">&amp;</span>source_directory)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(source_directory)
+    }
+
+    <span class="kw">fn </span>initialize_git_repository(project_root: <span class="kw-2">&amp;</span>Path) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>output = Command::new(<span class="string">&quot;git&quot;</span>)
+            .args([
+                <span class="string">&quot;init&quot;</span>,
+                project_root
+                    .to_str()
+                    .context(<span class="string">&quot;project name contains non UTF-8 characters&quot;</span>)<span class="question-mark">?</span>,
+            ])
+            .output()<span class="question-mark">?</span>;
+
+        <span class="kw">if </span>!output.status.success() {
+            <span class="macro">bail!</span>(
+                <span class="string">&quot;failed to initialize git repository at {}&quot;</span>,
+                <span class="kw-2">&amp;</span>project_root.display()
+            );
+        }
+
+        <span class="self">Self</span>::write_string_to_file(<span class="kw-2">&amp;</span>project_root.join(<span class="string">&quot;.gitignore&quot;</span>), <span class="string">&quot;/target&quot;</span>)
     }
 
     <span class="kw">fn </span>create_cargo_toml(project_root: <span class="kw-2">&amp;</span>Path, project_name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
