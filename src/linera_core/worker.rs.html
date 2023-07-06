@@ -1212,6 +1212,13 @@
 <a href="#1212" id="1212">1212</a>
 <a href="#1213" id="1213">1213</a>
 <a href="#1214" id="1214">1214</a>
+<a href="#1215" id="1215">1215</a>
+<a href="#1216" id="1216">1216</a>
+<a href="#1217" id="1217">1217</a>
+<a href="#1218" id="1218">1218</a>
+<a href="#1219" id="1219">1219</a>
+<a href="#1220" id="1220">1220</a>
+<a href="#1221" id="1221">1221</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1332,8 +1339,14 @@
 #[allow(clippy::large_enum_variant)]
 </span><span class="doccomment">/// Reason for the notification.
 </span><span class="kw">pub enum </span>Reason {
-    NewBlock { height: BlockHeight },
-    NewIncomingMessage { origin: Origin, height: BlockHeight },
+    NewBlock {
+        height: BlockHeight,
+        hash: CryptoHash,
+    },
+    NewIncomingMessage {
+        origin: Origin,
+        height: BlockHeight,
+    },
 }
 
 <span class="doccomment">/// Error type for [`ValidatorWorker`].
@@ -1750,6 +1763,7 @@
             chain_id: block.chain_id,
             reason: Reason::NewBlock {
                 height: block.height,
+                hash: certificate.value.hash(),
             },
         });
         <span class="comment">// Persist chain.

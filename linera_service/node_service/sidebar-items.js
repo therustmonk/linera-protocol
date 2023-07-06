@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["ApplicationOverview","NodeService"]};
+window.SIDEBAR_ITEMS = {"struct":["ApplicationOverview","Chains","NodeService"]};

@@ -735,6 +735,12 @@
 <a href="#735" id="735">735</a>
 <a href="#736" id="736">736</a>
 <a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -779,7 +785,7 @@
     abi::Abi,
     crypto::CryptoHash,
     data_types::{Amount, ArithmeticError, BlockHeight, Timestamp},
-    hex_debug,
+    doc_scalar, hex_debug,
     identifiers::{BytecodeId, ChainId, ChannelName, Destination, MessageId, Owner, SessionId},
 };
 <span class="kw">use </span>linera_views::{batch::Batch, views::ViewError};
@@ -1472,5 +1478,11 @@
 </span><span class="attr">#[derive(Clone, Debug, Error)]
 #[error(<span class="string">&quot;{0:?} is not a valid WebAssembly runtime&quot;</span>)]
 </span><span class="kw">pub struct </span>InvalidWasmRuntime(String);
+
+<span class="macro">doc_scalar!</span>(Operation, <span class="string">&quot;An operation to be executed in a block&quot;</span>);
+<span class="macro">doc_scalar!</span>(
+    Message,
+    <span class="string">&quot;An message to be sent and possibly executed in the receiver&#39;s block.&quot;
+</span>);
 </code></pre></div>
 </section></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="linera_execution" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0 (84c898d65 2023-04-16)" data-search-js="search-8a59a8356673ec1f.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>

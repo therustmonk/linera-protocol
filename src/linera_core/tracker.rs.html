@@ -172,6 +172,15 @@
 <a href="#172" id="172">172</a>
 <a href="#173" id="173">173</a>
 <a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -194,7 +203,7 @@
     /// we return true, otherwise we return false.
     </span><span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, notification: Notification) -&gt; bool {
         <span class="kw">match </span>notification.reason {
-            Reason::NewBlock { height } =&gt; <span class="self">self</span>.insert_new_block(notification.chain_id, height),
+            Reason::NewBlock { height, .. } =&gt; <span class="self">self</span>.insert_new_block(notification.chain_id, height),
             Reason::NewIncomingMessage { height, origin } =&gt; {
                 <span class="self">self</span>.insert_new_message(notification.chain_id, origin, height)
             }
@@ -245,6 +254,12 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">pub mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span>linera_base::crypto::{BcsHashable, CryptoHash};
+
+    <span class="attr">#[derive(Debug, serde::Serialize, serde::Deserialize)]
+    </span><span class="kw">struct </span>Foo;
+
+    <span class="kw">impl </span>BcsHashable <span class="kw">for </span>Foo {}
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_empty() {
@@ -252,6 +267,7 @@
             chain_id: ChainId::root(<span class="number">0</span>),
             reason: Reason::NewBlock {
                 height: BlockHeight(<span class="number">0</span>),
+                hash: CryptoHash::new(<span class="kw-2">&amp;</span>Foo),
             },
         };
 
@@ -265,9 +281,11 @@
     </span><span class="kw">fn </span>test_new_blocks() {
         <span class="kw">let </span>reason_0 = Reason::NewBlock {
             height: BlockHeight(<span class="number">0</span>),
+            hash: CryptoHash::new(<span class="kw-2">&amp;</span>Foo),
         };
         <span class="kw">let </span>reason_1 = Reason::NewBlock {
             height: BlockHeight(<span class="number">1</span>),
+            hash: CryptoHash::new(<span class="kw-2">&amp;</span>Foo),
         };
         <span class="kw">let </span>chain_0 = ChainId::root(<span class="number">0</span>);
         <span class="kw">let </span>chain_1 = ChainId::root(<span class="number">1</span>);

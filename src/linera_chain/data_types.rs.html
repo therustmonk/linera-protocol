@@ -759,12 +759,40 @@
 <a href="#759" id="759">759</a>
 <a href="#760" id="760">760</a>
 <a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
+<a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
+<a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
+<a href="#788" id="788">788</a>
+<a href="#789" id="789">789</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use </span><span class="kw">crate</span>::ChainError;
-<span class="kw">use </span>async_graphql::SimpleObject;
+<span class="kw">use </span>async_graphql::{Object, SimpleObject};
 <span class="kw">use </span>linera_base::{
     crypto::{BcsHashable, BcsSignable, CryptoHash, KeyPair, Signature},
     data_types::{BlockHeight, RoundNumber, Timestamp},
@@ -792,7 +820,7 @@
 /// * When a block is proposed to a validator, all cross-chain messages must have been
 ///   received ahead of time in the inbox of the chain.
 /// * This constraint does not apply to the execution of confirmed blocks.
-</span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
+</span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize, SimpleObject)]
 </span><span class="kw">pub struct </span>Block {
     <span class="doccomment">/// The chain to which this block belongs.
     </span><span class="kw">pub </span>chain_id: ChainId,
@@ -849,7 +877,7 @@
 }
 
 <span class="doccomment">/// A message received from a block of another chain.
-</span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
+</span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize, SimpleObject)]
 </span><span class="kw">pub struct </span>IncomingMessage {
     <span class="doccomment">/// The origin of the message (chain and channel if any).
     </span><span class="kw">pub </span>origin: Origin,
@@ -925,7 +953,7 @@
 }
 
 <span class="doccomment">/// A message together with routing information.
-</span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
+</span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize, SimpleObject)]
 </span><span class="kw">pub struct </span>OutgoingMessage {
     <span class="kw">pub </span>destination: Destination,
     <span class="kw">pub </span>authenticated_signer: <span class="prelude-ty">Option</span>&lt;Owner&gt;,
@@ -933,7 +961,7 @@
 }
 
 <span class="doccomment">/// A block, together with the messages and the state hash resulting from its execution.
-</span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
+</span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize, SimpleObject)]
 </span><span class="kw">pub struct </span>ExecutedBlock {
     <span class="kw">pub </span>block: Block,
     <span class="kw">pub </span>messages: Vec&lt;OutgoingMessage&gt;,
@@ -947,12 +975,40 @@
     ConfirmedBlock { executed_block: ExecutedBlock },
 }
 
+<span class="attr">#[Object]
+</span><span class="kw">impl </span>CertificateValue {
+    <span class="attr">#[graphql(derived(name = <span class="string">&quot;executed_block&quot;</span>))]
+    </span><span class="kw">async fn </span>_executed_block(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ExecutedBlock {
+        <span class="self">self</span>.executed_block().clone()
+    }
+
+    <span class="kw">async fn </span>status(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
+        <span class="kw">match </span><span class="self">self </span>{
+            CertificateValue::ValidatedBlock { .. } =&gt; <span class="string">&quot;validated&quot;</span>.to_string(),
+            CertificateValue::ConfirmedBlock { .. } =&gt; <span class="string">&quot;confirmed&quot;</span>.to_string(),
+        }
+    }
+}
+
 <span class="doccomment">/// A statement to be certified by the validators, with its hash.
 </span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 </span><span class="kw">pub struct </span>HashedValue {
     value: CertificateValue,
     <span class="doccomment">/// Hash of the value (used as key for storage).
     </span>hash: CryptoHash,
+}
+
+<span class="attr">#[Object]
+</span><span class="kw">impl </span>HashedValue {
+    <span class="attr">#[graphql(derived(name = <span class="string">&quot;hash&quot;</span>))]
+    </span><span class="kw">async fn </span>_hash(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CryptoHash {
+        <span class="self">self</span>.hash
+    }
+
+    <span class="attr">#[graphql(derived(name = <span class="string">&quot;value&quot;</span>))]
+    </span><span class="kw">async fn </span>_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CertificateValue {
+        <span class="self">self</span>.value.clone()
+    }
 }
 
 <span class="doccomment">/// The hash and chain ID of a `CertificateValue`.
@@ -1210,7 +1266,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.executed_block().messages
     }
 
-    <span class="kw">fn </span>executed_block(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>ExecutedBlock {
+    <span class="kw">pub fn </span>executed_block(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>ExecutedBlock {
         <span class="kw">match </span><span class="self">self </span>{
             CertificateValue::ConfirmedBlock { executed_block, .. }
             | CertificateValue::ValidatedBlock { executed_block, .. } =&gt; executed_block,

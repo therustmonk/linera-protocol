@@ -674,6 +674,7 @@
 <a href="#674" id="674">674</a>
 <a href="#675" id="675">675</a>
 <a href="#676" id="676">676</a>
+<a href="#677" id="677">677</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -1345,6 +1346,7 @@
             chain_id: ChainId::root(<span class="number">0</span>),
             reason: linera_core::worker::Reason::NewBlock {
                 height: BlockHeight(<span class="number">0</span>),
+                hash: CryptoHash::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;&quot;</span>.into())),
             },
         };
         round_trip_check::&lt;<span class="kw">_</span>, grpc::Notification&gt;(notification);
