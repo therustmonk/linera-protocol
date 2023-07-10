@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Protocol"],"fn":["data","init","route","save_config","short_app_id","short_cryptohash"],"struct":["Config","Data"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["parse_query","parse_schema"],"mod":["query","schema"],"struct":["Pos","Style"]};

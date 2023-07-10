@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["window"],"mod":["console"],"struct":["EventTarget","History","Location","Storage","Window"]};
