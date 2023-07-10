@@ -1182,7 +1182,7 @@
 
         <span class="kw">let </span>balance = <span class="self">self</span>.execution_state.system.balance.get_mut();
         <span class="self">Self</span>::sub_assign_fees(balance, credit)<span class="question-mark">?</span>;
-        <span class="self">Self</span>::sub_assign_fees(balance, pricing.fuel_price(used_fuel))<span class="question-mark">?</span>;
+        <span class="self">Self</span>::sub_assign_fees(balance, pricing.fuel_price(used_fuel)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
         <span class="self">Self</span>::sub_assign_fees(balance, pricing.messages_price(<span class="kw-2">&amp;</span>messages)<span class="question-mark">?</span>)<span class="question-mark">?</span>;
 
         <span class="comment">// Recompute the state hash.

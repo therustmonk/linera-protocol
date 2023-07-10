@@ -127,17 +127,17 @@
     <span class="kw">pub fn </span>messages_price(<span class="kw-2">&amp;</span><span class="self">self</span>, data: <span class="kw-2">&amp;</span><span class="kw">impl </span>Serialize) -&gt; <span class="prelude-ty">Result</span>&lt;Amount, PricingError&gt; {
         <span class="kw">let </span>size =
             u128::try_from(bcs::serialized_size(data)<span class="question-mark">?</span>).map_err(|<span class="kw">_</span>| ArithmeticError::Overflow)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.messages.saturating_mul(size))
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.messages.try_mul(size)<span class="question-mark">?</span>)
     }
 
     <span class="kw">pub fn </span>storage_price(<span class="kw-2">&amp;</span><span class="self">self</span>, data: <span class="kw-2">&amp;</span><span class="kw">impl </span>Serialize) -&gt; <span class="prelude-ty">Result</span>&lt;Amount, PricingError&gt; {
         <span class="kw">let </span>size =
             u128::try_from(bcs::serialized_size(data)<span class="question-mark">?</span>).map_err(|<span class="kw">_</span>| ArithmeticError::Overflow)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.storage.saturating_mul(size))
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.storage.try_mul(size)<span class="question-mark">?</span>)
     }
 
-    <span class="kw">pub fn </span>fuel_price(<span class="kw-2">&amp;</span><span class="self">self</span>, fuel: u64) -&gt; Amount {
-        <span class="self">self</span>.fuel.saturating_mul(u128::from(fuel))
+    <span class="kw">pub fn </span>fuel_price(<span class="kw-2">&amp;</span><span class="self">self</span>, fuel: u64) -&gt; <span class="prelude-ty">Result</span>&lt;Amount, PricingError&gt; {
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.fuel.try_mul(u128::from(fuel))<span class="question-mark">?</span>)
     }
 
     <span class="doccomment">/// Returns how much fuel can be paid with the given balance.
