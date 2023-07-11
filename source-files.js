@@ -13,6 +13,7 @@ var sourcesIndex = JSON.parse('{\
 "async_graphql_derive":["",[],["args.rs","complex_object.rs","description.rs","directive.rs","enum.rs","input_object.rs","interface.rs","lib.rs","merged_object.rs","merged_subscription.rs","newtype.rs","object.rs","oneof_object.rs","output_type.rs","scalar.rs","simple_object.rs","subscription.rs","union.rs","utils.rs","validators.rs"]],\
 "async_graphql_parser":["",[["parse",[],["executable.rs","generated.rs","mod.rs","service.rs","utils.rs"]],["types",[],["executable.rs","mod.rs","service.rs"]]],["lib.rs","pos.rs"]],\
 "async_graphql_value":["",[],["deserializer.rs","lib.rs","macros.rs","serializer.rs","value_serde.rs","variables.rs"]],\
+"async_io_stream":["",[],["lib.rs"]],\
 "async_lock":["",[],["barrier.rs","lib.rs","mutex.rs","once_cell.rs","rwlock.rs","semaphore.rs"]],\
 "async_stream":["",[],["async_stream.rs","lib.rs","next.rs","yielder.rs"]],\
 "async_stream_impl":["",[],["lib.rs"]],\
@@ -169,7 +170,7 @@ var sourcesIndex = JSON.parse('{\
 "linera_chain":["",[["manager",[],["mod.rs","multi.rs","single.rs"]]],["chain.rs","data_types.rs","inbox.rs","lib.rs","outbox.rs"]],\
 "linera_core":["",[["unit_tests",[],["client_test_utils.rs"]]],["client.rs","data_types.rs","lib.rs","node.rs","notifier.rs","tracker.rs","updater.rs","worker.rs"]],\
 "linera_execution":["",[["wasm",[],["async_boundary.rs","async_determinism.rs","common.rs","conversions_from_wit.rs","conversions_to_wit.rs","guest_futures.rs","mod.rs","module_cache.rs","sanitizer.rs","system_api.rs","wasmer.rs","wasmtime.rs"]]],["applications.rs","committee.rs","execution.rs","graphql.rs","lib.rs","ownership.rs","pricing.rs","runtime.rs","system.rs"]],\
-"linera_explorer":["",[],["graphql.rs","js_utils.rs","lib.rs"]],\
+"linera_explorer":["",[],["entrypoint.rs","graphql.rs","input_type.rs","js_utils.rs","lib.rs"]],\
 "linera_proxy":["",[],["proxy.rs"]],\
 "linera_rpc":["",[],["client.rs","codec.rs","config.rs","conversions.rs","grpc_network.rs","grpc_pool.rs","lib.rs","mass.rs","node_provider.rs","rpc.rs","simple_network.rs","transport.rs"]],\
 "linera_sdk":["",[["contract",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs","wit_types.rs"]],["service",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs","wit_types.rs"]],["test",[["integration",[],["block.rs","chain.rs","mod.rs","validator.rs"]]]],["views",[],["conversions_from_wit.rs","mod.rs","system_api.rs"]]],["base.rs","exported_future.rs","extensions.rs","lib.rs","log.rs"]],\
@@ -239,6 +240,7 @@ var sourcesIndex = JSON.parse('{\
 "pest_derive":["",[],["lib.rs"]],\
 "pest_generator":["",[],["docs.rs","generator.rs","lib.rs","macros.rs"]],\
 "pest_meta":["",[["optimizer",[],["concatenator.rs","factorizer.rs","lister.rs","mod.rs","restorer.rs","rotater.rs","skipper.rs","unroller.rs"]]],["ast.rs","grammar.rs","lib.rs","parser.rs","validator.rs"]],\
+"pharos":["",[],["error.rs","events.rs","filter.rs","lib.rs","observable.rs","pharos.rs","shared_pharos.rs"]],\
 "pin_project":["",[],["lib.rs"]],\
 "pin_project_internal":["",[["pin_project",[],["args.rs","attribute.rs","derive.rs","mod.rs"]]],["lib.rs","pinned_drop.rs","utils.rs"]],\
 "pin_project_lite":["",[],["lib.rs"]],\
@@ -285,6 +287,7 @@ var sourcesIndex = JSON.parse('{\
 "scopeguard":["",[],["lib.rs"]],\
 "sct":["",[],["lib.rs"]],\
 "seahash":["",[],["buffer.rs","helper.rs","lib.rs","reference.rs","stream.rs"]],\
+"send_wrapper":["",[],["lib.rs"]],\
 "serde":["",[["de",[],["format.rs","ignored_any.rs","impls.rs","mod.rs","seed.rs","utf8.rs","value.rs"]],["private",[],["de.rs","doc.rs","mod.rs","ser.rs","size_hint.rs"]],["ser",[],["fmt.rs","impls.rs","impossible.rs","mod.rs"]]],["integer128.rs","lib.rs","macros.rs"]],\
 "serde_bytes":["",[],["bytebuf.rs","bytes.rs","de.rs","lib.rs","ser.rs"]],\
 "serde_derive":["",[["internals",[],["ast.rs","attr.rs","case.rs","check.rs","ctxt.rs","mod.rs","receiver.rs","respan.rs","symbol.rs"]]],["bound.rs","de.rs","dummy.rs","fragment.rs","lib.rs","pretend.rs","ser.rs","this.rs","try.rs"]],\
@@ -372,6 +375,7 @@ var sourcesIndex = JSON.parse('{\
 "url":["",[],["host.rs","lib.rs","origin.rs","parser.rs","path_segments.rs","quirks.rs","slicing.rs"]],\
 "urlencoding":["",[],["dec.rs","enc.rs","lib.rs"]],\
 "utf8":["",[],["lib.rs","lossy.rs","read.rs"]],\
+"uuid":["",[],["builder.rs","error.rs","external.rs","fmt.rs","lib.rs","macros.rs","md5.rs","parser.rs","timestamp.rs","v3.rs"]],\
 "vec_map":["",[],["lib.rs"]],\
 "void":["",[],["lib.rs"]],\
 "wait_timeout":["",[],["lib.rs","unix.rs"]],\
@@ -404,9 +408,10 @@ var sourcesIndex = JSON.parse('{\
 "wasmtime_types":["",[],["error.rs","lib.rs"]],\
 "wast":["",[["component",[],["alias.rs","binary.rs","component.rs","custom.rs","expand.rs","export.rs","func.rs","import.rs","instance.rs","item_ref.rs","module.rs","resolve.rs","types.rs","wast.rs"]],["core",[["resolve",[],["deinline_import_export.rs","mod.rs","names.rs","types.rs"]]],["binary.rs","custom.rs","export.rs","expr.rs","func.rs","global.rs","import.rs","memory.rs","module.rs","table.rs","tag.rs","types.rs","wast.rs"]]],["component.rs","core.rs","encode.rs","error.rs","gensym.rs","lexer.rs","lib.rs","names.rs","parser.rs","token.rs","wast.rs","wat.rs"]],\
 "wat":["",[],["lib.rs"]],\
-"web_sys":["",[["features",[],["gen_EventTarget.rs","gen_History.rs","gen_Location.rs","gen_Storage.rs","gen_Window.rs","gen_console.rs","mod.rs"]]],["lib.rs"]],\
+"web_sys":["",[["features",[],["gen_BinaryType.rs","gen_Blob.rs","gen_CloseEvent.rs","gen_DomException.rs","gen_Event.rs","gen_EventTarget.rs","gen_History.rs","gen_Location.rs","gen_MessageEvent.rs","gen_Storage.rs","gen_WebSocket.rs","gen_Window.rs","gen_console.rs","mod.rs"]]],["lib.rs"]],\
 "webpki":["",[],["calendar.rs","cert.rs","der.rs","error.rs","name.rs","signed_data.rs","time.rs","trust_anchor_util.rs","verify_cert.rs","webpki.rs"]],\
 "winnow":["",[["ascii",[],["mod.rs"]],["binary",[["bits",[],["mod.rs"]]],["mod.rs"]],["combinator",[],["branch.rs","core.rs","mod.rs","multi.rs","parser.rs","sequence.rs"]],["stream",[],["impls.rs","mod.rs"]],["token",[],["mod.rs"]],["trace",[],["mod.rs"]]],["bits.rs","branch.rs","bytes.rs","character.rs","error.rs","lib.rs","macros.rs","multi.rs","number.rs","parser.rs","sequence.rs"]],\
+"ws_stream_wasm":["",[],["error.rs","lib.rs","ws_event.rs","ws_message.rs","ws_meta.rs","ws_state.rs","ws_stream.rs","ws_stream_io.rs"]],\
 "xmlparser":["",[],["error.rs","lib.rs","stream.rs","strspan.rs","xmlchar.rs"]],\
 "zeroize":["",[],["lib.rs","x86.rs"]],\
 "zeroize_derive":["",[],["lib.rs"]],\
