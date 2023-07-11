@@ -111,6 +111,11 @@ var sourcesIndex = JSON.parse('{\
 "foreign_types":["",[],["lib.rs"]],\
 "foreign_types_shared":["",[],["lib.rs"]],\
 "form_urlencoded":["",[],["lib.rs"]],\
+"frunk":["",[],["lib.rs","monoid.rs","semigroup.rs","validated.rs"]],\
+"frunk_core":["",[],["coproduct.rs","generic.rs","hlist.rs","indices.rs","labelled.rs","lib.rs","macros.rs","path.rs","traits.rs","tuples.rs"]],\
+"frunk_derives":["",[],["derive_generic.rs","derive_labelled_generic.rs","lib.rs"]],\
+"frunk_proc_macro_helpers":["",[],["lib.rs"]],\
+"frunk_proc_macros":["",[],["lib.rs"]],\
 "futures":["",[],["lib.rs"]],\
 "futures_channel":["",[["mpsc",[],["mod.rs","queue.rs","sink_impl.rs"]]],["lib.rs","lock.rs","oneshot.rs"]],\
 "futures_core":["",[["task",[["__internal",[],["atomic_waker.rs","mod.rs"]]],["mod.rs","poll.rs"]]],["future.rs","lib.rs","stream.rs"]],\
@@ -192,7 +197,7 @@ var sourcesIndex = JSON.parse('{\
 "linera_wit_bindgen_host_wasmtime_rust":["",[],["error.rs","le.rs","lib.rs","region.rs","slab.rs","table.rs"]],\
 "linera_wit_bindgen_host_wasmtime_rust_macro":["",[],["lib.rs"]],\
 "linera_wit_parser":["",[["ast",[],["lex.rs","resolve.rs"]]],["abi.rs","ast.rs","lib.rs","mangle.rs","sizealign.rs"]],\
-"linera_witty":["",[["primitive_types",[],["flat_type.rs","mod.rs","simple_type.rs"]]],["lib.rs"]],\
+"linera_witty":["",[["memory_layout",[],["element.rs","flat_layout.rs","layout.rs","mod.rs"]],["primitive_types",[],["flat_type.rs","maybe_flat_type.rs","mod.rs","simple_type.rs"]]],["lib.rs"]],\
 "linked_hash_map":["",[],["lib.rs"]],\
 "linux_raw_sys":["",[["x86_64",[],["errno.rs","general.rs","ioctl.rs"]]],["lib.rs"]],\
 "lock_api":["",[],["lib.rs","mutex.rs","remutex.rs","rwlock.rs"]],\
