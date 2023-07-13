@@ -737,6 +737,7 @@
 <a href="#737" id="737">737</a>
 <a href="#738" id="738">738</a>
 <a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -776,13 +777,14 @@
 };
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>serde_json::json;
 <span class="kw">use </span>std::{net::SocketAddr, num::NonZeroU16, sync::Arc};
 <span class="kw">use </span>thiserror::Error <span class="kw">as </span>ThisError;
 <span class="kw">use </span>tower_http::cors::CorsLayer;
 <span class="kw">use </span>tracing::{debug, error, info};
 
-<span class="attr">#[derive(SimpleObject, Clone)]
+<span class="attr">#[derive(SimpleObject, Serialize, Deserialize, Clone)]
 </span><span class="kw">pub struct </span>Chains {
     <span class="kw">pub </span>list: Vec&lt;ChainId&gt;,
     <span class="kw">pub </span>default: ChainId,
