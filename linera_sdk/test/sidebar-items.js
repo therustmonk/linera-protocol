@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["ActiveChain","BlockBuilder","TestValidator"]};
+window.SIDEBAR_ITEMS = {"fn":["log_messages","mock_application_id","mock_application_parameters","mock_application_state","mock_chain_id","mock_key_value_store","mock_system_balance","mock_system_timestamp","mock_try_query_application"],"struct":["ActiveChain","BlockBuilder","TestValidator"]};

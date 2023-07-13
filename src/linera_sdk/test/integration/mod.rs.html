@@ -15,6 +15,13 @@
 <a href="#15" id="15">15</a>
 <a href="#16" id="16">16</a>
 <a href="#17" id="17">17</a>
+<a href="#18" id="18">18</a>
+<a href="#19" id="19">19</a>
+<a href="#20" id="20">20</a>
+<a href="#21" id="21">21</a>
+<a href="#22" id="22">22</a>
+<a href="#23" id="23">23</a>
+<a href="#24" id="24">24</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -25,12 +32,19 @@
 //! executed targeting the host architecture, instead of targeting `wasm32-unknown-unknown` like
 //! done for unit tests.
 
-</span><span class="attr">#![cfg(any(feature = <span class="string">&quot;wasmer&quot;</span>, feature = <span class="string">&quot;wasmtime&quot;</span>))]
+</span><span class="attr">#![cfg(any(feature = <span class="string">&quot;test&quot;</span>, feature = <span class="string">&quot;wasmer&quot;</span>, feature = <span class="string">&quot;wasmtime&quot;</span>))]
 
+#[cfg(any(feature = <span class="string">&quot;wasmer&quot;</span>, feature = <span class="string">&quot;wasmtime&quot;</span>))]
 </span><span class="kw">mod </span>block;
-<span class="kw">mod </span>chain;
-<span class="kw">mod </span>validator;
+<span class="attr">#[cfg(any(feature = <span class="string">&quot;wasmer&quot;</span>, feature = <span class="string">&quot;wasmtime&quot;</span>))]
+</span><span class="kw">mod </span>chain;
+<span class="kw">mod </span>mock_stubs;
+<span class="attr">#[cfg(any(feature = <span class="string">&quot;wasmer&quot;</span>, feature = <span class="string">&quot;wasmtime&quot;</span>))]
+</span><span class="kw">mod </span>validator;
 
-<span class="kw">pub use </span><span class="self">self</span>::{block::BlockBuilder, chain::ActiveChain, validator::TestValidator};
+<span class="attr">#[cfg(feature = <span class="string">&quot;test&quot;</span>)]
+</span><span class="kw">pub use </span><span class="self">self</span>::mock_stubs::<span class="kw-2">*</span>;
+<span class="attr">#[cfg(any(feature = <span class="string">&quot;wasmer&quot;</span>, feature = <span class="string">&quot;wasmtime&quot;</span>))]
+</span><span class="kw">pub use </span><span class="self">self</span>::{block::BlockBuilder, chain::ActiveChain, validator::TestValidator};
 </code></pre></div>
 </section></main><div id="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="linera_sdk" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0 (84c898d65 2023-04-16)" data-search-js="search-8a59a8356673ec1f.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-0bcba95ff279c1db.css" ></div></body></html>
