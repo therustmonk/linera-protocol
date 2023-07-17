@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {};
+window.SIDEBAR_ITEMS = {"derive":["WitType"],"macro":["HList"],"struct":["HNil"],"trait":["HList","Layout","WitType"]};
