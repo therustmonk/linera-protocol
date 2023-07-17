@@ -115,12 +115,14 @@
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
 <a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use </span>graphql_client::GraphQLQuery;
 <span class="kw">use </span>linera_base::{
-    crypto::CryptoHash,
+    crypto::{CryptoHash, PublicKey},
     data_types::{BlockHeight, Timestamp},
     identifiers::{ChainId, Destination, Owner},
 };
@@ -146,6 +148,8 @@
     NewBlock {
         height: BlockHeight,
         hash: CryptoHash,
+        timestamp: Timestamp,
+        new_chains: Vec&lt;(ChainId, PublicKey)&gt;,
     },
     NewIncomingMessage {
         origin: Origin,

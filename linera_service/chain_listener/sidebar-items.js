@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["ChainListener","ChainListenerConfig"]};
+window.SIDEBAR_ITEMS = {"struct":["ChainListener","ChainListenerConfig"],"trait":["ClientContext"]};
