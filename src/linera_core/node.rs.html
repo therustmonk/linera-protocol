@@ -1034,7 +1034,7 @@
         <span class="kw">let </span>node = LocalNode { state };
         <span class="self">Self </span>{
             node: Arc::new(Mutex::new(node)),
-            notifier: Notifier::default(),
+            notifier: Default::default(),
         }
     }
 }

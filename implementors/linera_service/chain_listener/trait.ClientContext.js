@@ -1,3 +1,0 @@
-(function() {var implementors = {
-"linera":[["impl <a class=\"trait\" href=\"linera_service/chain_listener/trait.ClientContext.html\" title=\"trait linera_service::chain_listener::ClientContext\">ClientContext</a>&lt;<a class=\"struct\" href=\"linera_rpc/node_provider/struct.NodeProvider.html\" title=\"struct linera_rpc::node_provider::NodeProvider\">NodeProvider</a>&gt; for <a class=\"struct\" href=\"linera/struct.ClientContext.html\" title=\"struct linera::ClientContext\">ClientContext</a>"]]
-};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

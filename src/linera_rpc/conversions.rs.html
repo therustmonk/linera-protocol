@@ -675,15 +675,6 @@
 <a href="#675" id="675">675</a>
 <a href="#676" id="676">676</a>
 <a href="#677" id="677">677</a>
-<a href="#678" id="678">678</a>
-<a href="#679" id="679">679</a>
-<a href="#680" id="680">680</a>
-<a href="#681" id="681">681</a>
-<a href="#682" id="682">682</a>
-<a href="#683" id="683">683</a>
-<a href="#684" id="684">684</a>
-<a href="#685" id="685">685</a>
-<a href="#686" id="686">686</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -1122,16 +1113,9 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">pub mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use </span>linera_base::{
-        crypto::{BcsSignable, CryptoHash, KeyPair},
-        data_types::{Amount, Timestamp},
-    };
-    <span class="kw">use </span>linera_chain::{
-        data_types::{Block, BlockAndRound, ExecutedBlock, HashedValue},
-        ChainManagerInfo,
-    };
+    <span class="kw">use </span>linera_base::crypto::{BcsSignable, CryptoHash, KeyPair};
+    <span class="kw">use </span>linera_chain::data_types::{Block, BlockAndRound, ExecutedBlock, HashedValue};
     <span class="kw">use </span>linera_core::data_types::ChainInfo;
-    <span class="kw">use </span>linera_execution::committee::Epoch;
     <span class="kw">use </span>serde::{Deserialize, Serialize};
     <span class="kw">use </span>std::{borrow::Cow, fmt::Debug};
 
@@ -1143,12 +1127,12 @@
     <span class="kw">fn </span>get_block() -&gt; Block {
         Block {
             chain_id: ChainId::root(<span class="number">0</span>),
-            epoch: Epoch::default(),
+            epoch: Default::default(),
             incoming_messages: <span class="macro">vec!</span>[],
             operations: <span class="macro">vec!</span>[],
-            height: BlockHeight::from(<span class="number">0</span>),
+            height: Default::default(),
             authenticated_signer: <span class="prelude-val">None</span>,
-            timestamp: Timestamp::default(),
+            timestamp: Default::default(),
             previous_block_hash: <span class="prelude-val">None</span>,
         }
     }
@@ -1212,11 +1196,11 @@
             chain_id: ChainId::root(<span class="number">0</span>),
             epoch: <span class="prelude-val">None</span>,
             description: <span class="prelude-val">None</span>,
-            manager: ChainManagerInfo::default(),
-            system_balance: Amount::ZERO,
+            manager: Default::default(),
+            system_balance: Default::default(),
             block_hash: <span class="prelude-val">None</span>,
-            timestamp: Timestamp::default(),
-            next_block_height: BlockHeight::from(<span class="number">0</span>),
+            timestamp: Default::default(),
+            next_block_height: Default::default(),
             state_hash: <span class="prelude-val">None</span>,
             requested_committees: <span class="prelude-val">None</span>,
             requested_pending_messages: <span class="macro">vec!</span>[],
@@ -1342,7 +1326,7 @@
         <span class="kw">let </span>block_proposal = BlockProposal {
             content: BlockAndRound {
                 block: get_block(),
-                round: RoundNumber::zero(),
+                round: Default::default(),
             },
             owner: Owner::from(KeyPair::generate().public()),
             signature: Signature::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;test&quot;</span>.into()), <span class="kw-2">&amp;</span>KeyPair::generate()),
@@ -1363,8 +1347,6 @@
             reason: linera_core::worker::Reason::NewBlock {
                 height: BlockHeight(<span class="number">0</span>),
                 hash: CryptoHash::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;&quot;</span>.into())),
-                timestamp: Timestamp::default(),
-                new_chains: Vec::new(),
             },
         };
         round_trip_check::&lt;<span class="kw">_</span>, grpc::Notification&gt;(notification);
