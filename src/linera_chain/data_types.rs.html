@@ -787,6 +787,13 @@
 <a href="#787" id="787">787</a>
 <a href="#788" id="788">788</a>
 <a href="#789" id="789">789</a>
+<a href="#790" id="790">790</a>
+<a href="#791" id="791">791</a>
+<a href="#792" id="792">792</a>
+<a href="#793" id="793">793</a>
+<a href="#794" id="794">794</a>
+<a href="#795" id="795">795</a>
+<a href="#796" id="796">796</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -950,6 +957,7 @@
     <span class="kw">pub </span>owner: Owner,
     <span class="kw">pub </span>signature: Signature,
     <span class="kw">pub </span>blobs: Vec&lt;HashedValue&gt;,
+    <span class="kw">pub </span>validated: <span class="prelude-ty">Option</span>&lt;Certificate&gt;,
 }
 
 <span class="doccomment">/// A message together with routing information.
@@ -1323,13 +1331,19 @@
 }
 
 <span class="kw">impl </span>BlockProposal {
-    <span class="kw">pub fn </span>new(content: BlockAndRound, secret: <span class="kw-2">&amp;</span>KeyPair, blobs: Vec&lt;HashedValue&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(
+        content: BlockAndRound,
+        secret: <span class="kw-2">&amp;</span>KeyPair,
+        blobs: Vec&lt;HashedValue&gt;,
+        validated: <span class="prelude-ty">Option</span>&lt;Certificate&gt;,
+    ) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>signature = Signature::new(<span class="kw-2">&amp;</span>content, secret);
         <span class="self">Self </span>{
             content,
             owner: secret.public().into(),
             signature,
             blobs,
+            validated,
         }
     }
 }

@@ -194,14 +194,6 @@
 <a href="#194" id="194">194</a>
 <a href="#195" id="195">195</a>
 <a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a>
-<a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
-<a href="#200" id="200">200</a>
-<a href="#201" id="201">201</a>
-<a href="#202" id="202">202</a>
-<a href="#203" id="203">203</a>
-<a href="#204" id="204">204</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -212,14 +204,13 @@
 <span class="kw">pub use </span>single::{SingleOwnerManager, SingleOwnerManagerInfo};
 
 <span class="kw">use crate</span>::{
-    data_types::{Block, BlockProposal, Certificate, LiteVote, OutgoingMessage, Vote},
+    data_types::{BlockProposal, Certificate, LiteVote, OutgoingMessage, Vote},
     ChainError,
 };
 <span class="kw">use </span>linera_base::{
     crypto::{CryptoHash, KeyPair, PublicKey},
     data_types::{BlockHeight, RoundNumber},
     doc_scalar, ensure,
-    identifiers::Owner,
 };
 <span class="kw">use </span>linera_execution::ChainOwnership;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
@@ -269,16 +260,10 @@
         !<span class="macro">matches!</span>(<span class="self">self</span>, ChainManager::None)
     }
 
-    <span class="kw">pub fn </span>verify_owner(<span class="kw-2">&amp;</span><span class="self">self</span>, owner: <span class="kw-2">&amp;</span>Owner) -&gt; <span class="prelude-ty">Option</span>&lt;PublicKey&gt; {
+    <span class="kw">pub fn </span>verify_owner(<span class="kw-2">&amp;</span><span class="self">self</span>, proposal: <span class="kw-2">&amp;</span>BlockProposal) -&gt; <span class="prelude-ty">Option</span>&lt;PublicKey&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            ChainManager::Single(manager) =&gt; {
-                <span class="kw">if </span>manager.owner == <span class="kw-2">*</span>owner {
-                    <span class="prelude-val">Some</span>(manager.public_key)
-                } <span class="kw">else </span>{
-                    <span class="prelude-val">None
-                </span>}
-            }
-            ChainManager::Multi(manager) =&gt; manager.owners.get(owner).copied(),
+            ChainManager::Single(manager) =&gt; manager.verify_owner(proposal),
+            ChainManager::Multi(manager) =&gt; manager.verify_owner(proposal),
             ChainManager::None =&gt; <span class="prelude-val">None</span>,
         }
     }
@@ -289,7 +274,7 @@
                 <span class="kw">let </span>round = manager.round();
                 round.try_add_one().unwrap_or(round)
             }
-            <span class="kw">_ </span>=&gt; RoundNumber::default(),
+            ChainManager::None | ChainManager::Single(<span class="kw">_</span>) =&gt; RoundNumber::default(),
         }
     }
 
@@ -297,36 +282,28 @@
         <span class="kw">match </span><span class="self">self </span>{
             ChainManager::Single(manager) =&gt; manager.pending(),
             ChainManager::Multi(manager) =&gt; manager.pending(),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
+            ChainManager::None =&gt; <span class="prelude-val">None</span>,
         }
     }
 
     <span class="doccomment">/// Verifies the safety of the block w.r.t. voting rules.
-    </span><span class="kw">pub fn </span>check_proposed_block(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        new_block: <span class="kw-2">&amp;</span>Block,
-        new_round: RoundNumber,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Outcome, ChainError&gt; {
+    </span><span class="kw">pub fn </span>check_proposed_block(<span class="kw-2">&amp;</span><span class="self">self</span>, proposal: <span class="kw-2">&amp;</span>BlockProposal) -&gt; <span class="prelude-ty">Result</span>&lt;Outcome, ChainError&gt; {
         <span class="comment">// When a block is certified, incrementing its height must succeed.
         </span><span class="macro">ensure!</span>(
-            new_block.height &lt; BlockHeight::max(),
+            proposal.content.block.height &lt; BlockHeight::max(),
             ChainError::InvalidBlockHeight
         );
         <span class="kw">match </span><span class="self">self </span>{
-            ChainManager::Single(manager) =&gt; manager.check_proposed_block(new_block, new_round),
-            ChainManager::Multi(manager) =&gt; manager.check_proposed_block(new_block, new_round),
-            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected chain manager&quot;</span>),
+            ChainManager::Single(manager) =&gt; manager.check_proposed_block(proposal),
+            ChainManager::Multi(manager) =&gt; manager.check_proposed_block(proposal),
+            ChainManager::None =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected chain manager&quot;</span>),
         }
     }
 
-    <span class="kw">pub fn </span>check_validated_block(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        new_block: <span class="kw-2">&amp;</span>Block,
-        new_round: RoundNumber,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Outcome, ChainError&gt; {
+    <span class="kw">pub fn </span>check_validated_block(<span class="kw-2">&amp;</span><span class="self">self</span>, certificate: <span class="kw-2">&amp;</span>Certificate) -&gt; <span class="prelude-ty">Result</span>&lt;Outcome, ChainError&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            ChainManager::Multi(manager) =&gt; manager.check_validated_block(new_block, new_round),
-            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected chain manager&quot;</span>),
+            ChainManager::Multi(manager) =&gt; manager.check_validated_block(certificate),
+            ChainManager::None | ChainManager::Single(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected chain manager&quot;</span>),
         }
     }
 
@@ -344,14 +321,14 @@
             ChainManager::Multi(manager) =&gt; {
                 manager.create_vote(proposal, messages, state_hash, key_pair)
             }
-            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected chain manager&quot;</span>),
+            ChainManager::None =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected chain manager&quot;</span>),
         }
     }
 
     <span class="kw">pub fn </span>create_final_vote(<span class="kw-2">&amp;mut </span><span class="self">self</span>, certificate: Certificate, key_pair: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>KeyPair&gt;) {
         <span class="kw">match </span><span class="self">self </span>{
             ChainManager::Multi(manager) =&gt; manager.create_final_vote(certificate, key_pair),
-            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected chain manager&quot;</span>),
+            ChainManager::None | ChainManager::Single(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected chain manager&quot;</span>),
         }
     }
 }
@@ -396,6 +373,13 @@
             ChainManagerInfo::Single(single) =&gt; single.pending.as_ref(),
             ChainManagerInfo::Multi(multi) =&gt; multi.pending.as_ref(),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
+        }
+    }
+
+    <span class="kw">pub fn </span>highest_validated(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Certificate&gt; {
+        <span class="kw">match </span><span class="self">self </span>{
+            ChainManagerInfo::Multi(multi) =&gt; multi.highest_validated(),
+            ChainManagerInfo::None | ChainManagerInfo::Single(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
         }
     }
 

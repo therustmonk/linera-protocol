@@ -1481,6 +1481,9 @@
 <a href="#1481" id="1481">1481</a>
 <a href="#1482" id="1482">1482</a>
 <a href="#1483" id="1483">1483</a>
+<a href="#1484" id="1484">1484</a>
+<a href="#1485" id="1485">1485</a>
+<a href="#1486" id="1486">1486</a>
 </pre><pre class="rust"><code><span class="doccomment">/// A request for client to subscribe to notifications for a given `ChainId`
 </span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -1609,6 +1612,9 @@
     <span class="doccomment">/// Required bytecode
     </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, tag = <span class="string">&quot;5&quot;</span>)]
     </span><span class="kw">pub </span>blobs: ::prost::alloc::vec::Vec&lt;u8&gt;,
+    <span class="doccomment">/// A certificate for a validated block that justifies the proposal in this round.
+    </span><span class="attr">#[prost(bytes = <span class="string">&quot;vec&quot;</span>, optional, tag = <span class="string">&quot;6&quot;</span>)]
+    </span><span class="kw">pub </span>validated: ::core::option::Option&lt;::prost::alloc::vec::Vec&lt;u8&gt;&gt;,
 }
 <span class="doccomment">/// A certified statement from the committee, without the value.
 </span><span class="attr">#[allow(clippy::derive_partial_eq_without_eq)]

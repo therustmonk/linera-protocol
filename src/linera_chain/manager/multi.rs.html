@@ -198,14 +198,25 @@
 <a href="#198" id="198">198</a>
 <a href="#199" id="199">199</a>
 <a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use </span><span class="kw">super</span>::Outcome;
 <span class="kw">use crate</span>::{
     data_types::{
-        Block, BlockAndRound, BlockProposal, Certificate, CertificateValue, ExecutedBlock,
-        HashedValue, LiteVote, OutgoingMessage, Vote,
+        BlockAndRound, BlockProposal, Certificate, CertificateValue, ExecutedBlock, HashedValue,
+        LiteVote, OutgoingMessage, Vote,
     },
     ChainError,
 };
@@ -261,39 +272,35 @@
     }
 
     <span class="doccomment">/// Verifies the safety of the block w.r.t. voting rules.
-    </span><span class="kw">pub fn </span>check_proposed_block(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        new_block: <span class="kw-2">&amp;</span>Block,
-        new_round: RoundNumber,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Outcome, ChainError&gt; {
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(proposal) = <span class="kw-2">&amp;</span><span class="self">self</span>.proposed {
-            <span class="kw">if </span>proposal.content.block == <span class="kw-2">*</span>new_block &amp;&amp; proposal.content.round == new_round {
+    </span><span class="kw">pub fn </span>check_proposed_block(<span class="kw-2">&amp;</span><span class="self">self</span>, proposal: <span class="kw-2">&amp;</span>BlockProposal) -&gt; <span class="prelude-ty">Result</span>&lt;Outcome, ChainError&gt; {
+        <span class="kw">let </span>new_block = <span class="kw-2">&amp;</span>proposal.content.block;
+        <span class="kw">let </span>new_round = proposal.content.round;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(old_proposal) = <span class="kw-2">&amp;</span><span class="self">self</span>.proposed {
+            <span class="kw">if </span>old_proposal.content.block == <span class="kw-2">*</span>new_block &amp;&amp; old_proposal.content.round == new_round {
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(Outcome::Skip);
             }
-            <span class="kw">if </span>new_round &lt;= proposal.content.round {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(ChainError::InsufficientRound(proposal.content.round));
+            <span class="kw">if </span>new_round &lt;= old_proposal.content.round {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(ChainError::InsufficientRound(old_proposal.content.round));
             }
         }
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(Certificate { round, value, .. }) = <span class="kw-2">&amp;</span><span class="self">self</span>.locked {
-            <span class="kw">if let </span>CertificateValue::ValidatedBlock {
-                executed_block: ExecutedBlock { block, .. },
-            } = value.inner()
-            {
-                <span class="macro">ensure!</span>(new_round &gt; <span class="kw-2">*</span>round, ChainError::InsufficientRound(<span class="kw-2">*</span>round));
-                <span class="macro">ensure!</span>(
-                    <span class="kw-2">*</span>new_block == <span class="kw-2">*</span>block,
-                    ChainError::HasLockedBlock(block.height, <span class="kw-2">*</span>round)
-                );
-            }
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(locked) = proposal
+            .validated
+            .iter()
+            .chain(<span class="kw-2">&amp;</span><span class="self">self</span>.locked)
+            .max_by_key(|cert| cert.round)
+        {
+            <span class="kw">let </span>block = <span class="kw-2">&amp;</span>locked.value().executed_block().block;
+            <span class="macro">ensure!</span>(
+                locked.round &lt; new_round &amp;&amp; block == new_block,
+                ChainError::HasLockedBlock(block.height, locked.round)
+            );
         }
         <span class="prelude-val">Ok</span>(Outcome::Accept)
     }
 
-    <span class="kw">pub fn </span>check_validated_block(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        new_block: <span class="kw-2">&amp;</span>Block,
-        new_round: RoundNumber,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Outcome, ChainError&gt; {
+    <span class="kw">pub fn </span>check_validated_block(<span class="kw-2">&amp;</span><span class="self">self</span>, certificate: <span class="kw-2">&amp;</span>Certificate) -&gt; <span class="prelude-ty">Result</span>&lt;Outcome, ChainError&gt; {
+        <span class="kw">let </span>new_block = <span class="kw-2">&amp;</span>certificate.value().executed_block().block;
+        <span class="kw">let </span>new_round = certificate.round;
         <span class="kw">if let </span><span class="prelude-val">Some</span>(Vote { value, round, .. }) = <span class="kw-2">&amp;</span><span class="self">self</span>.pending {
             <span class="kw">match </span>value.inner() {
                 CertificateValue::ConfirmedBlock { executed_block } =&gt; {
@@ -352,6 +359,10 @@
             </span><span class="self">self</span>.pending = <span class="prelude-val">Some</span>(vote);
         }
     }
+
+    <span class="kw">pub fn </span>verify_owner(<span class="kw-2">&amp;</span><span class="self">self</span>, proposal: <span class="kw-2">&amp;</span>BlockProposal) -&gt; <span class="prelude-ty">Option</span>&lt;PublicKey&gt; {
+        <span class="self">self</span>.owners.get(<span class="kw-2">&amp;</span>proposal.owner).copied()
+    }
 }
 
 <span class="doccomment">/// Chain manager information that is included in `ChainInfo` sent to clients, about chains
@@ -396,6 +407,17 @@
 
     <span class="kw">pub fn </span>next_round(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RoundNumber {
         <span class="self">self</span>.round.try_add_one().unwrap_or(<span class="self">self</span>.round)
+    }
+
+    <span class="kw">pub fn </span>highest_validated(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Certificate&gt; {
+        <span class="self">self</span>.requested_locked
+            .iter()
+            .chain(
+                <span class="self">self</span>.requested_proposed
+                    .as_ref()
+                    .and_then(|proposal| proposal.validated.as_ref()),
+            )
+            .max_by_key(|cert| cert.round)
     }
 }
 </code></pre></div>

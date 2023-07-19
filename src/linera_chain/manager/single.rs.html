@@ -127,15 +127,14 @@
 <a href="#127" id="127">127</a>
 <a href="#128" id="128">128</a>
 <a href="#129" id="129">129</a>
-<a href="#130" id="130">130</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use </span><span class="kw">super</span>::Outcome;
 <span class="kw">use crate</span>::{
     data_types::{
-        Block, BlockAndRound, BlockProposal, CertificateValue, ExecutedBlock, HashedValue,
-        LiteVote, OutgoingMessage, Vote,
+        BlockAndRound, BlockProposal, CertificateValue, ExecutedBlock, HashedValue, LiteVote,
+        OutgoingMessage, Vote,
     },
     ChainError,
 };
@@ -173,22 +172,17 @@
     }
 
     <span class="doccomment">/// Verifies the safety of the block w.r.t. voting rules.
-    </span><span class="kw">pub fn </span>check_proposed_block(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        new_block: <span class="kw-2">&amp;</span>Block,
-        new_round: RoundNumber,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Outcome, ChainError&gt; {
+    </span><span class="kw">pub fn </span>check_proposed_block(<span class="kw-2">&amp;</span><span class="self">self</span>, proposal: <span class="kw-2">&amp;</span>BlockProposal) -&gt; <span class="prelude-ty">Result</span>&lt;Outcome, ChainError&gt; {
+        <span class="kw">let </span>new_block = <span class="kw-2">&amp;</span>proposal.content.block;
+        <span class="kw">let </span>new_round = proposal.content.round;
         <span class="macro">ensure!</span>(
-            new_round == RoundNumber::default(),
+            new_round == RoundNumber::default() &amp;&amp; proposal.validated.is_none(),
             ChainError::InvalidBlockProposal
         );
         <span class="kw">if let </span><span class="prelude-val">Some</span>(vote) = <span class="kw-2">&amp;</span><span class="self">self</span>.pending {
             <span class="kw">let </span>block = <span class="kw">match </span>vote.value() {
                 CertificateValue::ConfirmedBlock { executed_block, .. } =&gt; <span class="kw-2">&amp;</span>executed_block.block,
-                value =&gt; {
-                    <span class="kw">let </span>msg = <span class="macro">format!</span>(<span class="string">&quot;Unexpected value: {:?}&quot;</span>, value);
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(ChainError::InternalError(msg));
-                }
+                <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(ChainError::InternalError(<span class="string">&quot;Unexpected value&quot;</span>.to_string())),
             };
             <span class="kw">if </span>block == new_block {
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(Outcome::Skip);
@@ -227,6 +221,10 @@
             <span class="kw">let </span>vote = Vote::new(value, round, key_pair);
             <span class="self">self</span>.pending = <span class="prelude-val">Some</span>(vote);
         }
+    }
+
+    <span class="kw">pub fn </span>verify_owner(<span class="kw-2">&amp;</span><span class="self">self</span>, proposal: <span class="kw-2">&amp;</span>BlockProposal) -&gt; <span class="prelude-ty">Option</span>&lt;PublicKey&gt; {
+        (<span class="self">self</span>.owner == proposal.owner).then_some(<span class="self">self</span>.public_key)
     }
 }
 

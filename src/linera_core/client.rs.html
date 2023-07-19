@@ -1525,6 +1525,16 @@
 <a href="#1525" id="1525">1525</a>
 <a href="#1526" id="1526">1526</a>
 <a href="#1527" id="1527">1527</a>
+<a href="#1528" id="1528">1528</a>
+<a href="#1529" id="1529">1529</a>
+<a href="#1530" id="1530">1530</a>
+<a href="#1531" id="1531">1531</a>
+<a href="#1532" id="1532">1532</a>
+<a href="#1533" id="1533">1533</a>
+<a href="#1534" id="1534">1534</a>
+<a href="#1535" id="1535">1535</a>
+<a href="#1536" id="1536">1536</a>
+<a href="#1537" id="1537">1537</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -2481,7 +2491,7 @@
         }
     }
 
-    <span class="doccomment">/// Executes (or retries) a regular block proposal. Update local balance.
+    <span class="doccomment">/// Executes (or retries) a regular block proposal. Updates local balance.
     /// If `with_confirmation` is false, we stop short of executing the finalized block.
     </span><span class="kw">async fn </span>propose_block(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: Block) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="kw">let </span>next_round = <span class="self">self</span>.next_round;
@@ -2506,7 +2516,16 @@
             .read_or_download_blobs(nodes, block.bytecode_locations())
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="comment">// Build the initial query.
-        </span><span class="kw">let </span>key_pair = <span class="self">self</span>.key_pair().<span class="kw">await</span><span class="question-mark">?</span>;
+        </span><span class="kw">let </span>manager = <span class="self">self</span>.chain_info().<span class="kw">await</span><span class="question-mark">?</span>.manager;
+        <span class="kw">let </span>key_pair = <span class="self">self</span>.key_pair().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>validated = manager.highest_validated().cloned();
+        <span class="comment">// TODO(#66): return the block that should be proposed instead
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(validated) = <span class="kw-2">&amp;</span>validated {
+            <span class="macro">ensure!</span>(
+                validated.value().executed_block().block == block,
+                <span class="string">&quot;A different block has already been validated at this height&quot;
+            </span>);
+        }
         <span class="kw">let </span>proposal = BlockProposal::new(
             BlockAndRound {
                 block: block.clone(),
@@ -2514,6 +2533,7 @@
             },
             key_pair,
             blobs,
+            validated,
         );
         <span class="comment">// Try to execute the block locally first.
         </span><span class="self">self</span>.node_client
@@ -2522,7 +2542,7 @@
         <span class="comment">// Remember what we are trying to do, before sending the proposal to the validators.
         </span><span class="self">self</span>.pending_block = <span class="prelude-val">Some</span>(block);
         <span class="comment">// Send the query to validators.
-        </span><span class="kw">let </span>final_certificate = <span class="kw">match </span><span class="self">self</span>.chain_info().<span class="kw">await</span><span class="question-mark">?</span>.manager {
+        </span><span class="kw">let </span>final_certificate = <span class="kw">match </span>manager {
             ChainManagerInfo::Multi(<span class="kw">_</span>) =&gt; {
                 <span class="comment">// Need two round-trips.
                 </span><span class="kw">let </span>certificate = <span class="self">self

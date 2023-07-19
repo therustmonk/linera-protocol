@@ -1219,6 +1219,9 @@
 <a href="#1219" id="1219">1219</a>
 <a href="#1220" id="1220">1220</a>
 <a href="#1221" id="1221">1221</a>
+<a href="#1222" id="1222">1222</a>
+<a href="#1223" id="1223">1223</a>
+<a href="#1224" id="1224">1224</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1866,7 +1869,7 @@
             </span>|| chain
                 .manager
                 .get_mut()
-                .check_validated_block(block, certificate.round)<span class="question-mark">?
+                .check_validated_block(<span class="kw-2">&amp;</span>certificate)<span class="question-mark">?
                 </span>== ChainManagerOutcome::Skip
         {
             <span class="comment">// If we just processed the same pending block, return the chain info unchanged.
@@ -2063,29 +2066,32 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainInfoResponse, NetworkActions), WorkerError&gt; {
         <span class="macro">trace!</span>(<span class="string">&quot;{} &lt;-- {:?}&quot;</span>, <span class="self">self</span>.nickname, proposal);
         <span class="kw">let </span>BlockProposal {
-            content: BlockAndRound { block, round },
+            content: BlockAndRound { block, .. },
             owner,
             signature,
             blobs,
+            validated: <span class="kw">_</span>,
         } = <span class="kw-2">&amp;</span>proposal;
         <span class="kw">let </span>chain_id = block.chain_id;
         <span class="kw">let </span><span class="kw-2">mut </span>chain = <span class="self">self</span>.storage.load_active_chain(chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="comment">// Check the epoch.
-        </span><span class="kw">let </span>epoch = chain
+        </span><span class="kw">let </span>(epoch, committee) = chain
             .execution_state
             .system
-            .epoch
-            .get()
+            .current_committee()
             .expect(<span class="string">&quot;chain is active&quot;</span>);
         <span class="macro">ensure!</span>(
             block.epoch == epoch,
             WorkerError::InvalidEpoch { chain_id, epoch }
         );
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(validated) = <span class="kw-2">&amp;</span>proposal.validated {
+            validated.check(committee)<span class="question-mark">?</span>;
+        }
         <span class="comment">// Check the authentication of the block.
         </span><span class="kw">let </span>public_key = chain
             .manager
             .get()
-            .verify_owner(owner)
+            .verify_owner(<span class="kw-2">&amp;</span>proposal)
             .ok_or(WorkerError::InvalidOwner)<span class="question-mark">?</span>;
         signature.check(<span class="kw-2">&amp;</span>proposal.content, public_key)<span class="question-mark">?</span>;
         <span class="comment">// Check the authentication of the operations in the block.
@@ -2095,7 +2101,7 @@
         <span class="comment">// Check if the chain is ready for this new block proposal.
         // This should always pass for nodes without voting key.
         </span>chain.tip_state.get().verify_block_chaining(block)<span class="question-mark">?</span>;
-        <span class="kw">if </span>chain.manager.get().check_proposed_block(block, <span class="kw-2">*</span>round)<span class="question-mark">? </span>== ChainManagerOutcome::Skip {
+        <span class="kw">if </span>chain.manager.get().check_proposed_block(<span class="kw-2">&amp;</span>proposal)<span class="question-mark">? </span>== ChainManagerOutcome::Skip {
             <span class="comment">// If we just processed the same pending block, return the chain info unchanged.
             </span><span class="kw">return </span><span class="prelude-val">Ok</span>((
                 ChainInfoResponse::new(<span class="kw-2">&amp;</span>chain, <span class="self">self</span>.key_pair()),
