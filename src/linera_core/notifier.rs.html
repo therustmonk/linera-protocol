@@ -210,7 +210,7 @@
 </span><span class="kw">impl</span>&lt;N&gt; Default <span class="kw">for </span>Notifier&lt;N&gt; {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            inner: Default::default(),
+            inner: DashMap::default(),
         }
     }
 }

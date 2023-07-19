@@ -90,10 +90,19 @@
 <a href="#90" id="90">90</a>
 <a href="#91" id="91">91</a>
 <a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="kw">use </span>futures::{lock::Mutex, StreamExt};
+</span><span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>futures::{lock::Mutex, StreamExt};
 <span class="kw">use </span>linera_core::{
     client::{ChainClient, ValidatorNodeProvider},
     tracker::NotificationTracker,
@@ -116,6 +125,14 @@
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) delay_after_ms: u64,
 }
 
+<span class="attr">#[async_trait]
+</span><span class="kw">pub trait </span>ClientContext&lt;P: ValidatorNodeProvider&gt; {
+    <span class="kw">async fn </span>update_wallet&lt;<span class="lifetime">&#39;a</span>, S&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>, client: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>ChainClient&lt;P, S&gt;)
+    <span class="kw">where
+        </span>S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
+        ViewError: From&lt;S::ContextError&gt;;
+}
+
 <span class="doccomment">/// A `ChainListener` is a process that listens to notifications from validators and reacts
 /// appropriately.
 </span><span class="kw">pub struct </span>ChainListener&lt;P, S&gt; {
@@ -135,10 +152,9 @@
     }
 
     <span class="doccomment">/// Runs the chain listener.
-    </span><span class="kw">pub async fn </span>run&lt;C, F&gt;(<span class="self">self</span>, <span class="kw-2">mut </span>context: C, wallet_updater: F) -&gt; <span class="prelude-ty">Result</span>&lt;(), anyhow::Error&gt;
+    </span><span class="kw">pub async fn </span>run&lt;C&gt;(<span class="self">self</span>, <span class="kw-2">mut </span>context: C) -&gt; <span class="prelude-ty">Result</span>&lt;(), anyhow::Error&gt;
     <span class="kw">where
-        for</span>&lt;<span class="lifetime">&#39;a</span>&gt; F:
-            (Fn(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>C, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>ChainClient&lt;P, S&gt;) -&gt; futures::future::BoxFuture&lt;<span class="lifetime">&#39;a</span>, ()&gt;) + Send,
+        </span>C: ClientContext&lt;P&gt;,
     {
         <span class="kw">let </span><span class="kw-2">mut </span>notification_stream = ChainClient::listen(<span class="self">self</span>.client.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>tracker = NotificationTracker::default();
@@ -170,7 +186,7 @@
                             }
                         }
                     }
-                    wallet_updater(<span class="kw-2">&amp;mut </span>context, client.deref_mut()).<span class="kw">await</span>;
+                    context.update_wallet(client.deref_mut()).<span class="kw">await</span>;
                 }
 
                 <span class="kw">if </span><span class="self">self</span>.config.delay_after_ms &gt; <span class="number">0 </span>{

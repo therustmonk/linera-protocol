@@ -732,8 +732,8 @@ Please make sure a node service isn&#39;t running locally, only one client can u
         <span class="kw">let </span><span class="kw-2">mut </span>reader = BufReader::new(<span class="kw-2">&amp;</span>file_lock.file);
         <span class="kw">if </span>reader.fill_buf()<span class="question-mark">?</span>.is_empty() {
             <span class="kw">let </span>inner = InnerWallet {
-                chains: Default::default(),
-                unassigned_key_pairs: Default::default(),
+                chains: BTreeMap::new(),
+                unassigned_key_pairs: HashMap::new(),
                 default: <span class="prelude-val">None</span>,
                 genesis_config,
             };

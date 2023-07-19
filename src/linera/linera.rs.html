@@ -1670,6 +1670,13 @@
 <a href="#1670" id="1670">1670</a>
 <a href="#1671" id="1671">1671</a>
 <a href="#1672" id="1672">1672</a>
+<a href="#1673" id="1673">1673</a>
+<a href="#1674" id="1674">1674</a>
+<a href="#1675" id="1675">1675</a>
+<a href="#1676" id="1676">1676</a>
+<a href="#1677" id="1677">1677</a>
+<a href="#1678" id="1678">1678</a>
+<a href="#1679" id="1679">1679</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1700,7 +1707,7 @@
 };
 <span class="kw">use </span>linera_rpc::node_provider::{NodeOptions, NodeProvider};
 <span class="kw">use </span>linera_service::{
-    chain_listener::ChainListenerConfig,
+    chain_listener::{<span class="self">self</span>, ChainListenerConfig},
     config::{CommitteeConfig, Export, GenesisConfig, Import, UserChain, WalletState},
     node_service::{Chains, NodeService},
     project::{<span class="self">self</span>, Project},
@@ -1749,6 +1756,18 @@
     notification_retry_delay: Duration,
     notification_retries: u32,
     wait_for_outgoing_messages: bool,
+}
+
+<span class="attr">#[async_trait]
+</span><span class="kw">impl </span>chain_listener::ClientContext&lt;NodeProvider&gt; <span class="kw">for </span>ClientContext {
+    <span class="kw">async fn </span>update_wallet&lt;<span class="lifetime">&#39;a</span>, S&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>, client: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>ChainClient&lt;NodeProvider, S&gt;)
+    <span class="kw">where
+        </span>S: Store + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
+        ViewError: From&lt;S::ContextError&gt;,
+    {
+        <span class="self">self</span>.update_wallet_from_client(client).<span class="kw">await</span>;
+        <span class="self">self</span>.save_wallet()
+    }
 }
 
 <span class="kw">impl </span>ClientContext {
@@ -1870,7 +1889,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         storage: S,
         chain_id: <span class="kw">impl </span>Into&lt;<span class="prelude-ty">Option</span>&lt;ChainId&gt;&gt;,
-    ) -&gt; ChainClient&lt;<span class="kw">impl </span>ValidatorNodeProvider, S&gt; {
+    ) -&gt; ChainClient&lt;NodeProvider, S&gt; {
         <span class="kw">let </span>chain_id = chain_id.into().unwrap_or_else(|| {
             <span class="self">self</span>.wallet_state
                 .default_chain()
@@ -2072,13 +2091,15 @@
         key_pair: <span class="prelude-ty">Option</span>&lt;KeyPair&gt;,
         timestamp: Timestamp,
     ) {
-        <span class="self">self</span>.wallet_state.insert(UserChain {
-            chain_id,
-            key_pair: key_pair.as_ref().map(|kp| kp.copy()),
-            block_hash: <span class="prelude-val">None</span>,
-            timestamp,
-            next_block_height: BlockHeight::from(<span class="number">0</span>),
-        });
+        <span class="kw">if </span><span class="self">self</span>.wallet_state.get(chain_id).is_none() {
+            <span class="self">self</span>.wallet_state.insert(UserChain {
+                chain_id,
+                key_pair: key_pair.as_ref().map(|kp| kp.copy()),
+                block_hash: <span class="prelude-val">None</span>,
+                timestamp,
+                next_block_height: BlockHeight::from(<span class="number">0</span>),
+            });
+        }
     }
 
     <span class="attr">#[cfg(feature = <span class="string">&quot;benchmark&quot;</span>)]
@@ -2980,14 +3001,7 @@
                 <span class="kw">let </span>list = context.wallet_state.chain_ids();
                 <span class="kw">let </span>chains = Chains { list, default };
                 <span class="kw">let </span>service = NodeService::new(chain_client, config, port, chains);
-                service
-                    .run(context, |context, client| {
-                        Box::pin(<span class="kw">async </span>{
-                            context.update_wallet_from_client(client).<span class="kw">await</span>;
-                            context.save_wallet();
-                        })
-                    })
-                    .<span class="kw">await</span><span class="question-mark">?</span>;
+                service.run(context).<span class="kw">await</span><span class="question-mark">?</span>;
             }
 
             PublishBytecode {

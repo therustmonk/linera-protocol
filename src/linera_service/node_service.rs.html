@@ -735,13 +735,10 @@
 <a href="#735" id="735">735</a>
 <a href="#736" id="736">736</a>
 <a href="#737" id="737">737</a>
-<a href="#738" id="738">738</a>
-<a href="#739" id="739">739</a>
-<a href="#740" id="740">740</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="kw">use </span><span class="kw">crate</span>::chain_listener::{ChainListener, ChainListenerConfig};
+</span><span class="kw">use </span><span class="kw">crate</span>::chain_listener::{ChainListener, ChainListenerConfig, ClientContext};
 <span class="kw">use </span>async_graphql::{
     futures_util::Stream,
     http::GraphiQLSource,
@@ -1335,10 +1332,9 @@
     }
 
     <span class="doccomment">/// Runs the node service.
-    </span><span class="kw">pub async fn </span>run&lt;C, F&gt;(<span class="self">self</span>, context: C, wallet_updater: F) -&gt; <span class="prelude-ty">Result</span>&lt;(), anyhow::Error&gt;
+    </span><span class="kw">pub async fn </span>run&lt;C&gt;(<span class="self">self</span>, context: C) -&gt; <span class="prelude-ty">Result</span>&lt;(), anyhow::Error&gt;
     <span class="kw">where
-        for</span>&lt;<span class="lifetime">&#39;a</span>&gt; F:
-            (Fn(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>C, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>ChainClient&lt;P, S&gt;) -&gt; futures::future::BoxFuture&lt;<span class="lifetime">&#39;a</span>, ()&gt;) + Send,
+        </span>C: ClientContext&lt;P&gt;,
     {
         <span class="comment">// Process the inbox: For messages that are already there we won&#39;t receive a notification.
         </span><span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.lock().<span class="kw">await</span>;
@@ -1361,9 +1357,7 @@
 
         <span class="macro">info!</span>(<span class="string">&quot;GraphiQL IDE: http://localhost:{}&quot;</span>, port);
 
-        <span class="kw">let </span>sync_fut = Box::pin(
-            ChainListener::new(<span class="self">self</span>.config, <span class="self">self</span>.client.clone()).run(context, wallet_updater),
-        );
+        <span class="kw">let </span>sync_fut = Box::pin(ChainListener::new(<span class="self">self</span>.config, <span class="self">self</span>.client.clone()).run(context));
         <span class="kw">let </span>serve_fut =
             Server::bind(<span class="kw-2">&amp;</span>SocketAddr::from(([<span class="number">127</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>], port))).serve(app.into_make_service());
 
