@@ -1246,7 +1246,7 @@
         <span class="kw">let </span>type_ident = get_type_field(e).expect(<span class="string">&quot;Failed to find the type&quot;</span>);
         load_future_quotes.push(<span class="macro">quote! </span>{
             <span class="kw">let </span>index = #idx_lit;
-            <span class="kw">let </span>base_key = context.derive_key(<span class="kw-2">&amp;</span>index)<span class="question-mark">?</span>;
+            <span class="kw">let </span>base_key = context.derive_tag_key(linera_views::common::MIN_VIEW_TAG, <span class="kw-2">&amp;</span>index)<span class="question-mark">?</span>;
             <span class="kw">let </span>#fut = #type_ident::load(context.clone_with_base_key(base_key));
         });
         load_ident_quotes.push(<span class="macro">quote! </span>{
@@ -1883,11 +1883,11 @@
                             <span class="kw-2">&amp;</span>context.base_key(),
                         );
                         <span class="kw">let </span>index = <span class="number">0</span>;
-                        <span class="kw">let </span>base_key = context.derive_key(<span class="kw-2">&amp;</span>index)<span class="question-mark">?</span>;
+                        <span class="kw">let </span>base_key = context.derive_tag_key(linera_views::common::MIN_VIEW_TAG, <span class="kw-2">&amp;</span>index)<span class="question-mark">?</span>;
                         <span class="kw">let </span>register_fut =
                             RegisterView::load(context.clone_with_base_key(base_key));
                         <span class="kw">let </span>index = <span class="number">1</span>;
-                        <span class="kw">let </span>base_key = context.derive_key(<span class="kw-2">&amp;</span>index)<span class="question-mark">?</span>;
+                        <span class="kw">let </span>base_key = context.derive_tag_key(linera_views::common::MIN_VIEW_TAG, <span class="kw-2">&amp;</span>index)<span class="question-mark">?</span>;
                         <span class="kw">let </span>collection_fut =
                             CollectionView::load(context.clone_with_base_key(base_key));
                         <span class="kw">let </span>result = <span class="macro">join!</span>(register_fut, collection_fut);
