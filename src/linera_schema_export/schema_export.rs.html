@@ -83,50 +83,20 @@
 <a href="#83" id="83">83</a>
 <a href="#84" id="84">84</a>
 <a href="#85" id="85">85</a>
-<a href="#86" id="86">86</a>
-<a href="#87" id="87">87</a>
-<a href="#88" id="88">88</a>
-<a href="#89" id="89">89</a>
-<a href="#90" id="90">90</a>
-<a href="#91" id="91">91</a>
-<a href="#92" id="92">92</a>
-<a href="#93" id="93">93</a>
-<a href="#94" id="94">94</a>
-<a href="#95" id="95">95</a>
-<a href="#96" id="96">96</a>
-<a href="#97" id="97">97</a>
-<a href="#98" id="98">98</a>
-<a href="#99" id="99">99</a>
-<a href="#100" id="100">100</a>
-<a href="#101" id="101">101</a>
-<a href="#102" id="102">102</a>
-<a href="#103" id="103">103</a>
-<a href="#104" id="104">104</a>
-<a href="#105" id="105">105</a>
-<a href="#106" id="106">106</a>
-<a href="#107" id="107">107</a>
-<a href="#108" id="108">108</a>
-<a href="#109" id="109">109</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-</span><span class="kw">use </span>linera_base::{
-    data_types::{BlockHeight, Timestamp},
-    identifiers::{ChainDescription, ChainId},
-};
+</span><span class="kw">use </span>linera_base::identifiers::ChainId;
 <span class="kw">use </span>linera_chain::data_types::{BlockProposal, Certificate, HashedValue, LiteCertificate};
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>linera_core::{
-    client::{ChainClient, ValidatorNodeProvider},
+    client::ValidatorNodeProvider,
     data_types::{ChainInfoQuery, ChainInfoResponse},
     node::{NodeError, NotificationStream, ValidatorNode},
 };
 <span class="kw">use </span>linera_execution::committee::Committee;
-<span class="kw">use </span>linera_service::{
-    chain_listener::ChainListenerConfig,
-    node_service::{Chains, NodeService},
-};
+<span class="kw">use </span>linera_service::{chain_listener::ChainListenerConfig, node_service::NodeService};
 <span class="kw">use </span>linera_storage::MemoryStoreClient;
 
 <span class="attr">#[derive(Clone)]
@@ -183,34 +153,16 @@
 }
 
 <span class="kw">fn </span>main() -&gt; std::io::Result&lt;()&gt; {
-    <span class="kw">let </span>chain_id = ChainId::from(ChainDescription::Root(<span class="number">0</span>));
     <span class="kw">let </span>store = MemoryStoreClient::new(<span class="prelude-val">None</span>);
-    <span class="kw">let </span>chain_client = ChainClient::new(
-        chain_id,
-        Vec::new(),
-        DummyValidatorNodeProvider,
-        store,
-        chain_id,
-        <span class="number">0</span>,
-        <span class="prelude-val">None</span>,
-        Timestamp::now(),
-        BlockHeight(<span class="number">0</span>),
-        std::time::Duration::from_micros(<span class="number">0</span>),
-        <span class="number">0</span>,
-    );
-    <span class="kw">let </span>chains = Chains {
-        list: Vec::new(),
-        default: chain_id,
-    };
     <span class="kw">let </span>config = ChainListenerConfig {
         delay_before_ms: <span class="number">0</span>,
         delay_after_ms: <span class="number">0</span>,
     };
-    <span class="kw">let </span>service = NodeService::new(
-        chain_client,
+    <span class="kw">let </span>service = NodeService::&lt;DummyValidatorNodeProvider, <span class="kw">_</span>&gt;::new(
         config,
         std::num::NonZeroU16::new(<span class="number">8080</span>).unwrap(),
-        chains,
+        <span class="prelude-val">None</span>,
+        store,
     );
     <span class="kw">let </span>schema = service.schema().sdl();
     <span class="macro">print!</span>(<span class="string">&quot;{}&quot;</span>, schema);

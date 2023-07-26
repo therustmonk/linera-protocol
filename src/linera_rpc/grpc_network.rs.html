@@ -737,6 +737,22 @@
 <a href="#737" id="737">737</a>
 <a href="#738" id="738">738</a>
 <a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -1361,17 +1377,33 @@
         <span class="kw">let </span>subscription_request = SubscriptionRequest {
             chain_ids: chains.into_iter().map(|chain| chain.into()).collect(),
         };
-        <span class="kw">let </span>client = <span class="self">self</span>.client.clone();
+        <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.clone();
+
+        <span class="comment">// Make the first connection attempt before returning from this method.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>stream = <span class="prelude-val">Some</span>(
+            client
+                .subscribe(subscription_request.clone())
+                .<span class="kw">await
+                </span>.map_err(|status| NodeError::SubscriptionFailed {
+                    status: status.to_string(),
+                })<span class="question-mark">?
+                </span>.into_inner(),
+        );
 
         <span class="comment">// A stream of `Result&lt;grpc::Notification, tonic::Status&gt;` that keeps calling
         // `client.subscribe(request)` endlessly and without delay.
         </span><span class="kw">let </span>endlessly_retrying_notification_stream = stream::unfold((), <span class="kw">move </span>|()| {
             <span class="kw">let </span><span class="kw-2">mut </span>client = client.clone();
             <span class="kw">let </span>subscription_request = subscription_request.clone();
+            <span class="kw">let </span><span class="kw-2">mut </span>stream = stream.take();
             <span class="kw">async move </span>{
-                <span class="kw">let </span>stream = <span class="kw">match </span>client.subscribe(subscription_request.clone()).<span class="kw">await </span>{
-                    <span class="prelude-val">Err</span>(err) =&gt; future::Either::Left(stream::iter(iter::once(<span class="prelude-val">Err</span>(err)))),
-                    <span class="prelude-val">Ok</span>(response) =&gt; future::Either::Right(response.into_inner()),
+                <span class="kw">let </span>stream = <span class="kw">if let </span><span class="prelude-val">Some</span>(stream) = stream.take() {
+                    future::Either::Right(stream)
+                } <span class="kw">else </span>{
+                    <span class="kw">match </span>client.subscribe(subscription_request.clone()).<span class="kw">await </span>{
+                        <span class="prelude-val">Err</span>(err) =&gt; future::Either::Left(stream::iter(iter::once(<span class="prelude-val">Err</span>(err)))),
+                        <span class="prelude-val">Ok</span>(response) =&gt; future::Either::Right(response.into_inner()),
+                    }
                 };
                 <span class="prelude-val">Some</span>((stream, ()))
             }

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["ApplicationOverview","Chains","MutationRoot","NodeService","QueryRoot","SubscriptionRoot"]};
+window.SIDEBAR_ITEMS = {"struct":["ApplicationOverview","Chains","MutationRoot","NodeService","QueryRoot","SubscriptionRoot"],"type":["ClientMapInner"]};
