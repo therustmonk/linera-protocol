@@ -155,21 +155,43 @@
 <a href="#155" id="155">155</a>
 <a href="#156" id="156">156</a>
 <a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="doccomment">//! Abstraction over how different runtimes manipulate the guest WebAssembly module&#39;s memory.
 
-</span><span class="kw">use super</span>::{InstanceWithFunction, Runtime, RuntimeError};
+</span><span class="kw">use super</span>::{
+    traits::{CabiFreeAlias, CabiReallocAlias},
+    InstanceWithFunction, Runtime, RuntimeError,
+};
 <span class="kw">use crate</span>::{Layout, WitType};
 <span class="kw">use </span>frunk::{hlist, hlist_pat, HList};
 <span class="kw">use </span>std::borrow::Cow;
 
 <span class="doccomment">/// An address for a location in a guest WebAssembly module&#39;s memory.
 </span><span class="attr">#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-</span><span class="kw">pub struct </span>GuestPointer(u32);
+</span><span class="kw">pub struct </span>GuestPointer(<span class="kw">pub</span>(<span class="kw">crate</span>) u32);
 
 <span class="kw">impl </span>GuestPointer {
+    <span class="doccomment">/// Returns a new address that&#39;s the current address advanced to add padding to ensure it&#39;s
+    /// aligned to the `alignment` byte boundary.
+    </span><span class="kw">pub fn </span>aligned_at(<span class="kw-2">&amp;</span><span class="self">self</span>, alignment: u32) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>padding = (-(<span class="self">self</span>.<span class="number">0 </span><span class="kw">as </span>i32) &amp; (alignment <span class="kw">as </span>i32 - <span class="number">1</span>)) <span class="kw">as </span>u32;
+
+        GuestPointer(<span class="self">self</span>.<span class="number">0 </span>+ padding)
+    }
+
     <span class="doccomment">/// Returns a new address that&#39;s the current address advanced to after the size of `T`.
     </span><span class="kw">pub fn </span>after&lt;T: WitType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         GuestPointer(<span class="self">self</span>.<span class="number">0 </span>+ T::SIZE)
@@ -178,9 +200,7 @@
     <span class="doccomment">/// Returns a new address that&#39;s the current address advanced to add padding to ensure it&#39;s
     /// aligned properly for `T`.
     </span><span class="kw">pub fn </span>after_padding_for&lt;T: WitType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>padding = (-(<span class="self">self</span>.<span class="number">0 </span><span class="kw">as </span>i32) &amp; (&lt;T::Layout <span class="kw">as </span>Layout&gt;::ALIGNMENT <span class="kw">as </span>i32 - <span class="number">1</span>)) <span class="kw">as </span>u32;
-
-        GuestPointer(<span class="self">self</span>.<span class="number">0 </span>+ padding)
+        <span class="self">self</span>.aligned_at(&lt;T::Layout <span class="kw">as </span>Layout&gt;::ALIGNMENT)
     }
 
     <span class="doccomment">/// Returns the address of an element in a contiguous list of properly aligned `T` types.
@@ -210,22 +230,6 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), RuntimeError&gt;;
 }
 
-<span class="doccomment">/// Trait alias for a Wasm module instance with the WIT Canonical ABI `cabi_realloc` function.
-</span><span class="kw">pub trait </span>CabiReallocAlias: InstanceWithFunction&lt;<span class="macro">HList!</span>[i32, i32, i32, i32], <span class="macro">HList!</span>[i32]&gt; {}
-
-<span class="kw">impl</span>&lt;AnyInstance&gt; CabiReallocAlias <span class="kw">for </span>AnyInstance <span class="kw">where
-    </span>AnyInstance: InstanceWithFunction&lt;<span class="macro">HList!</span>[i32, i32, i32, i32], <span class="macro">HList!</span>[i32]&gt;
-{
-}
-
-<span class="doccomment">/// Trait alias for a Wasm module instance with the WIT Canonical ABI `cabi_free` function.
-</span><span class="kw">pub trait </span>CabiFreeAlias: InstanceWithFunction&lt;<span class="macro">HList!</span>[i32], <span class="macro">HList!</span>[]&gt; {}
-
-<span class="kw">impl</span>&lt;AnyInstance&gt; CabiFreeAlias <span class="kw">for </span>AnyInstance <span class="kw">where
-    </span>AnyInstance: InstanceWithFunction&lt;<span class="macro">HList!</span>[i32], <span class="macro">HList!</span>[]&gt;
-{
-}
-
 <span class="doccomment">/// A handle to interface with a guest Wasm module instance&#39;s memory.
 </span><span class="attr">#[allow(clippy::type_complexity)]
 </span><span class="kw">pub struct </span>Memory&lt;<span class="lifetime">&#39;runtime</span>, Instance&gt;
@@ -238,6 +242,24 @@
         &lt;Instance <span class="kw">as </span>InstanceWithFunction&lt;<span class="macro">HList!</span>[i32, i32, i32, i32], <span class="macro">HList!</span>[i32]&gt;&gt;::Function,
     &gt;,
     cabi_free: <span class="prelude-ty">Option</span>&lt;&lt;Instance <span class="kw">as </span>InstanceWithFunction&lt;<span class="macro">HList!</span>[i32], <span class="macro">HList!</span>[]&gt;&gt;::Function&gt;,
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;runtime</span>, Instance&gt; Memory&lt;<span class="lifetime">&#39;runtime</span>, Instance&gt;
+<span class="kw">where
+    </span>Instance: CabiReallocAlias + CabiFreeAlias,
+{
+    <span class="doccomment">/// Creates a new [`Memory`] instance using a Wasm module `instance` and its `memory` export.
+    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new(
+        instance: <span class="kw-2">&amp;</span><span class="lifetime">&#39;runtime </span><span class="kw-2">mut </span>Instance,
+        memory: &lt;Instance::Runtime <span class="kw">as </span>Runtime&gt;::Memory,
+    ) -&gt; <span class="self">Self </span>{
+        Memory {
+            instance,
+            memory,
+            cabi_realloc: <span class="prelude-val">None</span>,
+            cabi_free: <span class="prelude-val">None</span>,
+        }
+    }
 }
 
 <span class="kw">impl</span>&lt;Instance&gt; Memory&lt;<span class="lifetime">&#39;_</span>, Instance&gt;

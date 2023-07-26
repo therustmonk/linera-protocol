@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"derive":["WitType"]};
+window.SIDEBAR_ITEMS = {"derive":["WitLoad","WitType"]};

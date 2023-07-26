@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"derive":["WitType"],"macro":["HList"],"struct":["HNil","Memory"],"trait":["HList","Layout","WitType"]};
+window.SIDEBAR_ITEMS = {"derive":["WitLoad","WitType"],"enum":["RuntimeError"],"macro":["HList","hlist"],"mod":["hlist"],"struct":["FakeInstance","FakeRuntime","GuestPointer","HNil","Memory"],"trait":["HList","InstanceWithMemory","Layout","Runtime","RuntimeMemory","Split","WitLoad","WitType"]};
