@@ -118,11 +118,11 @@
 </span><span class="kw">pub struct </span>ChainListenerConfig {
     <span class="doccomment">/// Wait before processing any notification (useful for testing).
     </span><span class="attr">#[structopt(long = <span class="string">&quot;listener-delay-before-ms&quot;</span>, default_value = <span class="string">&quot;0&quot;</span>)]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) delay_before_ms: u64,
+    </span><span class="kw">pub </span>delay_before_ms: u64,
 
     <span class="doccomment">/// Wait after processing any notification (useful for rate limiting).
     </span><span class="attr">#[structopt(long = <span class="string">&quot;listener-delay-after-ms&quot;</span>, default_value = <span class="string">&quot;0&quot;</span>)]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) delay_after_ms: u64,
+    </span><span class="kw">pub </span>delay_after_ms: u64,
 }
 
 <span class="attr">#[async_trait]

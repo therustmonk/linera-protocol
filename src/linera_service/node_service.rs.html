@@ -788,19 +788,19 @@
 }
 
 <span class="doccomment">/// Our root GraphQL query type.
-</span><span class="kw">struct </span>QueryRoot&lt;P, S&gt; {
+</span><span class="kw">pub struct </span>QueryRoot&lt;P, S&gt; {
     client: Arc&lt;Mutex&lt;ChainClient&lt;P, S&gt;&gt;&gt;,
     port: NonZeroU16,
     chains: Chains,
 }
 
 <span class="doccomment">/// Our root GraphQL subscription type.
-</span><span class="kw">struct </span>SubscriptionRoot&lt;P, S&gt; {
+</span><span class="kw">pub struct </span>SubscriptionRoot&lt;P, S&gt; {
     client: Arc&lt;Mutex&lt;ChainClient&lt;P, S&gt;&gt;&gt;,
 }
 
 <span class="doccomment">/// Our root GraphQL mutation type.
-</span><span class="kw">struct </span>MutationRoot&lt;P, S&gt; {
+</span><span class="kw">pub struct </span>MutationRoot&lt;P, S&gt; {
     client: Arc&lt;Mutex&lt;ChainClient&lt;P, S&gt;&gt;&gt;,
 }
 
@@ -1314,7 +1314,7 @@
         }
     }
 
-    <span class="kw">fn </span>schema(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Schema&lt;QueryRoot&lt;P, S&gt;, MutationRoot&lt;P, S&gt;, SubscriptionRoot&lt;P, S&gt;&gt; {
+    <span class="kw">pub fn </span>schema(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Schema&lt;QueryRoot&lt;P, S&gt;, MutationRoot&lt;P, S&gt;, SubscriptionRoot&lt;P, S&gt;&gt; {
         Schema::build(
             QueryRoot {
                 client: <span class="self">self</span>.client.clone(),
