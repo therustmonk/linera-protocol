@@ -639,6 +639,20 @@
 <a href="#639" id="639">639</a>
 <a href="#640" id="640">640</a>
 <a href="#641" id="641">641</a>
+<a href="#642" id="642">642</a>
+<a href="#643" id="643">643</a>
+<a href="#644" id="644">644</a>
+<a href="#645" id="645">645</a>
+<a href="#646" id="646">646</a>
+<a href="#647" id="647">647</a>
+<a href="#648" id="648">648</a>
+<a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -672,8 +686,9 @@
     blocks::BlocksBlocks <span class="kw">as </span>Blocks, Chains,
 };
 <span class="kw">use </span>js_utils::{getf, log_str, parse, setf, stringify, SER};
+<span class="kw">use </span>once_cell::sync::OnceCell;
 
-<span class="kw">static </span><span class="kw-2">mut </span>WEBSOCKET: <span class="prelude-ty">Option</span>&lt;WsMeta&gt; = <span class="prelude-val">None</span>;
+<span class="kw">static </span>WEBSOCKET: OnceCell&lt;WsMeta&gt; = OnceCell::new();
 
 <span class="doccomment">/// Page enum containing info for each page.
 </span><span class="attr">#[derive(Serialize, Deserialize, Clone)]
@@ -1054,9 +1069,10 @@
     app: <span class="kw-2">&amp;</span>JsValue,
     data: <span class="kw-2">&amp;</span>Data,
     args: <span class="kw-2">&amp;</span>[(String, String)],
+    init: bool,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainId, bool), String&gt; {
     <span class="kw">match </span>find_arg(args, <span class="string">&quot;chain&quot;</span>) {
-        <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>((data.chain, <span class="bool-val">false</span>)),
+        <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>((data.chain, init)),
         <span class="prelude-val">Some</span>(chain_id) =&gt; {
             <span class="kw">let </span>chain_js: JsValue = chain_id
                 .serialize(<span class="kw-2">&amp;</span>SER)
@@ -1064,14 +1080,20 @@
             setf(app, <span class="string">&quot;chain&quot;</span>, <span class="kw-2">&amp;</span>chain_js);
             ChainId::from_str(<span class="kw-2">&amp;</span>chain_id)
                 .map_err(|e| e.to_string())
-                .map(|id| (id, id == data.chain))
+                .map(|id| (id, id != data.chain || init))
         }
     }
 }
 
 <span class="doccomment">/// Main function to switch between Vue pages.
-</span><span class="kw">async fn </span>route_aux(app: <span class="kw-2">&amp;</span>JsValue, data: <span class="kw-2">&amp;</span>Data, path: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;String&gt;, args: <span class="kw-2">&amp;</span>[(String, String)]) {
-    <span class="kw">let </span>chain_info = chain_id_from_args(app, data, args);
+</span><span class="kw">async fn </span>route_aux(
+    app: <span class="kw-2">&amp;</span>JsValue,
+    data: <span class="kw-2">&amp;</span>Data,
+    path: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;String&gt;,
+    args: <span class="kw-2">&amp;</span>[(String, String)],
+    init: bool,
+) {
+    <span class="kw">let </span>chain_info = chain_id_from_args(app, data, args, init);
     <span class="kw">let </span>(page_name, args): (<span class="kw-2">&amp;</span>str, Vec&lt;(String, String)&gt;) = <span class="kw">match </span>(path, <span class="kw-2">&amp;</span>data.page) {
         (<span class="prelude-val">Some</span>(p), <span class="kw">_</span>) =&gt; (p, args.to_vec()),
         (<span class="kw">_</span>, p) =&gt; page_name_and_args(p),
@@ -1107,10 +1129,8 @@
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(<span class="string">&quot;unknown page&quot;</span>.to_string()),
             };
             <span class="kw">if </span>chain_changed {
-                <span class="kw">unsafe </span>{
-                    <span class="kw">if let </span><span class="prelude-val">Some</span>(ws) = <span class="kw-2">&amp;</span>WEBSOCKET {
-                        <span class="kw">let _ </span>= ws.close().<span class="kw">await</span>;
-                    }
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(ws) = WEBSOCKET.get() {
+                    <span class="kw">let _ </span>= ws.close().<span class="kw">await</span>;
                 }
                 <span class="kw">let </span>address = node_service_address(<span class="kw-2">&amp;</span>data.config, Protocol::Websocket);
                 subscribe_chain(app, <span class="kw-2">&amp;</span>address, chain_id).<span class="kw">await</span>;
@@ -1136,7 +1156,7 @@
     <span class="kw">let </span>msg = <span class="macro">format!</span>(<span class="string">&quot;route: {} {:?}&quot;</span>, path.as_deref().unwrap_or(<span class="string">&quot;none&quot;</span>), args);
     log_str(<span class="kw-2">&amp;</span>msg);
     <span class="kw">let </span>data = from_value::&lt;Data&gt;(app.clone()).expect(<span class="string">&quot;cannot parse Vue data&quot;</span>);
-    route_aux(<span class="kw-2">&amp;</span>app, <span class="kw-2">&amp;</span>data, <span class="kw-2">&amp;</span>path, <span class="kw-2">&amp;</span>args).<span class="kw">await
+    route_aux(<span class="kw-2">&amp;</span>app, <span class="kw-2">&amp;</span>data, <span class="kw-2">&amp;</span>path, <span class="kw-2">&amp;</span>args, <span class="bool-val">false</span>).<span class="kw">await
 </span>}
 
 <span class="attr">#[wasm_bindgen]
@@ -1175,7 +1195,14 @@
     </span>.expect(<span class="string">&quot;cannot send to websocket&quot;</span>);
     wsio.next().<span class="kw">await</span>;
     <span class="kw">let </span>uuid = Uuid::new_v3(<span class="kw-2">&amp;</span>Uuid::NAMESPACE_DNS, <span class="string">b&quot;linera.dev&quot;</span>);
-    <span class="kw">let </span>query = <span class="macro">format!</span>(<span class="string">&quot;{{\&quot;id\&quot;: \&quot;{}\&quot;, \&quot;type\&quot;: \&quot;subscribe\&quot;, \&quot;payload\&quot;: {{\&quot;query\&quot;: \&quot;subscription {{ notifications(chainId: {}) }}\&quot;}}}}&quot;</span>, uuid, chain);
+    <span class="kw">let </span>payload_query = <span class="macro">format!</span>(
+        <span class="string">r#&quot;subscription {{ notifications(chainId: \&quot;{}\&quot;) }}&quot;#</span>,
+        chain
+    );
+    <span class="kw">let </span>query = <span class="macro">format!</span>(
+        <span class="string">r#&quot;{{ &quot;id&quot;: &quot;{}&quot;, &quot;type&quot;: &quot;subscribe&quot;, &quot;payload&quot;: {{&quot;query&quot;: &quot;{}&quot;}} }}&quot;#</span>,
+        uuid, payload_query
+    );
     wsio.send(WsMessage::Text(query))
         .<span class="kw">await
         </span>.expect(<span class="string">&quot;cannot send to websocket&quot;</span>);
@@ -1183,24 +1210,24 @@
     spawn_local(<span class="kw">async move </span>{
         <span class="kw">while let </span><span class="prelude-val">Some</span>(evt) = wsio.next().<span class="kw">await </span>{
             <span class="kw">match </span>evt {
-                WsMessage::Text(s) =&gt; {
-                    <span class="kw">let </span>gq = serde_json::from_str::&lt;
+                WsMessage::Text(message) =&gt; {
+                    <span class="kw">let </span>graphql_message = serde_json::from_str::&lt;
                         GQuery&lt;Response&lt;graphql::notifications::ResponseData&gt;&gt;,
-                    &gt;(<span class="kw-2">&amp;</span>s)
+                    &gt;(<span class="kw-2">&amp;</span>message)
                     .expect(<span class="string">&quot;unexpected websocket response&quot;</span>);
-                    <span class="kw">if let </span><span class="prelude-val">Some</span>(p) = gq.payload {
-                        <span class="kw">if let </span><span class="prelude-val">Some</span>(d) = p.data {
+                    <span class="kw">if let </span><span class="prelude-val">Some</span>(payload) = graphql_message.payload {
+                        <span class="kw">if let </span><span class="prelude-val">Some</span>(message_data) = payload.data {
                             <span class="kw">let </span>data =
                                 from_value::&lt;Data&gt;(app.clone()).expect(<span class="string">&quot;cannot parse vue data&quot;</span>);
                             <span class="kw">if let </span>graphql::Reason::NewBlock { hash: _hash, .. } =
-                                d.notifications.reason
+                                message_data.notifications.reason
                             {
-                                <span class="kw">if </span>d.notifications.chain_id == chain {
-                                    route_aux(<span class="kw-2">&amp;</span>app, <span class="kw-2">&amp;</span>data, <span class="kw-2">&amp;</span><span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>Vec::new()).<span class="kw">await
+                                <span class="kw">if </span>message_data.notifications.chain_id == chain {
+                                    route_aux(<span class="kw-2">&amp;</span>app, <span class="kw-2">&amp;</span>data, <span class="kw-2">&amp;</span><span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>Vec::new(), <span class="bool-val">false</span>).<span class="kw">await
                                 </span>}
                             }
                         }
-                        <span class="kw">if let </span><span class="prelude-val">Some</span>(errors) = p.errors {
+                        <span class="kw">if let </span><span class="prelude-val">Some</span>(errors) = payload.errors {
                             errors.iter().for_each(|e| log_str(<span class="kw-2">&amp;</span>e.to_string()));
                             <span class="kw">break</span>;
                         }
@@ -1210,7 +1237,7 @@
             }
         }
     });
-    <span class="kw">unsafe </span>{ WEBSOCKET = <span class="prelude-val">Some</span>(ws) }
+    <span class="kw">let _ </span>= WEBSOCKET.set(ws);
 }
 
 <span class="doccomment">/// Initializes pages and subscribes to notifications.
@@ -1228,6 +1255,7 @@
                 <span class="kw-2">&amp;</span>data,
                 <span class="kw-2">&amp;</span><span class="prelude-val">Some</span>(<span class="string">&quot;error&quot;</span>.to_string()),
                 <span class="kw-2">&amp;</span>[(<span class="string">&quot;msg&quot;</span>.to_string(), e.to_string())],
+                <span class="bool-val">true</span>,
             )
             .<span class="kw">await
         </span>}
@@ -1258,7 +1286,7 @@
                     <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
                 },
             };
-            route_aux(<span class="kw-2">&amp;</span>app, <span class="kw-2">&amp;</span>data, <span class="kw-2">&amp;</span>path, <span class="kw-2">&amp;</span>args).<span class="kw">await</span>;
+            route_aux(<span class="kw-2">&amp;</span>app, <span class="kw-2">&amp;</span>data, <span class="kw-2">&amp;</span>path, <span class="kw-2">&amp;</span>args, <span class="bool-val">true</span>).<span class="kw">await</span>;
         }
     }
 }
