@@ -241,6 +241,8 @@
 <a href="#241" id="241">241</a>
 <a href="#242" id="242">242</a>
 <a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -338,6 +340,8 @@
     </span>K: KeyValueStoreClient + Send + Sync,
 {
     <span class="kw">const </span>MAX_CONNECTIONS: usize = K::MAX_CONNECTIONS;
+    <span class="comment">// The LRU cache does not change the underlying client&#39;s size limit.
+    </span><span class="kw">const </span>MAX_VALUE_SIZE: usize = K::MAX_VALUE_SIZE;
     <span class="kw">type </span>Error = K::Error;
     <span class="kw">type </span>Keys = K::Keys;
     <span class="kw">type </span>KeyValues = K::KeyValues;
@@ -475,7 +479,7 @@
         extra: E,
         n: usize,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ViewError&gt; {
-        <span class="kw">let </span>client = MemoryClient::new(guard.into());
+        <span class="kw">let </span>client = MemoryClient::new(guard);
         <span class="kw">let </span>lru_client = LruCachingKeyValueClient::new(client, n);
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             db: lru_client,

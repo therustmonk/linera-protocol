@@ -1448,10 +1448,10 @@
     <span class="doccomment">/// Inserts or resets the value of a key of the map.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::ByteMapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map = ByteMapView::load(context).await.unwrap();
     ///   map.insert(vec![0,1], String::from(&quot;Hello&quot;));
     ///   assert_eq!(map.keys().await.unwrap(), vec![vec![0,1]]);
@@ -1465,10 +1465,10 @@
     <span class="doccomment">/// Removes a value. If absent then nothing is done.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::ByteMapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map = ByteMapView::load(context).await.unwrap();
     ///   map.insert(vec![0,1], &quot;Hello&quot;);
     ///   map.remove(vec![0,1]);
@@ -1498,10 +1498,10 @@
     <span class="doccomment">/// Reads the value at the given position, if any.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::ByteMapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map = ByteMapView::load(context).await.unwrap();
     ///   map.insert(vec![0,1], String::from(&quot;Hello&quot;));
     ///   assert_eq!(map.get(vec![0,1]).await.unwrap(), Some(String::from(&quot;Hello&quot;)));
@@ -1537,10 +1537,10 @@
     <span class="doccomment">/// Obtains a mutable reference to a value at a given position if available.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::ByteMapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map = ByteMapView::load(context).await.unwrap();
     ///   map.insert(vec![0,1], String::from(&quot;Hello&quot;));
     ///   let value = map.get_mut(vec![0,1]).await.unwrap().unwrap();
@@ -1573,10 +1573,10 @@
     /// the loop exits
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::ByteMapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map = ByteMapView::load(context).await.unwrap();
     ///   map.insert(vec![0,1], String::from(&quot;Hello&quot;));
     ///   map.insert(vec![1,2], String::from(&quot;Bonjour&quot;));
@@ -1637,10 +1637,10 @@
     /// in the lexicographic order.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::ByteMapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map = ByteMapView::load(context).await.unwrap();
     ///   map.insert(vec![0,1], String::from(&quot;Hello&quot;));
     ///   let mut count = 0;
@@ -1665,10 +1665,10 @@
     <span class="doccomment">/// Returns the list of keys of the map in lexicographic order.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::ByteMapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map = ByteMapView::load(context).await.unwrap();
     ///   map.insert(vec![0,1], String::from(&quot;Hello&quot;));
     ///   map.insert(vec![1,2], String::from(&quot;Bonjour&quot;));
@@ -1691,10 +1691,10 @@
     /// ends prematurely.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::ByteMapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map = ByteMapView::load(context).await.unwrap();
     ///   map.insert(vec![0,1], String::from(&quot;Hello&quot;));
     ///   map.insert(vec![1,2], String::from(&quot;Bonjour&quot;));
@@ -1762,10 +1762,10 @@
     /// in the lexicographic order.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::ByteMapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map = ByteMapView::load(context).await.unwrap();
     ///   map.insert(vec![0,1], String::from(&quot;Hello&quot;));
     ///   let mut count = 0;
@@ -1812,10 +1812,10 @@
     /// Default value if the index is missing.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::ByteMapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map = ByteMapView::load(context).await.unwrap();
     ///   map.insert(vec![0,1], String::from(&quot;Hello&quot;));
     ///   assert_eq!(map.get_mut_or_default(vec![7]).await.unwrap(), &quot;&quot;);
@@ -1940,10 +1940,10 @@
     <span class="doccomment">/// Inserts or resets a value at an index.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::MapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map : MapView&lt;_,u32,_&gt; = MapView::load(context).await.unwrap();
     ///   map.insert(&amp;(24 as u32), String::from(&quot;Hello&quot;));
     ///   assert_eq!(map.get(&amp;(24 as u32)).await.unwrap(), Some(String::from(&quot;Hello&quot;)));
@@ -1962,10 +1962,10 @@
     <span class="doccomment">/// Removes a value. If absent then the operation does nothing.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::MapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map = MapView::&lt;_,u32,String&gt;::load(context).await.unwrap();
     ///   map.remove(&amp;(37 as u32));
     ///   assert_eq!(map.get(&amp;(37 as u32)).await.unwrap(), None);
@@ -1997,10 +1997,10 @@
     <span class="doccomment">/// Reads the value at the given position, if any.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::MapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map : MapView&lt;_, u32,_&gt; = MapView::load(context).await.unwrap();
     ///   map.insert(&amp;(37 as u32), String::from(&quot;Hello&quot;));
     ///   assert_eq!(map.get(&amp;(37 as u32)).await.unwrap(), Some(String::from(&quot;Hello&quot;)));
@@ -2019,10 +2019,10 @@
     <span class="doccomment">/// Obtains a mutable reference to a value at a given position if available
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::MapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map : MapView::&lt;_,u32,String&gt; = MapView::load(context).await.unwrap();
     ///   map.insert(&amp;(37 as u32), String::from(&quot;Hello&quot;));
     ///   assert_eq!(map.get_mut(&amp;(34 as u32)).await.unwrap(), None);
@@ -2051,10 +2051,10 @@
     <span class="doccomment">/// Returns the list of indices in the map. The order is determined by serialization.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::MapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map : MapView::&lt;_,u32,String&gt; = MapView::load(context).await.unwrap();
     ///   map.insert(&amp;(37 as u32), String::from(&quot;Hello&quot;));
     ///   assert_eq!(map.indices().await.unwrap(), vec![37 as u32]);
@@ -2075,10 +2075,10 @@
     /// the loop ends prematurely.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::MapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map : MapView&lt;_, u128, String&gt; = MapView::load(context).await.unwrap();
     ///   map.insert(&amp;(34 as u128), String::from(&quot;Thanks&quot;));
     ///   map.insert(&amp;(37 as u128), String::from(&quot;Spasiba&quot;));
@@ -2108,10 +2108,10 @@
     /// determined by serialization.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::MapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map : MapView&lt;_, u128, String&gt; = MapView::load(context).await.unwrap();
     ///   map.insert(&amp;(34 as u128), String::from(&quot;Hello&quot;));
     ///   let mut count = 0;
@@ -2140,10 +2140,10 @@
     /// If the function returns false, then the loop ends prematurely.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::MapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map : MapView&lt;_, u128, String&gt; = MapView::load(context).await.unwrap();
     ///   map.insert(&amp;(34 as u128), String::from(&quot;Thanks&quot;));
     ///   map.insert(&amp;(37 as u128), String::from(&quot;Spasiba&quot;));
@@ -2174,10 +2174,10 @@
     /// visited in an order determined by serialization.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::MapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map : MapView&lt;_,Vec&lt;u8&gt;,_&gt; = MapView::load(context).await.unwrap();
     ///   map.insert(&amp;vec![0,1], String::from(&quot;Hello&quot;));
     ///   let mut count = 0;
@@ -2214,10 +2214,10 @@
     /// Default value if the index is missing.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::MapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map : MapView&lt;_,u32,u128&gt; = MapView::load(context).await.unwrap();
     ///   let value = map.get_mut_or_default(&amp;(34 as u32)).await.unwrap();
     ///   assert_eq!(*value, 0 as u128);
@@ -2305,10 +2305,10 @@
     <span class="doccomment">/// Insert or resets a value.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::MapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map : MapView&lt;_,u128,_&gt; = MapView::load(context).await.unwrap();
     ///   map.insert(&amp;(24 as u128), String::from(&quot;Hello&quot;));
     ///   assert_eq!(map.get(&amp;(24 as u128)).await.unwrap(), Some(String::from(&quot;Hello&quot;)));
@@ -2327,10 +2327,10 @@
     <span class="doccomment">/// Removes a value. If absent then this does not do anything.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::MapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map = MapView::&lt;_,u128,String&gt;::load(context).await.unwrap();
     ///   map.remove(&amp;(37 as u128));
     ///   assert_eq!(map.get(&amp;(37 as u128)).await.unwrap(), None);
@@ -2362,11 +2362,11 @@
     <span class="doccomment">/// Reads the value at the given position, if any.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::CustomMapView;
     /// # use linera_views::memory::MemoryContext;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map : CustomMapView&lt;MemoryContext&lt;()&gt;, u128, String&gt; = CustomMapView::load(context).await.unwrap();
     ///   map.insert(&amp;(34 as u128), String::from(&quot;Hello&quot;));
     ///   assert_eq!(map.get(&amp;(34 as u128)).await.unwrap(), Some(String::from(&quot;Hello&quot;)));
@@ -2384,10 +2384,10 @@
     <span class="doccomment">/// Obtains a mutable reference to a value at a given position if available
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::CustomMapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map : CustomMapView&lt;_, u128, String&gt; = CustomMapView::load(context).await.unwrap();
     ///   map.insert(&amp;(34 as u128), String::from(&quot;Hello&quot;));
     ///   let value = map.get_mut(&amp;(34 as u128)).await.unwrap().unwrap();
@@ -2416,10 +2416,10 @@
     /// by the custom serialization.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::MapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map : MapView::&lt;_,u128,String&gt; = MapView::load(context).await.unwrap();
     ///   map.insert(&amp;(34 as u128), String::from(&quot;Hello&quot;));
     ///   map.insert(&amp;(37 as u128), String::from(&quot;Bonjour&quot;));
@@ -2441,10 +2441,10 @@
     /// then the loop ends prematurely.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::CustomMapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map = CustomMapView::load(context).await.unwrap();
     ///   map.insert(&amp;(34 as u128), String::from(&quot;Hello&quot;));
     ///   map.insert(&amp;(37 as u128), String::from(&quot;Hola&quot;));
@@ -2473,10 +2473,10 @@
     /// determined by the custom serialization.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::CustomMapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map = CustomMapView::load(context).await.unwrap();
     ///   map.insert(&amp;(34 as u128), String::from(&quot;Hello&quot;));
     ///   map.insert(&amp;(37 as u128), String::from(&quot;Hola&quot;));
@@ -2506,10 +2506,10 @@
     /// If the function returns false, then the loop ends prematurely.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::CustomMapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map = CustomMapView::&lt;_,u128,String&gt;::load(context).await.unwrap();
     ///   map.insert(&amp;(34 as u128), String::from(&quot;Hello&quot;));
     ///   map.insert(&amp;(37 as u128), String::from(&quot;Hola&quot;));
@@ -2539,10 +2539,10 @@
     /// visited in an order determined by the custom serialization.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::CustomMapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map : CustomMapView&lt;_, u128, String&gt; = CustomMapView::load(context).await.unwrap();
     ///   map.insert(&amp;(34 as u128), String::from(&quot;Hello&quot;));
     ///   map.insert(&amp;(37 as u128), String::from(&quot;Hola&quot;));
@@ -2580,10 +2580,10 @@
     /// Default value if the index is missing.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::map_view::CustomMapView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut map : CustomMapView&lt;_, u128, String&gt; = CustomMapView::load(context).await.unwrap();
     ///   assert_eq!(*map.get_mut_or_default(&amp;(34 as u128)).await.unwrap(), String::new());
     /// # })

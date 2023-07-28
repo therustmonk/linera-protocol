@@ -384,6 +384,18 @@
 <a href="#384" id="384">384</a>
 <a href="#385" id="385">385</a>
 <a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -613,6 +625,18 @@
         }
     }
 
+    <span class="doccomment">/// check the size of the values of the batch.
+    </span><span class="kw">pub fn </span>check_value_size(<span class="kw-2">&amp;</span><span class="self">self</span>, max_value_size: usize) -&gt; bool {
+        <span class="kw">for </span>operation <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.operations {
+            <span class="kw">if let </span>WriteOperation::Put { key: <span class="kw">_</span>, value } = operation {
+                <span class="kw">if </span>value.len() &gt; max_value_size {
+                    <span class="kw">return </span><span class="bool-val">false</span>;
+                }
+            }
+        }
+        <span class="bool-val">true
+    </span>}
+
     <span class="doccomment">/// Adds the insertion of a `(key,value)` pair into the batch with a serializable value.
     /// ```rust
     /// # use linera_views::batch::Batch;
@@ -693,7 +717,7 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span>linera_views::{batch::Batch, common::Context, memory::create_test_context};
+    <span class="kw">use </span>linera_views::{batch::Batch, common::Context, memory::create_memory_context};
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_simplify_batch1() {
@@ -749,7 +773,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_simplify_batch5() {
-        <span class="kw">let </span>context = create_test_context();
+        <span class="kw">let </span>context = create_memory_context();
         <span class="kw">let </span><span class="kw-2">mut </span>batch = Batch::new();
         batch.put_key_value_bytes(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>], <span class="macro">vec!</span>[]);
         batch.put_key_value_bytes(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>], <span class="macro">vec!</span>[]);

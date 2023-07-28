@@ -904,6 +904,7 @@
 <a href="#904" id="904">904</a>
 <a href="#905" id="905">905</a>
 <a href="#906" id="906">906</a>
+<a href="#907" id="907">907</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -951,7 +952,7 @@
     </span>Hash,
 }
 
-<span class="doccomment">/// A view that represents the function of KeyValueStoreClient (though not KeyValueStoreClient).
+<span class="doccomment">/// A view that represents the functions of KeyValueStoreClient (though not KeyValueStoreClient).
 ///
 /// Comment on the data set:
 /// In order to work, the view needs to store the updates and deleted_prefixes.
@@ -1064,10 +1065,10 @@
     /// false, then the loop ends prematurely.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::key_value_store_view::KeyValueStoreView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut view = KeyValueStoreView::load(context).await.unwrap();
     ///   view.insert(vec![0,1], vec![0]);
     ///   view.insert(vec![0,2], vec![0]);
@@ -1133,10 +1134,10 @@
     <span class="doccomment">/// Applies the function f over all indices.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::key_value_store_view::KeyValueStoreView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut view = KeyValueStoreView::load(context).await.unwrap();
     ///   view.insert(vec![0,1], vec![0]);
     ///   view.insert(vec![0,2], vec![0]);
@@ -1164,10 +1165,10 @@
     /// If the function f returns false then the loop ends prematurely.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::key_value_store_view::KeyValueStoreView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut view = KeyValueStoreView::load(context).await.unwrap();
     ///   view.insert(vec![0,1], vec![0]);
     ///   view.insert(vec![0,2], vec![0]);
@@ -1232,10 +1233,10 @@
     <span class="doccomment">/// Applies the function f over all index/value pairs.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::key_value_store_view::KeyValueStoreView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut view = KeyValueStoreView::load(context).await.unwrap();
     ///   view.insert(vec![0,1], vec![0]);
     ///   view.insert(vec![0,2], vec![0]);
@@ -1261,10 +1262,10 @@
     <span class="doccomment">/// Returns the list of indices in lexicographic order.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::key_value_store_view::KeyValueStoreView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut view = KeyValueStoreView::load(context).await.unwrap();
     ///   view.insert(vec![0,1], vec![0]);
     ///   view.insert(vec![0,2], vec![0]);
@@ -1285,10 +1286,10 @@
     <span class="doccomment">/// Obtains the value at the given index, if any.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::key_value_store_view::KeyValueStoreView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut view = KeyValueStoreView::load(context).await.unwrap();
     ///   view.insert(vec![0,1], vec![42]);
     ///   assert_eq!(view.get(&amp;[0,1]).await.unwrap(), Some(vec![42]));
@@ -1314,10 +1315,10 @@
     <span class="doccomment">/// Obtains the values of a range of indices
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::key_value_store_view::KeyValueStoreView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut view = KeyValueStoreView::load(context).await.unwrap();
     ///   view.insert(vec![0,1], vec![42]);
     ///   assert_eq!(view.multi_get(vec![vec![0,1], vec![0,2]]).await.unwrap(), vec![Some(vec![42]), None]);
@@ -1356,10 +1357,10 @@
     <span class="doccomment">/// Sets or inserts a value.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::key_value_store_view::KeyValueStoreView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut view = KeyValueStoreView::load(context).await.unwrap();
     ///   view.insert(vec![0,1], vec![34]);
     ///   assert_eq!(view.get(&amp;[0,1]).await.unwrap(), Some(vec![34]));
@@ -1373,10 +1374,10 @@
     <span class="doccomment">/// Removes a value. If absent then the action has no effect.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::key_value_store_view::KeyValueStoreView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut view = KeyValueStoreView::load(context).await.unwrap();
     ///   view.insert(vec![0,1], vec![34]);
     ///   view.remove(vec![0,1]);
@@ -1419,10 +1420,10 @@
     <span class="doccomment">/// Iterates over all the keys matching the given prefix. The prefix is not included in the returned keys.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::key_value_store_view::KeyValueStoreView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut view = KeyValueStoreView::load(context).await.unwrap();
     ///   view.insert(vec![0,1], vec![34]);
     ///   view.insert(vec![3,4], vec![42]);
@@ -1485,10 +1486,10 @@
     /// prefix is not included in the returned keys.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::key_value_store_view::KeyValueStoreView;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut view = KeyValueStoreView::load(context).await.unwrap();
     ///   view.insert(vec![0,1], vec![34]);
     ///   view.insert(vec![3,4], vec![42]);
@@ -1554,11 +1555,11 @@
     <span class="doccomment">/// Applies the given batch of `crate::common::WriteOperation`.
     /// ```rust
     /// # tokio_test::block_on(async {
-    /// # use linera_views::memory::create_test_context;
+    /// # use linera_views::memory::create_memory_context;
     /// # use linera_views::key_value_store_view::KeyValueStoreView;
     /// # use linera_views::batch::Batch;
     /// # use crate::linera_views::views::View;
-    /// # let context = create_test_context();
+    /// # let context = create_memory_context();
     ///   let mut view = KeyValueStoreView::load(context).await.unwrap();
     ///   view.insert(vec![0,1], vec![34]);
     ///   view.insert(vec![3,4], vec![42]);
@@ -1655,6 +1656,7 @@
     ViewError: From&lt;C::Error&gt;,
 {
     <span class="kw">const </span>MAX_CONNECTIONS: usize = C::MAX_CONNECTIONS;
+    <span class="kw">const </span>MAX_VALUE_SIZE: usize = C::MAX_VALUE_SIZE;
     <span class="kw">type </span>Error = ViewError;
     <span class="kw">type </span>Keys = Vec&lt;Vec&lt;u8&gt;&gt;;
     <span class="kw">type </span>KeyValues = Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt;;

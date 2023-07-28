@@ -560,6 +560,13 @@
 <a href="#560" id="560">560</a>
 <a href="#561" id="561">561</a>
 <a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -675,8 +682,11 @@
 <span class="doccomment">/// Low-level, asynchronous key-value operations. Useful for storage APIs not based on views.
 </span><span class="attr">#[async_trait]
 </span><span class="kw">pub trait </span>KeyValueStoreClient {
-    <span class="doccomment">/// Maximum number of simultaneous connections
+    <span class="doccomment">/// Maximum number of simultaneous connections.
     </span><span class="kw">const </span>MAX_CONNECTIONS: usize;
+
+    <span class="doccomment">/// The maximal size of values that can be stored.
+    </span><span class="kw">const </span>MAX_VALUE_SIZE: usize;
 
     <span class="doccomment">/// The error type.
     </span><span class="kw">type </span>Error: Debug;
@@ -820,6 +830,9 @@
 </span><span class="kw">pub trait </span>Context {
     <span class="doccomment">/// Maximum number of simultaneous connections
     </span><span class="kw">const </span>MAX_CONNECTIONS: usize;
+
+    <span class="doccomment">/// The maximal size of values that can be stored.
+    </span><span class="kw">const </span>MAX_VALUE_SIZE: usize;
 
     <span class="doccomment">/// User-provided data to be carried along.
     </span><span class="kw">type </span>Extra: Clone + Send + Sync;
@@ -1007,6 +1020,7 @@
     ViewError: From&lt;DB::Error&gt;,
 {
     <span class="kw">const </span>MAX_CONNECTIONS: usize = DB::MAX_CONNECTIONS;
+    <span class="kw">const </span>MAX_VALUE_SIZE: usize = DB::MAX_VALUE_SIZE;
     <span class="kw">type </span>Extra = E;
     <span class="kw">type </span>Error = DB::Error;
     <span class="kw">type </span>Keys = DB::Keys;

@@ -97,6 +97,53 @@
 <a href="#97" id="97">97</a>
 <a href="#98" id="98">98</a>
 <a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -104,14 +151,61 @@
 //! key-value store. The central notion is a [`views::View`](crate::views::View) which can
 //! be loaded from storage, modified in memory, then committed (i.e. the changes are
 //! atomically persisted in storage).
+//!
+//! The package provides essentially two functionalities:
+//! * An abstraction to access databases.
+//! * Several containers named views for storing data modeled on classical ones.
+//!
+//! See `DESIGN.md` for more details.
+//!
+//! ## The supported databases.
+//!
+//! The databases supported are of the NoSQL variety and they are key-value stores.
+//!
+//! We provide support for the following databases:
+//! * `MemoryClient` is using the memory
+//! * `RocksdbClient` is a disk-based key-value store
+//! * `DynamoDbClient` is the AWS-based DynamoDB service.
+//!
+//! The corresponding type in the code is the `KeyValueStoreClient`.
+//! A context is the combination of a client and a path (named `base_key` which is
+//! of type `Vec&lt;u8&gt;`).
+//!
+//! ## Views.
+//!
+//! A view is a container whose data lies in one of the above-mentioned databases.
+//! When the container is modified the modification lies first in the view before
+//! being committed to the database. In technical terms, a view implements the trait `View`.
+//!
+//! The specific functionalities of the trait `View` are the following:
+//! * `load` for loading the view from a specific context.
+//! * `rollback` for canceling all modifications that were not committed thus far.
+//! * `clear` for clearing the view, in other words for reverting it to its default state.
+//! * `flush` for persisting the changes to storage.
+//! * `delete` for deleting the changes from the database.
+//!
+//! The following views implement the `View` trait:
+//! * `RegisterView` implements the storing of a single data.
+//! * `LogView` implements a log, which is a list of entries that can be expanded.
+//! * `QueueView` implements a queue, which is a list of entries that can be expanded and reduced.
+//! * `MapView` implements a map with keys and values.
+//! * `SetView` implements a set with keys.
+//! * `CollectionView` implements a map whose values are views themselves.
+//! * `ReentrantCollectionView` implements a map for which different keys can be accessed independently.
+//! * `ViewContainer&lt;C&gt;` implements a `KeyValueStoreClient` and is used internally.
+//!
+//! The `LogView` can be seen as an analog of `VecDeque` while `MapView` is an analog of `BTreeMap`.
 
 </span><span class="attr">#![deny(missing_docs)]
 
 </span><span class="doccomment">/// The definition of the batches for writing in the database.
 </span><span class="kw">pub mod </span>batch;
 
-<span class="doccomment">/// The definitions used for the memory, RocksDB, and DynamoDB backends.
+<span class="doccomment">/// The definitions used for the `KeyValueStoreClient` and `Context`.
 </span><span class="kw">pub mod </span>common;
+
+<span class="doccomment">/// The code for handling big values by splitting them into several small ones.
+</span><span class="kw">pub mod </span>value_splitting;
 
 <span class="doccomment">/// The definition of the `View` and related traits.
 </span><span class="kw">pub mod </span>views;
@@ -153,7 +247,7 @@
 </span><span class="attr">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">pub mod </span>hashable_wrapper;
 
-<span class="doccomment">/// Helper definitions for Rocksdb storage.
+<span class="doccomment">/// Helper definitions for RocksDB storage.
 </span><span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
 #[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">pub mod </span>rocksdb;

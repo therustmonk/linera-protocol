@@ -174,6 +174,10 @@
 <a href="#174" id="174">174</a>
 <a href="#175" id="175">175</a>
 <a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -250,7 +254,7 @@
     <span class="doccomment">/// Errors within the context can occur and are presented as ViewError.
     </span><span class="attr">#[error(<span class="string">&quot;Storage operation error in {backend}: {error}&quot;</span>)]
     </span>ContextError {
-        <span class="doccomment">/// backend can be e.g. RocksDb / AmazonDb / Memory / etc.
+        <span class="doccomment">/// backend can be e.g. RocksDB / DynamoDB / Memory / etc.
         </span>backend: String,
         <span class="doccomment">/// error is the specific problem that occurred within that context
         </span>error: String,
@@ -271,6 +275,10 @@
     <span class="doccomment">/// The database is corrupt: Some entries are missing
     </span><span class="attr">#[error(<span class="string">&quot;Missing database entries&quot;</span>)]
     </span>MissingEntries,
+
+    <span class="doccomment">/// The value is too large for the client
+    </span><span class="attr">#[error(<span class="string">&quot;The value is too large for the client&quot;</span>)]
+    </span>TooLargeValue,
 }
 
 <span class="kw">impl </span>ViewError {

@@ -34,7 +34,7 @@
 
 </span><span class="kw">use crate</span>::{chain_guards::ChainGuards, DbStore, DbStoreClient};
 <span class="kw">use </span>linera_execution::WasmRuntime;
-<span class="kw">use </span>linera_views::memory::{create_test_memory_client, MemoryClient};
+<span class="kw">use </span>linera_views::memory::{create_memory_client, MemoryClient};
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">type </span>MemoryStore = DbStore&lt;MemoryClient&gt;;
@@ -51,7 +51,7 @@
 
 <span class="kw">impl </span>MemoryStore {
     <span class="kw">pub fn </span>new(wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>client = create_test_memory_client();
+        <span class="kw">let </span>client = create_memory_client();
         <span class="self">Self </span>{
             client,
             guards: ChainGuards::default(),

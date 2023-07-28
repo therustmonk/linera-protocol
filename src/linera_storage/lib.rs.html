@@ -439,6 +439,8 @@
 <a href="#439" id="439">439</a>
 <a href="#440" id="440">440</a>
 <a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
 </pre><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -479,6 +481,7 @@
 <span class="kw">use </span>linera_views::{
     batch::Batch,
     common::{Context, ContextFromDb, KeyValueStoreClient},
+    value_splitting::DatabaseConsistencyError,
     views::{CryptoHashView, RootView, View, ViewError},
 };
 <span class="kw">use </span>metrics::increment_counter;
@@ -701,7 +704,8 @@
 <span class="kw">where
     </span>CL: KeyValueStoreClient + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
     ViewError: From&lt;&lt;CL <span class="kw">as </span>KeyValueStoreClient&gt;::Error&gt;,
-    &lt;CL <span class="kw">as </span>KeyValueStoreClient&gt;::Error: From&lt;bcs::Error&gt; + Send + Sync + serde::ser::StdError,
+    &lt;CL <span class="kw">as </span>KeyValueStoreClient&gt;::Error:
+        From&lt;bcs::Error&gt; + From&lt;DatabaseConsistencyError&gt; + Send + Sync + serde::ser::StdError,
 {
     <span class="kw">type </span>Context = ContextFromDb&lt;ChainRuntimeContext&lt;<span class="self">Self</span>&gt;, CL&gt;;
     <span class="kw">type </span>ContextError = &lt;CL <span class="kw">as </span>KeyValueStoreClient&gt;::Error;
