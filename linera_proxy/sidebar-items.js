@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Proxy"],"fn":["main"],"static":["CALLSITE","META"],"struct":["ProxyOptions","SimpleProxy"]};
+window.SIDEBAR_ITEMS = {"enum":["Proxy"],"fn":["main"],"struct":["ProxyOptions","SimpleProxy"]};

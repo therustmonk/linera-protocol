@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["arr"],"trait":["AddLength"],"type":["Inc"]};
+window.SIDEBAR_ITEMS = {"trait":["AddLength"],"type":["Inc"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["tarr"],"struct":["ATerm","TArr"]};
+window.SIDEBAR_ITEMS = {"struct":["ATerm","TArr"]};

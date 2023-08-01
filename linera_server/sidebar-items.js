@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["ServerCommand"],"fn":["main","make_server_config","parse_duration"],"static":["CALLSITE","META"],"struct":["ServerContext","ServerOptions","ValidatorOptions"]};
+window.SIDEBAR_ITEMS = {"enum":["ServerCommand"],"fn":["main","make_server_config","parse_duration"],"struct":["ServerContext","ServerOptions","ValidatorOptions"]};
