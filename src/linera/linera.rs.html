@@ -1885,7 +1885,7 @@
         <span class="kw">match </span><span class="kw-2">&amp;</span>options.storage_config {
             <span class="prelude-val">Some</span>(config) =&gt; config.parse(),
             <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
-            </span><span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(StorageConfig::Rocksdb {
+            </span><span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(StorageConfig::RocksDb {
                 path: <span class="self">Self</span>::create_default_config_path()<span class="question-mark">?</span>.join(<span class="string">&quot;wallet.db&quot;</span>),
             }),
             <span class="attr">#[cfg(not(feature = <span class="string">&quot;rocksdb&quot;</span>))]

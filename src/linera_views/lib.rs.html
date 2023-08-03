@@ -164,7 +164,7 @@
 //!
 //! We provide support for the following databases:
 //! * `MemoryClient` is using the memory
-//! * `RocksdbClient` is a disk-based key-value store
+//! * `RocksDbClient` is a disk-based key-value store
 //! * `DynamoDbClient` is the AWS-based DynamoDB service.
 //!
 //! The corresponding type in the code is the `KeyValueStoreClient`.
@@ -250,7 +250,7 @@
 <span class="doccomment">/// Helper definitions for RocksDB storage.
 </span><span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
 #[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
-</span><span class="kw">pub mod </span>rocksdb;
+</span><span class="kw">pub mod </span>rocks_db;
 
 <span class="doccomment">/// Helper definitions for DynamoDB storage.
 </span><span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]

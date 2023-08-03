@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":["READ_CERTIFICATE_COUNTER","READ_VALUE_COUNTER","WRITE_CERTIFICATE_COUNTER","WRITE_VALUE_COUNTER"],"struct":["ChainRuntimeContext","DbStore","DbStoreClient"],"trait":["Store"],"type":["DynamoDbStoreClient","MemoryStoreClient","RocksdbStoreClient"]};
+window.SIDEBAR_ITEMS = {"constant":["READ_CERTIFICATE_COUNTER","READ_VALUE_COUNTER","WRITE_CERTIFICATE_COUNTER","WRITE_VALUE_COUNTER"],"struct":["ChainRuntimeContext","DbStore","DbStoreClient"],"trait":["Store"],"type":["DynamoDbStoreClient","MemoryStoreClient","RocksDbStoreClient"]};

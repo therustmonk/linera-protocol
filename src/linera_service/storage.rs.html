@@ -238,7 +238,7 @@
 <span class="kw">use </span>std::str::FromStr;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
-</span><span class="kw">use </span>{linera_storage::RocksdbStoreClient, std::path::PathBuf};
+</span><span class="kw">use </span>{linera_storage::RocksDbStoreClient, std::path::PathBuf};
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
 </span><span class="kw">use </span>{
@@ -252,7 +252,7 @@
 </span><span class="kw">pub enum </span>StorageConfig {
     Memory,
     <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
-    </span>Rocksdb {
+    </span>RocksDb {
         path: PathBuf,
     },
     <span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
@@ -271,11 +271,11 @@
 
 <span class="attr">#[doc(hidden)]
 #[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
-</span><span class="kw">pub type </span>MaybeRocksdbStoreClient = RocksdbStoreClient;
+</span><span class="kw">pub type </span>MaybeRocksDbStoreClient = RocksDbStoreClient;
 
 <span class="attr">#[doc(hidden)]
 #[cfg(not(feature = <span class="string">&quot;rocksdb&quot;</span>))]
-</span><span class="kw">pub type </span>MaybeRocksdbStoreClient = MemoryStoreClient;
+</span><span class="kw">pub type </span>MaybeRocksDbStoreClient = MemoryStoreClient;
 
 <span class="attr">#[doc(hidden)]
 #[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
@@ -287,14 +287,14 @@
 
 <span class="kw">pub trait </span>RunnableJob&lt;Output&gt;:
     Runnable&lt;MemoryStoreClient, Output = Output&gt;
-    + Runnable&lt;MaybeRocksdbStoreClient, Output = Output&gt;
+    + Runnable&lt;MaybeRocksDbStoreClient, Output = Output&gt;
     + Runnable&lt;MaybeDynamoDbStoreClient, Output = Output&gt;
 {
 }
 
 <span class="kw">impl</span>&lt;Output, T&gt; RunnableJob&lt;Output&gt; <span class="kw">for </span>T <span class="kw">where
     </span>T: Runnable&lt;MemoryStoreClient, Output = Output&gt;
-        + Runnable&lt;MaybeRocksdbStoreClient, Output = Output&gt;
+        + Runnable&lt;MaybeRocksDbStoreClient, Output = Output&gt;
         + Runnable&lt;MaybeDynamoDbStoreClient, Output = Output&gt;
 {
 }
@@ -319,7 +319,7 @@
                 job.run(client).<span class="kw">await
             </span>}
             <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
-            </span>Rocksdb { path } =&gt; {
+            </span>RocksDb { path } =&gt; {
                 <span class="kw">let </span>is_new_dir = <span class="kw">if </span>path.is_dir() {
                     <span class="macro">tracing::warn!</span>(<span class="string">&quot;Using existing database {:?}&quot;</span>, path);
                     <span class="bool-val">false
@@ -328,7 +328,7 @@
                     <span class="bool-val">true
                 </span>};
 
-                <span class="kw">let </span><span class="kw-2">mut </span>client = RocksdbStoreClient::new(path.clone(), wasm_runtime, cache_size);
+                <span class="kw">let </span><span class="kw-2">mut </span>client = RocksDbStoreClient::new(path.clone(), wasm_runtime, cache_size);
                 <span class="kw">if </span>is_new_dir {
                     config.initialize_store(<span class="kw-2">&amp;mut </span>client).<span class="kw">await</span><span class="question-mark">?</span>;
                 }
@@ -363,7 +363,7 @@
 
 <span class="kw">const </span>MEMORY: <span class="kw-2">&amp;</span>str = <span class="string">&quot;memory&quot;</span>;
 <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
-</span><span class="kw">const </span>ROCKSDB: <span class="kw-2">&amp;</span>str = <span class="string">&quot;rocksdb:&quot;</span>;
+</span><span class="kw">const </span>ROCKS_DB: <span class="kw-2">&amp;</span>str = <span class="string">&quot;rocksdb:&quot;</span>;
 <span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
 </span><span class="kw">const </span>DYNAMO_DB: <span class="kw-2">&amp;</span>str = <span class="string">&quot;dynamodb:&quot;</span>;
 
@@ -375,8 +375,8 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="self">Self</span>::Memory);
         }
         <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(s) = input.strip_prefix(ROCKSDB) {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="self">Self</span>::Rocksdb {
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(s) = input.strip_prefix(ROCKS_DB) {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="self">Self</span>::RocksDb {
                 path: s.to_string().into(),
             });
         }
@@ -417,10 +417,10 @@
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
 #[test]
-</span><span class="kw">fn </span>test_rocksdb_storage_config_from_str() {
+</span><span class="kw">fn </span>test_rocks_db_storage_config_from_str() {
     <span class="macro">assert_eq!</span>(
         StorageConfig::from_str(<span class="string">&quot;rocksdb:foo.db&quot;</span>).unwrap(),
-        StorageConfig::Rocksdb {
+        StorageConfig::RocksDb {
             path: <span class="string">&quot;foo.db&quot;</span>.into()
         }
     );

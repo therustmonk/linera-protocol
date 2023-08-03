@@ -658,7 +658,7 @@
 <span class="kw">use </span>tokio::sync::oneshot;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
-</span><span class="kw">use </span>{linera_storage::RocksdbStoreClient, tokio::sync::Semaphore};
+</span><span class="kw">use </span>{linera_storage::RocksDbStoreClient, tokio::sync::Semaphore};
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
 </span><span class="kw">use </span>{
@@ -1148,7 +1148,7 @@
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
 </span><span class="doccomment">/// Limit concurrency for rocksdb tests to avoid &quot;too many open files&quot; errors.
-</span><span class="kw">pub static </span>ROCKSDB_SEMAPHORE: Semaphore = Semaphore::const_new(<span class="number">5</span>);
+</span><span class="kw">pub static </span>ROCKS_DB_SEMAPHORE: Semaphore = Semaphore::const_new(<span class="number">5</span>);
 
 <span class="attr">#[derive(Default)]
 </span><span class="kw">pub struct </span>MakeMemoryStoreClient {
@@ -1177,35 +1177,35 @@
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
 #[derive(Default)]
-</span><span class="kw">pub struct </span>MakeRocksdbStoreClient {
+</span><span class="kw">pub struct </span>MakeRocksDbStoreClient {
     temp_dirs: Vec&lt;tempfile::TempDir&gt;,
     wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
 }
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
-</span><span class="kw">impl </span>MakeRocksdbStoreClient {
-    <span class="doccomment">/// Creates a [`MakeRocksdbStoreClient`] that uses the specified [`WasmRuntime`] to run WASM
+</span><span class="kw">impl </span>MakeRocksDbStoreClient {
+    <span class="doccomment">/// Creates a [`MakeRocksDbStoreClient`] that uses the specified [`WasmRuntime`] to run WASM
     /// applications.
     </span><span class="attr">#[allow(dead_code)]
     </span><span class="kw">pub fn </span>with_wasm_runtime(wasm_runtime: <span class="kw">impl </span>Into&lt;<span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;&gt;) -&gt; <span class="self">Self </span>{
-        MakeRocksdbStoreClient {
+        MakeRocksDbStoreClient {
             wasm_runtime: wasm_runtime.into(),
-            ..MakeRocksdbStoreClient::default()
+            ..MakeRocksDbStoreClient::default()
         }
     }
 }
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
 #[async_trait]
-</span><span class="kw">impl </span>StoreBuilder <span class="kw">for </span>MakeRocksdbStoreClient {
-    <span class="kw">type </span>Store = RocksdbStoreClient;
+</span><span class="kw">impl </span>StoreBuilder <span class="kw">for </span>MakeRocksDbStoreClient {
+    <span class="kw">type </span>Store = RocksDbStoreClient;
 
     <span class="kw">async fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Store, anyhow::Error&gt; {
         <span class="kw">let </span>dir = tempfile::TempDir::new()<span class="question-mark">?</span>;
         <span class="kw">let </span>path = dir.path().to_path_buf();
         <span class="self">self</span>.temp_dirs.push(dir);
         <span class="kw">let </span>standard_max_cache_size = <span class="number">1000</span>;
-        <span class="prelude-val">Ok</span>(RocksdbStoreClient::new(
+        <span class="prelude-val">Ok</span>(RocksDbStoreClient::new(
             path,
             <span class="self">self</span>.wasm_runtime,
             standard_max_cache_size,
