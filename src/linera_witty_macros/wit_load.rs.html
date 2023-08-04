@@ -76,34 +76,6 @@
 <a href="#76" id="76">76</a>
 <a href="#77" id="77">77</a>
 <a href="#78" id="78">78</a>
-<a href="#79" id="79">79</a>
-<a href="#80" id="80">80</a>
-<a href="#81" id="81">81</a>
-<a href="#82" id="82">82</a>
-<a href="#83" id="83">83</a>
-<a href="#84" id="84">84</a>
-<a href="#85" id="85">85</a>
-<a href="#86" id="86">86</a>
-<a href="#87" id="87">87</a>
-<a href="#88" id="88">88</a>
-<a href="#89" id="89">89</a>
-<a href="#90" id="90">90</a>
-<a href="#91" id="91">91</a>
-<a href="#92" id="92">92</a>
-<a href="#93" id="93">93</a>
-<a href="#94" id="94">94</a>
-<a href="#95" id="95">95</a>
-<a href="#96" id="96">96</a>
-<a href="#97" id="97">97</a>
-<a href="#98" id="98">98</a>
-<a href="#99" id="99">99</a>
-<a href="#100" id="100">100</a>
-<a href="#101" id="101">101</a>
-<a href="#102" id="102">102</a>
-<a href="#103" id="103">103</a>
-<a href="#104" id="104">104</a>
-<a href="#105" id="105">105</a>
-<a href="#106" id="106">106</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -112,24 +84,18 @@
 </span><span class="attr">#[path = <span class="string">&quot;unit_tests/wit_load.rs&quot;</span>]
 </span><span class="kw">mod </span>tests;
 
+<span class="kw">use </span><span class="kw">crate</span>::util::{hlist_bindings_for, hlist_type_for};
 <span class="kw">use </span>proc_macro2::TokenStream;
-<span class="kw">use </span>quote::{format_ident, quote, ToTokens};
+<span class="kw">use </span>quote::{format_ident, quote};
 <span class="kw">use </span>syn::{Fields, Ident};
 
 <span class="doccomment">/// Returns the body of the `WitLoad` implementation for the Rust `struct` with the specified
 /// `fields`.
 </span><span class="kw">pub fn </span>derive_for_struct(fields: <span class="kw-2">&amp;</span>Fields) -&gt; TokenStream {
-    <span class="kw">let </span>field_pairs: Vec&lt;<span class="kw">_</span>&gt; = field_names_and_types(fields).collect();
-
-    <span class="kw">let </span>load_fields = loads_for_fields(field_pairs.iter().cloned());
-    <span class="kw">let </span>construction = construction_for_fields(field_pairs.iter().cloned(), fields);
-
-    <span class="kw">let </span>lift_fields = field_pairs.iter().map(|(field_name, field_type)| {
-        <span class="macro">quote! </span>{
-            <span class="kw">let </span>(field_layout, flat_layout) = linera_witty::Split::split(flat_layout);
-            <span class="kw">let </span>#field_name = &lt;#field_type <span class="kw">as </span>WitLoad&gt;::lift_from(field_layout, memory)<span class="question-mark">?</span>;
-        }
-    });
+    <span class="kw">let </span>field_names = field_names(fields);
+    <span class="kw">let </span>fields_hlist_binding = hlist_bindings_for(field_names.clone());
+    <span class="kw">let </span>fields_hlist_type = hlist_type_for(fields);
+    <span class="kw">let </span>construction = construction_for_fields(field_names, fields);
 
     <span class="macro">quote! </span>{
         <span class="kw">fn </span>load&lt;Instance&gt;(
@@ -141,7 +107,8 @@
             &lt;Instance::Runtime <span class="kw">as </span>linera_witty::Runtime&gt;::Memory:
                 linera_witty::RuntimeMemory&lt;Instance&gt;,
         {
-            #( #load_fields )*
+            <span class="kw">let </span>#fields_hlist_binding =
+                &lt;#fields_hlist_type <span class="kw">as </span>linera_witty::WitLoad&gt;::load(memory, location)<span class="question-mark">?</span>;
 
             <span class="prelude-val">Ok</span>(<span class="self">Self </span>#construction)
         }
@@ -155,43 +122,22 @@
             &lt;Instance::Runtime <span class="kw">as </span>linera_witty::Runtime&gt;::Memory:
                 linera_witty::RuntimeMemory&lt;Instance&gt;,
         {
-            #( #lift_fields )*
+            <span class="kw">let </span>#fields_hlist_binding =
+                &lt;#fields_hlist_type <span class="kw">as </span>linera_witty::WitLoad&gt;::lift_from(flat_layout, memory)<span class="question-mark">?</span>;
 
             <span class="prelude-val">Ok</span>(<span class="self">Self </span>#construction)
         }
     }
 }
 
-<span class="doccomment">/// Returns an iterator over the names and types of the provided `fields`.
-</span><span class="kw">fn </span>field_names_and_types(
-    fields: <span class="kw-2">&amp;</span>Fields,
-) -&gt; <span class="kw">impl </span>Iterator&lt;Item = (Ident, TokenStream)&gt; + Clone + <span class="lifetime">&#39;_ </span>{
-    <span class="kw">let </span>field_names = fields.iter().enumerate().map(|(index, field)| {
+<span class="doccomment">/// Returns an iterator over the names of the provided `fields`.
+</span><span class="kw">fn </span>field_names(fields: <span class="kw-2">&amp;</span>Fields) -&gt; <span class="kw">impl </span>Iterator&lt;Item = Ident&gt; + Clone + <span class="lifetime">&#39;_ </span>{
+    fields.iter().enumerate().map(|(index, field)| {
         field
             .ident
             .as_ref()
             .cloned()
             .unwrap_or_else(|| <span class="macro">format_ident!</span>(<span class="string">&quot;field{index}&quot;</span>))
-    });
-
-    <span class="kw">let </span>field_types = fields.iter().map(|field| field.ty.to_token_stream());
-
-    field_names.zip(field_types)
-}
-
-<span class="doccomment">/// Returns the code generated to load a single field.
-///
-/// Assumes that `location` points to where the field starts in memory, and advances it to the end
-/// of the field. A binding with the field name is created in the generated code.
-</span><span class="kw">fn </span>loads_for_fields(
-    field_names_and_types: <span class="kw">impl </span>Iterator&lt;Item = (Ident, TokenStream)&gt; + Clone,
-) -&gt; <span class="kw">impl </span>Iterator&lt;Item = TokenStream&gt; {
-    field_names_and_types.map(|(field_name, field_type)| {
-        <span class="macro">quote! </span>{
-            location = location.after_padding_for::&lt;#field_type&gt;();
-            <span class="kw">let </span>#field_name = &lt;#field_type <span class="kw">as </span>linera_witty::WitLoad&gt;::load(memory, location)<span class="question-mark">?</span>;
-            location = location.after::&lt;#field_type&gt;();
-        }
     })
 }
 
@@ -199,11 +145,9 @@
 ///
 /// Assumes that bindings were created with the field names.
 </span><span class="kw">fn </span>construction_for_fields(
-    field_names_and_types: <span class="kw">impl </span>Iterator&lt;Item = (Ident, TokenStream)&gt;,
+    field_names: <span class="kw">impl </span>Iterator&lt;Item = Ident&gt;,
     fields: <span class="kw-2">&amp;</span>Fields,
 ) -&gt; TokenStream {
-    <span class="kw">let </span>field_names = field_names_and_types.map(|(name, <span class="kw">_</span>)| name);
-
     <span class="kw">match </span>fields {
         Fields::Unit =&gt; <span class="macro">quote! </span>{},
         Fields::Named(<span class="kw">_</span>) =&gt; <span class="macro">quote! </span>{ { #( #field_names ),* } },
