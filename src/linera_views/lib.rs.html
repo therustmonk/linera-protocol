@@ -144,6 +144,11 @@
 <a href="#144" id="144">144</a>
 <a href="#145" id="145">145</a>
 <a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -247,12 +252,17 @@
 </span><span class="attr">#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">pub mod </span>hashable_wrapper;
 
-<span class="doccomment">/// Helper definitions for RocksDB storage.
+<span class="doccomment">/// A storage backend for views based on ScyllaDB
+</span><span class="attr">#[cfg(feature = <span class="string">&quot;scylladb&quot;</span>)]
+#[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
+</span><span class="kw">pub mod </span>scylla_db;
+
+<span class="doccomment">/// A storage backend for views based on RocksDB
 </span><span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
 #[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">pub mod </span>rocks_db;
 
-<span class="doccomment">/// Helper definitions for DynamoDB storage.
+<span class="doccomment">/// A storage backend for views based on DynamoDB
 </span><span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
 #[cfg(not(target_arch = <span class="string">&quot;wasm32&quot;</span>))]
 </span><span class="kw">pub mod </span>dynamo_db;

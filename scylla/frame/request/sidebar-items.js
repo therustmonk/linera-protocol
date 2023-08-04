@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["RequestOpcode"],"mod":["auth_response","batch","execute","options","prepare","query","register","startup"],"struct":["AuthResponse","Batch","Options","Prepare","Query","Startup"],"trait":["Request"]};

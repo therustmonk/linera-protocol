@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["ScyllaDbContextError"],"fn":["create_scylla_db_test_client"],"struct":["ScyllaDbClient"]};

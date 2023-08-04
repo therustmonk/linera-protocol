@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["BlockMode","BlockSize","Error"],"struct":["FrameDecoder","FrameEncoder","FrameInfo"]};

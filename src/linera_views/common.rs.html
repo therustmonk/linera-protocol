@@ -567,6 +567,16 @@
 <a href="#567" id="567">567</a>
 <a href="#568" id="568">568</a>
 <a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -616,17 +626,27 @@
 /// is possible with the way the comparison operators for vectors are built.
 ///
 /// The statement is that p is a prefix of v if and only if p &lt;= v &lt; upper_bound(p).
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_upper_bound(key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; Bound&lt;Vec&lt;u8&gt;&gt; {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_upper_bound_option(key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt; {
     <span class="kw">let </span>len = key_prefix.len();
     <span class="kw">for </span>i <span class="kw">in </span>(<span class="number">0</span>..len).rev() {
         <span class="kw">let </span>val = key_prefix[i];
         <span class="kw">if </span>val &lt; u8::MAX {
             <span class="kw">let </span><span class="kw-2">mut </span>upper_bound = key_prefix[<span class="number">0</span>..i + <span class="number">1</span>].to_vec();
             upper_bound[i] += <span class="number">1</span>;
-            <span class="kw">return </span>Excluded(upper_bound);
+            <span class="kw">return </span><span class="prelude-val">Some</span>(upper_bound);
         }
     }
-    Unbounded
+    <span class="prelude-val">None
+</span>}
+
+<span class="doccomment">/// The upper bound that can be used in ranges when accessing
+/// a container. That is a vector v is a prefix of p if and only if
+/// v belongs to the interval (Included(p), get_upper_bound(p)).
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_upper_bound(key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; Bound&lt;Vec&lt;u8&gt;&gt; {
+    <span class="kw">match </span>get_upper_bound_option(key_prefix) {
+        <span class="prelude-val">None </span>=&gt; Unbounded,
+        <span class="prelude-val">Some</span>(upper_bound) =&gt; Excluded(upper_bound),
+    }
 }
 
 <span class="doccomment">/// Computes an interval so that a vector has `key_prefix` as a prefix

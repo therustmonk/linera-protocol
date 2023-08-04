@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["CDCPartitioner","Murmur3Partitioner"],"trait":["Partitioner"]};
