@@ -166,6 +166,13 @@
 <a href="#166" id="166">166</a>
 <a href="#167" id="167">167</a>
 <a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -179,6 +186,10 @@
 <span class="kw">use </span>frunk::{hlist, hlist_pat, HList};
 <span class="kw">use </span>std::borrow::Cow;
 
+<span class="attr">#[cfg(test)]
+#[path = <span class="string">&quot;unit_tests/memory.rs&quot;</span>]
+</span><span class="kw">mod </span>tests;
+
 <span class="doccomment">/// An address for a location in a guest WebAssembly module&#39;s memory.
 </span><span class="attr">#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 </span><span class="kw">pub struct </span>GuestPointer(<span class="kw">pub</span>(<span class="kw">crate</span>) u32);
@@ -186,25 +197,28 @@
 <span class="kw">impl </span>GuestPointer {
     <span class="doccomment">/// Returns a new address that&#39;s the current address advanced to add padding to ensure it&#39;s
     /// aligned to the `alignment` byte boundary.
-    </span><span class="kw">pub fn </span>aligned_at(<span class="kw-2">&amp;</span><span class="self">self</span>, alignment: u32) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>padding = (-(<span class="self">self</span>.<span class="number">0 </span><span class="kw">as </span>i32) &amp; (alignment <span class="kw">as </span>i32 - <span class="number">1</span>)) <span class="kw">as </span>u32;
+    </span><span class="kw">pub const fn </span>aligned_at(<span class="kw-2">&amp;</span><span class="self">self</span>, alignment: u32) -&gt; <span class="self">Self </span>{
+        <span class="comment">// The following computation is equivalent to:
+        // `(alignment - (self.0 % alignment)) % alignment`.
+        // Source: https://en.wikipedia.org/wiki/Data_structure_alignment#Computing_padding
+        </span><span class="kw">let </span>padding = (-(<span class="self">self</span>.<span class="number">0 </span><span class="kw">as </span>i32) &amp; (alignment <span class="kw">as </span>i32 - <span class="number">1</span>)) <span class="kw">as </span>u32;
 
         GuestPointer(<span class="self">self</span>.<span class="number">0 </span>+ padding)
     }
 
     <span class="doccomment">/// Returns a new address that&#39;s the current address advanced to after the size of `T`.
-    </span><span class="kw">pub fn </span>after&lt;T: WitType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub const fn </span>after&lt;T: WitType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         GuestPointer(<span class="self">self</span>.<span class="number">0 </span>+ T::SIZE)
     }
 
     <span class="doccomment">/// Returns a new address that&#39;s the current address advanced to add padding to ensure it&#39;s
     /// aligned properly for `T`.
-    </span><span class="kw">pub fn </span>after_padding_for&lt;T: WitType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub const fn </span>after_padding_for&lt;T: WitType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.aligned_at(&lt;T::Layout <span class="kw">as </span>Layout&gt;::ALIGNMENT)
     }
 
     <span class="doccomment">/// Returns the address of an element in a contiguous list of properly aligned `T` types.
-    </span><span class="kw">pub fn </span>index&lt;T: WitType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u32) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub const fn </span>index&lt;T: WitType&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, index: u32) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>element_size = GuestPointer(T::SIZE).after_padding_for::&lt;T&gt;();
 
         GuestPointer(<span class="self">self</span>.<span class="number">0 </span>+ index * element_size.<span class="number">0</span>)
