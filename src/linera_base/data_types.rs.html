@@ -514,7 +514,7 @@
 </span><span class="attr">#[derive(
     Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Default, Debug, Serialize, Deserialize,
 )]
-</span><span class="kw">pub struct </span>RoundNumber(<span class="kw">pub </span>u64);
+</span><span class="kw">pub struct </span>RoundNumber(<span class="kw">pub </span>u32);
 
 <span class="doccomment">/// A timestamp, in microseconds since the Unix epoch.
 </span><span class="attr">#[derive(
@@ -711,7 +711,7 @@
 
 <span class="macro">impl_wrapped_number!</span>(Amount, u128);
 <span class="macro">impl_wrapped_number!</span>(BlockHeight, u64);
-<span class="macro">impl_strictly_wrapped_number!</span>(RoundNumber, u64);
+<span class="macro">impl_strictly_wrapped_number!</span>(RoundNumber, u32);
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>Amount {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
@@ -815,7 +815,7 @@
     <span class="kw">type </span><span class="prelude-val">Err </span>= std::num::ParseIntError;
 
     <span class="kw">fn </span>from_str(src: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span>(u64::from_str(src)<span class="question-mark">?</span>))
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span>(u32::from_str(src)<span class="question-mark">?</span>))
     }
 }
 
