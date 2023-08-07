@@ -72,7 +72,7 @@
 </span><span class="kw">pub trait </span>Sealed {}
 
 <span class="doccomment">/// Representation of the memory layout of complex types as a sequence of fundamental WIT types.
-</span><span class="kw">pub trait </span>Layout: Sealed + Default + HList {
+</span><span class="kw">pub trait </span>Layout: Sealed + HList {
     <span class="doccomment">/// The alignment boundary required for the layout.
     </span><span class="kw">const </span>ALIGNMENT: u32;
 

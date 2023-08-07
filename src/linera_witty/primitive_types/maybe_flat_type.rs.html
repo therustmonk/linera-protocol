@@ -55,7 +55,7 @@
 <span class="kw">use </span>frunk::HCons;
 
 <span class="doccomment">/// A marker trait for [`FlatType`]s and the unit type, which uses no storage space.
-</span><span class="kw">pub trait </span>MaybeFlatType: Sized {
+</span><span class="kw">pub trait </span>MaybeFlatType: Default + Sized {
     <span class="doccomment">/// Result of flattening the layout made up of the current element followed by `Tail`.
     </span><span class="kw">type </span>Flatten&lt;Tail: Layout&gt;: FlatLayout;
 

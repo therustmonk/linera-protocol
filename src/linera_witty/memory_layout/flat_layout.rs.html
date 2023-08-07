@@ -36,7 +36,7 @@
 /// This allows laying out complex types as a sequence of WebAssembly types that can represent the
 /// parameters or the return list of a function. WIT uses this as an optimization to pass complex
 /// types as multiple native WebAssembly parameters.
-</span><span class="kw">pub trait </span>FlatLayout: Layout&lt;Flat = <span class="self">Self</span>&gt; {}
+</span><span class="kw">pub trait </span>FlatLayout: Default + Layout&lt;Flat = <span class="self">Self</span>&gt; {}
 
 <span class="kw">impl </span>FlatLayout <span class="kw">for </span>HNil {}
 
