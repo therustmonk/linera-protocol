@@ -181,6 +181,21 @@
 <a href="#181" id="181">181</a>
 <a href="#182" id="182">182</a>
 <a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -197,6 +212,21 @@
 }
 
 <span class="kw">impl </span>NotificationTracker {
+    <span class="doccomment">/// Returns whether the `Notification` has a higher `BlockHeight` than any previously
+    /// seen `Notification`.
+    </span><span class="kw">pub fn </span>is_new(<span class="kw-2">&amp;mut </span><span class="self">self</span>, notification: <span class="kw-2">&amp;</span>Notification) -&gt; bool {
+        <span class="kw">match </span><span class="kw-2">&amp;</span>notification.reason {
+            Reason::NewBlock { height, .. } =&gt; <span class="self">self
+                </span>.new_block
+                .get(<span class="kw-2">&amp;</span>notification.chain_id)
+                .map_or(<span class="bool-val">true</span>, |prev_height| height &gt; prev_height),
+            Reason::NewIncomingMessage { height, origin } =&gt; <span class="self">self
+                </span>.new_message
+                .get(<span class="kw-2">&amp;</span>(notification.chain_id, origin.clone()))
+                .map_or(<span class="bool-val">true</span>, |prev_height| height &gt; prev_height),
+        }
+    }
+
     <span class="doccomment">/// Adds a `Notification` to the `Tracker`.
     ///
     /// If the `Notification` has a higher `BlockHeight` than any previously seen `Notification`

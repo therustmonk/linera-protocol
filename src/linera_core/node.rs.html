@@ -1021,7 +1021,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         query: ChainInfoQuery,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfoResponse, NodeError&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>node = <span class="self">self</span>.node.lock().<span class="kw">await</span>;
+        <span class="kw">let </span>node = <span class="self">self</span>.node.lock().<span class="kw">await</span>;
         <span class="comment">// In local nodes, we can trust fully_handle_certificate to carry all actions eventually.
         </span><span class="kw">let </span>(response, _actions) = node.state.handle_chain_info_query(query).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(response)
