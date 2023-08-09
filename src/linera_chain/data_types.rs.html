@@ -794,6 +794,32 @@
 <a href="#794" id="794">794</a>
 <a href="#795" id="795">795</a>
 <a href="#796" id="796">796</a>
+<a href="#797" id="797">797</a>
+<a href="#798" id="798">798</a>
+<a href="#799" id="799">799</a>
+<a href="#800" id="800">800</a>
+<a href="#801" id="801">801</a>
+<a href="#802" id="802">802</a>
+<a href="#803" id="803">803</a>
+<a href="#804" id="804">804</a>
+<a href="#805" id="805">805</a>
+<a href="#806" id="806">806</a>
+<a href="#807" id="807">807</a>
+<a href="#808" id="808">808</a>
+<a href="#809" id="809">809</a>
+<a href="#810" id="810">810</a>
+<a href="#811" id="811">811</a>
+<a href="#812" id="812">812</a>
+<a href="#813" id="813">813</a>
+<a href="#814" id="814">814</a>
+<a href="#815" id="815">815</a>
+<a href="#816" id="816">816</a>
+<a href="#817" id="817">817</a>
+<a href="#818" id="818">818</a>
+<a href="#819" id="819">819</a>
+<a href="#820" id="820">820</a>
+<a href="#821" id="821">821</a>
+<a href="#822" id="822">822</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1108,14 +1134,40 @@
     <span class="kw">pub fn </span>new(
         value: LiteValue,
         round: RoundNumber,
-        signatures: Vec&lt;(ValidatorName, Signature)&gt;,
+        <span class="kw-2">mut </span>signatures: Vec&lt;(ValidatorName, Signature)&gt;,
     ) -&gt; <span class="self">Self </span>{
+        <span class="kw">if </span>!is_strictly_ordered(<span class="kw-2">&amp;</span>signatures) {
+            <span class="comment">// Not enforcing no duplicates, check the documentation for is_strictly_ordered
+            // It&#39;s the responsibility of the caller to make sure signatures has no duplicates
+            </span>signatures.sort_by_key(|<span class="kw-2">&amp;</span>(validator_name, <span class="kw">_</span>)| validator_name)
+        }
+
         <span class="kw">let </span>signatures = Cow::Owned(signatures);
         <span class="self">Self </span>{
             value,
             round,
             signatures,
         }
+    }
+
+    <span class="doccomment">/// Creates a `LiteCertificate` from a list of votes, without cryptographically checking the
+    /// signatures. Returns `None` if the votes are empty or don&#39;t have matching values and rounds.
+    </span><span class="kw">pub fn </span>try_from_votes(votes: <span class="kw">impl </span>IntoIterator&lt;Item = LiteVote&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>votes = votes.into_iter();
+        <span class="kw">let </span>LiteVote {
+            value,
+            round,
+            validator,
+            signature,
+        } = votes.next()<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>signatures = <span class="macro">vec!</span>[(validator, signature)];
+        <span class="kw">for </span>vote <span class="kw">in </span>votes {
+            <span class="kw">if </span>vote.value.value_hash != value.value_hash || vote.round != round {
+                <span class="kw">return </span><span class="prelude-val">None</span>;
+            }
+            signatures.push((vote.validator, vote.signature));
+        }
+        <span class="prelude-val">Some</span>(LiteCertificate::new(value, round, signatures))
     }
 
     <span class="doccomment">/// Verifies the certificate.

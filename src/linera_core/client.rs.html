@@ -1552,8 +1552,6 @@
 <a href="#1552" id="1552">1552</a>
 <a href="#1553" id="1553">1553</a>
 <a href="#1554" id="1554">1554</a>
-<a href="#1555" id="1555">1555</a>
-<a href="#1556" id="1556">1556</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1579,7 +1577,7 @@
 <span class="kw">use </span>linera_chain::{
     data_types::{
         Block, BlockAndRound, BlockProposal, Certificate, CertificateValue, HashedValue,
-        IncomingMessage, LiteVote,
+        IncomingMessage, LiteCertificate, LiteVote,
     },
     ChainManagerInfo, ChainStateView,
 };
@@ -2139,7 +2137,9 @@
             <span class="kw-2">&amp;</span>nodes,
             committee,
             |value: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;LiteVote&gt;| -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">_</span>&gt; {
-                value.as_ref().map(|vote| vote.value.value_hash)
+                value
+                    .as_ref()
+                    .map(|vote| (vote.value.value_hash, vote.round))
             },
             |name, client| {
                 <span class="kw">let </span><span class="kw-2">mut </span>updater = ValidatorUpdater {
@@ -2154,57 +2154,53 @@
             },
         )
         .<span class="kw">await</span>;
-        <span class="kw">let </span>votes = <span class="kw">match </span>result {
-            <span class="prelude-val">Ok</span>((_hash, votes)) =&gt; votes,
-            <span class="prelude-val">Err</span>(CommunicationError::Trusted(NodeError::InactiveChain(id)))
-                <span class="kw">if </span>id == chain_id
-                    &amp;&amp; <span class="macro">matches!</span>(action, CommunicateAction::AdvanceToNextBlockHeight(<span class="kw">_</span>)) =&gt;
-            {
-                <span class="comment">// The chain is visibly not active (yet or any more) so there is no need
-                // to synchronize block heights.
-                </span><span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
-            }
-            <span class="prelude-val">Err</span>(CommunicationError::Trusted(err)) =&gt; {
-                <span class="macro">bail!</span>(<span class="string">&quot;Failed to communicate with a quorum of validators: {}&quot;</span>, err)
-            }
-            <span class="prelude-val">Err</span>(CommunicationError::Sample(errors)) =&gt; {
-                <span class="macro">bail!</span>(
-                    <span class="string">&quot;Failed to communicate with a quorum of validators:\n{:#?}&quot;</span>,
-                    errors
-                )
-            }
-        };
-        <span class="kw">let </span>signatures: Vec&lt;<span class="kw">_</span>&gt; = votes
-            .into_iter()
-            .filter_map(|vote| vote.map(|vote| (vote.validator, vote.signature)))
-            .collect();
-        <span class="kw">match </span>action {
+        <span class="kw">let </span>(value, round) = <span class="kw">match </span>action {
             CommunicateAction::SubmitBlockForConfirmation(proposal) =&gt; {
                 <span class="kw">let </span>block = proposal.content.block;
-                <span class="kw">let </span>round = proposal.content.round;
                 <span class="kw">let </span>(executed_block, <span class="kw">_</span>) = <span class="self">self</span>.node_client.stage_block_execution(block).<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>value = HashedValue::from(CertificateValue::ConfirmedBlock { executed_block });
-                <span class="kw">let </span>certificate = Certificate::new(value, round, signatures);
-                <span class="comment">// Certificate is valid because
-                // * `communicate_with_quorum` ensured a sufficient &quot;weight&quot; of
-                // (non-error) answers were returned by validators.
-                // * each answer is a vote signed by the expected validator.
-                </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(certificate))
+                (
+                    HashedValue::from(CertificateValue::ConfirmedBlock { executed_block }),
+                    proposal.content.round,
+                )
             }
             CommunicateAction::SubmitBlockForValidation(proposal) =&gt; {
                 <span class="kw">let </span>BlockAndRound { block, round } = proposal.content;
                 <span class="kw">let </span>(executed_block, <span class="kw">_</span>) = <span class="self">self</span>.node_client.stage_block_execution(block).<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="kw">let </span>value = HashedValue::new_validated(executed_block);
-                <span class="kw">let </span>certificate = Certificate::new(value, round, signatures);
-                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(certificate))
+                (HashedValue::new_validated(executed_block), round)
             }
             CommunicateAction::FinalizeBlock(validity_certificate) =&gt; {
                 <span class="kw">let </span>round = validity_certificate.round;
-                <span class="kw">let </span>conf_value = validity_certificate.value.into_confirmed();
-                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Certificate::new(conf_value, round, signatures)))
+                (validity_certificate.value.into_confirmed(), round)
             }
-            CommunicateAction::AdvanceToNextBlockHeight(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-        }
+            CommunicateAction::AdvanceToNextBlockHeight(<span class="kw">_</span>) =&gt; {
+                <span class="kw">return match </span>result {
+                    <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+                    <span class="prelude-val">Err</span>(CommunicationError::Trusted(NodeError::InactiveChain(id)))
+                        <span class="kw">if </span>id == chain_id =&gt;
+                    {
+                        <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
+                    }
+                    <span class="prelude-val">Err</span>(error) =&gt; <span class="prelude-val">Err</span>(error)<span class="question-mark">?</span>,
+                };
+            }
+        };
+        <span class="kw">let </span>votes = <span class="kw">match </span>result<span class="question-mark">? </span>{
+            (<span class="prelude-val">Some</span>((votes_hash, votes_round)), votes)
+                <span class="kw">if </span>votes_hash == value.hash() &amp;&amp; votes_round == round =&gt;
+            {
+                votes
+            }
+            <span class="kw">_ </span>=&gt; <span class="macro">bail!</span>(<span class="string">&quot;Unexpected response from validators&quot;</span>),
+        };
+        <span class="comment">// Certificate is valid because
+        // * `communicate_with_quorum` ensured a sufficient &quot;weight&quot; of
+        // (non-error) answers were returned by validators.
+        // * each answer is a vote signed by the expected validator.
+        </span><span class="kw">let </span>certificate = LiteCertificate::try_from_votes(votes.into_iter().flatten())
+            .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;Vote values or rounds don&#39;t match; this is a bug&quot;</span>))<span class="question-mark">?
+            </span>.with_value(value)
+            .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;A quorum voted for an unexpected value&quot;</span>))<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(certificate))
     }
 
     <span class="kw">async fn </span>receive_certificate_internal(
