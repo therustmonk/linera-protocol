@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"derive":["WitLoad","WitStore","WitType"]};
+window.SIDEBAR_ITEMS = {"attr":["wit_import"],"derive":["WitLoad","WitStore","WitType"]};

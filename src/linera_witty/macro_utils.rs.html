@@ -37,33 +37,33 @@
 
 </span><span class="doccomment">//! Common macros used by other macros.
 
-/// Repeats a `macro` call with a growing list of `name: Type` elements.
+/// Repeats a `macro` call with a growing list of `name: Type` or just `name` elements.
 ///
 /// Calls the `macro` repeatedly, starting with list of the elements until the first `|`, then
 /// adding the next element for each successive call.
 </span><span class="macro">macro_rules! </span>repeat_macro {
     (
         <span class="macro-nonterminal">$</span><span class="kw">macro</span>:<span class="macro-nonterminal">tt </span>=&gt;
-        $( <span class="macro-nonterminal">$current_names</span>:ident : <span class="macro-nonterminal">$current_types</span>:ident ),*
-        | <span class="macro-nonterminal">$next_name</span>:ident : <span class="macro-nonterminal">$next_type</span>:ident
-        $(, <span class="macro-nonterminal">$queued_names</span>:ident : <span class="macro-nonterminal">$queued_types</span>:ident )* $(,)<span class="question-mark">?
+        $( <span class="macro-nonterminal">$current_names</span>:ident $( : <span class="macro-nonterminal">$current_types</span>:ident )<span class="question-mark">? </span>),*
+        | <span class="macro-nonterminal">$next_name</span>:ident $( : <span class="macro-nonterminal">$next_type</span>:ident )<span class="question-mark">?
+        </span>$(, <span class="macro-nonterminal">$queued_names</span>:ident $( : <span class="macro-nonterminal">$queued_types</span>:ident )<span class="question-mark">? </span>)* $(,)<span class="question-mark">?
     </span>) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro">macro!</span>($( <span class="macro-nonterminal">$current_names</span>: <span class="macro-nonterminal">$current_types </span>),<span class="kw-2">*</span>);
+        <span class="macro-nonterminal">$</span><span class="macro">macro!</span>($( <span class="macro-nonterminal">$current_names </span>$(: <span class="macro-nonterminal">$current_types</span>)<span class="question-mark">? </span>),<span class="kw-2">*</span>);
 
         <span class="macro">repeat_macro!</span>(
             <span class="macro-nonterminal">$</span><span class="kw">macro </span>=&gt;
-            $( <span class="macro-nonterminal">$current_names</span>: <span class="macro-nonterminal">$current_types</span>, )*
-            <span class="macro-nonterminal">$next_name</span>: <span class="macro-nonterminal">$next_type
-            </span>| $(<span class="macro-nonterminal">$queued_names</span>: <span class="macro-nonterminal">$queued_types </span>),*
+            $( <span class="macro-nonterminal">$current_names </span>$(: <span class="macro-nonterminal">$current_types</span>)<span class="question-mark">?</span>, )*
+            <span class="macro-nonterminal">$next_name </span>$(: <span class="macro-nonterminal">$next_type</span>)<span class="question-mark">?
+            </span>| $(<span class="macro-nonterminal">$queued_names </span>$(: <span class="macro-nonterminal">$queued_types</span>)<span class="question-mark">? </span>),*
         );
     };
 
-    ( <span class="macro-nonterminal">$</span><span class="kw">macro</span>:<span class="macro-nonterminal">tt </span>=&gt; $( <span class="macro-nonterminal">$current_names</span>:ident : <span class="macro-nonterminal">$current_types</span>:ident ),* |) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro">macro!</span>($( <span class="macro-nonterminal">$current_names</span>: <span class="macro-nonterminal">$current_types </span>),<span class="kw-2">*</span>);
+    ( <span class="macro-nonterminal">$</span><span class="kw">macro</span>:<span class="macro-nonterminal">tt </span>=&gt; $( <span class="macro-nonterminal">$current_names</span>:ident $( : <span class="macro-nonterminal">$current_types</span>:ident )<span class="question-mark">? </span>),* |) =&gt; {
+        <span class="macro-nonterminal">$</span><span class="macro">macro!</span>($( <span class="macro-nonterminal">$current_names </span>$(: <span class="macro-nonterminal">$current_types</span>)<span class="question-mark">? </span>),<span class="kw-2">*</span>);
     };
 
-    ( <span class="macro-nonterminal">$</span><span class="kw">macro</span>:<span class="macro-nonterminal">tt </span>=&gt; $( <span class="macro-nonterminal">$current_names</span>:ident : <span class="macro-nonterminal">$current_types</span>:ident ),* $(,)<span class="kw-2">*</span>) =&gt; {
-        <span class="macro">repeat_macro!</span>(<span class="macro-nonterminal">$</span><span class="kw">macro </span>=&gt; | $( <span class="macro-nonterminal">$current_names</span>: <span class="macro-nonterminal">$current_types </span>),<span class="kw-2">*</span>);
+    ( <span class="macro-nonterminal">$</span><span class="kw">macro</span>:<span class="macro-nonterminal">tt </span>=&gt; $( <span class="macro-nonterminal">$current_names</span>:ident $( : <span class="macro-nonterminal">$current_types</span>:ident )<span class="question-mark">? </span>),* $(,)<span class="kw-2">*</span>) =&gt; {
+        <span class="macro">repeat_macro!</span>(<span class="macro-nonterminal">$</span><span class="kw">macro </span>=&gt; | $( <span class="macro-nonterminal">$current_names </span>$(: <span class="macro-nonterminal">$current_types</span>)<span class="question-mark">? </span>),<span class="kw-2">*</span>);
     }
 }
 </code></pre></div></section></main></body></html>
