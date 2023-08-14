@@ -1,3 +1,4 @@
 (function() {var implementors = {
+"linera_witty":[["impl <a class=\"trait\" href=\"wasmer/sys/store/trait.AsStoreRef.html\" title=\"trait wasmer::sys::store::AsStoreRef\">AsStoreRef</a> for <a class=\"struct\" href=\"linera_witty/wasmer/struct.EntrypointInstance.html\" title=\"struct linera_witty::wasmer::EntrypointInstance\">EntrypointInstance</a>"]],
 "wasmer":[]
 };if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

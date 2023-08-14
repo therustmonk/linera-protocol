@@ -114,19 +114,27 @@
 <a href="#114" id="114">114</a>
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="doccomment">//! Representation of the parameters of an imported function.
 //!
-//! The host parameters type is flattened and if it&#39;s made up of 16 or less flat types, they are
-//! sent directly as the guest&#39;s function parameters. If there are more than 16 flat types, then
-//! the host type is instead stored in a heap allocated region of memory, and the address to that
-//! region is sent as a parameter instead.
+//! The maximum number of parameters that can be used in a WIT function is defined by the
+//! [canonical ABI][flattening] as the `MAX_FLAT_PARAMS` constant (16). There is no equivalent
+//! constant defined in Witty. Instead, any attempt to use more than the limit should lead to a
+//! compiler error.
 //!
-//! See the [canonical ABI&#39;s section on
-//! flattening](https://github.com/WebAssembly/component-model/blob/main/design/mvp/CanonicalABI.md#flattening)
-//! for more details.
+//! The host parameters type is flattened and if it&#39;s made up of `MAX_FLAT_PARAMS` or less flat
+//! types, they are sent directly as the guest&#39;s function parameters. If there are more than
+//! `MAX_FLAT_PARAMS` flat types, then the host type is instead stored in a heap allocated region
+//! of memory, and the address to that region is sent as a parameter instead.
+//!
+//! [flattening]: https://github.com/WebAssembly/component-model/blob/main/design/mvp/CanonicalABI.md#flattening
 
 </span><span class="kw">use crate</span>::{
     memory_layout::FlatLayout, primitive_types::FlatType, InstanceWithMemory, Layout, Memory,
@@ -188,9 +196,11 @@
 <span class="doccomment">/// Implementation of [`FlatHostParameters`] for parameters that are sent to the guest through the
 /// heap.
 ///
-/// When more than 16 function parameters are needed, they are spilled over into a heap memory
-/// allocation and the only parameter sent as a function parameter is the address to that
-/// allocation.
+/// The maximum number of parameters is defined by the [canonical
+/// ABI](https://github.com/WebAssembly/component-model/blob/main/design/mvp/CanonicalABI.md#flattening)
+/// as the `MAX_FLAT_PARAMS` constant. When more than `MAX_FLAT_PARAMS` (16) function parameters
+/// are needed, they are spilled over into a heap memory allocation and the only parameter sent as
+/// a function parameter is the address to that allocation.
 </span><span class="kw">impl</span>&lt;A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Tail&gt; FlatHostParameters <span class="kw">for </span><span class="macro">HList!</span>[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, ...Tail]
 <span class="kw">where
     </span>A: FlatType,

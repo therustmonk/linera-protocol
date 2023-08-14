@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["EntrypointInstance","InstanceBuilder","InstanceSlot","Wasmer"],"type":["ReentrantInstance"]};
