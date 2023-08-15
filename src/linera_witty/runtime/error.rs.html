@@ -59,6 +59,16 @@
 <a href="#59" id="59">59</a>
 <a href="#60" id="60">60</a>
 <a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a>
+<a href="#64" id="64">64</a>
+<a href="#65" id="65">65</a>
+<a href="#66" id="66">66</a>
+<a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -119,5 +129,15 @@
     </span><span class="attr">#[cfg(feature = <span class="string">&quot;wasmer&quot;</span>)]
     #[error(transparent)]
     </span>WasmerMemory(<span class="attr">#[from] </span>wasmer::MemoryAccessError),
+
+    <span class="doccomment">/// Wasmtime error.
+    </span><span class="attr">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
+    #[error(transparent)]
+    </span>Wasmtime(<span class="attr">#[from] </span>anyhow::Error),
+
+    <span class="doccomment">/// Wasmtime trap during execution.
+    </span><span class="attr">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
+    #[error(transparent)]
+    </span>WasmtimeTrap(<span class="attr">#[from] </span>wasmtime::Trap),
 }
 </code></pre></div></section></main></body></html>
