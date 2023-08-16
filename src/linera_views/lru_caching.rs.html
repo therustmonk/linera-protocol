@@ -245,6 +245,9 @@
 <a href="#245" id="245">245</a>
 <a href="#246" id="246">246</a>
 <a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -266,7 +269,7 @@
 <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
 </span><span class="kw">use </span>{
     <span class="kw">crate</span>::common::ContextFromDb,
-    <span class="kw">crate</span>::memory::{MemoryClient, MemoryStoreMap},
+    <span class="kw">crate</span>::memory::{MemoryClient, MemoryStoreMap, MEMORY_MAX_STREAM_QUERIES},
     <span class="kw">crate</span>::views::ViewError,
     async_lock::MutexGuardArc,
 };
@@ -343,12 +346,15 @@
 <span class="kw">where
     </span>K: KeyValueStoreClient + Send + Sync,
 {
-    <span class="kw">const </span>MAX_CONNECTIONS: usize = K::MAX_CONNECTIONS;
     <span class="comment">// The LRU cache does not change the underlying client&#39;s size limit.
     </span><span class="kw">const </span>MAX_VALUE_SIZE: usize = K::MAX_VALUE_SIZE;
     <span class="kw">type </span>Error = K::Error;
     <span class="kw">type </span>Keys = K::Keys;
     <span class="kw">type </span>KeyValues = K::KeyValues;
+
+    <span class="kw">fn </span>max_stream_queries(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.client.max_stream_queries()
+    }
 
     <span class="kw">async fn </span>read_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, <span class="self">Self</span>::Error&gt; {
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.lru_read_keys {
@@ -483,7 +489,7 @@
         extra: E,
         n: usize,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ViewError&gt; {
-        <span class="kw">let </span>client = MemoryClient::new(guard);
+        <span class="kw">let </span>client = MemoryClient::new(guard, MEMORY_MAX_STREAM_QUERIES);
         <span class="kw">let </span>lru_client = LruCachingKeyValueClient::new(client, n);
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             db: lru_client,

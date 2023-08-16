@@ -293,6 +293,9 @@
 <a href="#293" id="293">293</a>
 <a href="#294" id="294">294</a>
 <a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -313,8 +316,11 @@
 
 <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
 </span><span class="kw">use </span>{
-    async_lock::Mutex, linera_views::memory::MemoryContext, linera_views::views::View,
-    std::collections::BTreeMap, std::sync::Arc,
+    async_lock::Mutex,
+    linera_views::memory::{MemoryContext, MEMORY_MAX_STREAM_QUERIES},
+    linera_views::views::View,
+    std::collections::BTreeMap,
+    std::sync::Arc,
 };
 
 <span class="attr">#[cfg(test)]
@@ -582,7 +588,7 @@
 {
     <span class="kw">pub async fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>guard = Arc::new(Mutex::new(BTreeMap::new())).lock_arc().<span class="kw">await</span>;
-        <span class="kw">let </span>context = MemoryContext::new(guard, ());
+        <span class="kw">let </span>context = MemoryContext::new(guard, MEMORY_MAX_STREAM_QUERIES, ());
         <span class="self">Self</span>::load(context)
             .<span class="kw">await
             </span>.expect(<span class="string">&quot;Loading from memory should work&quot;</span>)

@@ -303,6 +303,9 @@
 <a href="#303" id="303">303</a>
 <a href="#304" id="304">304</a>
 <a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -317,6 +320,7 @@
 <span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
 </span><span class="kw">use </span>{
     <span class="kw">crate</span>::dynamo_db::DynamoDbClient,
+    <span class="kw">crate</span>::dynamo_db::{DYNAMO_DB_MAX_CONCURRENT_QUERIES, DYNAMO_DB_MAX_STREAM_QUERIES},
     <span class="kw">crate</span>::lru_caching::TEST_CACHE_SIZE,
     anyhow::{Context, Error},
     aws_sdk_s3::Endpoint,
@@ -449,6 +453,8 @@
     <span class="kw">let </span>(key_value_operation, <span class="kw">_</span>) = DynamoDbClient::from_config(
         localstack.dynamo_db_config(),
         <span class="string">&quot;test_table&quot;</span>.parse().expect(<span class="string">&quot;Invalid table name&quot;</span>),
+        <span class="prelude-val">Some</span>(DYNAMO_DB_MAX_CONCURRENT_QUERIES),
+        DYNAMO_DB_MAX_STREAM_QUERIES,
         TEST_CACHE_SIZE,
     )
     .<span class="kw">await

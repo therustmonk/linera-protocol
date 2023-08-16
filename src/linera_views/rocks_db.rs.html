@@ -265,6 +265,26 @@
 <a href="#265" id="265">265</a>
 <a href="#266" id="266">266</a>
 <a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -283,6 +303,9 @@
 <span class="kw">use </span>tempfile::TempDir;
 <span class="kw">use </span>thiserror::Error;
 
+<span class="doccomment">/// The number of streams for the test
+</span><span class="kw">pub const </span>ROCKS_DB_MAX_STREAM_QUERIES: usize = <span class="number">10</span>;
+
 <span class="comment">// The maximum size of values in RocksDB is 3 GB
 // That is 3221225472 and so for offset reason we decrease by 400
 </span><span class="kw">const </span>MAX_VALUE_SIZE: usize = <span class="number">3221225072</span>;
@@ -291,28 +314,35 @@
 </span><span class="kw">pub type </span>DB = rocksdb::DBWithThreadMode&lt;rocksdb::MultiThreaded&gt;;
 
 <span class="doccomment">/// The internal client
-</span><span class="kw">pub type </span>RocksDbClientInternal = Arc&lt;DB&gt;;
+</span><span class="attr">#[derive(Clone)]
+</span><span class="kw">pub struct </span>RocksDbClientInternal {
+    db: Arc&lt;DB&gt;,
+    max_stream_queries: usize,
+}
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>KeyValueStoreClient <span class="kw">for </span>RocksDbClientInternal {
-    <span class="kw">const </span>MAX_CONNECTIONS: usize = <span class="number">1</span>;
     <span class="kw">const </span>MAX_VALUE_SIZE: usize = MAX_VALUE_SIZE;
     <span class="kw">type </span>Error = RocksDbContextError;
     <span class="kw">type </span>Keys = Vec&lt;Vec&lt;u8&gt;&gt;;
     <span class="kw">type </span>KeyValues = Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt;;
 
+    <span class="kw">fn </span>max_stream_queries(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.max_stream_queries
+    }
+
     <span class="kw">async fn </span>read_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, RocksDbContextError&gt; {
-        <span class="kw">let </span>db = <span class="self">self</span>.clone();
+        <span class="kw">let </span>client = <span class="self">self</span>.clone();
         <span class="kw">let </span>key = key.to_vec();
-        <span class="prelude-val">Ok</span>(tokio::task::spawn_blocking(<span class="kw">move </span>|| db.get(<span class="kw-2">&amp;</span>key)).<span class="kw">await</span><span class="question-mark">??</span>)
+        <span class="prelude-val">Ok</span>(tokio::task::spawn_blocking(<span class="kw">move </span>|| client.db.get(<span class="kw-2">&amp;</span>key)).<span class="kw">await</span><span class="question-mark">??</span>)
     }
 
     <span class="kw">async fn </span>read_multi_key_bytes(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         keys: Vec&lt;Vec&lt;u8&gt;&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt;, RocksDbContextError&gt; {
-        <span class="kw">let </span>db = <span class="self">self</span>.clone();
-        <span class="kw">let </span>entries = tokio::task::spawn_blocking(<span class="kw">move </span>|| db.multi_get(<span class="kw-2">&amp;</span>keys)).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>client = <span class="self">self</span>.clone();
+        <span class="kw">let </span>entries = tokio::task::spawn_blocking(<span class="kw">move </span>|| client.db.multi_get(<span class="kw-2">&amp;</span>keys)).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(entries.into_iter().collect::&lt;<span class="prelude-ty">Result</span>&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;()<span class="question-mark">?</span>)
     }
 
@@ -320,11 +350,11 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         key_prefix: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Keys, RocksDbContextError&gt; {
-        <span class="kw">let </span>db = <span class="self">self</span>.clone();
+        <span class="kw">let </span>client = <span class="self">self</span>.clone();
         <span class="kw">let </span>prefix = key_prefix.to_vec();
         <span class="kw">let </span>len = prefix.len();
         <span class="kw">let </span>keys = tokio::task::spawn_blocking(<span class="kw">move </span>|| {
-            <span class="kw">let </span><span class="kw-2">mut </span>iter = db.raw_iterator();
+            <span class="kw">let </span><span class="kw-2">mut </span>iter = client.db.raw_iterator();
             <span class="kw">let </span><span class="kw-2">mut </span>keys = Vec::new();
             iter.seek(<span class="kw-2">&amp;</span>prefix);
             <span class="kw">let </span><span class="kw-2">mut </span>next_key = iter.key();
@@ -346,11 +376,11 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         key_prefix: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::KeyValues, RocksDbContextError&gt; {
-        <span class="kw">let </span>db = <span class="self">self</span>.clone();
+        <span class="kw">let </span>client = <span class="self">self</span>.clone();
         <span class="kw">let </span>prefix = key_prefix.to_vec();
         <span class="kw">let </span>len = prefix.len();
         <span class="kw">let </span>key_values = tokio::task::spawn_blocking(<span class="kw">move </span>|| {
-            <span class="kw">let </span><span class="kw-2">mut </span>iter = db.raw_iterator();
+            <span class="kw">let </span><span class="kw-2">mut </span>iter = client.db.raw_iterator();
             <span class="kw">let </span><span class="kw-2">mut </span>key_values = Vec::new();
             iter.seek(<span class="kw-2">&amp;</span>prefix);
             <span class="kw">let </span><span class="kw-2">mut </span>next_key = iter.key();
@@ -376,7 +406,7 @@
         <span class="kw-2">mut </span>batch: Batch,
         _base_key: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), RocksDbContextError&gt; {
-        <span class="kw">let </span>db = <span class="self">self</span>.clone();
+        <span class="kw">let </span>client = <span class="self">self</span>.clone();
         <span class="comment">// NOTE: The delete_range functionality of RocksDB needs to have an upper bound in order to work.
         // Thus in order to have the system working, we need to handle the unlikely case of having to
         // delete a key starting with [255, ...., 255]
@@ -410,7 +440,7 @@
                     }
                 }
             }
-            db.write(inner_batch)<span class="question-mark">?</span>;
+            client.db.write(inner_batch)<span class="question-mark">?</span>;
             <span class="prelude-val">Ok</span>(())
         })
         .<span class="kw">await</span><span class="question-mark">??</span>;
@@ -430,11 +460,18 @@
 
 <span class="kw">impl </span>RocksDbClient {
     <span class="doccomment">/// Creates a RocksDB database from a specified path.
-    </span><span class="kw">pub fn </span>new&lt;P: AsRef&lt;Path&gt;&gt;(path: P, cache_size: usize) -&gt; RocksDbClient {
+    </span><span class="kw">pub fn </span>new&lt;P: AsRef&lt;Path&gt;&gt;(
+        path: P,
+        max_stream_queries: usize,
+        cache_size: usize,
+    ) -&gt; RocksDbClient {
         <span class="kw">let </span><span class="kw-2">mut </span>options = rocksdb::Options::default();
         options.create_if_missing(<span class="bool-val">true</span>);
         <span class="kw">let </span>db = DB::open(<span class="kw-2">&amp;</span>options, path).unwrap();
-        <span class="kw">let </span>client = Arc::new(db);
+        <span class="kw">let </span>client = RocksDbClientInternal {
+            db: Arc::new(db),
+            max_stream_queries,
+        };
         <span class="kw">let </span>client = ValueSplittingKeyValueStoreClient::new(client);
         <span class="self">Self </span>{
             client: LruCachingKeyValueClient::new(client, cache_size),
@@ -445,7 +482,7 @@
 <span class="doccomment">/// Creates a RocksDB database client to be used for tests.
 </span><span class="kw">pub fn </span>create_rocks_db_test_client() -&gt; RocksDbClient {
     <span class="kw">let </span>dir = TempDir::new().unwrap();
-    RocksDbClient::new(dir, TEST_CACHE_SIZE)
+    RocksDbClient::new(dir, ROCKS_DB_MAX_STREAM_QUERIES, TEST_CACHE_SIZE)
 }
 
 <span class="doccomment">/// An implementation of [`crate::common::Context`] based on RocksDB
@@ -453,11 +490,14 @@
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>KeyValueStoreClient <span class="kw">for </span>RocksDbClient {
-    <span class="kw">const </span>MAX_CONNECTIONS: usize = <span class="number">1</span>;
     <span class="kw">const </span>MAX_VALUE_SIZE: usize = usize::MAX;
     <span class="kw">type </span>Error = RocksDbContextError;
     <span class="kw">type </span>Keys = Vec&lt;Vec&lt;u8&gt;&gt;;
     <span class="kw">type </span>KeyValues = Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt;;
+
+    <span class="kw">fn </span>max_stream_queries(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.client.max_stream_queries()
+    }
 
     <span class="kw">async fn </span>read_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, RocksDbContextError&gt; {
         <span class="self">self</span>.client.read_key_bytes(key).<span class="kw">await

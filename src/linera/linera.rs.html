@@ -1688,6 +1688,18 @@
 <a href="#1688" id="1688">1688</a>
 <a href="#1689" id="1689">1689</a>
 <a href="#1690" id="1690">1690</a>
+<a href="#1691" id="1691">1691</a>
+<a href="#1692" id="1692">1692</a>
+<a href="#1693" id="1693">1693</a>
+<a href="#1694" id="1694">1694</a>
+<a href="#1695" id="1695">1695</a>
+<a href="#1696" id="1696">1696</a>
+<a href="#1697" id="1697">1697</a>
+<a href="#1698" id="1698">1698</a>
+<a href="#1699" id="1699">1699</a>
+<a href="#1700" id="1700">1700</a>
+<a href="#1701" id="1701">1701</a>
+<a href="#1702" id="1702">1702</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -2288,6 +2300,14 @@
     <span class="doccomment">/// The WebAssembly runtime to use.
     </span><span class="attr">#[structopt(long)]
     </span>wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
+
+    <span class="doccomment">/// The maximal number of simultaneous queries to the database
+    </span><span class="attr">#[structopt(long)]
+    </span>max_concurrent_queries: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+
+    <span class="doccomment">/// The maximal number of simultaneous stream queries to the database
+    </span><span class="attr">#[structopt(long, default_value = <span class="string">&quot;10&quot;</span>)]
+    </span>max_stream_queries: usize,
 
     <span class="doccomment">/// The maximal number of entries in the storage cache.
     </span><span class="attr">#[structopt(long, default_value = <span class="string">&quot;1000&quot;</span>)]
@@ -3366,12 +3386,16 @@
     <span class="kw">let </span>genesis_config = context.wallet_state.genesis_config().clone();
     <span class="kw">let </span>wasm_runtime = options.wasm_runtime.with_wasm_default();
     <span class="kw">let </span>cache_size = options.cache_size;
+    <span class="kw">let </span>max_concurrent_queries = options.max_concurrent_queries;
+    <span class="kw">let </span>max_stream_queries = options.max_stream_queries;
     <span class="kw">let </span>storage_config = ClientContext::storage_config(<span class="kw-2">&amp;</span>options)<span class="question-mark">?</span>;
 
     storage_config
         .run_with_storage(
             <span class="kw-2">&amp;</span>genesis_config,
             wasm_runtime,
+            max_concurrent_queries,
+            max_stream_queries,
             cache_size,
             Job(context, options.command),
         )

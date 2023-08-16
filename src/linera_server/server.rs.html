@@ -463,6 +463,23 @@
 <a href="#463" id="463">463</a>
 <a href="#464" id="464">464</a>
 <a href="#465" id="465">465</a>
+<a href="#466" id="466">466</a>
+<a href="#467" id="467">467</a>
+<a href="#468" id="468">468</a>
+<a href="#469" id="469">469</a>
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
+<a href="#482" id="482">482</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -771,6 +788,14 @@
         </span><span class="attr">#[structopt(long)]
         </span>wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
 
+        <span class="doccomment">/// The maximal number of simultaneous queries to the database
+        </span><span class="attr">#[structopt(long)]
+        </span>max_concurrent_queries: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+
+        <span class="doccomment">/// The maximal number of stream queries to the database
+        </span><span class="attr">#[structopt(long, default_value = <span class="string">&quot;10&quot;</span>)]
+        </span>max_stream_queries: usize,
+
         <span class="doccomment">/// The maximal number of entries in the storage cache.
         </span><span class="attr">#[structopt(long, default_value = <span class="string">&quot;1000&quot;</span>)]
         </span>cache_size: usize,
@@ -818,6 +843,8 @@
             shard,
             grace_period,
             wasm_runtime,
+            max_concurrent_queries,
+            max_stream_queries,
             cache_size,
         } =&gt; {
             <span class="kw">let </span>genesis_config = GenesisConfig::read(<span class="kw-2">&amp;</span>genesis_config_path)
@@ -833,7 +860,14 @@
             };
             <span class="kw">let </span>wasm_runtime = wasm_runtime.with_wasm_default();
             storage_config
-                .run_with_storage(<span class="kw-2">&amp;</span>genesis_config, wasm_runtime, cache_size, job)
+                .run_with_storage(
+                    <span class="kw-2">&amp;</span>genesis_config,
+                    wasm_runtime,
+                    max_concurrent_queries,
+                    max_stream_queries,
+                    cache_size,
+                    job,
+                )
                 .<span class="kw">await
                 </span>.unwrap();
         }

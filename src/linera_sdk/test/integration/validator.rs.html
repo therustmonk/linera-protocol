@@ -167,6 +167,8 @@
 <a href="#167" id="167">167</a>
 <a href="#168" id="168">168</a>
 <a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -189,6 +191,7 @@
     WasmRuntime,
 };
 <span class="kw">use </span>linera_storage::{MemoryStoreClient, Store};
+<span class="kw">use </span>linera_views::memory::MEMORY_MAX_STREAM_QUERIES;
 <span class="kw">use </span>std::sync::{
     atomic::{AtomicU32, Ordering},
     Arc,
@@ -217,7 +220,8 @@
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>key_pair = KeyPair::generate();
         <span class="kw">let </span>committee = Committee::make_simple(<span class="macro">vec!</span>[ValidatorName(key_pair.public())]);
-        <span class="kw">let </span>client = MemoryStoreClient::new(<span class="prelude-val">Some</span>(WasmRuntime::default()));
+        <span class="kw">let </span>client =
+            MemoryStoreClient::new(<span class="prelude-val">Some</span>(WasmRuntime::default()), MEMORY_MAX_STREAM_QUERIES);
 
         <span class="kw">let </span>worker = WorkerState::new(
             <span class="string">&quot;Single validator node&quot;</span>.to_string(),

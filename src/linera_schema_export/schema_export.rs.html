@@ -83,11 +83,13 @@
 <a href="#83" id="83">83</a>
 <a href="#84" id="84">84</a>
 <a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use </span>linera_base::identifiers::ChainId;
 <span class="kw">use </span>linera_chain::data_types::{BlockProposal, Certificate, HashedValue, LiteCertificate};
+<span class="kw">use </span>linera_views::memory::MEMORY_MAX_STREAM_QUERIES;
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>linera_core::{
@@ -153,7 +155,7 @@
 }
 
 <span class="kw">fn </span>main() -&gt; std::io::Result&lt;()&gt; {
-    <span class="kw">let </span>store = MemoryStoreClient::new(<span class="prelude-val">None</span>);
+    <span class="kw">let </span>store = MemoryStoreClient::new(<span class="prelude-val">None</span>, MEMORY_MAX_STREAM_QUERIES);
     <span class="kw">let </span>config = ChainListenerConfig {
         delay_before_ms: <span class="number">0</span>,
         delay_after_ms: <span class="number">0</span>,

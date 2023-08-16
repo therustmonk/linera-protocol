@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["RocksDbContextError"],"fn":["create_rocks_db_test_client"],"struct":["RocksDbClient"],"type":["DB","RocksDbClientInternal","RocksDbContext"]};
+window.SIDEBAR_ITEMS = {"constant":["ROCKS_DB_MAX_STREAM_QUERIES"],"enum":["RocksDbContextError"],"fn":["create_rocks_db_test_client"],"struct":["RocksDbClient","RocksDbClientInternal"],"type":["DB","RocksDbContext"]};

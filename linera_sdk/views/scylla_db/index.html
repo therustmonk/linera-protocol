@@ -2,8 +2,8 @@
 This provides a KeyValueStoreClient for the ScyllaDB database.
 The code is functional but some aspects are missing.</p>
 <p>The current connection is done via a Session and a corresponding
-primary key that we name <code>namespace</code>. The total number of connection
-is controlled via the <code>MAX_CONNECTION</code>.</p>
+primary key that we name <code>namespace</code>. The maximum number of
+concurrent queries is controlled by max_concurrent_queries.</p>
 <p>Support for ScyllaDb is experimental and is still missing important features:
 TODO(#936): Enable all tests using ScyllaDB
 TODO(#935): Read several keys at once

@@ -905,6 +905,9 @@
 <a href="#905" id="905">905</a>
 <a href="#906" id="906">906</a>
 <a href="#907" id="907">907</a>
+<a href="#908" id="908">908</a>
+<a href="#909" id="909">909</a>
+<a href="#910" id="910">910</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -928,7 +931,7 @@
 <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
 </span><span class="kw">use </span>{
     <span class="kw">crate</span>::common::{ContextFromDb, KeyValueStoreClient},
-    <span class="kw">crate</span>::memory::{MemoryContext, MemoryStoreMap},
+    <span class="kw">crate</span>::memory::{MemoryContext, MemoryStoreMap, MEMORY_MAX_STREAM_QUERIES},
     async_lock::{MutexGuardArc, RwLock},
     std::sync::Arc,
 };
@@ -1655,11 +1658,14 @@
     </span>C: Context + Sync + Send + Clone,
     ViewError: From&lt;C::Error&gt;,
 {
-    <span class="kw">const </span>MAX_CONNECTIONS: usize = C::MAX_CONNECTIONS;
     <span class="kw">const </span>MAX_VALUE_SIZE: usize = C::MAX_VALUE_SIZE;
     <span class="kw">type </span>Error = ViewError;
     <span class="kw">type </span>Keys = Vec&lt;Vec&lt;u8&gt;&gt;;
     <span class="kw">type </span>KeyValues = Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt;;
+
+    <span class="kw">fn </span>max_stream_queries(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="number">1
+    </span>}
 
     <span class="kw">async fn </span>read_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, ViewError&gt; {
         <span class="kw">let </span>view = <span class="self">self</span>.view.read().<span class="kw">await</span>;
@@ -1803,7 +1809,7 @@
         base_key: Vec&lt;u8&gt;,
         extra: E,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ViewError&gt; {
-        <span class="kw">let </span>context = MemoryContext::new(guard, ());
+        <span class="kw">let </span>context = MemoryContext::new(guard, MEMORY_MAX_STREAM_QUERIES, ());
         <span class="kw">let </span>key_value_store_view = ViewContainer::new(context).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             db: key_value_store_view,

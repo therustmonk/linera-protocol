@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["MemoryContextError"],"fn":["create_memory_client","create_memory_context"],"struct":["MemoryClient"],"type":["MemoryContext","MemoryStoreMap"]};
+window.SIDEBAR_ITEMS = {"constant":["MEMORY_MAX_STREAM_QUERIES"],"enum":["MemoryContextError"],"fn":["create_memory_client","create_memory_client_stream_queries","create_memory_context"],"struct":["MemoryClient"],"type":["MemoryContext","MemoryStoreMap"]};

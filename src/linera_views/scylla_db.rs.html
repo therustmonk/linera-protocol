@@ -299,6 +299,39 @@
 <a href="#299" id="299">299</a>
 <a href="#300" id="300">300</a>
 <a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -306,8 +339,8 @@
 //! The code is functional but some aspects are missing.
 //!
 //! The current connection is done via a Session and a corresponding
-//! primary key that we name `namespace`. The total number of connection
-//! is controlled via the `MAX_CONNECTION`.
+//! primary key that we name `namespace`. The maximum number of
+//! concurrent queries is controlled by max_concurrent_queries.
 //!
 //! Support for ScyllaDb is experimental and is still missing important features:
 //! TODO(#936): Enable all tests using ScyllaDB
@@ -319,7 +352,7 @@
     batch::{Batch, WriteOperation},
     common::{get_upper_bound_option, KeyValueStoreClient},
 };
-<span class="kw">use </span>async_lock::Semaphore;
+<span class="kw">use </span>async_lock::{Semaphore, SemaphoreGuard};
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>scylla::{IntoTypedRows, Session, SessionBuilder};
 <span class="kw">use </span>std::{ops::Deref, sync::Arc};
@@ -330,14 +363,18 @@
 </span><span class="kw">type </span>ScyllaDbClientPair = (Session, Vec&lt;u8&gt;);
 
 <span class="doccomment">/// We limit the number of connections that can be done.
-/// TODO: Put it as parameter when PR 931.
-</span><span class="kw">const </span>MAX_CONNECTIONS: usize = <span class="number">10</span>;
+</span><span class="kw">const </span>SCYLLA_DB_MAX_CONCURRENT_QUERIES: usize = <span class="number">10</span>;
+
+<span class="doccomment">/// The number of connection in the stream is limited.
+</span><span class="kw">const </span>SCYLLA_DB_MAX_STREAM_QUERIES: usize = <span class="number">10</span>;
 
 <span class="doccomment">/// The client itself and the keeping of the count of active connections.
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ScyllaDbClient {
     client: Arc&lt;ScyllaDbClientPair&gt;,
     count: Arc&lt;Semaphore&gt;,
+    max_concurrent_queries: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+    max_stream_queries: usize,
 }
 
 <span class="doccomment">/// The error type for [`ScyllaDbClient`]
@@ -358,15 +395,18 @@
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>KeyValueStoreClient <span class="kw">for </span>ScyllaDbClient {
-    <span class="kw">const </span>MAX_CONNECTIONS: usize = MAX_CONNECTIONS;
     <span class="kw">const </span>MAX_VALUE_SIZE: usize = usize::MAX;
     <span class="kw">type </span>Error = ScyllaDbContextError;
     <span class="kw">type </span>Keys = Vec&lt;Vec&lt;u8&gt;&gt;;
     <span class="kw">type </span>KeyValues = Vec&lt;(Vec&lt;u8&gt;, Vec&lt;u8&gt;)&gt;;
 
+    <span class="kw">fn </span>max_stream_queries(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.max_stream_queries
+    }
+
     <span class="kw">async fn </span>read_key_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;, <span class="self">Self</span>::Error&gt; {
         <span class="kw">let </span>client = <span class="self">self</span>.client.deref();
-        <span class="kw">let </span>_guard = <span class="self">self</span>.count.acquire().<span class="kw">await</span>;
+        <span class="kw">let </span>_guard = <span class="self">self</span>.acquire().<span class="kw">await</span>;
         <span class="self">Self</span>::read_key_internal(client, key.to_vec()).<span class="kw">await
     </span>}
 
@@ -376,7 +416,7 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt;, <span class="self">Self</span>::Error&gt; {
         <span class="comment">// There is probably a better way in ScyllaDB for downloading several keys than this one.
         </span><span class="kw">let </span>client = <span class="self">self</span>.client.deref();
-        <span class="kw">let </span>_guard = <span class="self">self</span>.count.acquire().<span class="kw">await</span>;
+        <span class="kw">let </span>_guard = <span class="self">self</span>.acquire().<span class="kw">await</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>values = Vec::new();
         <span class="kw">for </span>key <span class="kw">in </span>keys {
             <span class="kw">let </span>value = <span class="self">Self</span>::read_key_internal(client, key.to_vec()).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -387,7 +427,7 @@
 
     <span class="kw">async fn </span>find_keys_by_prefix(<span class="kw-2">&amp;</span><span class="self">self</span>, key_prefix: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Keys, <span class="self">Self</span>::Error&gt; {
         <span class="kw">let </span>client = <span class="self">self</span>.client.deref();
-        <span class="kw">let </span>_guard = <span class="self">self</span>.count.acquire().<span class="kw">await</span>;
+        <span class="kw">let </span>_guard = <span class="self">self</span>.acquire().<span class="kw">await</span>;
         <span class="self">Self</span>::find_keys_by_prefix_internal(client, key_prefix.to_vec()).<span class="kw">await
     </span>}
 
@@ -396,13 +436,13 @@
         key_prefix: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::KeyValues, <span class="self">Self</span>::Error&gt; {
         <span class="kw">let </span>client = <span class="self">self</span>.client.deref();
-        <span class="kw">let </span>_guard = <span class="self">self</span>.count.acquire().<span class="kw">await</span>;
+        <span class="kw">let </span>_guard = <span class="self">self</span>.acquire().<span class="kw">await</span>;
         <span class="self">Self</span>::find_key_values_by_prefix_internal(client, key_prefix.to_vec()).<span class="kw">await
     </span>}
 
     <span class="kw">async fn </span>write_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, batch: Batch, _base_key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt; {
         <span class="kw">let </span>client = <span class="self">self</span>.client.deref();
-        <span class="kw">let </span>_guard = <span class="self">self</span>.count.acquire().<span class="kw">await</span>;
+        <span class="kw">let </span>_guard = <span class="self">self</span>.acquire().<span class="kw">await</span>;
         <span class="self">Self</span>::write_batch_internal(client, batch).<span class="kw">await
     </span>}
 
@@ -412,6 +452,14 @@
 }
 
 <span class="kw">impl </span>ScyllaDbClient {
+    <span class="doccomment">/// Obtains the semaphore lock on the database if needed.
+    </span><span class="kw">async fn </span>acquire(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;SemaphoreGuard&lt;<span class="lifetime">&#39;_</span>&gt;&gt; {
+        <span class="kw">match </span><span class="self">self</span>.max_concurrent_queries {
+            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">None</span>,
+            <span class="prelude-val">Some</span>(_max_concurrent_queries) =&gt; <span class="prelude-val">Some</span>(<span class="self">self</span>.count.acquire().<span class="kw">await</span>),
+        }
+    }
+
     <span class="kw">async fn </span>read_key_internal(
         client: <span class="kw-2">&amp;</span>ScyllaDbClientPair,
         key: Vec&lt;u8&gt;,
@@ -563,7 +611,12 @@
         <span class="prelude-val">Ok</span>(key_values)
     }
 
-    <span class="kw">async fn </span>new(uri: <span class="kw-2">&amp;</span>str, namespace: Vec&lt;u8&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ScyllaDbContextError&gt; {
+    <span class="kw">async fn </span>new(
+        uri: <span class="kw-2">&amp;</span>str,
+        namespace: Vec&lt;u8&gt;,
+        max_concurrent_queries: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+        max_stream_queries: usize,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ScyllaDbContextError&gt; {
         <span class="comment">// Create a session builder and specify the ScyllaDB contact points
         </span><span class="kw">let </span>session = SessionBuilder::new().known_node(uri).build().<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -587,17 +640,30 @@
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>client = (session, namespace);
         <span class="kw">let </span>client = Arc::new(client);
-        <span class="kw">let </span>count = Arc::new(Semaphore::new(<span class="number">1</span>));
-        <span class="prelude-val">Ok</span>(ScyllaDbClient { client, count })
+        <span class="kw">let </span>n = max_concurrent_queries.unwrap_or(<span class="number">1</span>);
+        <span class="kw">let </span>count = Arc::new(Semaphore::new(n));
+        <span class="prelude-val">Ok</span>(ScyllaDbClient {
+            client,
+            count,
+            max_concurrent_queries,
+            max_stream_queries,
+        })
     }
 }
 
 <span class="doccomment">/// Creates a ScyllaDb test client
 </span><span class="kw">pub async fn </span>create_scylla_db_test_client() -&gt; ScyllaDbClient {
-    <span class="kw">let </span>dummy_namespace = <span class="macro">vec!</span>[<span class="number">0</span>];
     <span class="kw">let </span>uri = <span class="string">&quot;localhost:9042&quot;</span>;
-    ScyllaDbClient::new(uri, dummy_namespace)
-        .<span class="kw">await
-        </span>.expect(<span class="string">&quot;client&quot;</span>)
+    <span class="kw">let </span>dummy_namespace = <span class="macro">vec!</span>[<span class="number">0</span>];
+    <span class="kw">let </span>max_concurrent_queries = <span class="prelude-val">Some</span>(SCYLLA_DB_MAX_CONCURRENT_QUERIES);
+    <span class="kw">let </span>max_stream_queries = SCYLLA_DB_MAX_STREAM_QUERIES;
+    ScyllaDbClient::new(
+        uri,
+        dummy_namespace,
+        max_concurrent_queries,
+        max_stream_queries,
+    )
+    .<span class="kw">await
+    </span>.expect(<span class="string">&quot;client&quot;</span>)
 }
 </code></pre></div></section></main></body></html>
