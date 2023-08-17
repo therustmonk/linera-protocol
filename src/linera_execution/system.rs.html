@@ -1021,10 +1021,10 @@
         amount: Amount,
         user_data: UserData,
     },
-    <span class="doccomment">/// Creates (or activates) a new chain by installing the given authentication key.
+    <span class="doccomment">/// Creates (or activates) a new chain.
     /// This will automatically subscribe to the future committees created by `admin_id`.
     </span>OpenChain {
-        public_key: PublicKey,
+        ownership: ChainOwnership,
         admin_id: ChainId,
         epoch: Epoch,
         committees: BTreeMap&lt;Epoch, Committee&gt;,
@@ -1097,9 +1097,9 @@
         recipient: Recipient,
         user_data: UserData,
     },
-    <span class="doccomment">/// Creates (or activates) a new chain by installing the given authentication key.
+    <span class="doccomment">/// Creates (or activates) a new chain.
     </span>OpenChain {
-        public_key: PublicKey,
+        ownership: ChainOwnership,
         admin_id: ChainId,
         epoch: Epoch,
         committees: BTreeMap&lt;Epoch, Committee&gt;,
@@ -1378,7 +1378,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>new_application = <span class="prelude-val">None</span>;
         <span class="kw">match </span>operation {
             OpenChain {
-                public_key,
+                ownership,
                 committees,
                 admin_id,
                 epoch,
@@ -1403,7 +1403,7 @@
                     Destination::Recipient(child_id),
                     <span class="bool-val">false</span>,
                     SystemMessage::OpenChain {
-                        public_key: <span class="kw-2">*</span>public_key,
+                        ownership: ownership.clone(),
                         committees: committees.clone(),
                         admin_id: <span class="kw-2">*</span>admin_id,
                         epoch: <span class="kw-2">*</span>epoch,
@@ -1803,7 +1803,7 @@
     </span><span class="kw">pub fn </span>open_chain(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         message_id: MessageId,
-        public_key: PublicKey,
+        ownership: ChainOwnership,
         epoch: Epoch,
         committees: BTreeMap&lt;Epoch, Committee&gt;,
         admin_id: ChainId,
@@ -1824,7 +1824,7 @@
                 name: SystemChannel::Admin.name(),
             })
             .expect(<span class="string">&quot;serialization failed&quot;</span>);
-        <span class="self">self</span>.ownership.set(ChainOwnership::single(public_key));
+        <span class="self">self</span>.ownership.set(ownership);
         <span class="self">self</span>.timestamp.set(timestamp);
     }
 

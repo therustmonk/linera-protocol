@@ -1552,6 +1552,9 @@
 <a href="#1552" id="1552">1552</a>
 <a href="#1553" id="1553">1553</a>
 <a href="#1554" id="1554">1554</a>
+<a href="#1555" id="1555">1555</a>
+<a href="#1556" id="1556">1556</a>
+<a href="#1557" id="1557">1557</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1584,8 +1587,8 @@
 <span class="kw">use </span>linera_execution::{
     committee::{Committee, Epoch, ValidatorName},
     system::{Account, AdminOperation, Recipient, SystemChannel, SystemOperation, UserData},
-    Bytecode, Message, Operation, Query, Response, SystemMessage, SystemQuery, SystemResponse,
-    UserApplicationId,
+    Bytecode, ChainOwnership, Message, Operation, Query, Response, SystemMessage, SystemQuery,
+    SystemResponse, UserApplicationId,
 };
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;
@@ -2867,7 +2870,10 @@
     </span>}
 
     <span class="doccomment">/// Opens a new chain with a derived UID.
-    </span><span class="kw">pub async fn </span>open_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>, public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;(MessageId, Certificate)&gt; {
+    </span><span class="kw">pub async fn </span>open_chain(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        ownership: ChainOwnership,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(MessageId, Certificate)&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>(epoch, committees) = <span class="self">self</span>.epoch_and_committees(<span class="self">self</span>.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>epoch = epoch.ok_or(NodeError::InactiveLocalChain(<span class="self">self</span>.chain_id))<span class="question-mark">?</span>;
@@ -2876,7 +2882,7 @@
             </span>.execute_block(
                 messages,
                 <span class="macro">vec!</span>[Operation::System(SystemOperation::OpenChain {
-                    public_key,
+                    ownership,
                     committees,
                     admin_id: <span class="self">self</span>.admin_id,
                     epoch,

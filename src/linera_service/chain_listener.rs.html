@@ -211,6 +211,10 @@
 <a href="#211" id="211">211</a>
 <a href="#212" id="212">212</a>
 <a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -228,7 +232,7 @@
     tracker::NotificationTracker,
     worker::{Notification, Reason},
 };
-<span class="kw">use </span>linera_execution::{Message, SystemMessage};
+<span class="kw">use </span>linera_execution::{ChainOwnership, Message, SystemMessage};
 <span class="kw">use </span>linera_storage::Store;
 <span class="kw">use </span>linera_views::views::ViewError;
 <span class="kw">use </span>std::{sync::Arc, time::Duration};
@@ -375,7 +379,11 @@
                 <span class="kw">for </span>outgoing_message <span class="kw">in </span><span class="kw-2">&amp;</span>executed_block.messages {
                     <span class="kw">if let </span>OutgoingMessage {
                         destination: Destination::Recipient(new_id),
-                        message: Message::System(SystemMessage::OpenChain { public_key, .. }),
+                        message:
+                            Message::System(SystemMessage::OpenChain {
+                                ownership: ChainOwnership::Single { public_key, .. },
+                                ..
+                            }),
                         ..
                     } = outgoing_message
                     {
