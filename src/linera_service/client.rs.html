@@ -1030,6 +1030,7 @@
 <a href="#1030" id="1030">1030</a>
 <a href="#1031" id="1031">1031</a>
 <a href="#1032" id="1032">1032</a>
+<a href="#1033" id="1033">1033</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -1038,6 +1039,7 @@
 <span class="kw">use </span>async_graphql::InputType;
 <span class="kw">use </span>linera_base::{
     abi::ContractAbi,
+    crypto::PublicKey,
     identifiers::{ChainId, MessageId, Owner},
 };
 <span class="kw">use </span>linera_execution::Bytecode;
@@ -1390,15 +1392,15 @@
     <span class="kw">pub async fn </span>open_chain(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         from: ChainId,
-        to_owner: <span class="prelude-ty">Option</span>&lt;Owner&gt;,
+        to_public_key: <span class="prelude-ty">Option</span>&lt;PublicKey&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(MessageId, ChainId)&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>command = <span class="self">self</span>.run_with_storage().<span class="kw">await</span><span class="question-mark">?</span>;
         command
             .arg(<span class="string">&quot;open-chain&quot;</span>)
             .args([<span class="string">&quot;--from&quot;</span>, <span class="kw-2">&amp;</span>from.to_string()]);
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(owner) = to_owner {
-            command.args([<span class="string">&quot;--to-public-key&quot;</span>, <span class="kw-2">&amp;</span>owner.to_string()]);
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(public_key) = to_public_key {
+            command.args([<span class="string">&quot;--to-public-key&quot;</span>, <span class="kw-2">&amp;</span>public_key.to_string()]);
         }
 
         <span class="kw">let </span>stdout = <span class="self">Self</span>::run_command(<span class="kw-2">&amp;mut </span>command).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1423,14 +1425,14 @@
     <span class="kw">pub async fn </span>open_multi_owner_chain(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         from: ChainId,
-        to_owners: Vec&lt;Owner&gt;,
+        to_public_keys: Vec&lt;PublicKey&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(MessageId, ChainId)&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>command = <span class="self">self</span>.run_with_storage().<span class="kw">await</span><span class="question-mark">?</span>;
         command
             .arg(<span class="string">&quot;open-multi-owner-chain&quot;</span>)
             .args([<span class="string">&quot;--from&quot;</span>, <span class="kw-2">&amp;</span>from.to_string()])
             .arg(<span class="string">&quot;--to-public-keys&quot;</span>)
-            .args(to_owners.iter().map(Owner::to_string));
+            .args(to_public_keys.iter().map(PublicKey::to_string));
 
         <span class="kw">let </span>stdout = <span class="self">Self</span>::run_command(<span class="kw-2">&amp;mut </span>command).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>split = stdout.split(<span class="string">&#39;\n&#39;</span>);
@@ -1480,17 +1482,17 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">pub async fn </span>keygen(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Owner&gt; {
+    <span class="kw">pub async fn </span>keygen(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PublicKey&gt; {
         <span class="kw">let </span>stdout = <span class="self">Self</span>::run_command(<span class="self">self</span>.run().<span class="kw">await</span><span class="question-mark">?</span>.arg(<span class="string">&quot;keygen&quot;</span>)).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(Owner::from_str(stdout.trim())<span class="question-mark">?</span>)
+        <span class="prelude-val">Ok</span>(PublicKey::from_str(stdout.trim())<span class="question-mark">?</span>)
     }
 
-    <span class="kw">pub async fn </span>assign(<span class="kw-2">&amp;</span><span class="self">self</span>, owner: Owner, message_id: MessageId) -&gt; <span class="prelude-ty">Result</span>&lt;ChainId&gt; {
+    <span class="kw">pub async fn </span>assign(<span class="kw-2">&amp;</span><span class="self">self</span>, key: PublicKey, message_id: MessageId) -&gt; <span class="prelude-ty">Result</span>&lt;ChainId&gt; {
         <span class="kw">let </span>stdout = <span class="self">Self</span>::run_command(
             <span class="self">self</span>.run_with_storage()
                 .<span class="kw">await</span><span class="question-mark">?
                 </span>.arg(<span class="string">&quot;assign&quot;</span>)
-                .args([<span class="string">&quot;--key&quot;</span>, <span class="kw-2">&amp;</span>owner.to_string()])
+                .args([<span class="string">&quot;--key&quot;</span>, <span class="kw-2">&amp;</span>key.to_string()])
                 .args([<span class="string">&quot;--message-id&quot;</span>, <span class="kw-2">&amp;</span>message_id.to_string()]),
         )
         .<span class="kw">await</span><span class="question-mark">?</span>;
