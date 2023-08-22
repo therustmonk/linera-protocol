@@ -68,20 +68,24 @@
 <a href="#68" id="68">68</a>
 <a href="#69" id="69">69</a>
 <a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="doccomment">//! Support for the [Wasmtime](https://wasmtime.dev) runtime.
 
-</span><span class="kw">mod </span>function;
+</span><span class="kw">mod </span>export_function;
+<span class="kw">mod </span>function;
 <span class="kw">mod </span>memory;
 <span class="kw">mod </span>parameters;
 <span class="kw">mod </span>results;
 
+<span class="kw">pub use </span><span class="self">self</span>::{parameters::WasmtimeParameters, results::WasmtimeResults};
 <span class="kw">use </span><span class="kw">super</span>::traits::{Instance, Runtime};
-<span class="kw">use </span>wasmtime::{
-    AsContext, AsContextMut, Caller, Extern, Memory, Store, StoreContext, StoreContextMut,
-};
+<span class="kw">pub use </span>anyhow;
+<span class="kw">use </span>wasmtime::{AsContext, AsContextMut, Extern, Memory, Store, StoreContext, StoreContextMut};
+<span class="kw">pub use </span>wasmtime::{Caller, Linker};
 
 <span class="doccomment">/// Representation of the [Wasmtime](https://wasmtime.dev) runtime.
 </span><span class="kw">pub struct </span>Wasmtime;

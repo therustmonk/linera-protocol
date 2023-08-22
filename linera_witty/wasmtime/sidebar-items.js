@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["EntrypointInstance","Wasmtime"],"type":["ReentrantInstance"]};
+window.SIDEBAR_ITEMS = {"struct":["Caller","EntrypointInstance","Linker","Wasmtime"],"trait":["WasmtimeParameters","WasmtimeResults"],"type":["ReentrantInstance"]};

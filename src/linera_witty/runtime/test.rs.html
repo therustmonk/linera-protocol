@@ -271,6 +271,81 @@
 <a href="#271" id="271">271</a>
 <a href="#272" id="272">272</a>
 <a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -283,7 +358,7 @@
     GuestPointer, Instance, InstanceWithFunction, InstanceWithMemory, Runtime, RuntimeError,
     RuntimeMemory,
 };
-<span class="kw">use </span><span class="kw">crate</span>::memory_layout::FlatLayout;
+<span class="kw">use crate</span>::{memory_layout::FlatLayout, ExportFunction, WitLoad, WitStore};
 <span class="kw">use </span>frunk::{hlist, hlist_pat, HList};
 <span class="kw">use </span>std::{
     any::Any,
@@ -303,15 +378,18 @@
     <span class="kw">type </span>Memory = Arc&lt;Mutex&lt;Vec&lt;u8&gt;&gt;&gt;;
 }
 
-<span class="doccomment">/// A closure for handling calls to mocked exported guest functions.
-</span><span class="kw">pub type </span>ExportedFunctionHandler = Box&lt;<span class="kw">dyn </span>Fn(Box&lt;<span class="kw">dyn </span>Any&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>Any&gt;, RuntimeError&gt;&gt;;
+<span class="doccomment">/// A closure for handling calls to mocked functions.
+</span><span class="kw">pub type </span>FunctionHandler =
+    Arc&lt;<span class="kw">dyn </span>Fn(MockInstance, Box&lt;<span class="kw">dyn </span>Any&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>Any&gt;, RuntimeError&gt;&gt;;
 
 <span class="doccomment">/// A fake Wasm instance.
 ///
 /// Only contains exports for the memory and the canonical ABI allocation functions.
+</span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>MockInstance {
     memory: Arc&lt;Mutex&lt;Vec&lt;u8&gt;&gt;&gt;,
-    exported_functions: HashMap&lt;String, ExportedFunctionHandler&gt;,
+    exported_functions: HashMap&lt;String, FunctionHandler&gt;,
+    imported_functions: HashMap&lt;String, FunctionHandler&gt;,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>MockInstance {
@@ -321,11 +399,13 @@
         MockInstance {
             memory: memory.clone(),
             exported_functions: HashMap::new(),
+            imported_functions: HashMap::new(),
         }
-        .with_exported_function(<span class="string">&quot;cabi_free&quot;</span>, |<span class="kw">_</span>: <span class="macro">HList!</span>[i32]| <span class="prelude-val">Ok</span>(<span class="macro">hlist!</span>[]))
+        .with_exported_function(<span class="string">&quot;cabi_free&quot;</span>, |<span class="kw">_</span>, <span class="kw">_</span>: <span class="macro">HList!</span>[i32]| <span class="prelude-val">Ok</span>(<span class="macro">hlist!</span>[]))
         .with_exported_function(
             <span class="string">&quot;cabi_realloc&quot;</span>,
-            <span class="kw">move </span>|<span class="macro">hlist_pat!</span>[_old_address, _old_size, alignment, new_size]: <span class="macro">HList!</span>[
+            <span class="kw">move </span>|<span class="kw">_</span>,
+                  <span class="macro">hlist_pat!</span>[_old_address, _old_size, alignment, new_size]: <span class="macro">HList!</span>[
                 i32, i32, i32, i32
             ]| {
                 <span class="kw">let </span>allocation_size = usize::try_from(new_size)
@@ -362,7 +442,7 @@
     </span><span class="kw">where
         </span>Parameters: <span class="lifetime">&#39;static</span>,
         Results: <span class="lifetime">&#39;static</span>,
-        Handler: Fn(Parameters) -&gt; <span class="prelude-ty">Result</span>&lt;Results, RuntimeError&gt; + <span class="lifetime">&#39;static</span>,
+        Handler: Fn(MockInstance, Parameters) -&gt; <span class="prelude-ty">Result</span>&lt;Results, RuntimeError&gt; + <span class="lifetime">&#39;static</span>,
     {
         <span class="self">self</span>.add_exported_function(name, handler);
         <span class="self">self
@@ -379,20 +459,44 @@
     </span><span class="kw">where
         </span>Parameters: <span class="lifetime">&#39;static</span>,
         Results: <span class="lifetime">&#39;static</span>,
-        Handler: Fn(Parameters) -&gt; <span class="prelude-ty">Result</span>&lt;Results, RuntimeError&gt; + <span class="lifetime">&#39;static</span>,
+        Handler: Fn(MockInstance, Parameters) -&gt; <span class="prelude-ty">Result</span>&lt;Results, RuntimeError&gt; + <span class="lifetime">&#39;static</span>,
     {
         <span class="self">self</span>.exported_functions.insert(
             name.into(),
-            Box::new(<span class="kw">move </span>|boxed_parameters| {
+            Arc::new(<span class="kw">move </span>|caller, boxed_parameters| {
                 <span class="kw">let </span>parameters = boxed_parameters
                     .downcast()
                     .expect(<span class="string">&quot;Incorrect parameters used to call handler for exported function&quot;</span>);
 
-                handler(<span class="kw-2">*</span>parameters).map(|results| Box::new(results) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>Any&gt;)
+                handler(caller, <span class="kw-2">*</span>parameters).map(|results| Box::new(results) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>Any&gt;)
             }),
         );
         <span class="self">self
     </span>}
+
+    <span class="doccomment">/// Calls a function that the mock instance imported from the host.
+    </span><span class="kw">pub fn </span>call_imported_function&lt;Parameters, Results&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        function: <span class="kw-2">&amp;</span>str,
+        parameters: Parameters,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Results, RuntimeError&gt;
+    <span class="kw">where
+        </span>Parameters: WitStore + <span class="lifetime">&#39;static</span>,
+        Results: WitLoad + <span class="lifetime">&#39;static</span>,
+    {
+        <span class="kw">let </span>handler = <span class="self">self
+            </span>.imported_functions
+            .get(function)
+            .unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">&quot;Missing function imported from host: {function:?}&quot;</span>));
+
+        <span class="kw">let </span>flat_parameters = parameters.lower(<span class="kw-2">&amp;mut </span><span class="self">self</span>.clone().memory()<span class="question-mark">?</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>boxed_flat_results = handler(<span class="self">self</span>.clone(), Box::new(flat_parameters))<span class="question-mark">?</span>;
+        <span class="kw">let </span>flat_results = <span class="kw-2">*</span>boxed_flat_results
+            .downcast()
+            .expect(<span class="string">&quot;Expected an incorrect results type from imported host function&quot;</span>);
+
+        Results::lift_from(flat_results, <span class="kw-2">&amp;</span><span class="self">self</span>.clone().memory()<span class="question-mark">?</span>)
+    }
 }
 
 <span class="kw">impl </span>Instance <span class="kw">for </span>MockInstance {
@@ -431,7 +535,7 @@
             .get(function)
             .ok_or_else(|| RuntimeError::FunctionNotFound(function.clone()))<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>results = handler(Box::new(parameters))<span class="question-mark">?</span>;
+        <span class="kw">let </span>results = handler(<span class="self">self</span>.clone(), Box::new(parameters))<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="kw-2">*</span>results
             .downcast()
@@ -490,12 +594,58 @@
     }
 }
 
+<span class="kw">impl</span>&lt;Handler, Parameters, Results&gt; ExportFunction&lt;Handler, Parameters, Results&gt; <span class="kw">for </span>MockInstance
+<span class="kw">where
+    </span>Handler: Fn(MockInstance, Parameters) -&gt; <span class="prelude-ty">Result</span>&lt;Results, RuntimeError&gt; + <span class="lifetime">&#39;static</span>,
+    Parameters: <span class="lifetime">&#39;static</span>,
+    Results: <span class="lifetime">&#39;static</span>,
+{
+    <span class="kw">fn </span>export(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        module_name: <span class="kw-2">&amp;</span>str,
+        function_name: <span class="kw-2">&amp;</span>str,
+        handler: Handler,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), RuntimeError&gt; {
+        <span class="kw">let </span>name = <span class="macro">format!</span>(<span class="string">&quot;{module_name}#{function_name}&quot;</span>);
+
+        <span class="self">self</span>.imported_functions.insert(
+            name.clone(),
+            Arc::new(<span class="kw">move </span>|instance, boxed_parameters| {
+                <span class="kw">let </span>parameters = boxed_parameters.downcast().unwrap_or_else(|<span class="kw">_</span>| {
+                    <span class="macro">panic!</span>(
+                        <span class="string">&quot;Incorrect parameters used to call handler for exported function {name:?}&quot;
+                    </span>)
+                });
+
+                <span class="kw">let </span>results = handler(instance, <span class="kw-2">*</span>parameters)<span class="question-mark">?</span>;
+
+                <span class="prelude-val">Ok</span>(Box::new(results))
+            }),
+        );
+
+        <span class="prelude-val">Ok</span>(())
+    }
+}
+
+<span class="doccomment">/// A helper trait to serve as an equivalent to [`crate::wasmer::WasmerResults`] and
+/// [`crate::wasmtime::WasmtimeResults`] for the [`MockInstance`].
+///
+/// This is in order to help with writing tests generic over the Wasm guest instance type.
+</span><span class="kw">pub trait </span>MockResults {
+    <span class="doccomment">/// The mock native type of the results for the [`MockInstance`].
+    </span><span class="kw">type </span>Results;
+}
+
+<span class="kw">impl</span>&lt;T&gt; MockResults <span class="kw">for </span>T {
+    <span class="kw">type </span>Results = T;
+}
+
 <span class="doccomment">/// A helper type to verify how many times an exported function is called.
 </span><span class="kw">pub struct </span>MockExportedFunction&lt;Parameters, Results&gt; {
     name: String,
     call_counter: Arc&lt;AtomicUsize&gt;,
     expected_calls: usize,
-    handler: <span class="kw">fn</span>(Parameters) -&gt; <span class="prelude-ty">Result</span>&lt;Results, RuntimeError&gt;,
+    handler: <span class="kw">fn</span>(MockInstance, Parameters) -&gt; <span class="prelude-ty">Result</span>&lt;Results, RuntimeError&gt;,
 }
 
 <span class="kw">impl</span>&lt;Parameters, Results&gt; MockExportedFunction&lt;Parameters, Results&gt;
@@ -511,7 +661,7 @@
     /// times.
     </span><span class="kw">pub fn </span>new(
         name: <span class="kw">impl </span>Into&lt;String&gt;,
-        handler: <span class="kw">fn</span>(Parameters) -&gt; <span class="prelude-ty">Result</span>&lt;Results, RuntimeError&gt;,
+        handler: <span class="kw">fn</span>(MockInstance, Parameters) -&gt; <span class="prelude-ty">Result</span>&lt;Results, RuntimeError&gt;,
         expected_calls: usize,
     ) -&gt; <span class="self">Self </span>{
         MockExportedFunction {
@@ -527,9 +677,9 @@
         <span class="kw">let </span>call_counter = <span class="self">self</span>.call_counter.clone();
         <span class="kw">let </span>handler = <span class="self">self</span>.handler;
 
-        instance.add_exported_function(<span class="self">self</span>.name.clone(), <span class="kw">move </span>|parameters: Parameters| {
+        instance.add_exported_function(<span class="self">self</span>.name.clone(), <span class="kw">move </span>|caller, parameters: Parameters| {
             call_counter.fetch_add(<span class="number">1</span>, Ordering::AcqRel);
-            handler(parameters)
+            handler(caller, parameters)
         });
     }
 }

@@ -160,6 +160,10 @@ var sourcesIndex = JSON.parse('{\
 "iana_time_zone":["",[],["ffi_utils.rs","lib.rs","tz_linux.rs"]],\
 "id_arena":["",[],["lib.rs"]],\
 "idna":["",[],["lib.rs","punycode.rs","uts46.rs"]],\
+"import_getters":["",[],["getters.rs"]],\
+"import_operations":["",[],["operations.rs"]],\
+"import_setters":["",[],["setters.rs"]],\
+"import_simple_function":["",[],["simple_function.rs"]],\
 "indexmap":["",[["map",[["core",[],["raw.rs"]]],["core.rs"]]],["arbitrary.rs","equivalent.rs","lib.rs","macros.rs","map.rs","mutable_keys.rs","serde.rs","serde_seq.rs","set.rs","util.rs"]],\
 "inflector":["",[["cases",[["camelcase",[],["mod.rs"]],["case",[],["mod.rs"]],["classcase",[],["mod.rs"]],["kebabcase",[],["mod.rs"]],["pascalcase",[],["mod.rs"]],["screamingsnakecase",[],["mod.rs"]],["sentencecase",[],["mod.rs"]],["snakecase",[],["mod.rs"]],["tablecase",[],["mod.rs"]],["titlecase",[],["mod.rs"]],["traincase",[],["mod.rs"]]],["mod.rs"]],["numbers",[["deordinalize",[],["mod.rs"]],["ordinalize",[],["mod.rs"]]],["mod.rs"]],["string",[["constants",[],["mod.rs"]],["deconstantize",[],["mod.rs"]],["demodulize",[],["mod.rs"]],["pluralize",[],["mod.rs"]],["singularize",[],["mod.rs"]]],["mod.rs"]],["suffix",[["foreignkey",[],["mod.rs"]]],["mod.rs"]]],["lib.rs"]],\
 "io_lifetimes":["",[],["example_ffi.rs","lib.rs","portability.rs","raw.rs","traits.rs","views.rs"]],\
@@ -205,8 +209,8 @@ var sourcesIndex = JSON.parse('{\
 "linera_wit_bindgen_host_wasmtime_rust":["",[],["error.rs","le.rs","lib.rs","region.rs","slab.rs","table.rs"]],\
 "linera_wit_bindgen_host_wasmtime_rust_macro":["",[],["lib.rs"]],\
 "linera_wit_parser":["",[["ast",[],["lex.rs","resolve.rs"]]],["abi.rs","ast.rs","lib.rs","mangle.rs","sizealign.rs"]],\
-"linera_witty":["",[["imported_function_interface",[],["mod.rs","parameters.rs","results.rs"]],["memory_layout",[],["element.rs","flat_layout.rs","join_flat_layouts.rs","layout.rs","mod.rs"]],["primitive_types",[],["flat_type.rs","join_flat_types.rs","maybe_flat_type.rs","mod.rs","simple_type.rs"]],["runtime",[["wasmer",[],["function.rs","memory.rs","mod.rs","parameters.rs","results.rs"]],["wasmtime",[],["function.rs","memory.rs","mod.rs","parameters.rs","results.rs"]]],["error.rs","memory.rs","mod.rs","test.rs","traits.rs"]],["type_traits",[["implementations",[["std",[],["floats.rs","integers.rs","mod.rs","option.rs","phantom_data.rs","primitives.rs","result.rs","string.rs","tuples.rs","vec.rs"]]],["custom_types.rs","frunk.rs","mod.rs"]]],["mod.rs"]],["util",[],["merge.rs","mod.rs","split.rs","zero_extend.rs"]]],["lib.rs","macro_utils.rs"]],\
-"linera_witty_macros":["",[],["lib.rs","util.rs","wit_import.rs","wit_load.rs","wit_store.rs","wit_type.rs"]],\
+"linera_witty":["",[["exported_function_interface",[],["guest_interface.rs","mod.rs","result_storage.rs"]],["imported_function_interface",[],["mod.rs","parameters.rs","results.rs"]],["memory_layout",[],["element.rs","flat_layout.rs","join_flat_layouts.rs","layout.rs","mod.rs"]],["primitive_types",[],["flat_type.rs","join_flat_types.rs","maybe_flat_type.rs","mod.rs","simple_type.rs"]],["runtime",[["wasmer",[],["export_function.rs","function.rs","memory.rs","mod.rs","parameters.rs","results.rs"]],["wasmtime",[],["export_function.rs","function.rs","memory.rs","mod.rs","parameters.rs","results.rs"]]],["error.rs","memory.rs","mod.rs","test.rs","traits.rs"]],["type_traits",[["implementations",[["std",[],["floats.rs","integers.rs","mod.rs","option.rs","phantom_data.rs","primitives.rs","result.rs","string.rs","tuples.rs","vec.rs"]]],["custom_types.rs","frunk.rs","mod.rs"]]],["mod.rs"]],["util",[],["merge.rs","mod.rs","split.rs","zero_extend.rs"]]],["lib.rs","macro_utils.rs"]],\
+"linera_witty_macros":["",[["wit_export",[],["function_information.rs","mod.rs"]]],["lib.rs","util.rs","wit_import.rs","wit_load.rs","wit_store.rs","wit_type.rs"]],\
 "linked_hash_map":["",[],["lib.rs"]],\
 "linux_raw_sys":["",[["x86_64",[],["errno.rs","general.rs","ioctl.rs"]]],["lib.rs"]],\
 "lock_api":["",[],["lib.rs","mutex.rs","remutex.rs","rwlock.rs"]],\

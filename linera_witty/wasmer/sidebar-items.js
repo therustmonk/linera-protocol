@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["EntrypointInstance","InstanceBuilder","InstanceSlot","Wasmer"],"type":["ReentrantInstance"]};
+window.SIDEBAR_ITEMS = {"struct":["EntrypointInstance","FunctionEnvMut","InstanceBuilder","InstanceSlot","Wasmer"],"trait":["WasmerParameters","WasmerResults"],"type":["ReentrantInstance"]};

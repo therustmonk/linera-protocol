@@ -36,7 +36,7 @@
 </span><span class="kw">pub mod </span>wasmtime;
 
 <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
-</span><span class="kw">pub use </span><span class="self">self</span>::test::{MockExportedFunction, MockInstance, MockRuntime};
+</span><span class="kw">pub use </span><span class="self">self</span>::test::{MockExportedFunction, MockInstance, MockResults, MockRuntime};
 <span class="kw">pub use </span><span class="self">self</span>::{
     error::RuntimeError,
     memory::{GuestPointer, Memory, RuntimeMemory},
