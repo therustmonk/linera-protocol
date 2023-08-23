@@ -588,7 +588,7 @@
     }
 
     <span class="kw">for </span>(index, (segment, expected)) <span class="kw">in </span>path.segments.iter().zip(segments).enumerate() {
-        <span class="kw">let </span>with_type_parameters = index == segments.len();
+        <span class="kw">let </span>with_type_parameters = index == segments.len() - <span class="number">1</span>;
 
         <span class="kw">if </span>!is_path_segment(segment, expected, with_type_parameters) {
             <span class="kw">return </span><span class="bool-val">false</span>;
