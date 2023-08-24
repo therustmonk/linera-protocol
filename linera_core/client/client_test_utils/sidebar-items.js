@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["FaultType"],"static":["ROCKS_DB_SEMAPHORE"],"struct":["LocalValidatorClient","MakeDynamoDbStoreClient","MakeMemoryStoreClient","MakeRocksDbStoreClient","NodeProvider","TestBuilder"],"trait":["StoreBuilder"]};
+window.SIDEBAR_ITEMS = {"enum":["FaultType"],"static":["ROCKS_DB_SEMAPHORE"],"struct":["LocalValidatorClient","MakeDynamoDbStoreClient","MakeMemoryStoreClient","MakeRocksDbStoreClient","MakeScyllaDbStoreClient","NodeProvider","TestBuilder"],"trait":["StoreBuilder"]};

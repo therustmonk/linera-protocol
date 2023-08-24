@@ -276,7 +276,7 @@
 <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
 </span><span class="kw">use </span>{
     async_lock::Mutex,
-    linera_views::memory::{MemoryContext, MEMORY_MAX_STREAM_QUERIES},
+    linera_views::memory::{MemoryContext, TEST_MEMORY_MAX_STREAM_QUERIES},
     std::collections::BTreeMap,
     std::sync::Arc,
 };
@@ -504,7 +504,7 @@
         <span class="kw">let </span>guard = Arc::new(Mutex::new(BTreeMap::new()))
             .try_lock_arc()
             .expect(<span class="string">&quot;a guard&quot;</span>);
-        <span class="kw">let </span>context = MemoryContext::new(guard, MEMORY_MAX_STREAM_QUERIES, ());
+        <span class="kw">let </span>context = MemoryContext::new(guard, TEST_MEMORY_MAX_STREAM_QUERIES, ());
         <span class="self">Self</span>::load(context)
             .<span class="kw">await
             </span>.expect(<span class="string">&quot;Loading from memory should work&quot;</span>)

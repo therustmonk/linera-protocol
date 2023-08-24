@@ -191,7 +191,7 @@
     WasmRuntime,
 };
 <span class="kw">use </span>linera_storage::{MemoryStoreClient, Store};
-<span class="kw">use </span>linera_views::memory::MEMORY_MAX_STREAM_QUERIES;
+<span class="kw">use </span>linera_views::memory::TEST_MEMORY_MAX_STREAM_QUERIES;
 <span class="kw">use </span>std::sync::{
     atomic::{AtomicU32, Ordering},
     Arc,
@@ -221,7 +221,7 @@
         <span class="kw">let </span>key_pair = KeyPair::generate();
         <span class="kw">let </span>committee = Committee::make_simple(<span class="macro">vec!</span>[ValidatorName(key_pair.public())]);
         <span class="kw">let </span>client =
-            MemoryStoreClient::new(<span class="prelude-val">Some</span>(WasmRuntime::default()), MEMORY_MAX_STREAM_QUERIES);
+            MemoryStoreClient::new(<span class="prelude-val">Some</span>(WasmRuntime::default()), TEST_MEMORY_MAX_STREAM_QUERIES);
 
         <span class="kw">let </span>worker = WorkerState::new(
             <span class="string">&quot;Single validator node&quot;</span>.to_string(),

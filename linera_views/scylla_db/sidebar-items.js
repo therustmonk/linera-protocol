@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["ScyllaDbContextError"],"fn":["create_scylla_db_test_client"],"struct":["ScyllaDbClient"]};
+window.SIDEBAR_ITEMS = {"constant":["TEST_SCYLLA_DB_MAX_CONCURRENT_QUERIES","TEST_SCYLLA_DB_MAX_STREAM_QUERIES"],"enum":["ScyllaDbContextError"],"fn":["create_scylla_db_test_client","create_scylla_db_test_context","get_table_name"],"struct":["ScyllaDbClient","ScyllaDbClientInternal"],"type":["ScyllaDbContext"]};

@@ -194,7 +194,7 @@ var sourcesIndex = JSON.parse('{\
 "linera_sdk_wasm_tests":["",[],["lib.rs"]],\
 "linera_server":["",[],["server.rs"]],\
 "linera_service":["",[],["chain_listener.rs","client.rs","config.rs","grpc_proxy.rs","lib.rs","node_service.rs","project.rs","storage.rs","util.rs"]],\
-"linera_storage":["",[],["chain_guards.rs","dynamo_db.rs","lib.rs","memory.rs","rocks_db.rs"]],\
+"linera_storage":["",[],["chain_guards.rs","dynamo_db.rs","lib.rs","memory.rs","rocks_db.rs","scylla_db.rs"]],\
 "linera_views":["",[["test_utils",[],["mod.rs"]]],["batch.rs","collection_view.rs","common.rs","dynamo_db.rs","hashable_wrapper.rs","key_value_store_view.rs","lib.rs","localstack.rs","log_view.rs","lru_caching.rs","map_view.rs","memory.rs","queue_view.rs","reentrant_collection_view.rs","register_view.rs","rocks_db.rs","scylla_db.rs","set_view.rs","value_splitting.rs","views.rs"]],\
 "linera_views_derive":["",[],["lib.rs","util.rs"]],\
 "linera_wit_bindgen_core":["",[],["lib.rs","ns.rs"]],\

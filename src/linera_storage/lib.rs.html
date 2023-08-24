@@ -441,6 +441,10 @@
 <a href="#441" id="441">441</a>
 <a href="#442" id="442">442</a>
 <a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -452,12 +456,16 @@
 <span class="kw">mod </span>memory;
 <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
 </span><span class="kw">mod </span>rocks_db;
+<span class="attr">#[cfg(feature = <span class="string">&quot;scylladb&quot;</span>)]
+</span><span class="kw">mod </span>scylla_db;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
 </span><span class="kw">pub use </span><span class="kw">crate</span>::dynamo_db::DynamoDbStoreClient;
 <span class="kw">pub use </span><span class="kw">crate</span>::memory::MemoryStoreClient;
 <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
 </span><span class="kw">pub use </span><span class="kw">crate</span>::rocks_db::RocksDbStoreClient;
+<span class="attr">#[cfg(feature = <span class="string">&quot;scylladb&quot;</span>)]
+</span><span class="kw">pub use </span><span class="kw">crate</span>::scylla_db::ScyllaDbStoreClient;
 
 <span class="kw">use </span><span class="kw">crate</span>::chain_guards::ChainGuards;
 <span class="kw">use </span>async_trait::async_trait;

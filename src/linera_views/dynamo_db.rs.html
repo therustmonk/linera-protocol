@@ -1230,10 +1230,10 @@
 <span class="doccomment">/// The DynamoDb database is potentially handling an infinite number of connections.
 /// However, for testing or some other purpose we really need to decrease the number of
 /// connections.
-</span><span class="kw">pub const </span>DYNAMO_DB_MAX_CONCURRENT_QUERIES: usize = <span class="number">10</span>;
+</span><span class="kw">pub const </span>TEST_DYNAMO_DB_MAX_CONCURRENT_QUERIES: usize = <span class="number">10</span>;
 
-<span class="doccomment">/// The number of entries in a stream of the tests can be controled by this parameter
-</span><span class="kw">pub const </span>DYNAMO_DB_MAX_STREAM_QUERIES: usize = <span class="number">10</span>;
+<span class="doccomment">/// The number of entries in a stream of the tests can be controlled by this parameter for tests.
+</span><span class="kw">pub const </span>TEST_DYNAMO_DB_MAX_STREAM_QUERIES: usize = <span class="number">10</span>;
 
 <span class="doccomment">/// Fundamental constants in DynamoDB: The maximum size of a TransactWriteItem is 100.
 /// See &lt;https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_TransactWriteItems.html&gt;

@@ -685,6 +685,29 @@
 <a href="#685" id="685">685</a>
 <a href="#686" id="686">686</a>
 <a href="#687" id="687">687</a>
+<a href="#688" id="688">688</a>
+<a href="#689" id="689">689</a>
+<a href="#690" id="690">690</a>
+<a href="#691" id="691">691</a>
+<a href="#692" id="692">692</a>
+<a href="#693" id="693">693</a>
+<a href="#694" id="694">694</a>
+<a href="#695" id="695">695</a>
+<a href="#696" id="696">696</a>
+<a href="#697" id="697">697</a>
+<a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -708,7 +731,7 @@
     WasmRuntime,
 };
 <span class="kw">use </span>linera_storage::{MemoryStoreClient, Store};
-<span class="kw">use </span>linera_views::{memory::MEMORY_MAX_STREAM_QUERIES, views::ViewError};
+<span class="kw">use </span>linera_views::{memory::TEST_MEMORY_MAX_STREAM_QUERIES, views::ViewError};
 <span class="kw">use </span>std::{
     collections::{BTreeMap, HashMap, HashSet},
     slice::SliceIndex,
@@ -717,20 +740,30 @@
 };
 <span class="kw">use </span>tokio::sync::oneshot;
 
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;rocksdb&quot;</span>, feature = <span class="string">&quot;aws&quot;</span>))]
+<span class="attr">#[cfg(any(feature = <span class="string">&quot;rocksdb&quot;</span>, feature = <span class="string">&quot;aws&quot;</span>, feature = <span class="string">&quot;scylladb&quot;</span>))]
 </span><span class="kw">use </span>linera_views::lru_caching::TEST_CACHE_SIZE;
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
 </span><span class="kw">use </span>{
-    linera_storage::RocksDbStoreClient, linera_views::rocks_db::ROCKS_DB_MAX_STREAM_QUERIES,
+    linera_storage::RocksDbStoreClient, linera_views::rocks_db::TEST_ROCKS_DB_MAX_STREAM_QUERIES,
     tokio::sync::Semaphore,
 };
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
 </span><span class="kw">use </span>{
     linera_storage::DynamoDbStoreClient,
-    linera_views::dynamo_db::{DYNAMO_DB_MAX_CONCURRENT_QUERIES, DYNAMO_DB_MAX_STREAM_QUERIES},
+    linera_views::dynamo_db::{
+        TEST_DYNAMO_DB_MAX_CONCURRENT_QUERIES, TEST_DYNAMO_DB_MAX_STREAM_QUERIES,
+    },
     linera_views::test_utils::LocalStackTestContext,
+};
+
+<span class="attr">#[cfg(feature = <span class="string">&quot;scylladb&quot;</span>)]
+</span><span class="kw">use </span>{
+    linera_storage::ScyllaDbStoreClient,
+    linera_views::scylla_db::{
+        get_table_name, TEST_SCYLLA_DB_MAX_CONCURRENT_QUERIES, TEST_SCYLLA_DB_MAX_STREAM_QUERIES,
+    },
 };
 
 <span class="attr">#[derive(Debug, PartialEq, Clone, Copy)]
@@ -1217,18 +1250,9 @@
 </span><span class="doccomment">/// Limit concurrency for rocksdb tests to avoid &quot;too many open files&quot; errors.
 </span><span class="kw">pub static </span>ROCKS_DB_SEMAPHORE: Semaphore = Semaphore::const_new(<span class="number">5</span>);
 
-<span class="kw">pub struct </span>MakeMemoryStoreClient {
+<span class="attr">#[derive(Default)]
+</span><span class="kw">pub struct </span>MakeMemoryStoreClient {
     wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
-    max_stream_queries: usize,
-}
-
-<span class="kw">impl </span>Default <span class="kw">for </span>MakeMemoryStoreClient {
-    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
-        MakeMemoryStoreClient {
-            wasm_runtime: <span class="prelude-val">None</span>,
-            max_stream_queries: MEMORY_MAX_STREAM_QUERIES,
-        }
-    }
 }
 
 <span class="attr">#[async_trait]
@@ -1238,7 +1262,7 @@
     <span class="kw">async fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Store, anyhow::Error&gt; {
         <span class="prelude-val">Ok</span>(MemoryStoreClient::new(
             <span class="self">self</span>.wasm_runtime,
-            <span class="self">self</span>.max_stream_queries,
+            TEST_MEMORY_MAX_STREAM_QUERIES,
         ))
     }
 }
@@ -1247,33 +1271,18 @@
     <span class="doccomment">/// Creates a [`MakeMemoryStoreClient`] that uses the specified [`WasmRuntime`] to run WASM
     /// applications.
     </span><span class="attr">#[allow(dead_code)]
-    </span><span class="kw">pub fn </span>with_wasm_runtime(
-        wasm_runtime: <span class="kw">impl </span>Into&lt;<span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;&gt;,
-        max_stream_queries: usize,
-    ) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>with_wasm_runtime(wasm_runtime: <span class="kw">impl </span>Into&lt;<span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;&gt;) -&gt; <span class="self">Self </span>{
         MakeMemoryStoreClient {
             wasm_runtime: wasm_runtime.into(),
-            max_stream_queries,
         }
     }
 }
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
+#[derive(Default)]
 </span><span class="kw">pub struct </span>MakeRocksDbStoreClient {
     temp_dirs: Vec&lt;tempfile::TempDir&gt;,
     wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
-    max_stream_queries: usize,
-}
-
-<span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
-</span><span class="kw">impl </span>Default <span class="kw">for </span>MakeRocksDbStoreClient {
-    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
-        MakeRocksDbStoreClient {
-            temp_dirs: <span class="macro">vec!</span>[],
-            wasm_runtime: <span class="prelude-val">None</span>,
-            max_stream_queries: ROCKS_DB_MAX_STREAM_QUERIES,
-        }
-    }
 }
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;rocksdb&quot;</span>)]
@@ -1281,13 +1290,9 @@
     <span class="doccomment">/// Creates a [`MakeRocksDbStoreClient`] that uses the specified [`WasmRuntime`] to run WASM
     /// applications.
     </span><span class="attr">#[allow(dead_code)]
-    </span><span class="kw">pub fn </span>with_wasm_runtime(
-        wasm_runtime: <span class="kw">impl </span>Into&lt;<span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;&gt;,
-        max_stream_queries: usize,
-    ) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>with_wasm_runtime(wasm_runtime: <span class="kw">impl </span>Into&lt;<span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;&gt;) -&gt; <span class="self">Self </span>{
         MakeRocksDbStoreClient {
             wasm_runtime: wasm_runtime.into(),
-            max_stream_queries,
             ..MakeRocksDbStoreClient::default()
         }
     }
@@ -1305,30 +1310,18 @@
         <span class="prelude-val">Ok</span>(RocksDbStoreClient::new(
             path,
             <span class="self">self</span>.wasm_runtime,
-            <span class="self">self</span>.max_stream_queries,
+            TEST_ROCKS_DB_MAX_STREAM_QUERIES,
             TEST_CACHE_SIZE,
         ))
     }
 }
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
+#[derive(Default)]
 </span><span class="kw">pub struct </span>MakeDynamoDbStoreClient {
     instance_counter: usize,
     localstack: <span class="prelude-ty">Option</span>&lt;LocalStackTestContext&gt;,
     wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
-    max_stream_queries: usize,
-}
-
-<span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
-</span><span class="kw">impl </span>Default <span class="kw">for </span>MakeDynamoDbStoreClient {
-    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
-        MakeDynamoDbStoreClient {
-            instance_counter: <span class="number">0</span>,
-            localstack: <span class="prelude-val">None</span>,
-            wasm_runtime: <span class="prelude-val">None</span>,
-            max_stream_queries: DYNAMO_DB_MAX_STREAM_QUERIES,
-        }
-    }
 }
 
 <span class="attr">#[cfg(feature = <span class="string">&quot;aws&quot;</span>)]
@@ -1336,13 +1329,9 @@
     <span class="doccomment">/// Creates a [`MakeDynamoDbStoreClient`] that uses the specified [`WasmRuntime`] to run WASM
     /// applications.
     </span><span class="attr">#[allow(dead_code)]
-    </span><span class="kw">pub fn </span>with_wasm_runtime(
-        wasm_runtime: <span class="kw">impl </span>Into&lt;<span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;&gt;,
-        max_stream_queries: usize,
-    ) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>with_wasm_runtime(wasm_runtime: <span class="kw">impl </span>Into&lt;<span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;&gt;) -&gt; <span class="self">Self </span>{
         MakeDynamoDbStoreClient {
             wasm_runtime: wasm_runtime.into(),
-            max_stream_queries,
             ..MakeDynamoDbStoreClient::default()
         }
     }
@@ -1363,13 +1352,70 @@
         <span class="kw">let </span>(store, <span class="kw">_</span>) = DynamoDbStoreClient::from_config(
             config,
             table,
-            <span class="prelude-val">Some</span>(DYNAMO_DB_MAX_CONCURRENT_QUERIES),
-            <span class="self">self</span>.max_stream_queries,
+            <span class="prelude-val">Some</span>(TEST_DYNAMO_DB_MAX_CONCURRENT_QUERIES),
+            TEST_DYNAMO_DB_MAX_STREAM_QUERIES,
             TEST_CACHE_SIZE,
             <span class="self">self</span>.wasm_runtime,
         )
         .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(store)
+    }
+}
+
+<span class="attr">#[cfg(feature = <span class="string">&quot;scylladb&quot;</span>)]
+</span><span class="kw">pub struct </span>MakeScyllaDbStoreClient {
+    instance_counter: usize,
+    uri: String,
+    wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
+}
+
+<span class="attr">#[cfg(feature = <span class="string">&quot;scylladb&quot;</span>)]
+</span><span class="kw">impl </span>Default <span class="kw">for </span>MakeScyllaDbStoreClient {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>instance_counter = <span class="number">0</span>;
+        <span class="kw">let </span>uri = <span class="string">&quot;localhost:9042&quot;</span>.to_string();
+        <span class="kw">let </span>wasm_runtime = <span class="prelude-val">None</span>;
+        MakeScyllaDbStoreClient {
+            instance_counter,
+            uri,
+            wasm_runtime,
+        }
+    }
+}
+
+<span class="attr">#[cfg(feature = <span class="string">&quot;scylladb&quot;</span>)]
+</span><span class="kw">impl </span>MakeScyllaDbStoreClient {
+    <span class="doccomment">/// Creates a [`MakeScyllaDbStoreClient`] that uses the specified [`WasmRuntime`] to run WASM
+    /// applications.
+    </span><span class="attr">#[allow(dead_code)]
+    </span><span class="kw">pub fn </span>with_wasm_runtime(wasm_runtime: <span class="kw">impl </span>Into&lt;<span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;&gt;) -&gt; <span class="self">Self </span>{
+        MakeScyllaDbStoreClient {
+            wasm_runtime: wasm_runtime.into(),
+            ..MakeScyllaDbStoreClient::default()
+        }
+    }
+}
+
+<span class="attr">#[cfg(feature = <span class="string">&quot;scylladb&quot;</span>)]
+#[async_trait]
+</span><span class="kw">impl </span>StoreBuilder <span class="kw">for </span>MakeScyllaDbStoreClient {
+    <span class="kw">type </span>Store = ScyllaDbStoreClient;
+
+    <span class="kw">async fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Store, anyhow::Error&gt; {
+        <span class="self">self</span>.instance_counter += <span class="number">1</span>;
+        <span class="kw">let </span>restart_database = <span class="bool-val">true</span>;
+        <span class="kw">let </span>table_name = get_table_name().<span class="kw">await</span>;
+        <span class="kw">let </span>table_name = <span class="macro">format!</span>(<span class="string">&quot;{}_{}&quot;</span>, table_name, <span class="self">self</span>.instance_counter);
+        <span class="prelude-val">Ok</span>(ScyllaDbStoreClient::new(
+            restart_database,
+            <span class="kw-2">&amp;</span><span class="self">self</span>.uri,
+            table_name,
+            <span class="prelude-val">Some</span>(TEST_SCYLLA_DB_MAX_CONCURRENT_QUERIES),
+            TEST_SCYLLA_DB_MAX_STREAM_QUERIES,
+            TEST_CACHE_SIZE,
+            <span class="self">self</span>.wasm_runtime,
+        )
+        .<span class="kw">await</span><span class="question-mark">?</span>)
     }
 }
 </code></pre></div></section></main></body></html>
