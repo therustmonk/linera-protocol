@@ -305,6 +305,40 @@
 <a href="#305" id="305">305</a>
 <a href="#306" id="306">306</a>
 <a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -315,14 +349,15 @@
 <span class="kw">use </span>proc_macro_error::abort;
 <span class="kw">use </span>quote::{quote, quote_spanned, ToTokens};
 <span class="kw">use </span>syn::{
-    spanned::Spanned, FnArg, GenericArgument, ImplItem, ImplItemMethod, LitStr, Path,
-    PathArguments, PathSegment, ReturnType, Token, Type, TypePath,
+    spanned::Spanned, FnArg, GenericArgument, GenericParam, ImplItem, ImplItemMethod, LitStr, Path,
+    PathArguments, PathSegment, ReturnType, Signature, Token, Type, TypePath,
 };
 
 <span class="doccomment">/// Pieces of information extracted from a function&#39;s definition.
 </span><span class="kw">pub struct </span>FunctionInformation&lt;<span class="lifetime">&#39;input</span>&gt; {
     function: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>ImplItemMethod,
     wit_name: String,
+    is_reentrant: bool,
     parameter_bindings: TokenStream,
     call_early_return: <span class="prelude-ty">Option</span>&lt;<span class="macro">Token!</span>[<span class="question-mark">?</span>]&gt;,
     interface_type: TokenStream,
@@ -354,8 +389,9 @@
     /// [`FunctionInformation`] instance.
     </span><span class="kw">pub fn </span>new(function: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>ImplItemMethod) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>wit_name = function.sig.ident.to_string().to_kebab_case();
+        <span class="kw">let </span>is_reentrant = <span class="self">Self</span>::is_reentrant(<span class="kw-2">&amp;</span>function.sig);
         <span class="kw">let </span>(parameter_bindings, parameter_types) =
-            <span class="self">Self</span>::parse_parameters(function.sig.inputs.iter());
+            <span class="self">Self</span>::parse_parameters(is_reentrant, function.sig.inputs.iter());
         <span class="kw">let </span>(results, is_fallible) = <span class="self">Self</span>::parse_output(<span class="kw-2">&amp;</span>function.sig.output);
 
         <span class="kw">let </span>interface_type = <span class="macro">quote_spanned! </span>{ function.sig.span() =&gt;
@@ -365,24 +401,52 @@
         FunctionInformation {
             function,
             wit_name,
+            is_reentrant,
             parameter_bindings,
             call_early_return: is_fallible.then(|| <span class="macro">Token!</span>[<span class="question-mark">?</span>](Span::call_site())),
             interface_type,
         }
     }
 
+    <span class="doccomment">/// Checks if a function should be considered as a reentrant function.
+    ///
+    /// A reentrant function has a generic type parameter that&#39;s used as the type of the first
+    /// parameter.
+    </span><span class="kw">fn </span>is_reentrant(signature: <span class="kw-2">&amp;</span>Signature) -&gt; bool {
+        <span class="kw">if </span>signature.generics.params.len() != <span class="number">1 </span>{
+            <span class="kw">return </span><span class="bool-val">false</span>;
+        }
+
+        <span class="kw">let </span><span class="prelude-val">Some</span>(GenericParam::Type(generic_type)) = signature.generics.params.first() <span class="kw">else </span>{
+            <span class="kw">return </span><span class="bool-val">false</span>;
+        };
+
+        <span class="kw">let </span><span class="prelude-val">Some</span>(FnArg::Typed(first_parameter)) = signature.inputs.first() <span class="kw">else </span>{
+            <span class="kw">return </span><span class="bool-val">false</span>;
+        };
+
+        <span class="kw">let </span>Type::Path(first_parameter_type) = <span class="kw-2">&amp;*</span>first_parameter.ty <span class="kw">else </span>{
+            <span class="kw">return </span><span class="bool-val">false</span>;
+        };
+
+        first_parameter_type.path == generic_type.ident.clone().into()
+    }
+
     <span class="doccomment">/// Parses a function&#39;s parameters and returns the generated code with a list ofbindings to the
     /// parameters and a list of the parameters types.
     </span><span class="kw">fn </span>parse_parameters(
+        is_reentrant: bool,
         inputs: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>FnArg&gt; + Clone,
     ) -&gt; (TokenStream, TokenStream) {
-        <span class="kw">let </span>parameters = inputs.map(|input| <span class="kw">match </span>input {
-            FnArg::Typed(parameter) =&gt; parameter,
-            FnArg::Receiver(receiver) =&gt; <span class="macro">abort!</span>(
-                receiver.self_token,
-                <span class="string">&quot;Exported interfaces can not have `self` parameters&quot;
-            </span>),
-        });
+        <span class="kw">let </span>parameters = inputs
+            .skip(<span class="kw">if </span>is_reentrant { <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>})
+            .map(|input| <span class="kw">match </span>input {
+                FnArg::Typed(parameter) =&gt; parameter,
+                FnArg::Receiver(receiver) =&gt; <span class="macro">abort!</span>(
+                    receiver.self_token,
+                    <span class="string">&quot;Exported interfaces can not have `self` parameters&quot;
+                </span>),
+            });
 
         <span class="kw">let </span>bindings = parameters.clone().map(|parameter| <span class="kw-2">&amp;</span>parameter.pat);
         <span class="kw">let </span>types = parameters.map(|parameter| <span class="kw-2">&amp;</span>parameter.ty);
@@ -477,6 +541,7 @@
         <span class="kw">let </span>host_parameters = <span class="kw-2">&amp;</span><span class="self">self</span>.parameter_bindings;
         <span class="kw">let </span>call_early_return = <span class="kw-2">&amp;</span><span class="self">self</span>.call_early_return;
         <span class="kw">let </span>function_name = <span class="kw-2">&amp;</span><span class="self">self</span>.function.sig.ident;
+        <span class="kw">let </span>caller_parameter = <span class="self">self</span>.is_reentrant.then(|| <span class="macro">quote! </span>{ <span class="kw-2">&amp;mut </span>caller, });
 
         <span class="kw">let </span>output_type = <span class="macro">quote_spanned! </span>{ <span class="self">self</span>.function.sig.output.span() =&gt;
             &lt;
@@ -503,7 +568,10 @@
                         )<span class="question-mark">?</span>;
 
                     <span class="attr">#[allow(clippy::let_unit_value)]
-                    </span><span class="kw">let </span>host_results = <span class="self">Self</span>::#function_name(#host_parameters) #call_early_return;
+                    </span><span class="kw">let </span>host_results = <span class="self">Self</span>::#function_name(
+                        #caller_parameter
+                        #host_parameters
+                    ) #call_early_return;
                     <span class="kw">let </span>guest_results =
                         &lt;Interface <span class="kw">as </span>linera_witty::ExportedFunctionInterface&gt;::lower_results(
                             host_results,

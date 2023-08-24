@@ -537,9 +537,9 @@
 
         <span class="kw">let </span>results = handler(<span class="self">self</span>.clone(), Box::new(parameters))<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(<span class="kw-2">*</span>results
-            .downcast()
-            .expect(<span class="string">&quot;Incorrect results type expected from handler of expected function&quot;</span>))
+        <span class="prelude-val">Ok</span>(<span class="kw-2">*</span>results.downcast().unwrap_or_else(|<span class="kw">_</span>| {
+            <span class="macro">panic!</span>(<span class="string">&quot;Incorrect results type expected from handler of expected function: {function}&quot;</span>)
+        }))
     }
 }
 
@@ -645,7 +645,7 @@
     name: String,
     call_counter: Arc&lt;AtomicUsize&gt;,
     expected_calls: usize,
-    handler: <span class="kw">fn</span>(MockInstance, Parameters) -&gt; <span class="prelude-ty">Result</span>&lt;Results, RuntimeError&gt;,
+    handler: Arc&lt;<span class="kw">dyn </span>Fn(MockInstance, Parameters) -&gt; <span class="prelude-ty">Result</span>&lt;Results, RuntimeError&gt;&gt;,
 }
 
 <span class="kw">impl</span>&lt;Parameters, Results&gt; MockExportedFunction&lt;Parameters, Results&gt;
@@ -661,21 +661,21 @@
     /// times.
     </span><span class="kw">pub fn </span>new(
         name: <span class="kw">impl </span>Into&lt;String&gt;,
-        handler: <span class="kw">fn</span>(MockInstance, Parameters) -&gt; <span class="prelude-ty">Result</span>&lt;Results, RuntimeError&gt;,
+        handler: <span class="kw">impl </span>Fn(MockInstance, Parameters) -&gt; <span class="prelude-ty">Result</span>&lt;Results, RuntimeError&gt; + <span class="lifetime">&#39;static</span>,
         expected_calls: usize,
     ) -&gt; <span class="self">Self </span>{
         MockExportedFunction {
             name: name.into(),
             call_counter: Arc::default(),
             expected_calls,
-            handler,
+            handler: Arc::new(handler),
         }
     }
 
     <span class="doccomment">/// Registers this [`MockExportedFunction`] with the mock `instance`.
     </span><span class="kw">pub fn </span>register(<span class="kw-2">&amp;</span><span class="self">self</span>, instance: <span class="kw-2">&amp;mut </span>MockInstance) {
         <span class="kw">let </span>call_counter = <span class="self">self</span>.call_counter.clone();
-        <span class="kw">let </span>handler = <span class="self">self</span>.handler;
+        <span class="kw">let </span>handler = <span class="self">self</span>.handler.clone();
 
         instance.add_exported_function(<span class="self">self</span>.name.clone(), <span class="kw">move </span>|caller, parameters: Parameters| {
             call_counter.fetch_add(<span class="number">1</span>, Ordering::AcqRel);
