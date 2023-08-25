@@ -632,10 +632,10 @@
             <span class="kw">let </span><span class="kw-2">mut </span>table_name: <span class="prelude-ty">Option</span>&lt;String&gt; = <span class="prelude-val">None</span>;
             <span class="kw">if </span>!s.is_empty() {
                 <span class="kw">let </span><span class="kw-2">mut </span>parts = s.split(<span class="string">&#39;:&#39;</span>);
-                <span class="kw">while let </span><span class="prelude-val">Some</span>(part_ent) = parts.next() {
-                    <span class="kw">match </span>part_ent {
+                <span class="kw">while let </span><span class="prelude-val">Some</span>(part) = parts.next() {
+                    <span class="kw">match </span>part {
                         <span class="string">&quot;https&quot; </span>=&gt; {
-                            <span class="kw">let </span>err_msg = <span class="string">&quot;Correct format is https:://my.validator.com:port&quot;</span>;
+                            <span class="kw">let </span>err_msg = <span class="string">&quot;Correct format is https:://db_hostname:port&quot;</span>;
                             <span class="kw">let </span><span class="prelude-val">Some</span>(empty) = parts.next() <span class="kw">else </span>{
                                 <span class="macro">bail!</span>(err_msg);
                             };
@@ -656,11 +656,11 @@
                             }
                             uri = <span class="prelude-val">Some</span>(<span class="macro">format!</span>(<span class="string">&quot;https::{}:{}&quot;</span>, address, port_str));
                         }
-                        <span class="kw">_ if </span>part_ent.starts_with(<span class="string">&quot;table&quot;</span>) =&gt; {
+                        <span class="kw">_ if </span>part.starts_with(<span class="string">&quot;table&quot;</span>) =&gt; {
                             <span class="kw">if </span>table_name.is_some() {
                                 <span class="macro">bail!</span>(<span class="string">&quot;The table_name has already been assigned&quot;</span>);
                             }
-                            table_name = <span class="prelude-val">Some</span>(part_ent.to_string());
+                            table_name = <span class="prelude-val">Some</span>(part.to_string());
                         }
                         <span class="string">&quot;restart_database&quot; </span>=&gt; {
                             <span class="kw">if </span>restart_database.is_some() {
@@ -675,7 +675,7 @@
                             restart_database = <span class="prelude-val">Some</span>(<span class="bool-val">false</span>);
                         }
                         <span class="kw">_ </span>=&gt; {
-                            <span class="macro">bail!</span>(<span class="string">&quot;the entry \&quot;{}\&quot; is not matching&quot;</span>, part_ent);
+                            <span class="macro">bail!</span>(<span class="string">&quot;the entry \&quot;{}\&quot; is not matching&quot;</span>, part);
                         }
                     }
                 }
@@ -772,10 +772,10 @@
         }
     );
     <span class="macro">assert_eq!</span>(
-        StorageConfig::from_str(<span class="string">&quot;scylladb:https:://my.validator.com:230&quot;</span>).unwrap(),
+        StorageConfig::from_str(<span class="string">&quot;scylladb:https:://db_hostname:230&quot;</span>).unwrap(),
         StorageConfig::ScyllaDb {
             restart_database: <span class="bool-val">true</span>,
-            uri: <span class="string">&quot;https:://my.validator.com:230&quot;</span>.to_string(),
+            uri: <span class="string">&quot;https:://db_hostname:230&quot;</span>.to_string(),
             table_name: <span class="string">&quot;table_storage&quot;</span>.to_string(),
         }
     );

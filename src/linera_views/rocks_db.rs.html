@@ -436,8 +436,8 @@
         }
         tokio::task::spawn_blocking(<span class="kw">move </span>|| -&gt; <span class="prelude-ty">Result</span>&lt;(), RocksDbContextError&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>inner_batch = rocksdb::WriteBatchWithTransaction::default();
-            <span class="kw">for </span>e_ent <span class="kw">in </span>batch.operations {
-                <span class="kw">match </span>e_ent {
+            <span class="kw">for </span>operation <span class="kw">in </span>batch.operations {
+                <span class="kw">match </span>operation {
                     WriteOperation::Delete { key } =&gt; inner_batch.delete(<span class="kw-2">&amp;</span>key),
                     WriteOperation::Put { key, value } =&gt; inner_batch.put(<span class="kw-2">&amp;</span>key, value),
                     WriteOperation::DeletePrefix { key_prefix } =&gt; {
