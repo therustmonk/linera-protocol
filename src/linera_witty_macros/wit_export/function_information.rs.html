@@ -339,6 +339,48 @@
 <a href="#339" id="339">339</a>
 <a href="#340" id="340">340</a>
 <a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -349,8 +391,9 @@
 <span class="kw">use </span>proc_macro_error::abort;
 <span class="kw">use </span>quote::{quote, quote_spanned, ToTokens};
 <span class="kw">use </span>syn::{
-    spanned::Spanned, FnArg, GenericArgument, GenericParam, ImplItem, ImplItemMethod, LitStr, Path,
-    PathArguments, PathSegment, ReturnType, Signature, Token, Type, TypePath,
+    spanned::Spanned, FnArg, GenericArgument, GenericParam, Ident, ImplItem, ImplItemMethod,
+    LitStr, PatType, Path, PathArguments, PathSegment, ReturnType, Signature, Token, Type,
+    TypePath, TypeReference,
 };
 
 <span class="doccomment">/// Pieces of information extracted from a function&#39;s definition.
@@ -363,10 +406,12 @@
     interface_type: TokenStream,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;input</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>ImplItem&gt; <span class="kw">for </span>FunctionInformation&lt;<span class="lifetime">&#39;input</span>&gt; {
-    <span class="kw">fn </span>from(item: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>ImplItem) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;input</span>&gt; FunctionInformation&lt;<span class="lifetime">&#39;input</span>&gt; {
+    <span class="doccomment">/// Parses a function definition from an [`ImplItem`] and collects pieces of information into a
+    /// [`FunctionInformation`] instance.
+    </span><span class="kw">pub fn </span>from_item(item: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>ImplItem, caller_type_parameter: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>Ident&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">match </span>item {
-            ImplItem::Method(function) =&gt; FunctionInformation::new(function),
+            ImplItem::Method(function) =&gt; FunctionInformation::new(function, caller_type_parameter),
             ImplItem::Const(const_item) =&gt; <span class="macro">abort!</span>(
                 const_item.ident,
                 <span class="string">&quot;Const items are not supported in exported types&quot;
@@ -382,14 +427,13 @@
             <span class="kw">_ </span>=&gt; <span class="macro">abort!</span>(item, <span class="string">&quot;Only function items are supported in exported types&quot;</span>),
         }
     }
-}
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;input</span>&gt; FunctionInformation&lt;<span class="lifetime">&#39;input</span>&gt; {
     <span class="doccomment">/// Parses a function definition and collects pieces of information into a
     /// [`FunctionInformation`] instance.
-    </span><span class="kw">pub fn </span>new(function: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>ImplItemMethod) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(function: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>ImplItemMethod, caller_type: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>Ident&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>wit_name = function.sig.ident.to_string().to_kebab_case();
-        <span class="kw">let </span>is_reentrant = <span class="self">Self</span>::is_reentrant(<span class="kw-2">&amp;</span>function.sig);
+        <span class="kw">let </span>is_reentrant = <span class="self">Self</span>::is_reentrant(<span class="kw-2">&amp;</span>function.sig)
+            || <span class="self">Self</span>::uses_caller_parameter(<span class="kw-2">&amp;</span>function.sig, caller_type);
         <span class="kw">let </span>(parameter_bindings, parameter_types) =
             <span class="self">Self</span>::parse_parameters(is_reentrant, function.sig.inputs.iter());
         <span class="kw">let </span>(results, is_fallible) = <span class="self">Self</span>::parse_output(<span class="kw-2">&amp;</span>function.sig.output);
@@ -421,15 +465,51 @@
             <span class="kw">return </span><span class="bool-val">false</span>;
         };
 
-        <span class="kw">let </span><span class="prelude-val">Some</span>(FnArg::Typed(first_parameter)) = signature.inputs.first() <span class="kw">else </span>{
+        <span class="self">Self</span>::first_parameter_is_caller(signature, <span class="kw-2">&amp;</span>generic_type.ident)
+    }
+
+    <span class="doccomment">/// Checks if a function uses a `caller_type` in the first parameter.
+    ///
+    /// If it does, the function is assumed to be reentrant.
+    </span><span class="kw">fn </span>uses_caller_parameter(signature: <span class="kw-2">&amp;</span>Signature, caller_type: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Ident&gt;) -&gt; bool {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(caller_type) = caller_type {
+            <span class="self">Self</span>::first_parameter_is_caller(signature, caller_type)
+        } <span class="kw">else </span>{
+            <span class="bool-val">false
+        </span>}
+    }
+
+    <span class="doccomment">/// Checks if the type of a function&#39;s first parameter is the `caller_type`.
+    </span><span class="kw">fn </span>first_parameter_is_caller(signature: <span class="kw-2">&amp;</span>Signature, caller_type: <span class="kw-2">&amp;</span>Ident) -&gt; bool {
+        <span class="kw">let </span><span class="prelude-val">Some</span>(first_parameter) = signature.inputs.first() <span class="kw">else </span>{
             <span class="kw">return </span><span class="bool-val">false</span>;
         };
 
-        <span class="kw">let </span>Type::Path(first_parameter_type) = <span class="kw-2">&amp;*</span>first_parameter.ty <span class="kw">else </span>{
+        <span class="kw">let </span>FnArg::Typed(PatType {
+            ty: first_parameter_type,
+            ..
+        }) = first_parameter
+        <span class="kw">else </span>{
+            <span class="macro">abort!</span>(
+                first_parameter,
+                <span class="string">&quot;`self` parameters aren&#39;t supported by Witty&quot;
+            </span>);
+        };
+
+        <span class="kw">let </span>Type::Reference(TypeReference {
+            mutability: <span class="prelude-val">Some</span>(<span class="kw">_</span>),
+            elem: referenced_type,
+            ..
+        }) = <span class="kw-2">&amp;**</span>first_parameter_type
+        <span class="kw">else </span>{
             <span class="kw">return </span><span class="bool-val">false</span>;
         };
 
-        first_parameter_type.path == generic_type.ident.clone().into()
+        <span class="kw">let </span>Type::Path(TypePath { path, .. }) = <span class="kw-2">&amp;**</span>referenced_type <span class="kw">else </span>{
+            <span class="kw">return </span><span class="bool-val">false</span>;
+        };
+
+        path.is_ident(caller_type)
     }
 
     <span class="doccomment">/// Parses a function&#39;s parameters and returns the generated code with a list ofbindings to the
@@ -468,7 +548,7 @@
 
     <span class="doccomment">/// Generates the code to export a host function using the Wasmer runtime.
     </span><span class="attr">#[cfg(feature = <span class="string">&quot;wasmer&quot;</span>)]
-    </span><span class="kw">pub fn </span>generate_for_wasmer(<span class="kw-2">&amp;</span><span class="self">self</span>, namespace: <span class="kw-2">&amp;</span>LitStr) -&gt; TokenStream {
+    </span><span class="kw">pub fn </span>generate_for_wasmer(<span class="kw-2">&amp;</span><span class="self">self</span>, namespace: <span class="kw-2">&amp;</span>LitStr, type_name: <span class="kw-2">&amp;</span>Ident) -&gt; TokenStream {
         <span class="kw">let </span>caller = <span class="macro">quote! </span>{
             linera_witty::wasmer::FunctionEnvMut&lt;<span class="lifetime">&#39;_</span>, linera_witty::wasmer::InstanceSlot&gt;
         };
@@ -482,6 +562,7 @@
 
         <span class="self">self</span>.generate(
             namespace,
+            type_name,
             caller,
             input_to_guest_parameters,
             guest_results_to_output,
@@ -491,7 +572,7 @@
 
     <span class="doccomment">/// Generates the code to export a host function using the Wasmtime runtime.
     </span><span class="attr">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
-    </span><span class="kw">pub fn </span>generate_for_wasmtime(<span class="kw-2">&amp;</span><span class="self">self</span>, namespace: <span class="kw-2">&amp;</span>LitStr) -&gt; TokenStream {
+    </span><span class="kw">pub fn </span>generate_for_wasmtime(<span class="kw-2">&amp;</span><span class="self">self</span>, namespace: <span class="kw-2">&amp;</span>LitStr, type_name: <span class="kw-2">&amp;</span>Ident) -&gt; TokenStream {
         <span class="kw">let </span>caller = <span class="macro">quote! </span>{ linera_witty::wasmtime::Caller&lt;<span class="lifetime">&#39;_</span>, ()&gt; };
         <span class="kw">let </span>input_to_guest_parameters = <span class="macro">quote! </span>{
             linera_witty::wasmtime::WasmtimeParameters::from_wasmtime(input)
@@ -503,6 +584,7 @@
 
         <span class="self">self</span>.generate(
             namespace,
+            type_name,
             caller,
             input_to_guest_parameters,
             guest_results_to_output,
@@ -512,7 +594,7 @@
 
     <span class="doccomment">/// Generates the code to export a host function using a mock Wasm instance for testing.
     </span><span class="attr">#[cfg(feature = <span class="string">&quot;mock-instance&quot;</span>)]
-    </span><span class="kw">pub fn </span>generate_for_mock_instance(<span class="kw-2">&amp;</span><span class="self">self</span>, namespace: <span class="kw-2">&amp;</span>LitStr) -&gt; TokenStream {
+    </span><span class="kw">pub fn </span>generate_for_mock_instance(<span class="kw-2">&amp;</span><span class="self">self</span>, namespace: <span class="kw-2">&amp;</span>LitStr, type_name: <span class="kw-2">&amp;</span>Ident) -&gt; TokenStream {
         <span class="kw">let </span>caller = <span class="macro">quote! </span>{ linera_witty::MockInstance };
         <span class="kw">let </span>input_to_guest_parameters = <span class="macro">quote! </span>{ input };
         <span class="kw">let </span>guest_results_to_output = <span class="macro">quote! </span>{ guest_results };
@@ -520,6 +602,7 @@
 
         <span class="self">self</span>.generate(
             namespace,
+            type_name,
             caller,
             input_to_guest_parameters,
             guest_results_to_output,
@@ -531,6 +614,7 @@
     </span><span class="kw">fn </span>generate(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         namespace: <span class="kw-2">&amp;</span>LitStr,
+        type_name: <span class="kw-2">&amp;</span>Ident,
         caller: TokenStream,
         input_to_guest_parameters: TokenStream,
         guest_results_to_output: TokenStream,
@@ -568,7 +652,7 @@
                         )<span class="question-mark">?</span>;
 
                     <span class="attr">#[allow(clippy::let_unit_value)]
-                    </span><span class="kw">let </span>host_results = <span class="self">Self</span>::#function_name(
+                    </span><span class="kw">let </span>host_results = #type_name::#function_name(
                         #caller_parameter
                         #host_parameters
                     ) #call_early_return;

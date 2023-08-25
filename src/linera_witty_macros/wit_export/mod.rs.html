@@ -162,6 +162,34 @@
 <a href="#162" id="162">162</a>
 <a href="#163" id="163">163</a>
 <a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -175,7 +203,7 @@
 <span class="kw">use </span>proc_macro2::TokenStream;
 <span class="kw">use </span>proc_macro_error::abort;
 <span class="kw">use </span>quote::quote;
-<span class="kw">use </span>syn::{Ident, ItemImpl, LitStr, Type, TypePath};
+<span class="kw">use </span>syn::{Generics, Ident, ItemImpl, LitStr, Type, TypePath};
 
 <span class="doccomment">/// Returns the code generated for exporting host functions to guest Wasm instances.
 ///
@@ -192,6 +220,7 @@
 /// this type. Then, they are used to generate the final code.
 </span><span class="kw">pub struct </span>WitExportGenerator&lt;<span class="lifetime">&#39;input</span>&gt; {
     type_name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>Ident,
+    has_caller_type_parameter: bool,
     implementation: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>ItemImpl,
     functions: Vec&lt;FunctionInformation&lt;<span class="lifetime">&#39;input</span>&gt;&gt;,
     namespace: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>LitStr,
@@ -201,18 +230,36 @@
     <span class="doccomment">/// Collects the pieces necessary for code generation from the inputs.
     </span><span class="kw">pub fn </span>new(implementation: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>ItemImpl, namespace: <span class="kw-2">&amp;</span><span class="lifetime">&#39;input </span>LitStr) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>type_name = type_name(implementation);
+        <span class="kw">let </span>caller_type_parameter = <span class="self">Self</span>::caller_type_parameter(<span class="kw-2">&amp;</span>implementation.generics);
         <span class="kw">let </span>functions = implementation
             .items
             .iter()
-            .map(FunctionInformation::from)
+            .map(|item| FunctionInformation::from_item(item, caller_type_parameter))
             .collect();
 
         WitExportGenerator {
             type_name,
+            has_caller_type_parameter: caller_type_parameter.is_some(),
             implementation,
             functions,
             namespace,
         }
+    }
+
+    <span class="doccomment">/// Extracts a generic type parameter for the caller type if available.
+    </span><span class="kw">fn </span>caller_type_parameter(generics: <span class="kw-2">&amp;</span>Generics) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Ident&gt; {
+        <span class="kw">if </span>generics.type_params().count() &gt; <span class="number">1 </span>{
+            <span class="macro">abort!</span>(
+                generics.params,
+                <span class="string">&quot;`#[wit_export]` supports only one generic type parameter \
+                which is assumed to be the caller instance&quot;
+            </span>);
+        }
+
+        generics
+            .type_params()
+            .next()
+            .map(|parameter| <span class="kw-2">&amp;</span>parameter.ident)
     }
 
     <span class="doccomment">/// Consumes the collected pieces to generate the final code.
@@ -235,12 +282,15 @@
         <span class="attr">#[cfg(feature = <span class="string">&quot;wasmer&quot;</span>)]
         </span>{
             <span class="kw">let </span>export_target = <span class="macro">quote! </span>{ linera_witty::wasmer::InstanceBuilder };
+            <span class="kw">let </span>target_caller_type = <span class="macro">quote! </span>{
+                linera_witty::wasmer::FunctionEnvMut&lt;<span class="lifetime">&#39;_</span>, linera_witty::wasmer::InstanceSlot&gt;
+            };
             <span class="kw">let </span>exported_functions = <span class="self">self
                 </span>.functions
                 .iter()
-                .map(|function| function.generate_for_wasmer(<span class="self">self</span>.namespace));
+                .map(|function| function.generate_for_wasmer(<span class="self">self</span>.namespace, <span class="self">self</span>.type_name));
 
-            <span class="prelude-val">Some</span>(<span class="self">self</span>.generate_for(export_target, exported_functions))
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.generate_for(export_target, target_caller_type, exported_functions))
         }
         <span class="attr">#[cfg(not(feature = <span class="string">&quot;wasmer&quot;</span>))]
         </span>{
@@ -253,12 +303,13 @@
         <span class="attr">#[cfg(feature = <span class="string">&quot;wasmtime&quot;</span>)]
         </span>{
             <span class="kw">let </span>export_target = <span class="macro">quote! </span>{ linera_witty::wasmtime::Linker&lt;()&gt; };
+            <span class="kw">let </span>target_caller_type = <span class="macro">quote! </span>{ linera_witty::wasmtime::Caller&lt;<span class="lifetime">&#39;_</span>, ()&gt; };
             <span class="kw">let </span>exported_functions = <span class="self">self
                 </span>.functions
                 .iter()
-                .map(|function| function.generate_for_wasmtime(<span class="self">self</span>.namespace));
+                .map(|function| function.generate_for_wasmtime(<span class="self">self</span>.namespace, <span class="self">self</span>.type_name));
 
-            <span class="prelude-val">Some</span>(<span class="self">self</span>.generate_for(export_target, exported_functions))
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.generate_for(export_target, target_caller_type, exported_functions))
         }
         <span class="attr">#[cfg(not(feature = <span class="string">&quot;wasmtime&quot;</span>))]
         </span>{
@@ -271,12 +322,12 @@
         <span class="attr">#[cfg(feature = <span class="string">&quot;mock-instance&quot;</span>)]
         </span>{
             <span class="kw">let </span>export_target = <span class="macro">quote! </span>{ linera_witty::MockInstance };
-            <span class="kw">let </span>exported_functions = <span class="self">self
-                </span>.functions
-                .iter()
-                .map(|function| function.generate_for_mock_instance(<span class="self">self</span>.namespace));
+            <span class="kw">let </span>target_caller_type = <span class="macro">quote! </span>{ linera_witty::MockInstance };
+            <span class="kw">let </span>exported_functions = <span class="self">self</span>.functions.iter().map(|function| {
+                function.generate_for_mock_instance(<span class="self">self</span>.namespace, <span class="self">self</span>.type_name)
+            });
 
-            <span class="prelude-val">Some</span>(<span class="self">self</span>.generate_for(export_target, exported_functions))
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.generate_for(export_target, target_caller_type, exported_functions))
         }
         <span class="attr">#[cfg(not(feature = <span class="string">&quot;mock-instance&quot;</span>))]
         </span>{
@@ -289,12 +340,16 @@
     </span><span class="kw">fn </span>generate_for(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         export_target: TokenStream,
+        target_caller_type: TokenStream,
         exported_functions: <span class="kw">impl </span>Iterator&lt;Item = TokenStream&gt;,
     ) -&gt; TokenStream {
         <span class="kw">let </span>type_name = <span class="kw-2">&amp;</span><span class="self">self</span>.type_name;
+        <span class="kw">let </span>caller_type_parameter = <span class="self">self
+            </span>.has_caller_type_parameter
+            .then(|| <span class="macro">quote! </span>{ &lt;#target_caller_type&gt; });
 
         <span class="macro">quote! </span>{
-            <span class="kw">impl </span>linera_witty::ExportTo&lt;#export_target&gt; <span class="kw">for </span>#type_name {
+            <span class="kw">impl </span>linera_witty::ExportTo&lt;#export_target&gt; <span class="kw">for </span>#type_name #caller_type_parameter {
                 <span class="kw">fn </span>export_to(
                     target: <span class="kw-2">&amp;mut </span>#export_target,
                 ) -&gt; <span class="prelude-ty">Result</span>&lt;(), linera_witty::RuntimeError&gt; {
@@ -315,15 +370,16 @@
     <span class="kw">else </span>{
         <span class="macro">abort!</span>(
             implementation.self_ty,
-            <span class="string">&quot;`#[wit_export]` must be used on `impl` blocks of non-generic types&quot;</span>,
+            <span class="string">&quot;`#[wit_export]` must be used on `impl` blocks&quot;</span>,
         );
     };
 
-    path_name.get_ident().unwrap_or_else(|| {
-        <span class="macro">abort!</span>(
-            implementation.self_ty,
-            <span class="string">&quot;`#[wit_export]` must be used on `impl` blocks of non-generic types&quot;</span>,
-        );
-    })
+    <span class="kw-2">&amp;</span>path_name
+        .segments
+        .last()
+        .unwrap_or_else(|| {
+            <span class="macro">abort!</span>(implementation.self_ty, <span class="string">&quot;Missing type name identifier&quot;</span>,);
+        })
+        .ident
 }
 </code></pre></div></section></main></body></html>
