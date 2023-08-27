@@ -436,6 +436,26 @@
 <a href="#436" id="436">436</a>
 <a href="#437" id="437">437</a>
 <a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a>
+<a href="#456" id="456">456</a>
+<a href="#457" id="457">457</a>
+<a href="#458" id="458">458</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -798,6 +818,18 @@
     </span><span class="kw">pub </span>chain_id: ChainId,
 }
 
+<span class="doccomment">/// A message together with routing information.
+</span><span class="attr">#[derive(Debug, Deserialize, Serialize)]
+#[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Eq, PartialEq))]
+</span><span class="kw">pub struct </span>OutgoingMessage&lt;Message&gt; {
+    <span class="doccomment">/// The destination of the message.
+    </span><span class="kw">pub </span>destination: Destination,
+    <span class="doccomment">/// Whether the message is authenticated.
+    </span><span class="kw">pub </span>authenticated: bool,
+    <span class="doccomment">/// The message itself.
+    </span><span class="kw">pub </span>message: Message,
+}
+
 <span class="doccomment">/// Externally visible results of an execution. These results are meant in the context of
 /// the application that created them.
 </span><span class="attr">#[derive(Debug, Deserialize, Serialize)]
@@ -805,7 +837,7 @@
 </span><span class="kw">pub struct </span>ExecutionResult&lt;Message&gt; {
     <span class="doccomment">/// Sends messages to the given destinations, possibly forwarding the authenticated
     /// signer.
-    </span><span class="kw">pub </span>messages: Vec&lt;(Destination, bool, Message)&gt;,
+    </span><span class="kw">pub </span>messages: Vec&lt;OutgoingMessage&lt;Message&gt;&gt;,
     <span class="doccomment">/// Subscribe chains to channels.
     </span><span class="kw">pub </span>subscribe: Vec&lt;(ChannelName, ChainId)&gt;,
     <span class="doccomment">/// Unsubscribe chains to channels.
@@ -825,7 +857,11 @@
 <span class="kw">impl</span>&lt;Message: Serialize + Debug + DeserializeOwned&gt; ExecutionResult&lt;Message&gt; {
     <span class="doccomment">/// Adds a message to the execution result.
     </span><span class="kw">pub fn </span>with_message(<span class="kw-2">mut </span><span class="self">self</span>, destination: <span class="kw">impl </span>Into&lt;Destination&gt;, message: Message) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.messages.push((destination.into(), <span class="bool-val">false</span>, message));
+        <span class="self">self</span>.messages.push(OutgoingMessage {
+            destination: destination.into(),
+            authenticated: <span class="bool-val">false</span>,
+            message,
+        });
         <span class="self">self
     </span>}
 
@@ -835,7 +871,11 @@
         destination: <span class="kw">impl </span>Into&lt;Destination&gt;,
         message: Message,
     ) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.messages.push((destination.into(), <span class="bool-val">true</span>, message));
+        <span class="self">self</span>.messages.push(OutgoingMessage {
+            destination: destination.into(),
+            authenticated: <span class="bool-val">true</span>,
+            message,
+        });
         <span class="self">self
     </span>}
 }

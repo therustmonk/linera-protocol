@@ -396,8 +396,8 @@
     runtime::{ApplicationStatus, ExecutionRuntime, SessionManager},
     system::SystemExecutionStateView,
     ContractRuntime, ExecutionError, ExecutionResult, ExecutionRuntimeContext, Message,
-    MessageContext, Operation, OperationContext, Query, QueryContext, RawExecutionResult, Response,
-    SystemMessage, UserApplicationDescription, UserApplicationId,
+    MessageContext, Operation, OperationContext, Query, QueryContext, RawExecutionResult,
+    RawOutgoingMessage, Response, SystemMessage, UserApplicationDescription, UserApplicationId,
 };
 <span class="kw">use </span>linera_base::{
     ensure,
@@ -621,13 +621,13 @@
             .describe_applications_with_dependencies(<span class="macro">vec!</span>[application_id], <span class="kw-2">&amp;</span>Default::default())
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">for </span>message <span class="kw">in </span><span class="kw-2">&amp;</span>result.messages {
-            system_result.messages.push((
-                message.<span class="number">0</span>.clone(),
-                <span class="bool-val">false</span>,
-                SystemMessage::RegisterApplications {
+            system_result.messages.push(RawOutgoingMessage {
+                destination: message.destination.clone(),
+                authenticated: <span class="bool-val">false</span>,
+                message: SystemMessage::RegisterApplications {
                     applications: applications.clone(),
                 },
-            ));
+            });
         }
         <span class="kw">if </span>!system_result.messages.is_empty() {
             results.push(ExecutionResult::System(system_result));

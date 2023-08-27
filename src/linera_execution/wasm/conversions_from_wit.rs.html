@@ -187,6 +187,14 @@
 <a href="#187" id="187">187</a>
 <a href="#188" id="188">188</a>
 <a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -199,8 +207,8 @@
 
 </span><span class="kw">use super</span>::{contract, contract_system_api, service_system_api};
 <span class="kw">use crate</span>::{
-    ApplicationCallResult, ChannelName, Destination, RawExecutionResult, SessionCallResult,
-    SessionId, UserApplicationId,
+    ApplicationCallResult, ChannelName, Destination, RawExecutionResult, RawOutgoingMessage,
+    SessionCallResult, SessionId, UserApplicationId,
 };
 <span class="kw">use </span>linera_base::{
     crypto::CryptoHash,
@@ -231,14 +239,22 @@
     }
 }
 
+<span class="kw">impl </span>From&lt;contract::OutgoingMessage&gt; <span class="kw">for </span>RawOutgoingMessage&lt;Vec&lt;u8&gt;&gt; {
+    <span class="kw">fn </span>from(message: contract::OutgoingMessage) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            destination: message.destination.into(),
+            authenticated: message.authenticated,
+            message: message.message,
+        }
+    }
+}
+
 <span class="kw">impl </span>From&lt;contract::ExecutionResult&gt; <span class="kw">for </span>RawExecutionResult&lt;Vec&lt;u8&gt;&gt; {
     <span class="kw">fn </span>from(result: contract::ExecutionResult) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>messages = result
             .messages
             .into_iter()
-            .map(|(destination, authenticated, message)| {
-                (destination.into(), authenticated, message)
-            })
+            .map(RawOutgoingMessage::from)
             .collect();
 
         <span class="kw">let </span>subscribe = result

@@ -919,6 +919,23 @@
 <a href="#919" id="919">919</a>
 <a href="#920" id="920">920</a>
 <a href="#921" id="921">921</a>
+<a href="#922" id="922">922</a>
+<a href="#923" id="923">923</a>
+<a href="#924" id="924">924</a>
+<a href="#925" id="925">925</a>
+<a href="#926" id="926">926</a>
+<a href="#927" id="927">927</a>
+<a href="#928" id="928">928</a>
+<a href="#929" id="929">929</a>
+<a href="#930" id="930">930</a>
+<a href="#931" id="931">931</a>
+<a href="#932" id="932">932</a>
+<a href="#933" id="933">933</a>
+<a href="#934" id="934">934</a>
+<a href="#935" id="935">935</a>
+<a href="#936" id="936">936</a>
+<a href="#937" id="937">937</a>
+<a href="#938" id="938">938</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -927,7 +944,7 @@
     committee::{Committee, Epoch},
     ApplicationRegistryView, Bytecode, BytecodeLocation, ChainOwnership, ChannelName,
     ChannelSubscription, Destination, MessageContext, OperationContext, QueryContext,
-    RawExecutionResult, UserApplicationDescription, UserApplicationId,
+    RawExecutionResult, RawOutgoingMessage, UserApplicationDescription, UserApplicationId,
 };
 <span class="kw">use </span>async_graphql::Enum;
 <span class="kw">use </span>custom_debug_derive::Debug;
@@ -1399,28 +1416,28 @@
                         epoch: <span class="kw-2">*</span>epoch
                     }
                 );
-                <span class="kw">let </span>e1 = (
-                    Destination::Recipient(child_id),
-                    <span class="bool-val">false</span>,
-                    SystemMessage::OpenChain {
+                <span class="kw">let </span>e1 = RawOutgoingMessage {
+                    destination: Destination::Recipient(child_id),
+                    authenticated: <span class="bool-val">false</span>,
+                    message: SystemMessage::OpenChain {
                         ownership: ownership.clone(),
                         committees: committees.clone(),
                         admin_id: <span class="kw-2">*</span>admin_id,
                         epoch: <span class="kw-2">*</span>epoch,
                     },
-                );
+                };
                 <span class="kw">let </span>subscription = ChannelSubscription {
                     chain_id: <span class="kw-2">*</span>admin_id,
                     name: SystemChannel::Admin.name(),
                 };
-                <span class="kw">let </span>e2 = (
-                    Destination::Recipient(<span class="kw-2">*</span>admin_id),
-                    <span class="bool-val">false</span>,
-                    SystemMessage::Subscribe {
+                <span class="kw">let </span>e2 = RawOutgoingMessage {
+                    destination: Destination::Recipient(<span class="kw-2">*</span>admin_id),
+                    authenticated: <span class="bool-val">false</span>,
+                    message: SystemMessage::Subscribe {
                         id: child_id,
                         subscription,
                     },
-                );
+                };
                 result.messages.extend([e1, e2]);
             }
             ChangeOwner { new_public_key } =&gt; {
@@ -1435,14 +1452,15 @@
                 <span class="comment">// Unsubscribe to all channels.
                 </span><span class="self">self</span>.subscriptions
                     .for_each_index(|subscription| {
-                        result.messages.push((
-                            Destination::Recipient(subscription.chain_id),
-                            <span class="bool-val">false</span>,
-                            SystemMessage::Unsubscribe {
+                        <span class="kw">let </span>message = RawOutgoingMessage {
+                            destination: Destination::Recipient(subscription.chain_id),
+                            authenticated: <span class="bool-val">false</span>,
+                            message: SystemMessage::Unsubscribe {
                                 id: context.chain_id,
                                 subscription,
                             },
-                        ));
+                        };
+                        result.messages.push(message);
                         <span class="prelude-val">Ok</span>(())
                     })
                     .<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1476,14 +1494,15 @@
                 );
                 balance.try_sub_assign(<span class="kw-2">*</span>amount)<span class="question-mark">?</span>;
                 <span class="kw">if let </span>Recipient::Account(account) = recipient {
-                    result.messages.push((
-                        Destination::Recipient(account.chain_id),
-                        <span class="bool-val">false</span>,
-                        SystemMessage::Credit {
+                    <span class="kw">let </span>message = RawOutgoingMessage {
+                        destination: Destination::Recipient(account.chain_id),
+                        authenticated: <span class="bool-val">false</span>,
+                        message: SystemMessage::Credit {
                             amount: <span class="kw-2">*</span>amount,
                             account: <span class="kw-2">*</span>account,
                         },
-                    ));
+                    };
+                    result.messages.push(message);
                 }
             }
             Claim {
@@ -1501,10 +1520,10 @@
                     <span class="kw-2">*</span>amount &gt; Amount::zero(),
                     SystemExecutionError::IncorrectClaimAmount
                 );
-                result.messages.push((
-                    Destination::Recipient(<span class="kw-2">*</span>target),
-                    <span class="bool-val">true</span>,
-                    SystemMessage::Withdraw {
+                <span class="kw">let </span>message = RawOutgoingMessage {
+                    destination: Destination::Recipient(<span class="kw-2">*</span>target),
+                    authenticated: <span class="bool-val">true</span>,
+                    message: SystemMessage::Withdraw {
                         amount: <span class="kw-2">*</span>amount,
                         account: Account {
                             chain_id: <span class="kw-2">*</span>target,
@@ -1513,7 +1532,8 @@
                         user_data: user_data.clone(),
                         recipient: <span class="kw-2">*</span>recipient,
                     },
-                ));
+                };
+                result.messages.push(message);
             }
             Admin(admin_operation) =&gt; {
                 <span class="macro">ensure!</span>(
@@ -1528,28 +1548,30 @@
                         );
                         <span class="self">self</span>.committees.get_mut().insert(<span class="kw-2">*</span>epoch, committee.clone());
                         <span class="self">self</span>.epoch.set(<span class="prelude-val">Some</span>(<span class="kw-2">*</span>epoch));
-                        result.messages.push((
-                            Destination::Subscribers(SystemChannel::Admin.name()),
-                            <span class="bool-val">false</span>,
-                            SystemMessage::SetCommittees {
+                        <span class="kw">let </span>message = RawOutgoingMessage {
+                            destination: Destination::Subscribers(SystemChannel::Admin.name()),
+                            authenticated: <span class="bool-val">false</span>,
+                            message: SystemMessage::SetCommittees {
                                 epoch: <span class="kw-2">*</span>epoch,
                                 committees: <span class="self">self</span>.committees.get().clone(),
                             },
-                        ));
+                        };
+                        result.messages.push(message);
                     }
                     AdminOperation::RemoveCommittee { epoch } =&gt; {
                         <span class="macro">ensure!</span>(
                             <span class="self">self</span>.committees.get_mut().remove(epoch).is_some(),
                             SystemExecutionError::InvalidCommitteeRemoval
                         );
-                        result.messages.push((
-                            Destination::Subscribers(SystemChannel::Admin.name()),
-                            <span class="bool-val">false</span>,
-                            SystemMessage::SetCommittees {
+                        <span class="kw">let </span>message = RawOutgoingMessage {
+                            destination: Destination::Subscribers(SystemChannel::Admin.name()),
+                            authenticated: <span class="bool-val">false</span>,
+                            message: SystemMessage::SetCommittees {
                                 epoch: <span class="self">self</span>.epoch.get().expect(<span class="string">&quot;chain is active&quot;</span>),
                                 committees: <span class="self">self</span>.committees.get().clone(),
                             },
-                        ));
+                        };
+                        result.messages.push(message);
                     }
                 }
             }
@@ -1573,14 +1595,15 @@
                     SystemExecutionError::NoSuchChannel(context.chain_id, <span class="kw-2">*</span>channel)
                 );
                 <span class="self">self</span>.subscriptions.insert(<span class="kw-2">&amp;</span>subscription)<span class="question-mark">?</span>;
-                result.messages.push((
-                    Destination::Recipient(<span class="kw-2">*</span>chain_id),
-                    <span class="bool-val">false</span>,
-                    SystemMessage::Subscribe {
+                <span class="kw">let </span>message = RawOutgoingMessage {
+                    destination: Destination::Recipient(<span class="kw-2">*</span>chain_id),
+                    authenticated: <span class="bool-val">false</span>,
+                    message: SystemMessage::Subscribe {
                         id: context.chain_id,
                         subscription,
                     },
-                ));
+                };
+                result.messages.push(message);
             }
             Unsubscribe { chain_id, channel } =&gt; {
                 <span class="kw">let </span>subscription = ChannelSubscription {
@@ -1592,25 +1615,27 @@
                     SystemExecutionError::InvalidUnsubscription(context.chain_id, <span class="kw-2">*</span>channel)
                 );
                 <span class="self">self</span>.subscriptions.remove(<span class="kw-2">&amp;</span>subscription)<span class="question-mark">?</span>;
-                result.messages.push((
-                    Destination::Recipient(<span class="kw-2">*</span>chain_id),
-                    <span class="bool-val">false</span>,
-                    SystemMessage::Unsubscribe {
+                <span class="kw">let </span>message = RawOutgoingMessage {
+                    destination: Destination::Recipient(<span class="kw-2">*</span>chain_id),
+                    authenticated: <span class="bool-val">false</span>,
+                    message: SystemMessage::Unsubscribe {
                         id: context.chain_id,
                         subscription,
                     },
-                ));
+                };
+                result.messages.push(message);
             }
             PublishBytecode { .. } =&gt; {
                 <span class="comment">// Send a `BytecodePublished` message to ourself so that we can broadcast
                 // the bytecode-id next.
-                </span>result.messages.push((
-                    Destination::Recipient(context.chain_id),
-                    <span class="bool-val">false</span>,
-                    SystemMessage::BytecodePublished {
+                </span><span class="kw">let </span>message = RawOutgoingMessage {
+                    destination: Destination::Recipient(context.chain_id),
+                    authenticated: <span class="bool-val">false</span>,
+                    message: SystemMessage::BytecodePublished {
                         operation_index: context.index,
                     },
-                ));
+                };
+                result.messages.push(message);
             }
             CreateApplication {
                 bytecode_id,
@@ -1630,21 +1655,25 @@
                     )
                     .<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="comment">// Send a message to ourself to increment the message ID.
-                </span>result.messages.push((
-                    Destination::Recipient(context.chain_id),
-                    <span class="bool-val">false</span>,
-                    SystemMessage::ApplicationCreated,
-                ));
+                </span><span class="kw">let </span>message = RawOutgoingMessage {
+                    destination: Destination::Recipient(context.chain_id),
+                    authenticated: <span class="bool-val">false</span>,
+                    message: SystemMessage::ApplicationCreated,
+                };
+                result.messages.push(message);
                 new_application = <span class="prelude-val">Some</span>((id, initialization_argument.clone()));
             }
             RequestApplication {
                 chain_id,
                 application_id,
-            } =&gt; result.messages.push((
-                Destination::Recipient(<span class="kw-2">*</span>chain_id),
-                <span class="bool-val">false</span>,
-                SystemMessage::RequestApplication(<span class="kw-2">*</span>application_id),
-            )),
+            } =&gt; {
+                <span class="kw">let </span>message = RawOutgoingMessage {
+                    destination: Destination::Recipient(<span class="kw-2">*</span>chain_id),
+                    authenticated: <span class="bool-val">false</span>,
+                    message: SystemMessage::RequestApplication(<span class="kw-2">*</span>application_id),
+                };
+                result.messages.push(message);
+            }
         }
 
         <span class="prelude-val">Ok</span>((result, new_application))
@@ -1694,14 +1723,15 @@
                 <span class="kw">let </span>balance = <span class="self">self</span>.balances.get_mut_or_default(owner).<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="kw">if </span>balance.try_sub_assign(<span class="kw-2">*</span>amount).is_ok() {
                     <span class="kw">if let </span>Recipient::Account(account) = recipient {
-                        result.messages.push((
-                            Destination::Recipient(account.chain_id),
-                            <span class="bool-val">false</span>,
-                            SystemMessage::Credit {
+                        <span class="kw">let </span>message = RawOutgoingMessage {
+                            destination: Destination::Recipient(account.chain_id),
+                            authenticated: <span class="bool-val">false</span>,
+                            message: SystemMessage::Credit {
                                 amount: <span class="kw-2">*</span>amount,
                                 account: <span class="kw-2">*</span>account,
                             },
-                        ));
+                        };
+                        result.messages.push(message);
                     }
                 } <span class="kw">else </span>{
                     <span class="macro">tracing::info!</span>(<span class="string">&quot;Withdrawal request was skipped due to lack of funds.&quot;</span>);
@@ -1718,19 +1748,21 @@
             Subscribe { id, subscription } <span class="kw">if </span>subscription.chain_id == context.chain_id =&gt; {
                 <span class="comment">// Notify the subscriber about this block, so that it is included in the
                 // receive_log of the subscriber and correctly synchronized.
-                </span>result.messages.push((
-                    Destination::Recipient(<span class="kw-2">*</span>id),
-                    <span class="bool-val">false</span>,
-                    SystemMessage::Notify { id: <span class="kw-2">*</span>id },
-                ));
+                </span><span class="kw">let </span>message = RawOutgoingMessage {
+                    destination: Destination::Recipient(<span class="kw-2">*</span>id),
+                    authenticated: <span class="bool-val">false</span>,
+                    message: SystemMessage::Notify { id: <span class="kw-2">*</span>id },
+                };
+                result.messages.push(message);
                 result.subscribe.push((subscription.name.clone(), <span class="kw-2">*</span>id));
             }
             Unsubscribe { id, subscription } <span class="kw">if </span>subscription.chain_id == context.chain_id =&gt; {
-                result.messages.push((
-                    Destination::Recipient(<span class="kw-2">*</span>id),
-                    <span class="bool-val">false</span>,
-                    SystemMessage::Notify { id: <span class="kw-2">*</span>id },
-                ));
+                <span class="kw">let </span>message = RawOutgoingMessage {
+                    destination: Destination::Recipient(<span class="kw-2">*</span>id),
+                    authenticated: <span class="bool-val">false</span>,
+                    message: SystemMessage::Notify { id: <span class="kw-2">*</span>id },
+                };
+                result.messages.push(message);
                 result.unsubscribe.push((subscription.name.clone(), <span class="kw-2">*</span>id));
             }
             BytecodePublished { operation_index } =&gt; {
@@ -1742,11 +1774,12 @@
                 <span class="self">self</span>.registry
                     .register_published_bytecode(bytecode_id, bytecode_location)<span class="question-mark">?</span>;
                 <span class="kw">let </span>locations = <span class="self">self</span>.registry.bytecode_locations().<span class="kw">await</span><span class="question-mark">?</span>;
-                result.messages.push((
-                    Destination::Subscribers(SystemChannel::PublishedBytecodes.name()),
-                    <span class="bool-val">false</span>,
-                    SystemMessage::BytecodeLocations { locations },
-                ));
+                <span class="kw">let </span>message = RawOutgoingMessage {
+                    destination: Destination::Subscribers(SystemChannel::PublishedBytecodes.name()),
+                    authenticated: <span class="bool-val">false</span>,
+                    message: SystemMessage::BytecodeLocations { locations },
+                };
+                result.messages.push(message);
             }
             BytecodeLocations { locations } =&gt; {
                 <span class="kw">for </span>(id, location) <span class="kw">in </span>locations {
@@ -1781,11 +1814,12 @@
                     }
                     <span class="prelude-val">Err</span>(err) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(err),
                     <span class="prelude-val">Ok</span>(applications) =&gt; {
-                        result.messages.push((
-                            Destination::Recipient(context.message_id.chain_id),
-                            <span class="bool-val">false</span>,
-                            SystemMessage::RegisterApplications { applications },
-                        ));
+                        <span class="kw">let </span>message = RawOutgoingMessage {
+                            destination: Destination::Recipient(context.message_id.chain_id),
+                            authenticated: <span class="bool-val">false</span>,
+                            message: SystemMessage::RegisterApplications { applications },
+                        };
+                        result.messages.push(message);
                     }
                 }
             }

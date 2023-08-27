@@ -741,6 +741,18 @@
 <a href="#741" id="741">741</a>
 <a href="#742" id="742">742</a>
 <a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -1146,6 +1158,18 @@
     ),
 }
 
+<span class="doccomment">/// A message together with routing information.
+</span><span class="attr">#[derive(Debug)]
+#[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Eq, PartialEq))]
+</span><span class="kw">pub struct </span>RawOutgoingMessage&lt;Message&gt; {
+    <span class="doccomment">/// The destination of the message.
+    </span><span class="kw">pub </span>destination: Destination,
+    <span class="doccomment">/// Whether the message is authenticated.
+    </span><span class="kw">pub </span>authenticated: bool,
+    <span class="doccomment">/// The message itself.
+    </span><span class="kw">pub </span>message: Message,
+}
+
 <span class="doccomment">/// Externally visible results of an execution. These results are meant in the context of
 /// the application that created them.
 </span><span class="attr">#[derive(Debug)]
@@ -1155,7 +1179,7 @@
     </span><span class="kw">pub </span>authenticated_signer: <span class="prelude-ty">Option</span>&lt;Owner&gt;,
     <span class="doccomment">/// Sends messages to the given destinations, possibly forwarding the authenticated
     /// signer.
-    </span><span class="kw">pub </span>messages: Vec&lt;(Destination, bool, Message)&gt;,
+    </span><span class="kw">pub </span>messages: Vec&lt;RawOutgoingMessage&lt;Message&gt;&gt;,
     <span class="doccomment">/// Subscribe chains to channels.
     </span><span class="kw">pub </span>subscribe: Vec&lt;(ChannelName, ChainId)&gt;,
     <span class="doccomment">/// Unsubscribe chains to channels.
