@@ -209,6 +209,17 @@
 <a href="#209" id="209">209</a>
 <a href="#210" id="210">210</a>
 <a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -228,6 +239,7 @@
 };
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>tracing::error;
 
 <span class="doccomment">/// The specific state of a chain managed by multiple owners.
 </span><span class="attr">#[derive(Clone, Debug, Serialize, Deserialize)]
@@ -289,7 +301,9 @@
             .chain(<span class="kw-2">&amp;</span><span class="self">self</span>.locked)
             .max_by_key(|cert| cert.round)
         {
-            <span class="kw">let </span>block = <span class="kw-2">&amp;</span>locked.value().executed_block().block;
+            <span class="kw">let </span>block = locked.value().block().ok_or_else(|| {
+                ChainError::InternalError(<span class="string">&quot;locked certificate must contain block&quot;</span>.to_string())
+            })<span class="question-mark">?</span>;
             <span class="macro">ensure!</span>(
                 locked.round &lt; new_round &amp;&amp; block == new_block,
                 ChainError::HasLockedBlock(block.height, locked.round)
@@ -299,12 +313,12 @@
     }
 
     <span class="kw">pub fn </span>check_validated_block(<span class="kw-2">&amp;</span><span class="self">self</span>, certificate: <span class="kw-2">&amp;</span>Certificate) -&gt; <span class="prelude-ty">Result</span>&lt;Outcome, ChainError&gt; {
-        <span class="kw">let </span>new_block = <span class="kw-2">&amp;</span>certificate.value().executed_block().block;
+        <span class="kw">let </span>new_block = certificate.value().block();
         <span class="kw">let </span>new_round = certificate.round;
         <span class="kw">if let </span><span class="prelude-val">Some</span>(Vote { value, round, .. }) = <span class="kw-2">&amp;</span><span class="self">self</span>.pending {
             <span class="kw">match </span>value.inner() {
                 CertificateValue::ConfirmedBlock { executed_block } =&gt; {
-                    <span class="kw">if </span>executed_block.block == <span class="kw-2">*</span>new_block &amp;&amp; <span class="kw-2">*</span>round == new_round {
+                    <span class="kw">if </span><span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>executed_block.block) == new_block &amp;&amp; <span class="kw-2">*</span>round == new_round {
                         <span class="kw">return </span><span class="prelude-val">Ok</span>(Outcome::Skip);
                     }
                 }
@@ -312,6 +326,11 @@
                     new_round &gt;= <span class="kw-2">*</span>round,
                     ChainError::InsufficientRound(round.try_sub_one().unwrap())
                 ),
+                CertificateValue::LeaderTimeout { .. } =&gt; {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(ChainError::InternalError(
+                        <span class="string">&quot;pending can only be validated or confirmed block&quot;</span>.to_string(),
+                    ))
+                }
             }
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(Certificate { round, .. }) = <span class="kw-2">&amp;</span><span class="self">self</span>.locked {
@@ -349,7 +368,10 @@
     <span class="kw">pub fn </span>create_final_vote(<span class="kw-2">&amp;mut </span><span class="self">self</span>, certificate: Certificate, key_pair: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>KeyPair&gt;) {
         <span class="comment">// Record validity certificate. This is important to keep track of rounds
         // for non-voting nodes.
-        </span><span class="kw">let </span>value = certificate.value.clone().into_confirmed();
+        </span><span class="kw">let </span><span class="prelude-val">Some</span>(value) = certificate.value.clone().into_confirmed() <span class="kw">else </span>{
+            <span class="macro">error!</span>(<span class="string">&quot;Unexpected certificate; expected ValidatedBlock&quot;</span>);
+            <span class="kw">return</span>;
+        };
         <span class="kw">let </span>round = certificate.round;
         <span class="self">self</span>.locked = <span class="prelude-val">Some</span>(certificate);
         <span class="kw">if let </span><span class="prelude-val">Some</span>(key_pair) = key_pair {

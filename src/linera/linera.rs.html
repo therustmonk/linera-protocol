@@ -1790,11 +1790,6 @@
 <a href="#1790" id="1790">1790</a>
 <a href="#1791" id="1791">1791</a>
 <a href="#1792" id="1792">1792</a>
-<a href="#1793" id="1793">1793</a>
-<a href="#1794" id="1794">1794</a>
-<a href="#1795" id="1795">1795</a>
-<a href="#1796" id="1796">1796</a>
-<a href="#1797" id="1797">1797</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -2992,12 +2987,7 @@
                     .<span class="kw">await
                     </span>.unwrap()
                     .into_iter()
-                    .map(|c| <span class="kw">match </span>c.value() {
-                        CertificateValue::ConfirmedBlock { executed_block, .. } =&gt; {
-                            executed_block.messages.len()
-                        }
-                        CertificateValue::ValidatedBlock { .. } =&gt; <span class="number">0</span>,
-                    })
+                    .filter_map(|c| c.value().executed_block().map(|e| e.messages.len()))
                     .sum::&lt;usize&gt;();
                 <span class="macro">info!</span>(<span class="string">&quot;Subscribed {} chains to new committees&quot;</span>, n);
 

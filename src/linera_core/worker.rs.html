@@ -1228,6 +1228,56 @@
 <a href="#1228" id="1228">1228</a>
 <a href="#1229" id="1229">1229</a>
 <a href="#1230" id="1230">1230</a>
+<a href="#1231" id="1231">1231</a>
+<a href="#1232" id="1232">1232</a>
+<a href="#1233" id="1233">1233</a>
+<a href="#1234" id="1234">1234</a>
+<a href="#1235" id="1235">1235</a>
+<a href="#1236" id="1236">1236</a>
+<a href="#1237" id="1237">1237</a>
+<a href="#1238" id="1238">1238</a>
+<a href="#1239" id="1239">1239</a>
+<a href="#1240" id="1240">1240</a>
+<a href="#1241" id="1241">1241</a>
+<a href="#1242" id="1242">1242</a>
+<a href="#1243" id="1243">1243</a>
+<a href="#1244" id="1244">1244</a>
+<a href="#1245" id="1245">1245</a>
+<a href="#1246" id="1246">1246</a>
+<a href="#1247" id="1247">1247</a>
+<a href="#1248" id="1248">1248</a>
+<a href="#1249" id="1249">1249</a>
+<a href="#1250" id="1250">1250</a>
+<a href="#1251" id="1251">1251</a>
+<a href="#1252" id="1252">1252</a>
+<a href="#1253" id="1253">1253</a>
+<a href="#1254" id="1254">1254</a>
+<a href="#1255" id="1255">1255</a>
+<a href="#1256" id="1256">1256</a>
+<a href="#1257" id="1257">1257</a>
+<a href="#1258" id="1258">1258</a>
+<a href="#1259" id="1259">1259</a>
+<a href="#1260" id="1260">1260</a>
+<a href="#1261" id="1261">1261</a>
+<a href="#1262" id="1262">1262</a>
+<a href="#1263" id="1263">1263</a>
+<a href="#1264" id="1264">1264</a>
+<a href="#1265" id="1265">1265</a>
+<a href="#1266" id="1266">1266</a>
+<a href="#1267" id="1267">1267</a>
+<a href="#1268" id="1268">1268</a>
+<a href="#1269" id="1269">1269</a>
+<a href="#1270" id="1270">1270</a>
+<a href="#1271" id="1271">1271</a>
+<a href="#1272" id="1272">1272</a>
+<a href="#1273" id="1273">1273</a>
+<a href="#1274" id="1274">1274</a>
+<a href="#1275" id="1275">1275</a>
+<a href="#1276" id="1276">1276</a>
+<a href="#1277" id="1277">1277</a>
+<a href="#1278" id="1278">1278</a>
+<a href="#1279" id="1279">1279</a>
+<a href="#1280" id="1280">1280</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1237,7 +1287,7 @@
 <span class="kw">use </span>futures::{future, FutureExt};
 <span class="kw">use </span>linera_base::{
     crypto::{CryptoHash, KeyPair},
-    data_types::{ArithmeticError, BlockHeight, Timestamp},
+    data_types::{ArithmeticError, BlockHeight, RoundNumber, Timestamp},
     doc_scalar, ensure,
     identifiers::{ChainId, Owner},
 };
@@ -1355,6 +1405,10 @@
     NewIncomingMessage {
         origin: Origin,
         height: BlockHeight,
+    },
+    NewRound {
+        height: BlockHeight,
+        round: RoundNumber,
     },
 }
 
@@ -1845,7 +1899,7 @@
     </span><span class="kw">async fn </span>process_validated_block(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         certificate: Certificate,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfoResponse, WorkerError&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainInfoResponse, NetworkActions), WorkerError&gt; {
         <span class="kw">let </span>block = <span class="kw">match </span>certificate.value() {
             CertificateValue::ValidatedBlock {
                 executed_block: ExecutedBlock { block, .. },
@@ -1868,33 +1922,68 @@
             }
         );
         certificate.check(committee)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>actions = NetworkActions::default();
+        <span class="kw">let </span>next_round = chain.manager.get().next_round();
         <span class="kw">if </span>chain
             .tip_state
             .get()
             .already_validated_block(block.height)<span class="question-mark">?
-            </span>|| chain
-                .manager
-                .get_mut()
-                .check_validated_block(<span class="kw-2">&amp;</span>certificate)<span class="question-mark">?
-                </span>== ChainManagerOutcome::Skip
+            </span>|| chain.manager.get().check_validated_block(<span class="kw-2">&amp;</span>certificate)<span class="question-mark">? </span>== ChainManagerOutcome::Skip
         {
             <span class="comment">// If we just processed the same pending block, return the chain info unchanged.
-            </span><span class="kw">return </span><span class="prelude-val">Ok</span>(ChainInfoResponse::new(<span class="kw-2">&amp;</span>chain, <span class="self">self</span>.key_pair()));
+            </span><span class="kw">return </span><span class="prelude-val">Ok</span>((ChainInfoResponse::new(<span class="kw-2">&amp;</span>chain, <span class="self">self</span>.key_pair()), actions));
         }
-        <span class="kw">if </span><span class="self">self
-            </span>.cache_recent_value(Cow::Borrowed(<span class="kw-2">&amp;</span>certificate.value))
-            .<span class="kw">await
-        </span>{
-            <span class="kw">let </span>value = certificate.value.clone().into_confirmed();
-            <span class="self">self</span>.cache_recent_value(Cow::Owned(value)).<span class="kw">await</span>;
-        }
+        <span class="self">self</span>.cache_validated(<span class="kw-2">&amp;</span>certificate.value).<span class="kw">await</span>;
         chain
             .manager
             .get_mut()
-            .create_final_vote(certificate, <span class="self">self</span>.key_pair());
+            .create_final_vote(certificate.clone(), <span class="self">self</span>.key_pair());
         <span class="kw">let </span>info = ChainInfoResponse::new(<span class="kw-2">&amp;</span>chain, <span class="self">self</span>.key_pair());
         chain.save().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(info)
+        <span class="kw">if </span>chain.manager.get().next_round() &gt; next_round {
+            actions.notifications.push(Notification {
+                chain_id: block.chain_id,
+                reason: Reason::NewRound {
+                    height: block.height,
+                    round: chain.manager.get().next_round(),
+                },
+            })
+        }
+        <span class="self">self</span>.cache_validated(<span class="kw-2">&amp;</span>certificate.value).<span class="kw">await</span>;
+        <span class="prelude-val">Ok</span>((info, actions))
+    }
+
+    <span class="doccomment">/// Processes a leader timeout issued from a multi-owner chain.
+    </span><span class="kw">async fn </span>process_leader_timeout(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        certificate: Certificate,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainInfoResponse, NetworkActions), WorkerError&gt; {
+        <span class="kw">let </span>(chain_id, _height, epoch) = <span class="kw">match </span>certificate.value() {
+            CertificateValue::LeaderTimeout {
+                chain_id,
+                height,
+                epoch,
+                ..
+            } =&gt; (<span class="kw-2">*</span>chain_id, <span class="kw-2">*</span>height, <span class="kw-2">*</span>epoch),
+            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Expecting a leader timeout certificate&quot;</span>),
+        };
+        <span class="comment">// Check that the chain is active and ready for this confirmation.
+        // Verify the certificate. Returns a catch-all error to make client code more robust.
+        </span><span class="kw">let </span>chain = <span class="self">self</span>.storage.load_active_chain(chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>(current_epoch, committee) = chain
+            .execution_state
+            .system
+            .current_committee()
+            .expect(<span class="string">&quot;chain is active&quot;</span>);
+        <span class="macro">ensure!</span>(
+            epoch == current_epoch,
+            WorkerError::InvalidEpoch { chain_id, epoch }
+        );
+        certificate.check(committee)<span class="question-mark">?</span>;
+        <span class="comment">// TODO(#464): Handle timeout in chain manager.
+        </span><span class="kw">let </span>actions = NetworkActions::default();
+        <span class="kw">let </span>info = ChainInfoResponse::new(<span class="kw-2">&amp;</span>chain, <span class="self">self</span>.key_pair());
+        <span class="prelude-val">Ok</span>((info, actions))
     }
 
     <span class="kw">async fn </span>process_cross_chain_update(
@@ -1974,6 +2063,15 @@
         <span class="bool-val">true
     </span>}
 
+    <span class="doccomment">/// Caches the validated block and the corresponding confirmed block.
+    </span><span class="kw">async fn </span>cache_validated(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="kw-2">&amp;</span>HashedValue) {
+        <span class="kw">if </span><span class="self">self</span>.cache_recent_value(Cow::Borrowed(value)).<span class="kw">await </span>{
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(value) = value.clone().into_confirmed() {
+                <span class="self">self</span>.cache_recent_value(Cow::Owned(value)).<span class="kw">await</span>;
+            }
+        }
+    }
+
     <span class="doccomment">/// Returns a stored [`Certificate`] for a chain&#39;s block.
     </span><span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
     </span><span class="kw">pub async fn </span>read_certificate(
@@ -2013,29 +2111,29 @@
         chain_id: ChainId,
         message_id: MessageId,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;IncomingMessage&gt;, WorkerError&gt; {
-        <span class="kw">let </span><span class="prelude-val">Some</span>(certificate) = <span class="self">self
-            </span>.read_certificate(message_id.chain_id, message_id.height)
-            .<span class="kw">await</span><span class="question-mark">?
-        </span><span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
-        };
-
+        <span class="kw">let </span>sender = message_id.chain_id;
         <span class="kw">let </span>index = usize::try_from(message_id.index).map_err(|<span class="kw">_</span>| ArithmeticError::Overflow)<span class="question-mark">?</span>;
-        <span class="kw">let </span><span class="prelude-val">Some</span>(outgoing_message) = certificate.value().messages().get(index).cloned() <span class="kw">else </span>{
+        <span class="kw">let </span><span class="prelude-val">Some</span>(certificate) = <span class="self">self</span>.read_certificate(sender, message_id.height).<span class="kw">await</span><span class="question-mark">? </span><span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
+        };
+        <span class="kw">let </span><span class="prelude-val">Some</span>(messages) = certificate.value().messages() <span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
+        };
+        <span class="kw">let </span><span class="prelude-val">Some</span>(outgoing_message) = messages.get(index).cloned() <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
         };
 
-        <span class="kw">let </span>application_id = outgoing_message.message.application_id();
-        <span class="kw">let </span>origin = Origin {
-            sender: message_id.chain_id,
-            medium: <span class="kw">match </span>outgoing_message.destination {
-                Destination::Recipient(<span class="kw">_</span>) =&gt; Medium::Direct,
-                Destination::Subscribers(name) =&gt; Medium::Channel(ChannelFullName {
+        <span class="kw">let </span>medium = <span class="kw">match </span>outgoing_message.destination {
+            Destination::Recipient(<span class="kw">_</span>) =&gt; Medium::Direct,
+            Destination::Subscribers(name) =&gt; {
+                <span class="kw">let </span>application_id = outgoing_message.message.application_id();
+                Medium::Channel(ChannelFullName {
                     application_id,
                     name,
-                }),
-            },
+                })
+            }
         };
+        <span class="kw">let </span>origin = Origin { sender, medium };
 
         <span class="kw">let </span><span class="kw-2">mut </span>chain = <span class="self">self</span>.storage.load_active_chain(chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>inbox = chain.inboxes.try_load_entry_mut(<span class="kw-2">&amp;</span>origin).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -2192,9 +2290,7 @@
         <span class="kw">let </span>(info, actions) = <span class="kw">match </span>certificate.value() {
             CertificateValue::ValidatedBlock { .. } =&gt; {
                 <span class="comment">// Confirm the validated block.
-                </span><span class="self">self</span>.process_validated_block(certificate)
-                    .<span class="kw">await
-                    </span>.map(|info| (info, NetworkActions::default()))<span class="question-mark">?
+                </span><span class="self">self</span>.process_validated_block(certificate).<span class="kw">await</span><span class="question-mark">?
             </span>}
             CertificateValue::ConfirmedBlock { .. } =&gt; {
                 <span class="comment">// Execute the confirmed block.
@@ -2204,6 +2300,10 @@
                     notify_when_messages_are_delivered,
                 )
                 .<span class="kw">await</span><span class="question-mark">?
+            </span>}
+            CertificateValue::LeaderTimeout { .. } =&gt; {
+                <span class="comment">// Handle the leader timeout.
+                </span><span class="self">self</span>.process_leader_timeout(certificate).<span class="kw">await</span><span class="question-mark">?
             </span>}
         };
         <span class="prelude-val">Ok</span>((info, actions))

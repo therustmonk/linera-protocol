@@ -198,6 +198,13 @@
 <a href="#198" id="198">198</a>
 <a href="#199" id="199">199</a>
 <a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -339,6 +346,13 @@
             ChainManager::None | ChainManager::Single(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected chain manager&quot;</span>),
         }
     }
+
+    <span class="kw">pub fn </span>handle_timeout_certificate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: Certificate) {
+        <span class="kw">match </span><span class="self">self </span>{
+            ChainManager::Multi(<span class="kw">_</span>) =&gt; {}
+            ChainManager::None | ChainManager::Single(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected chain manager&quot;</span>),
+        }
+    }
 }
 
 <span class="doccomment">/// Chain manager information that is included in `ChainInfo` sent to clients.
@@ -380,7 +394,7 @@
         <span class="kw">match </span><span class="self">self </span>{
             ChainManagerInfo::Single(single) =&gt; single.pending.as_ref(),
             ChainManagerInfo::Multi(multi) =&gt; multi.pending.as_ref(),
-            <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
+            ChainManagerInfo::None =&gt; <span class="prelude-val">None</span>,
         }
     }
 
@@ -394,7 +408,7 @@
     <span class="kw">pub fn </span>next_round(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RoundNumber {
         <span class="kw">match </span><span class="self">self </span>{
             ChainManagerInfo::Multi(multi) =&gt; multi.next_round(),
-            <span class="kw">_ </span>=&gt; RoundNumber::default(),
+            ChainManagerInfo::None | ChainManagerInfo::Single(<span class="kw">_</span>) =&gt; RoundNumber::default(),
         }
     }
 }

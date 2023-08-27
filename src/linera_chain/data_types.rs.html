@@ -820,6 +820,48 @@
 <a href="#820" id="820">820</a>
 <a href="#821" id="821">821</a>
 <a href="#822" id="822">822</a>
+<a href="#823" id="823">823</a>
+<a href="#824" id="824">824</a>
+<a href="#825" id="825">825</a>
+<a href="#826" id="826">826</a>
+<a href="#827" id="827">827</a>
+<a href="#828" id="828">828</a>
+<a href="#829" id="829">829</a>
+<a href="#830" id="830">830</a>
+<a href="#831" id="831">831</a>
+<a href="#832" id="832">832</a>
+<a href="#833" id="833">833</a>
+<a href="#834" id="834">834</a>
+<a href="#835" id="835">835</a>
+<a href="#836" id="836">836</a>
+<a href="#837" id="837">837</a>
+<a href="#838" id="838">838</a>
+<a href="#839" id="839">839</a>
+<a href="#840" id="840">840</a>
+<a href="#841" id="841">841</a>
+<a href="#842" id="842">842</a>
+<a href="#843" id="843">843</a>
+<a href="#844" id="844">844</a>
+<a href="#845" id="845">845</a>
+<a href="#846" id="846">846</a>
+<a href="#847" id="847">847</a>
+<a href="#848" id="848">848</a>
+<a href="#849" id="849">849</a>
+<a href="#850" id="850">850</a>
+<a href="#851" id="851">851</a>
+<a href="#852" id="852">852</a>
+<a href="#853" id="853">853</a>
+<a href="#854" id="854">854</a>
+<a href="#855" id="855">855</a>
+<a href="#856" id="856">856</a>
+<a href="#857" id="857">857</a>
+<a href="#858" id="858">858</a>
+<a href="#859" id="859">859</a>
+<a href="#860" id="860">860</a>
+<a href="#861" id="861">861</a>
+<a href="#862" id="862">862</a>
+<a href="#863" id="863">863</a>
+<a href="#864" id="864">864</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1005,21 +1047,31 @@
 <span class="doccomment">/// A statement to be certified by the validators.
 </span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Deserialize, Serialize)]
 </span><span class="kw">pub enum </span>CertificateValue {
-    ValidatedBlock { executed_block: ExecutedBlock },
-    ConfirmedBlock { executed_block: ExecutedBlock },
+    ValidatedBlock {
+        executed_block: ExecutedBlock,
+    },
+    ConfirmedBlock {
+        executed_block: ExecutedBlock,
+    },
+    LeaderTimeout {
+        chain_id: ChainId,
+        height: BlockHeight,
+        epoch: Epoch,
+    },
 }
 
 <span class="attr">#[Object]
 </span><span class="kw">impl </span>CertificateValue {
     <span class="attr">#[graphql(derived(name = <span class="string">&quot;executed_block&quot;</span>))]
-    </span><span class="kw">async fn </span>_executed_block(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ExecutedBlock {
-        <span class="self">self</span>.executed_block().clone()
+    </span><span class="kw">async fn </span>_executed_block(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;ExecutedBlock&gt; {
+        <span class="self">self</span>.executed_block().cloned()
     }
 
     <span class="kw">async fn </span>status(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
         <span class="kw">match </span><span class="self">self </span>{
             CertificateValue::ValidatedBlock { .. } =&gt; <span class="string">&quot;validated&quot;</span>.to_string(),
             CertificateValue::ConfirmedBlock { .. } =&gt; <span class="string">&quot;confirmed&quot;</span>.to_string(),
+            CertificateValue::LeaderTimeout { .. } =&gt; <span class="string">&quot;timeout&quot;</span>.to_string(),
         }
     }
 }
@@ -1276,15 +1328,31 @@
 
 <span class="kw">impl </span>CertificateValue {
     <span class="kw">pub fn </span>chain_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ChainId {
-        <span class="self">self</span>.executed_block().block.chain_id
+        <span class="kw">match </span><span class="self">self </span>{
+            CertificateValue::ConfirmedBlock { executed_block, .. }
+            | CertificateValue::ValidatedBlock { executed_block, .. } =&gt; {
+                executed_block.block.chain_id
+            }
+            CertificateValue::LeaderTimeout { chain_id, .. } =&gt; <span class="kw-2">*</span>chain_id,
+        }
     }
 
     <span class="kw">pub fn </span>height(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BlockHeight {
-        <span class="self">self</span>.executed_block().block.height
+        <span class="kw">match </span><span class="self">self </span>{
+            CertificateValue::ConfirmedBlock { executed_block, .. }
+            | CertificateValue::ValidatedBlock { executed_block, .. } =&gt; {
+                executed_block.block.height
+            }
+            CertificateValue::LeaderTimeout { height, .. } =&gt; <span class="kw-2">*</span>height,
+        }
     }
 
     <span class="kw">pub fn </span>epoch(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Epoch {
-        <span class="self">self</span>.executed_block().block.epoch
+        <span class="kw">match </span><span class="self">self </span>{
+            CertificateValue::ConfirmedBlock { executed_block, .. }
+            | CertificateValue::ValidatedBlock { executed_block, .. } =&gt; executed_block.block.epoch,
+            CertificateValue::LeaderTimeout { epoch, .. } =&gt; <span class="kw-2">*</span>epoch,
+        }
     }
 
     <span class="doccomment">/// Creates a `HashedValue` without checking that this is the correct hash!
@@ -1294,10 +1362,15 @@
 
     <span class="doccomment">/// Returns whether this value contains the message with the specified ID.
     </span><span class="kw">pub fn </span>has_message(<span class="kw-2">&amp;</span><span class="self">self</span>, message_id: <span class="kw-2">&amp;</span>MessageId) -&gt; bool {
+        <span class="kw">let </span><span class="prelude-val">Some</span>(executed_block) = <span class="self">self</span>.executed_block() <span class="kw">else </span>{
+            <span class="kw">return </span><span class="bool-val">false</span>;
+        };
+        <span class="kw">let </span><span class="prelude-val">Ok</span>(index) = usize::try_from(message_id.index) <span class="kw">else </span>{
+            <span class="kw">return </span><span class="bool-val">false</span>;
+        };
         <span class="self">self</span>.height() == message_id.height
             &amp;&amp; <span class="self">self</span>.chain_id() == message_id.chain_id
-            &amp;&amp; <span class="self">self</span>.executed_block().messages.len()
-                &gt; usize::try_from(message_id.index).unwrap_or(usize::MAX)
+            &amp;&amp; executed_block.messages.len() &gt; index
     }
 
     <span class="doccomment">/// Skip `n-1` messages from the end of the block and return the message ID, if any.
@@ -1305,7 +1378,7 @@
         <span class="kw">if </span>n == <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
-        <span class="kw">let </span>message_count = <span class="self">self</span>.executed_block().messages.len();
+        <span class="kw">let </span>message_count = <span class="self">self</span>.executed_block()<span class="question-mark">?</span>.messages.len();
         <span class="prelude-val">Some</span>(MessageId {
             chain_id: <span class="self">self</span>.chain_id(),
             height: <span class="self">self</span>.height(),
@@ -1321,16 +1394,26 @@
         <span class="macro">matches!</span>(<span class="self">self</span>, CertificateValue::ValidatedBlock { .. })
     }
 
-    <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
-    </span><span class="kw">pub fn </span>messages(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Vec&lt;OutgoingMessage&gt; {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.executed_block().messages
+    <span class="kw">pub fn </span>is_timeout(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="macro">matches!</span>(<span class="self">self</span>, CertificateValue::LeaderTimeout { .. })
     }
 
-    <span class="kw">pub fn </span>executed_block(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>ExecutedBlock {
+    <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+    </span><span class="kw">pub fn </span>messages(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Vec&lt;OutgoingMessage&gt;&gt; {
+        <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.executed_block()<span class="question-mark">?</span>.messages)
+    }
+
+    <span class="kw">pub fn </span>executed_block(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>ExecutedBlock&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             CertificateValue::ConfirmedBlock { executed_block, .. }
-            | CertificateValue::ValidatedBlock { executed_block, .. } =&gt; executed_block,
+            | CertificateValue::ValidatedBlock { executed_block, .. } =&gt; <span class="prelude-val">Some</span>(executed_block),
+            CertificateValue::LeaderTimeout { .. } =&gt; <span class="prelude-val">None</span>,
         }
+    }
+
+    <span class="kw">pub fn </span>block(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Block&gt; {
+        <span class="self">self</span>.executed_block()
+            .map(|executed_block| <span class="kw-2">&amp;</span>executed_block.block)
     }
 }
 
@@ -1356,15 +1439,16 @@
         }
     }
 
-    <span class="kw">pub fn </span>into_confirmed(<span class="self">self</span>) -&gt; HashedValue {
+    <span class="kw">pub fn </span>into_confirmed(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;HashedValue&gt; {
         <span class="kw">match </span><span class="self">self</span>.value {
-            value @ CertificateValue::ConfirmedBlock { .. } =&gt; HashedValue {
+            value @ CertificateValue::ConfirmedBlock { .. } =&gt; <span class="prelude-val">Some</span>(HashedValue {
                 hash: <span class="self">self</span>.hash,
                 value,
-            },
+            }),
             CertificateValue::ValidatedBlock { executed_block } =&gt; {
-                CertificateValue::ConfirmedBlock { executed_block }.into()
+                <span class="prelude-val">Some</span>(CertificateValue::ConfirmedBlock { executed_block }.into())
             }
+            CertificateValue::LeaderTimeout { .. } =&gt; <span class="prelude-val">None</span>,
         }
     }
 

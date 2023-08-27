@@ -1555,6 +1555,45 @@
 <a href="#1555" id="1555">1555</a>
 <a href="#1556" id="1556">1556</a>
 <a href="#1557" id="1557">1557</a>
+<a href="#1558" id="1558">1558</a>
+<a href="#1559" id="1559">1559</a>
+<a href="#1560" id="1560">1560</a>
+<a href="#1561" id="1561">1561</a>
+<a href="#1562" id="1562">1562</a>
+<a href="#1563" id="1563">1563</a>
+<a href="#1564" id="1564">1564</a>
+<a href="#1565" id="1565">1565</a>
+<a href="#1566" id="1566">1566</a>
+<a href="#1567" id="1567">1567</a>
+<a href="#1568" id="1568">1568</a>
+<a href="#1569" id="1569">1569</a>
+<a href="#1570" id="1570">1570</a>
+<a href="#1571" id="1571">1571</a>
+<a href="#1572" id="1572">1572</a>
+<a href="#1573" id="1573">1573</a>
+<a href="#1574" id="1574">1574</a>
+<a href="#1575" id="1575">1575</a>
+<a href="#1576" id="1576">1576</a>
+<a href="#1577" id="1577">1577</a>
+<a href="#1578" id="1578">1578</a>
+<a href="#1579" id="1579">1579</a>
+<a href="#1580" id="1580">1580</a>
+<a href="#1581" id="1581">1581</a>
+<a href="#1582" id="1582">1582</a>
+<a href="#1583" id="1583">1583</a>
+<a href="#1584" id="1584">1584</a>
+<a href="#1585" id="1585">1585</a>
+<a href="#1586" id="1586">1586</a>
+<a href="#1587" id="1587">1587</a>
+<a href="#1588" id="1588">1588</a>
+<a href="#1589" id="1589">1589</a>
+<a href="#1590" id="1590">1590</a>
+<a href="#1591" id="1591">1591</a>
+<a href="#1592" id="1592">1592</a>
+<a href="#1593" id="1593">1593</a>
+<a href="#1594" id="1594">1594</a>
+<a href="#1595" id="1595">1595</a>
+<a href="#1596" id="1596">1596</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1925,11 +1964,11 @@
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.key_pair().<span class="kw">await</span><span class="question-mark">?</span>.public())
     }
 
-    <span class="kw">async fn </span>get_local_next_block_height(
+    <span class="kw">async fn </span>local_chain_info(
         this: Arc&lt;Mutex&lt;<span class="self">Self</span>&gt;&gt;,
         chain_id: ChainId,
         local_node: <span class="kw-2">&amp;mut </span>LocalNodeClient&lt;S&gt;,
-    ) -&gt; <span class="prelude-ty">Option</span>&lt;BlockHeight&gt; {
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;ChainInfo&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>guard = this.lock().<span class="kw">await</span>;
         <span class="kw">let </span><span class="prelude-val">Ok</span>(info) = local_node.local_chain_info(chain_id).<span class="kw">await else </span>{
             <span class="macro">error!</span>(<span class="string">&quot;Fail to read local chain info for {chain_id}&quot;</span>);
@@ -1937,6 +1976,15 @@
         };
         <span class="comment">// Useful in case `chain_id` is the same as the local chain.
         </span>guard.update_from_info(<span class="kw-2">&amp;</span>info);
+        <span class="prelude-val">Some</span>(info)
+    }
+
+    <span class="kw">async fn </span>local_next_block_height(
+        this: Arc&lt;Mutex&lt;<span class="self">Self</span>&gt;&gt;,
+        chain_id: ChainId,
+        local_node: <span class="kw-2">&amp;mut </span>LocalNodeClient&lt;S&gt;,
+    ) -&gt; <span class="prelude-ty">Option</span>&lt;BlockHeight&gt; {
+        <span class="kw">let </span>info = <span class="self">Self</span>::local_chain_info(this, chain_id, local_node).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Some</span>(info.next_block_height)
     }
 
@@ -1952,8 +2000,7 @@
     {
         <span class="kw">match </span>notification.reason {
             Reason::NewIncomingMessage { origin, height } =&gt; {
-                <span class="kw">if </span><span class="self">Self</span>::get_local_next_block_height(this.clone(), origin.sender, <span class="kw-2">&amp;mut </span>local_node)
-                    .<span class="kw">await
+                <span class="kw">if </span><span class="self">Self</span>::local_next_block_height(this.clone(), origin.sender, <span class="kw-2">&amp;mut </span>local_node).<span class="kw">await
                     </span>&gt; <span class="prelude-val">Some</span>(height)
                 {
                     <span class="macro">debug!</span>(<span class="string">&quot;Accepting redundant notification for new message&quot;</span>);
@@ -1965,7 +2012,7 @@
                     <span class="macro">error!</span>(<span class="string">&quot;Fail to process notification: {e}&quot;</span>);
                     <span class="kw">return </span><span class="bool-val">false</span>;
                 }
-                <span class="kw">if </span><span class="self">Self</span>::get_local_next_block_height(this, origin.sender, <span class="kw-2">&amp;mut </span>local_node).<span class="kw">await
+                <span class="kw">if </span><span class="self">Self</span>::local_next_block_height(this, origin.sender, <span class="kw-2">&amp;mut </span>local_node).<span class="kw">await
                     </span>&lt;= <span class="prelude-val">Some</span>(height)
                 {
                     <span class="macro">error!</span>(<span class="string">&quot;Fail to synchronize new message after notification&quot;</span>);
@@ -1974,7 +2021,7 @@
             }
             Reason::NewBlock { height, hash } =&gt; {
                 <span class="kw">let </span>chain_id = notification.chain_id;
-                <span class="kw">if </span><span class="self">Self</span>::get_local_next_block_height(this.clone(), chain_id, <span class="kw-2">&amp;mut </span>local_node).<span class="kw">await
+                <span class="kw">if </span><span class="self">Self</span>::local_next_block_height(this.clone(), chain_id, <span class="kw-2">&amp;mut </span>local_node).<span class="kw">await
                     </span>&gt; <span class="prelude-val">Some</span>(height)
                 {
                     <span class="macro">debug!</span>(<span class="string">&quot;Accepting redundant notification for new block&quot;</span>);
@@ -1985,7 +2032,7 @@
                     .<span class="kw">await
                 </span>{
                     <span class="prelude-val">Ok</span>(()) =&gt; {
-                        <span class="kw">if </span><span class="self">Self</span>::get_local_next_block_height(this, chain_id, <span class="kw-2">&amp;mut </span>local_node).<span class="kw">await
+                        <span class="kw">if </span><span class="self">Self</span>::local_next_block_height(this, chain_id, <span class="kw-2">&amp;mut </span>local_node).<span class="kw">await
                             </span>&lt;= <span class="prelude-val">Some</span>(height)
                         {
                             <span class="macro">error!</span>(<span class="string">&quot;Fail to synchronize new block after notification&quot;</span>);
@@ -2015,6 +2062,34 @@
                         <span class="macro">error!</span>(<span class="string">&quot;Fail to process notification: {e}&quot;</span>);
                         <span class="kw">return </span><span class="bool-val">false</span>;
                     }
+                }
+            }
+            Reason::NewRound { height, round } =&gt; {
+                <span class="kw">let </span>chain_id = notification.chain_id;
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(info) =
+                    <span class="self">Self</span>::local_chain_info(this.clone(), chain_id, <span class="kw-2">&amp;mut </span>local_node).<span class="kw">await
+                </span>{
+                    <span class="kw">if </span>(info.next_block_height, info.manager.next_round()) &gt;= (height, round) {
+                        <span class="macro">debug!</span>(<span class="string">&quot;Accepting redundant notification for new round&quot;</span>);
+                        <span class="kw">return </span><span class="bool-val">true</span>;
+                    }
+                }
+                <span class="kw">if let </span><span class="prelude-val">Err</span>(error) = local_node
+                    .try_synchronize_chain_state_from(name, node, chain_id)
+                    .<span class="kw">await
+                </span>{
+                    <span class="macro">error!</span>(<span class="string">&quot;Fail to process notification: {error}&quot;</span>);
+                    <span class="kw">return </span><span class="bool-val">false</span>;
+                }
+                <span class="kw">let </span><span class="prelude-val">Some</span>(info) =
+                    <span class="self">Self</span>::local_chain_info(this.clone(), chain_id, <span class="kw-2">&amp;mut </span>local_node).<span class="kw">await
+                else </span>{
+                    <span class="macro">error!</span>(<span class="string">&quot;Fail to read local chain info for {chain_id}&quot;</span>);
+                    <span class="kw">return </span><span class="bool-val">false</span>;
+                };
+                <span class="kw">if </span>(info.next_block_height, info.manager.next_round()) &lt; (height, round) {
+                    <span class="macro">error!</span>(<span class="string">&quot;Fail to synchronize new block after notification&quot;</span>);
+                    <span class="kw">return </span><span class="bool-val">false</span>;
                 }
             }
         }
@@ -2173,7 +2248,10 @@
             }
             CommunicateAction::FinalizeBlock(validity_certificate) =&gt; {
                 <span class="kw">let </span>round = validity_certificate.round;
-                (validity_certificate.value.into_confirmed(), round)
+                <span class="kw">let </span><span class="prelude-val">Some</span>(conf_value) = validity_certificate.value.into_confirmed() <span class="kw">else </span>{
+                    <span class="macro">bail!</span>(<span class="string">&quot;Unexpected certificate value for finalized block&quot;</span>);
+                };
+                (conf_value, round)
             }
             CommunicateAction::AdvanceToNextBlockHeight(<span class="kw">_</span>) =&gt; {
                 <span class="kw">return match </span>result {
@@ -2559,7 +2637,7 @@
         <span class="comment">// TODO(#66): return the block that should be proposed instead
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(validated) = <span class="kw-2">&amp;</span>validated {
             <span class="macro">ensure!</span>(
-                validated.value().executed_block().block == block,
+                validated.value().block() == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>block),
                 <span class="string">&quot;A different block has already been validated at this height&quot;
             </span>);
         }

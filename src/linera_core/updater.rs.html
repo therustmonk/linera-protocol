@@ -457,6 +457,7 @@
 <a href="#457" id="457">457</a>
 <a href="#458" id="458">458</a>
 <a href="#459" id="459">459</a>
+<a href="#460" id="460">460</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -649,6 +650,7 @@
                     | CertificateValue::ValidatedBlock { executed_block, .. } =&gt; {
                         executed_block.block.bytecode_locations()
                     }
+                    CertificateValue::LeaderTimeout { .. } =&gt; HashMap::new(),
                 };
                 <span class="kw">for </span>location <span class="kw">in </span>locations {
                     <span class="kw">if </span>!required.contains_key(location) {
