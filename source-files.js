@@ -190,7 +190,8 @@ var sourcesIndex = JSON.parse('{\
 "linera_proxy":["",[],["proxy.rs"]],\
 "linera_rpc":["",[],["client.rs","codec.rs","config.rs","conversions.rs","grpc_network.rs","grpc_pool.rs","lib.rs","mass.rs","node_provider.rs","rpc.rs","simple_network.rs","transport.rs"]],\
 "linera_schema_export":["",[],["schema_export.rs"]],\
-"linera_sdk":["",[["contract",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs","wit_types.rs"]],["service",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs","wit_types.rs"]],["test",[["integration",[],["block.rs","chain.rs","mock_stubs.rs","mod.rs","validator.rs"]]]],["views",[],["conversions_from_wit.rs","mod.rs","system_api.rs"]]],["base.rs","exported_future.rs","extensions.rs","lib.rs","log.rs"]],\
+"linera_sdk":["",[["contract",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs","wit_types.rs"]],["service",[],["conversions_from_wit.rs","conversions_to_wit.rs","exported_futures.rs","mod.rs","system_api.rs","wit_types.rs"]],["test",[["integration",[],["block.rs","chain.rs","mock_stubs.rs","mod.rs","validator.rs"]]]],["views",[],["conversions_from_wit.rs","mod.rs","system_api.rs"]]],["base.rs","exported_future.rs","extensions.rs","graphql.rs","lib.rs","log.rs"]],\
+"linera_sdk_derive":["",[],["lib.rs","utils.rs"]],\
 "linera_sdk_wasm_tests":["",[],["lib.rs"]],\
 "linera_server":["",[],["server.rs"]],\
 "linera_service":["",[],["chain_listener.rs","client.rs","config.rs","grpc_proxy.rs","lib.rs","node_service.rs","project.rs","storage.rs","util.rs"]],\
