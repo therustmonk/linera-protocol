@@ -62,8 +62,8 @@
 <span class="kw">pub type </span>MemoryStoreClient = DbStoreClient&lt;MemoryClient&gt;;
 
 <span class="kw">impl </span>MemoryStoreClient {
-    <span class="kw">pub async fn </span>new_test() -&gt; MemoryStoreClient {
-        MemoryStoreClient::new(<span class="prelude-val">None</span>, TEST_MEMORY_MAX_STREAM_QUERIES)
+    <span class="kw">pub async fn </span>make_test_client(wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;) -&gt; MemoryStoreClient {
+        MemoryStoreClient::new(wasm_runtime, TEST_MEMORY_MAX_STREAM_QUERIES)
     }
 
     <span class="kw">pub fn </span>new(wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;, max_stream_queries: usize) -&gt; <span class="self">Self </span>{

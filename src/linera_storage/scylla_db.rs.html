@@ -94,7 +94,6 @@
 <a href="#94" id="94">94</a>
 <a href="#95" id="95">95</a>
 <a href="#96" id="96">96</a>
-<a href="#97" id="97">97</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -147,14 +146,13 @@
 
 <span class="kw">impl </span>ScyllaDbStoreClient {
     <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
-    </span><span class="kw">pub async fn </span>new_test() -&gt; ScyllaDbStoreClient {
+    </span><span class="kw">pub async fn </span>make_test_client(wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;) -&gt; ScyllaDbStoreClient {
         <span class="kw">let </span>restart_database = <span class="bool-val">true</span>;
         <span class="kw">let </span>uri = <span class="string">&quot;localhost:9042&quot;</span>;
         <span class="kw">let </span>table_name = get_table_name().<span class="kw">await</span>;
         <span class="kw">let </span>max_concurrent_queries = <span class="prelude-val">Some</span>(TEST_SCYLLA_DB_MAX_CONCURRENT_QUERIES);
         <span class="kw">let </span>max_stream_queries = TEST_SCYLLA_DB_MAX_STREAM_QUERIES;
         <span class="kw">let </span>cache_size = TEST_CACHE_SIZE;
-        <span class="kw">let </span>wasm_runtime = <span class="prelude-val">None</span>;
         ScyllaDbStoreClient::new(
             restart_database,
             uri,

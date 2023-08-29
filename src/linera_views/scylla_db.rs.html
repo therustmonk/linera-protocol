@@ -489,9 +489,6 @@
 <a href="#489" id="489">489</a>
 <a href="#490" id="490">490</a>
 <a href="#491" id="491">491</a>
-<a href="#492" id="492">492</a>
-<a href="#493" id="493">493</a>
-<a href="#494" id="494">494</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -542,8 +539,7 @@
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ScyllaDbClientInternal {
     client: Arc&lt;ScyllaDbClientPair&gt;,
-    count: Arc&lt;Semaphore&gt;,
-    max_concurrent_queries: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+    semaphore: <span class="prelude-ty">Option</span>&lt;Arc&lt;Semaphore&gt;&gt;,
     max_stream_queries: usize,
 }
 
@@ -637,9 +633,9 @@
 <span class="kw">impl </span>ScyllaDbClientInternal {
     <span class="doccomment">/// Obtains the semaphore lock on the database if needed.
     </span><span class="kw">async fn </span>acquire(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;SemaphoreGuard&lt;<span class="lifetime">&#39;_</span>&gt;&gt; {
-        <span class="kw">match </span><span class="self">self</span>.max_concurrent_queries {
+        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.semaphore {
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">None</span>,
-            <span class="prelude-val">Some</span>(_max_concurrent_queries) =&gt; <span class="prelude-val">Some</span>(<span class="self">self</span>.count.acquire().<span class="kw">await</span>),
+            <span class="prelude-val">Some</span>(count) =&gt; <span class="prelude-val">Some</span>(count.acquire().<span class="kw">await</span>),
         }
     }
 
@@ -852,12 +848,10 @@
         }
         <span class="kw">let </span>client = (session, table_name);
         <span class="kw">let </span>client = Arc::new(client);
-        <span class="kw">let </span>n = max_concurrent_queries.unwrap_or(<span class="number">1</span>);
-        <span class="kw">let </span>count = Arc::new(Semaphore::new(n));
+        <span class="kw">let </span>semaphore = max_concurrent_queries.map(|n| Arc::new(Semaphore::new(n)));
         <span class="prelude-val">Ok</span>(ScyllaDbClientInternal {
             client,
-            count,
-            max_concurrent_queries,
+            semaphore,
             max_stream_queries,
         })
     }

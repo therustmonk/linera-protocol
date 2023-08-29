@@ -104,11 +104,11 @@
 
 <span class="kw">impl </span>RocksDbStoreClient {
     <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
-    </span><span class="kw">pub async fn </span>new_test() -&gt; RocksDbStoreClient {
+    </span><span class="kw">pub async fn </span>make_test_client(wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;) -&gt; RocksDbStoreClient {
         <span class="kw">let </span>dir = TempDir::new().unwrap();
         RocksDbStoreClient::new(
             dir.path().to_path_buf(),
-            <span class="prelude-val">None</span>,
+            wasm_runtime,
             TEST_ROCKS_DB_MAX_STREAM_QUERIES,
             TEST_CACHE_SIZE,
         )

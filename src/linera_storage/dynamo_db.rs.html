@@ -190,7 +190,6 @@
 <a href="#190" id="190">190</a>
 <a href="#191" id="191">191</a>
 <a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -198,9 +197,8 @@
 <span class="kw">use </span>dashmap::DashMap;
 <span class="kw">use </span>futures::Future;
 <span class="kw">use </span>linera_execution::WasmRuntime;
-<span class="kw">use </span>linera_views::{
-    dynamo_db::{Config, DynamoDbClient, DynamoDbContextError, TableName, TableStatus},
-    test_utils::LocalStackTestContext,
+<span class="kw">use </span>linera_views::dynamo_db::{
+    Config, DynamoDbClient, DynamoDbContextError, LocalStackTestContext, TableName, TableStatus,
 };
 <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
 </span><span class="kw">use </span>linera_views::{
@@ -305,7 +303,7 @@
 
 <span class="kw">impl </span>DynamoDbStoreClient {
     <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
-    </span><span class="kw">pub async fn </span>new_test() -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub async fn </span>make_test_client(wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>table = <span class="string">&quot;linera&quot;</span>.parse().expect(<span class="string">&quot;Invalid table name&quot;</span>);
         <span class="kw">let </span>localstack = LocalStackTestContext::new().<span class="kw">await</span>.expect(<span class="string">&quot;localstack&quot;</span>);
         <span class="kw">let </span>(client, <span class="kw">_</span>) = DynamoDbStoreClient::from_config(
@@ -314,7 +312,7 @@
             <span class="prelude-val">Some</span>(TEST_DYNAMO_DB_MAX_CONCURRENT_QUERIES),
             TEST_DYNAMO_DB_MAX_STREAM_QUERIES,
             TEST_CACHE_SIZE,
-            <span class="prelude-val">None</span>,
+            wasm_runtime,
         )
         .<span class="kw">await
         </span>.expect(<span class="string">&quot;client and table_name&quot;</span>);
