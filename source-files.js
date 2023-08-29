@@ -215,7 +215,7 @@ var sourcesIndex = JSON.parse('{\
 "linked_hash_map":["",[],["lib.rs"]],\
 "linux_raw_sys":["",[["x86_64",[],["errno.rs","general.rs","ioctl.rs"]]],["lib.rs"]],\
 "lock_api":["",[],["lib.rs","mutex.rs","remutex.rs","rwlock.rs"]],\
-"log":["",[],["lib.rs","macros.rs"]],\
+"log":["",[],["__private_api.rs","lib.rs","macros.rs"]],\
 "lru":["",[],["lib.rs"]],\
 "lz4_flex":["",[["block",[],["compress.rs","decompress_safe.rs","hashtable.rs","mod.rs"]],["frame",[],["compress.rs","decompress.rs","header.rs","mod.rs"]]],["lib.rs","sink.rs"]],\
 "matchers":["",[],["lib.rs"]],\
@@ -244,7 +244,7 @@ var sourcesIndex = JSON.parse('{\
 "num_integer":["",[],["average.rs","lib.rs","roots.rs"]],\
 "num_iter":["",[],["lib.rs"]],\
 "num_rational":["",[],["lib.rs"]],\
-"num_traits":["",[["ops",[],["checked.rs","euclid.rs","inv.rs","mod.rs","mul_add.rs","overflowing.rs","saturating.rs","wrapping.rs"]]],["bounds.rs","cast.rs","float.rs","identities.rs","int.rs","lib.rs","macros.rs","pow.rs","real.rs","sign.rs"]],\
+"num_traits":["",[["ops",[],["bytes.rs","checked.rs","euclid.rs","inv.rs","mod.rs","mul_add.rs","overflowing.rs","saturating.rs","wrapping.rs"]]],["bounds.rs","cast.rs","float.rs","identities.rs","int.rs","lib.rs","macros.rs","pow.rs","real.rs","sign.rs"]],\
 "object":["",[["read",[["coff",[],["comdat.rs","file.rs","mod.rs","relocation.rs","section.rs","symbol.rs"]],["elf",[],["comdat.rs","compression.rs","dynamic.rs","file.rs","hash.rs","mod.rs","note.rs","relocation.rs","section.rs","segment.rs","symbol.rs","version.rs"]],["macho",[],["dyld_cache.rs","fat.rs","file.rs","load_command.rs","mod.rs","relocation.rs","section.rs","segment.rs","symbol.rs"]],["pe",[],["data_directory.rs","export.rs","file.rs","import.rs","mod.rs","relocation.rs","resource.rs","rich.rs","section.rs"]]],["any.rs","archive.rs","mod.rs","read_ref.rs","traits.rs","util.rs"]]],["archive.rs","common.rs","elf.rs","endian.rs","lib.rs","macho.rs","pe.rs","pod.rs"]],\
 "once_cell":["",[],["imp_std.rs","lib.rs","race.rs"]],\
 "opaque_debug":["",[],["lib.rs"]],\
