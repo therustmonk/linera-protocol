@@ -163,7 +163,7 @@
     __private::{quote::quote, TokenStream2},
 };
 
-<span class="attr">#[proc_macro_derive(MutationRoot)]
+<span class="attr">#[proc_macro_derive(GraphQLMutationRoot)]
 </span><span class="kw">pub fn </span>derive_mutation_root(input: TokenStream) -&gt; TokenStream {
     <span class="kw">let </span>input = <span class="macro">parse_macro_input!</span>(input <span class="kw">as </span>ItemEnum);
     generate_mutation_root_code(input).into()

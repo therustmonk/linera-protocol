@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"derive":["MutationRoot"]};
+window.SIDEBAR_ITEMS = {"derive":["GraphQLMutationRoot"]};
