@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["NodeError"],"struct":["LocalNode","LocalNodeClient"],"trait":["ValidatorNode"],"type":["NotificationStream"]};
+window.SIDEBAR_ITEMS = {"enum":["NodeError"],"trait":["ValidatorNode","ValidatorNodeProvider"],"type":["NotificationStream"]};

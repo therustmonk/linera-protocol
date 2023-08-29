@@ -1580,29 +1580,16 @@
 <a href="#1580" id="1580">1580</a>
 <a href="#1581" id="1581">1581</a>
 <a href="#1582" id="1582">1582</a>
-<a href="#1583" id="1583">1583</a>
-<a href="#1584" id="1584">1584</a>
-<a href="#1585" id="1585">1585</a>
-<a href="#1586" id="1586">1586</a>
-<a href="#1587" id="1587">1587</a>
-<a href="#1588" id="1588">1588</a>
-<a href="#1589" id="1589">1589</a>
-<a href="#1590" id="1590">1590</a>
-<a href="#1591" id="1591">1591</a>
-<a href="#1592" id="1592">1592</a>
-<a href="#1593" id="1593">1593</a>
-<a href="#1594" id="1594">1594</a>
-<a href="#1595" id="1595">1595</a>
-<a href="#1596" id="1596">1596</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use crate</span>::{
     data_types::{BlockHeightRange, ChainInfo, ChainInfoQuery},
-    node::{LocalNodeClient, NodeError, NotificationStream, ValidatorNode},
+    local_node::{LocalNodeClient, LocalNodeError},
+    node::{NodeError, NotificationStream, ValidatorNode, ValidatorNodeProvider},
     updater::{communicate_with_quorum, CommunicateAction, CommunicationError, ValidatorUpdater},
-    worker::{Notification, Reason, WorkerState},
+    worker::{Notification, Reason, WorkerError, WorkerState},
 };
 <span class="kw">use </span>anyhow::{anyhow, bail, ensure, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>futures::{
@@ -1621,7 +1608,7 @@
         Block, BlockAndRound, BlockProposal, Certificate, CertificateValue, HashedValue,
         IncomingMessage, LiteCertificate, LiteVote,
     },
-    ChainManagerInfo, ChainStateView,
+    ChainError, ChainManagerInfo, ChainStateView,
 };
 <span class="kw">use </span>linera_execution::{
     committee::{Committee, Epoch, ValidatorName},
@@ -1685,28 +1672,6 @@
     <span class="doccomment">/// Local node to manage the execution state and the local storage of the chains that we are
     /// tracking.
     </span>node_client: LocalNodeClient&lt;StorageClient&gt;,
-}
-
-<span class="doccomment">/// Turn an address into a validator node (local node or client to a remote node).
-</span><span class="attr">#[allow(clippy::result_large_err)]
-</span><span class="kw">pub trait </span>ValidatorNodeProvider {
-    <span class="kw">type </span>Node: ValidatorNode + Clone + Send + Sync + <span class="lifetime">&#39;static</span>;
-
-    <span class="kw">fn </span>make_node(<span class="kw-2">&amp;</span><span class="self">self</span>, address: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Node, NodeError&gt;;
-
-    <span class="kw">fn </span>make_nodes&lt;I&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, committee: <span class="kw-2">&amp;</span>Committee) -&gt; <span class="prelude-ty">Result</span>&lt;I, NodeError&gt;
-    <span class="kw">where
-        </span>I: FromIterator&lt;(ValidatorName, <span class="self">Self</span>::Node)&gt;,
-    {
-        committee
-            .validators()
-            .iter()
-            .map(|(name, validator)| {
-                <span class="kw">let </span>node = <span class="self">self</span>.make_node(<span class="kw-2">&amp;</span>validator.network_address)<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>((<span class="kw-2">*</span>name, node))
-            })
-            .collect()
-    }
 }
 
 <span class="kw">impl</span>&lt;P, S&gt; ChainClient&lt;P, S&gt; {
@@ -1788,7 +1753,7 @@
     </span><span class="kw">pub async fn </span>chain_state_view(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Arc&lt;ChainStateView&lt;S::Context&gt;&gt;, NodeError&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Arc&lt;ChainStateView&lt;S::Context&gt;&gt;, LocalNodeError&gt; {
         <span class="kw">let </span>chain_id = chain_id.unwrap_or(<span class="self">self</span>.chain_id);
         <span class="kw">let </span>chain_state_view = <span class="self">self
             </span>.node_client
@@ -1800,7 +1765,7 @@
     }
 
     <span class="doccomment">/// Obtains the basic `ChainInfo` data for the local chain.
-    </span><span class="kw">async fn </span>chain_info(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfo, NodeError&gt; {
+    </span><span class="kw">async fn </span>chain_info(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfo, LocalNodeError&gt; {
         <span class="kw">let </span>query = ChainInfoQuery::new(<span class="self">self</span>.chain_id);
         <span class="kw">let </span>response = <span class="self">self</span>.node_client.handle_chain_info_query(query).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(response.info)
@@ -1810,7 +1775,7 @@
     ///
     /// Messages known to be redundant are filtered out: A `RegisterApplications` message whose
     /// entries are already known never needs to be included in a block.
-    </span><span class="kw">async fn </span>pending_messages(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;IncomingMessage&gt;, NodeError&gt; {
+    </span><span class="kw">async fn </span>pending_messages(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;IncomingMessage&gt;, LocalNodeError&gt; {
         <span class="kw">let </span>query = ChainInfoQuery::new(<span class="self">self</span>.chain_id).with_pending_messages();
         <span class="kw">let </span>response = <span class="self">self</span>.node_client.handle_chain_info_query(query).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>pending_messages = <span class="macro">vec!</span>[];
@@ -1846,7 +1811,7 @@
     }
 
     <span class="doccomment">/// Obtains the set of committees trusted by the local chain.
-    </span><span class="kw">async fn </span>committees(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;BTreeMap&lt;Epoch, Committee&gt;, NodeError&gt; {
+    </span><span class="kw">async fn </span>committees(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;BTreeMap&lt;Epoch, Committee&gt;, LocalNodeError&gt; {
         <span class="kw">let </span>(_epoch, committees) = <span class="self">self</span>.epoch_and_committees(<span class="self">self</span>.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(committees)
     }
@@ -1855,37 +1820,39 @@
     </span><span class="kw">async fn </span>epoch_and_committees(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         chain_id: ChainId,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="prelude-ty">Option</span>&lt;Epoch&gt;, BTreeMap&lt;Epoch, Committee&gt;), NodeError&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="prelude-ty">Option</span>&lt;Epoch&gt;, BTreeMap&lt;Epoch, Committee&gt;), LocalNodeError&gt; {
         <span class="kw">let </span>query = ChainInfoQuery::new(chain_id).with_committees();
         <span class="kw">let </span>info = <span class="self">self</span>.node_client.handle_chain_info_query(query).<span class="kw">await</span><span class="question-mark">?</span>.info;
         <span class="kw">let </span>epoch = info.epoch;
         <span class="kw">let </span>committees = info
             .requested_committees
-            .ok_or(NodeError::InvalidChainInfoResponse)<span class="question-mark">?</span>;
+            .ok_or(LocalNodeError::InvalidChainInfoResponse)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>((epoch, committees))
     }
 
     <span class="doccomment">/// Obtains the epochs of the committees trusted by the local chain.
-    </span><span class="kw">pub async fn </span>epochs(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Epoch&gt;, NodeError&gt; {
+    </span><span class="kw">pub async fn </span>epochs(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Epoch&gt;, LocalNodeError&gt; {
         <span class="kw">let </span>committees = <span class="self">self</span>.committees().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(committees.into_keys().collect())
     }
 
     <span class="doccomment">/// Obtains the committee for the current epoch of the local chain.
-    </span><span class="kw">pub async fn </span>local_committee(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Committee, NodeError&gt; {
+    </span><span class="kw">pub async fn </span>local_committee(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Committee, LocalNodeError&gt; {
         <span class="kw">let </span>(epoch, <span class="kw-2">mut </span>committees) = <span class="self">self</span>.epoch_and_committees(<span class="self">self</span>.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
         committees
             .remove(
                 epoch
                     .as_ref()
-                    .ok_or(NodeError::InactiveLocalChain(<span class="self">self</span>.chain_id))<span class="question-mark">?</span>,
+                    .ok_or(LocalNodeError::InactiveChain(<span class="self">self</span>.chain_id))<span class="question-mark">?</span>,
             )
-            .ok_or(NodeError::InactiveLocalChain(<span class="self">self</span>.chain_id))
+            .ok_or(LocalNodeError::InactiveChain(<span class="self">self</span>.chain_id))
     }
 
     <span class="doccomment">/// Obtains all the committees trusted by either the local chain or its admin chain. Also
     /// return the latest trusted epoch.
-    </span><span class="kw">async fn </span>known_committees(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(BTreeMap&lt;Epoch, Committee&gt;, Epoch), NodeError&gt; {
+    </span><span class="kw">async fn </span>known_committees(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(BTreeMap&lt;Epoch, Committee&gt;, Epoch), LocalNodeError&gt; {
         <span class="kw">let </span>(epoch, <span class="kw-2">mut </span>committees) = <span class="self">self</span>.epoch_and_committees(<span class="self">self</span>.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>(admin_epoch, admin_committees) = <span class="self">self</span>.epoch_and_committees(<span class="self">self</span>.admin_id).<span class="kw">await</span><span class="question-mark">?</span>;
         committees.extend(admin_committees);
@@ -1894,28 +1861,30 @@
     }
 
     <span class="doccomment">/// Obtains the validators trusted by the local chain.
-    </span><span class="kw">async fn </span>validator_nodes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(ValidatorName, P::Node)&gt;, NodeError&gt; {
+    </span><span class="kw">async fn </span>validator_nodes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(ValidatorName, P::Node)&gt;&gt; {
         <span class="kw">match </span><span class="self">self</span>.local_committee().<span class="kw">await </span>{
-            <span class="prelude-val">Ok</span>(committee) =&gt; <span class="self">self</span>.validator_node_provider.make_nodes(<span class="kw-2">&amp;</span>committee),
-            <span class="prelude-val">Err</span>(NodeError::InactiveChain(<span class="kw">_</span>)) | <span class="prelude-val">Err</span>(NodeError::InactiveLocalChain(<span class="kw">_</span>)) =&gt; {
+            <span class="prelude-val">Ok</span>(committee) =&gt; <span class="prelude-val">Ok</span>(<span class="self">self</span>.validator_node_provider.make_nodes(<span class="kw-2">&amp;</span>committee)<span class="question-mark">?</span>),
+            <span class="prelude-val">Err</span>(LocalNodeError::InactiveChain(<span class="kw">_</span>)) =&gt; <span class="prelude-val">Ok</span>(Vec::new()),
+            <span class="prelude-val">Err</span>(LocalNodeError::WorkerError(WorkerError::ChainError(error)))
+                <span class="kw">if </span><span class="macro">matches!</span>(<span class="kw-2">*</span>error, ChainError::InactiveChain(<span class="kw">_</span>)) =&gt;
+            {
                 <span class="prelude-val">Ok</span>(Vec::new())
             }
-            <span class="prelude-val">Err</span>(e) =&gt; <span class="prelude-val">Err</span>(e),
+            <span class="prelude-val">Err</span>(e) =&gt; <span class="prelude-val">Err</span>(e.into()),
         }
     }
 
     <span class="doccomment">/// Obtains the current epoch of the local chain.
-    </span><span class="kw">async fn </span>epoch(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Epoch, anyhow::Error&gt; {
-        <span class="prelude-val">Ok</span>(<span class="self">self
-            </span>.chain_info()
+    </span><span class="kw">async fn </span>epoch(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Epoch, LocalNodeError&gt; {
+        <span class="self">self</span>.chain_info()
             .<span class="kw">await</span><span class="question-mark">?
             </span>.epoch
-            .ok_or(NodeError::InactiveLocalChain(<span class="self">self</span>.chain_id))<span class="question-mark">?</span>)
+            .ok_or(LocalNodeError::InactiveChain(<span class="self">self</span>.chain_id))
     }
 
     <span class="doccomment">/// Obtains the identity of the current owner of the chain. HACK: In the case of a
     /// multi-owner chain, we pick one identity for which we know the private key.
-    </span><span class="kw">pub async fn </span>identity(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Owner, anyhow::Error&gt; {
+    </span><span class="kw">pub async fn </span>identity(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Owner&gt; {
         <span class="kw">match </span><span class="self">self</span>.chain_info().<span class="kw">await</span><span class="question-mark">?</span>.manager {
             ChainManagerInfo::Single(manager) =&gt; {
                 <span class="kw">if </span>!<span class="self">self</span>.known_key_pairs.contains_key(<span class="kw-2">&amp;</span>manager.owner) {
@@ -1946,7 +1915,7 @@
                 );
                 <span class="prelude-val">Ok</span>(<span class="kw-2">*</span>identity)
             }
-            ChainManagerInfo::None =&gt; <span class="prelude-val">Err</span>(NodeError::InactiveLocalChain(<span class="self">self</span>.chain_id).into()),
+            ChainManagerInfo::None =&gt; <span class="prelude-val">Err</span>(LocalNodeError::InactiveChain(<span class="self">self</span>.chain_id).into()),
         }
     }
 
@@ -2125,7 +2094,7 @@
     <span class="kw">async fn </span>update_streams(
         this: <span class="kw-2">&amp;</span>Arc&lt;Mutex&lt;<span class="self">Self</span>&gt;&gt;,
         streams: <span class="kw-2">&amp;mut </span>HashMap&lt;ValidatorName, Pin&lt;Box&lt;<span class="kw">dyn </span>Stream&lt;Item = Notification&gt; + Send&gt;&gt;&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), NodeError&gt;
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
     <span class="kw">where
         </span>P: Send + <span class="lifetime">&#39;static</span>,
     {
@@ -2166,7 +2135,7 @@
     }
 
     <span class="doccomment">/// Prepares the chain for the next operation.
-    </span><span class="kw">async fn </span>prepare_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), NodeError&gt; {
+    </span><span class="kw">async fn </span>prepare_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="comment">// Verify that our local storage contains enough history compared to the
         // expected block height. Otherwise, download the missing history from the
         // network.
@@ -2177,10 +2146,10 @@
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">if </span>info.next_block_height == <span class="self">self</span>.next_block_height {
             <span class="comment">// Check that our local node has the expected block hash.
-            </span><span class="macro">linera_base::ensure!</span>(
+            </span><span class="macro">ensure!</span>(
                 <span class="self">self</span>.block_hash == info.block_hash,
-                NodeError::InvalidLocalBlockChaining
-            );
+                <span class="string">&quot;Invalid chain of blocks in local node&quot;
+            </span>);
         }
         <span class="kw">if </span>!<span class="macro">matches!</span>(
             <span class="kw-2">&amp;</span>info.manager,
@@ -2317,7 +2286,10 @@
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="comment">// Process the received operations. Download required blobs if necessary.
         </span><span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="self">self</span>.process_certificate(certificate.clone(), <span class="macro">vec!</span>[]).<span class="kw">await </span>{
-            <span class="kw">if let </span>NodeError::ApplicationBytecodesNotFound(locations) = <span class="kw-2">&amp;</span>err {
+            <span class="kw">if let </span>LocalNodeError::WorkerError(WorkerError::ApplicationBytecodesNotFound(
+                locations,
+            )) = <span class="kw-2">&amp;</span>err
+            {
                 <span class="kw">let </span>blobs: Vec&lt;HashedValue&gt; = future::join_all(locations.iter().map(|location| {
                     LocalNodeClient::&lt;S&gt;::download_blob(nodes.clone(), block.chain_id, <span class="kw-2">*</span>location)
                 }))
@@ -2511,7 +2483,7 @@
         this: Arc&lt;Mutex&lt;<span class="self">Self</span>&gt;&gt;,
         name: ValidatorName,
         client: A,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), NodeError&gt;
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
     <span class="kw">where
         </span>A: ValidatorNode + Send + Sync + <span class="lifetime">&#39;static </span>+ Clone,
     {
@@ -2583,7 +2555,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         certificate: Certificate,
         blobs: Vec&lt;HashedValue&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), NodeError&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), LocalNodeError&gt; {
         <span class="kw">let </span>info = <span class="self">self
             </span>.node_client
             .handle_certificate(certificate, blobs)
@@ -2954,7 +2926,7 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(MessageId, Certificate)&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>(epoch, committees) = <span class="self">self</span>.epoch_and_committees(<span class="self">self</span>.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>epoch = epoch.ok_or(NodeError::InactiveLocalChain(<span class="self">self</span>.chain_id))<span class="question-mark">?</span>;
+        <span class="kw">let </span>epoch = epoch.ok_or(LocalNodeError::InactiveChain(<span class="self">self</span>.chain_id))<span class="question-mark">?</span>;
         <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>certificate = <span class="self">self
             </span>.execute_block(
@@ -3134,7 +3106,7 @@
     </span><span class="kw">pub async fn </span>finalize_committee(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>(current_epoch, committees) = <span class="self">self</span>.epoch_and_committees(<span class="self">self</span>.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>current_epoch = current_epoch.ok_or(NodeError::InactiveLocalChain(<span class="self">self</span>.chain_id))<span class="question-mark">?</span>;
+        <span class="kw">let </span>current_epoch = current_epoch.ok_or(LocalNodeError::InactiveChain(<span class="self">self</span>.chain_id))<span class="question-mark">?</span>;
         <span class="kw">let </span>operations = committees
             .keys()
             .filter_map(|epoch| {

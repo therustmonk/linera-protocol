@@ -123,7 +123,7 @@
     grpc_network::GrpcClient,
     simple_network::SimpleClient,
 };
-<span class="kw">use </span>linera_core::{client::ValidatorNodeProvider, node::NodeError};
+<span class="kw">use </span>linera_core::node::{NodeError, ValidatorNodeProvider};
 <span class="kw">use </span>std::{str::FromStr, time::Duration};
 
 <span class="doccomment">/// A general node provider which delegates node provision to the underlying

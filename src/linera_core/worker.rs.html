@@ -1278,6 +1278,9 @@
 <a href="#1278" id="1278">1278</a>
 <a href="#1279" id="1279">1279</a>
 <a href="#1280" id="1280">1280</a>
+<a href="#1281" id="1281">1281</a>
+<a href="#1282" id="1282">1282</a>
+<a href="#1283" id="1283">1283</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1417,10 +1420,13 @@
 </span><span class="kw">pub enum </span>WorkerError {
     <span class="attr">#[error(transparent)]
     </span>CryptoError(<span class="attr">#[from] </span>linera_base::crypto::CryptoError),
+
     <span class="attr">#[error(transparent)]
     </span>ArithmeticError(<span class="attr">#[from] </span>ArithmeticError),
+
     <span class="attr">#[error(transparent)]
     </span>ViewError(<span class="attr">#[from] </span>linera_views::views::ViewError),
+
     <span class="attr">#[error(transparent)]
     </span>ChainError(<span class="attr">#[from] </span>Box&lt;linera_chain::ChainError&gt;),
 

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["client_test_utils"],"struct":["ChainClient"],"trait":["ValidatorNodeProvider"]};
+window.SIDEBAR_ITEMS = {"mod":["client_test_utils"],"struct":["ChainClient"]};

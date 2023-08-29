@@ -184,7 +184,7 @@ var sourcesIndex = JSON.parse('{\
 "linera":["",[],["linera.rs"]],\
 "linera_base":["",[],["abi.rs","crypto.rs","data_types.rs","graphql.rs","identifiers.rs","lib.rs"]],\
 "linera_chain":["",[["manager",[],["mod.rs","multi.rs","single.rs"]]],["chain.rs","data_types.rs","inbox.rs","lib.rs","outbox.rs"]],\
-"linera_core":["",[["unit_tests",[],["client_test_utils.rs"]]],["client.rs","data_types.rs","lib.rs","node.rs","notifier.rs","tracker.rs","updater.rs","worker.rs"]],\
+"linera_core":["",[["unit_tests",[],["client_test_utils.rs"]]],["client.rs","data_types.rs","lib.rs","local_node.rs","node.rs","notifier.rs","tracker.rs","updater.rs","worker.rs"]],\
 "linera_execution":["",[["wasm",[],["async_boundary.rs","async_determinism.rs","common.rs","conversions_from_wit.rs","conversions_to_wit.rs","guest_futures.rs","mod.rs","module_cache.rs","sanitizer.rs","system_api.rs","wasmer.rs","wasmtime.rs"]]],["applications.rs","committee.rs","execution.rs","graphql.rs","lib.rs","ownership.rs","pricing.rs","runtime.rs","system.rs"]],\
 "linera_explorer":["",[],["entrypoint.rs","graphql.rs","input_type.rs","js_utils.rs","lib.rs"]],\
 "linera_proxy":["",[],["proxy.rs"]],\

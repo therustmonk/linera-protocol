@@ -1787,9 +1787,6 @@
 <a href="#1787" id="1787">1787</a>
 <a href="#1788" id="1788">1788</a>
 <a href="#1789" id="1789">1789</a>
-<a href="#1790" id="1790">1790</a>
-<a href="#1791" id="1791">1791</a>
-<a href="#1792" id="1792">1792</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1806,11 +1803,8 @@
 };
 <span class="kw">use </span>linera_chain::data_types::{Certificate, CertificateValue, ExecutedBlock};
 <span class="kw">use </span>linera_core::{
-    client::{ChainClient, ValidatorNodeProvider},
-    data_types::ChainInfoQuery,
-    node::{LocalNodeClient, ValidatorNode},
-    tracker::NotificationTracker,
-    worker::WorkerState,
+    client::ChainClient, data_types::ChainInfoQuery, local_node::LocalNodeClient,
+    node::ValidatorNodeProvider, tracker::NotificationTracker, worker::WorkerState,
 };
 <span class="kw">use </span>linera_execution::{
     committee::{Committee, ValidatorName, ValidatorState},

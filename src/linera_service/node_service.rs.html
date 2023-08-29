@@ -828,9 +828,6 @@
 <a href="#828" id="828">828</a>
 <a href="#829" id="829">829</a>
 <a href="#830" id="830">830</a>
-<a href="#831" id="831">831</a>
-<a href="#832" id="832">832</a>
-<a href="#833" id="833">833</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -858,10 +855,7 @@
     BcsHexParseError,
 };
 <span class="kw">use </span>linera_chain::{data_types::HashedValue, ChainStateView};
-<span class="kw">use </span>linera_core::{
-    client::{ChainClient, ValidatorNodeProvider},
-    worker::Notification,
-};
+<span class="kw">use </span>linera_core::{client::ChainClient, node::ValidatorNodeProvider, worker::Notification};
 <span class="kw">use </span>linera_execution::{
     committee::{Committee, Epoch},
     system::{AdminOperation, Recipient, SystemChannel, UserData},

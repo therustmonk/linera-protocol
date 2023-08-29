@@ -83,7 +83,6 @@
 <a href="#83" id="83">83</a>
 <a href="#84" id="84">84</a>
 <a href="#85" id="85">85</a>
-<a href="#86" id="86">86</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -93,9 +92,8 @@
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>linera_core::{
-    client::ValidatorNodeProvider,
     data_types::{ChainInfoQuery, ChainInfoResponse},
-    node::{NodeError, NotificationStream, ValidatorNode},
+    node::{NodeError, NotificationStream, ValidatorNode, ValidatorNodeProvider},
 };
 <span class="kw">use </span>linera_execution::committee::Committee;
 <span class="kw">use </span>linera_service::{chain_listener::ChainListenerConfig, node_service::NodeService};
