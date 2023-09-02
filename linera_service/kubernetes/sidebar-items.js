@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["fetch_pod_ips","find_value_with_key_prefix","get_ips_from_k8s"]};

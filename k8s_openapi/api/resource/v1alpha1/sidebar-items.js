@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["AllocationResult","PodScheduling","PodSchedulingSpec","PodSchedulingStatus","ResourceClaim","ResourceClaimConsumerReference","ResourceClaimParametersReference","ResourceClaimSchedulingStatus","ResourceClaimSpec","ResourceClaimStatus","ResourceClaimTemplate","ResourceClaimTemplateSpec","ResourceClass","ResourceClassParametersReference"]};

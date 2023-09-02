@@ -480,6 +480,49 @@
 <a href="#480" id="480">480</a>
 <a href="#481" id="481">481</a>
 <a href="#482" id="482">482</a>
+<a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
+<a href="#493" id="493">493</a>
+<a href="#494" id="494">494</a>
+<a href="#495" id="495">495</a>
+<a href="#496" id="496">496</a>
+<a href="#497" id="497">497</a>
+<a href="#498" id="498">498</a>
+<a href="#499" id="499">499</a>
+<a href="#500" id="500">500</a>
+<a href="#501" id="501">501</a>
+<a href="#502" id="502">502</a>
+<a href="#503" id="503">503</a>
+<a href="#504" id="504">504</a>
+<a href="#505" id="505">505</a>
+<a href="#506" id="506">506</a>
+<a href="#507" id="507">507</a>
+<a href="#508" id="508">508</a>
+<a href="#509" id="509">509</a>
+<a href="#510" id="510">510</a>
+<a href="#511" id="511">511</a>
+<a href="#512" id="512">512</a>
+<a href="#513" id="513">513</a>
+<a href="#514" id="514">514</a>
+<a href="#515" id="515">515</a>
+<a href="#516" id="516">516</a>
+<a href="#517" id="517">517</a>
+<a href="#518" id="518">518</a>
+<a href="#519" id="519">519</a>
+<a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -498,6 +541,8 @@
     simple_network,
     transport::TransportProtocol,
 };
+<span class="attr">#[cfg(feature = <span class="string">&quot;kube&quot;</span>)]
+</span><span class="kw">use </span>linera_service::kubernetes::get_ips_from_k8s;
 <span class="kw">use </span>linera_service::{
     config::{
         CommitteeConfig, Export, GenesisConfig, Import, ValidatorConfig, ValidatorServerConfig,
@@ -518,6 +563,8 @@
     notification_config: NotificationConfig,
     shard: <span class="prelude-ty">Option</span>&lt;usize&gt;,
     grace_period_micros: u64,
+    <span class="attr">#[cfg(feature = <span class="string">&quot;kube&quot;</span>)]
+    </span>kube: bool,
 }
 
 <span class="kw">impl </span>ServerContext {
@@ -651,6 +698,22 @@
             }
         }
     }
+
+    <span class="attr">#[cfg(feature = <span class="string">&quot;kube&quot;</span>)]
+    </span><span class="kw">fn </span>get_listen_address(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
+        <span class="kw">if </span><span class="self">self</span>.kube {
+            std::env::var(<span class="string">&quot;MY_POD_IP&quot;</span>).expect(<span class="string">&quot;Could not get env variable MY_POD_IP&quot;</span>)
+        } <span class="kw">else </span>{
+            <span class="comment">// Allow local IP address to be different from the public one.
+            </span><span class="string">&quot;0.0.0.0&quot;</span>.to_string()
+        }
+    }
+
+    <span class="attr">#[cfg(not(feature = <span class="string">&quot;kube&quot;</span>))]
+    </span><span class="kw">fn </span>get_listen_address(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
+        <span class="comment">// Allow local IP address to be different from the public one.
+        </span><span class="string">&quot;0.0.0.0&quot;</span>.to_string()
+    }
 }
 
 <span class="attr">#[async_trait]
@@ -662,28 +725,28 @@
     <span class="kw">type </span>Output = ();
 
     <span class="kw">async fn </span>run(<span class="self">self</span>, storage: S) -&gt; <span class="prelude-ty">Result</span>&lt;(), anyhow::Error&gt; {
-        <span class="comment">// Allow local IP address to be different from the public one.
-        </span><span class="kw">let </span>listen_address = <span class="string">&quot;0.0.0.0&quot;</span>;
+        <span class="kw">let </span>listen_address = <span class="self">self</span>.get_listen_address();
+
         <span class="comment">// Run the server
         </span><span class="kw">let </span>states = <span class="kw">match </span><span class="self">self</span>.shard {
             <span class="prelude-val">Some</span>(shard) =&gt; {
                 <span class="macro">info!</span>(<span class="string">&quot;Running shard number {}&quot;</span>, shard);
-                <span class="macro">vec!</span>[<span class="self">self</span>.make_shard_state(listen_address, shard, storage)]
+                <span class="macro">vec!</span>[<span class="self">self</span>.make_shard_state(<span class="kw-2">&amp;</span>listen_address, shard, storage)]
             }
             <span class="prelude-val">None </span>=&gt; {
                 <span class="macro">info!</span>(<span class="string">&quot;Running all shards&quot;</span>);
                 <span class="kw">let </span>num_shards = <span class="self">self</span>.server_config.internal_network.shards.len();
                 (<span class="number">0</span>..num_shards)
-                    .map(|shard| <span class="self">self</span>.make_shard_state(listen_address, shard, storage.clone()))
+                    .map(|shard| <span class="self">self</span>.make_shard_state(<span class="kw-2">&amp;</span>listen_address, shard, storage.clone()))
                     .collect()
             }
         };
 
         <span class="kw">match </span><span class="self">self</span>.server_config.internal_network.protocol {
             NetworkProtocol::Simple(protocol) =&gt; {
-                <span class="self">self</span>.spawn_simple(listen_address, states, protocol).<span class="kw">await</span><span class="question-mark">?
+                <span class="self">self</span>.spawn_simple(<span class="kw-2">&amp;</span>listen_address, states, protocol).<span class="kw">await</span><span class="question-mark">?
             </span>}
-            NetworkProtocol::Grpc =&gt; <span class="self">self</span>.spawn_grpc(listen_address, states).<span class="kw">await</span><span class="question-mark">?</span>,
+            NetworkProtocol::Grpc =&gt; <span class="self">self</span>.spawn_grpc(<span class="kw-2">&amp;</span>listen_address, states).<span class="kw">await</span><span class="question-mark">?</span>,
         };
 
         <span class="prelude-val">Ok</span>(())
@@ -799,6 +862,13 @@
         <span class="doccomment">/// The maximal number of entries in the storage cache.
         </span><span class="attr">#[structopt(long, default_value = <span class="string">&quot;1000&quot;</span>)]
         </span>cache_size: usize,
+
+        <span class="doccomment">/// Use this when running from a Kubernetes cluster (including from within GCP)
+        /// Won&#39;t use config files to determine host IPs, but will do it dynamically
+        /// based on cluster info
+        </span><span class="attr">#[cfg(feature = <span class="string">&quot;kube&quot;</span>)]
+        #[structopt(long)]
+        </span>kube: bool,
     },
 
     <span class="doccomment">/// Act as a trusted third-party and generate all server configurations
@@ -846,17 +916,33 @@
             max_concurrent_queries,
             max_stream_queries,
             cache_size,
+            <span class="attr">#[cfg(feature = <span class="string">&quot;kube&quot;</span>)]
+            </span>kube,
         } =&gt; {
             <span class="kw">let </span>genesis_config = GenesisConfig::read(<span class="kw-2">&amp;</span>genesis_config_path)
                 .expect(<span class="string">&quot;Fail to read initial chain config&quot;</span>);
-            <span class="kw">let </span>server_config = ValidatorServerConfig::read(<span class="kw-2">&amp;</span>server_config_path)
+            <span class="attr">#[cfg(not(feature = <span class="string">&quot;kube&quot;</span>))]
+            </span><span class="kw">let </span>server_config = ValidatorServerConfig::read(<span class="kw-2">&amp;</span>server_config_path)
                 .expect(<span class="string">&quot;Fail to read server config&quot;</span>);
+            <span class="attr">#[cfg(feature = <span class="string">&quot;kube&quot;</span>)]
+            </span><span class="kw">let </span><span class="kw-2">mut </span>server_config = ValidatorServerConfig::read(<span class="kw-2">&amp;</span>server_config_path)
+                .expect(<span class="string">&quot;Fail to read server config&quot;</span>);
+
+            <span class="attr">#[cfg(feature = <span class="string">&quot;kube&quot;</span>)]
+            </span><span class="kw">if </span>kube {
+                get_ips_from_k8s(<span class="kw-2">&amp;mut </span>server_config)
+                    .<span class="kw">await
+                    </span>.expect(<span class="string">&quot;Failed to get IPs from k8s&quot;</span>);
+            }
+
             <span class="kw">let </span>job = ServerContext {
                 server_config,
                 cross_chain_config,
                 notification_config,
                 shard,
                 grace_period_micros: grace_period,
+                <span class="attr">#[cfg(feature = <span class="string">&quot;kube&quot;</span>)]
+                </span>kube,
             };
             <span class="kw">let </span>wasm_runtime = wasm_runtime.with_wasm_default();
             storage_config

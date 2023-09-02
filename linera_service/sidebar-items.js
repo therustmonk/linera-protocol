@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["chain_listener","client","config","grpc_proxy","node_service","project","storage","util"]};
+window.SIDEBAR_ITEMS = {"mod":["chain_listener","client","config","grpc_proxy","kubernetes","node_service","project","storage","util"]};
