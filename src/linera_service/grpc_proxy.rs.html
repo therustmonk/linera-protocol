@@ -402,7 +402,7 @@
             .clone()
             .ok_or_else(|| Status::invalid_argument(<span class="string">&quot;Missing field: chain_id.&quot;</span>))<span class="question-mark">?
             </span>.try_into()<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="number">0</span>.notifier.notify(<span class="kw-2">&amp;</span>chain_id, <span class="prelude-val">Ok</span>(notification));
+        <span class="self">self</span>.<span class="number">0</span>.notifier.notify(<span class="kw-2">&amp;</span>chain_id, <span class="kw-2">&amp;</span><span class="prelude-val">Ok</span>(notification));
         <span class="prelude-val">Ok</span>(Response::new(()))
     }
 }

@@ -541,9 +541,6 @@
 <a href="#541" id="541">541</a>
 <a href="#542" id="542">542</a>
 <a href="#543" id="543">543</a>
-<a href="#544" id="544">544</a>
-<a href="#545" id="545">545</a>
-<a href="#546" id="546">546</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -577,13 +574,13 @@
 <span class="doccomment">/// A local node with a single worker, typically used by clients.
 </span><span class="kw">pub struct </span>LocalNode&lt;S&gt; {
     state: WorkerState&lt;S&gt;,
+    notifier: Notifier&lt;Notification&gt;,
 }
 
 <span class="doccomment">/// A client to a local node.
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>LocalNodeClient&lt;S&gt; {
     node: Arc&lt;Mutex&lt;LocalNode&lt;S&gt;&gt;&gt;,
-    notifier: Notifier&lt;Notification&gt;,
 }
 
 <span class="doccomment">/// Error type for the operations on a local node.
@@ -644,10 +641,7 @@
                 <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut </span>notifications),
             )
             .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">for </span>notification <span class="kw">in </span>notifications {
-            <span class="self">self</span>.notifier
-                .notify(<span class="kw-2">&amp;</span>notification.chain_id.clone(), notification);
-        }
+        node.notifier.handle_notifications(<span class="kw-2">&amp;</span>notifications);
         <span class="prelude-val">Ok</span>(response)
     }
 
@@ -666,10 +660,7 @@
                 <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut </span>notifications),
             )
             .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">for </span>notification <span class="kw">in </span>notifications {
-            <span class="self">self</span>.notifier
-                .notify(<span class="kw-2">&amp;</span>notification.chain_id.clone(), notification);
-        }
+        node.notifier.handle_notifications(<span class="kw-2">&amp;</span>notifications);
         <span class="prelude-val">Ok</span>(response)
     }
 
@@ -687,17 +678,20 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         chains: Vec&lt;ChainId&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;NotificationStream, LocalNodeError&gt; {
-        <span class="kw">let </span>rx = <span class="self">self</span>.notifier.subscribe(chains);
+        <span class="kw">let </span>node = <span class="self">self</span>.node.lock().<span class="kw">await</span>;
+        <span class="kw">let </span>rx = node.notifier.subscribe(chains);
         <span class="prelude-val">Ok</span>(Box::pin(UnboundedReceiverStream::new(rx)))
     }
 }
 
 <span class="kw">impl</span>&lt;S&gt; LocalNodeClient&lt;S&gt; {
     <span class="kw">pub fn </span>new(state: WorkerState&lt;S&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>node = LocalNode { state };
+        <span class="kw">let </span>node = LocalNode {
+            state,
+            notifier: Notifier::default(),
+        };
         <span class="self">Self </span>{
             node: Arc::new(Mutex::new(node)),
-            notifier: Notifier::default(),
         }
     }
 }

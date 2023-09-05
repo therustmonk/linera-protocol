@@ -187,6 +187,18 @@
 <a href="#187" id="187">187</a>
 <a href="#188" id="188">188</a>
 <a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -195,7 +207,7 @@
 <span class="kw">use </span>tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 <span class="kw">use </span>tracing::trace;
 
-<span class="doccomment">/// The `Notifier` holds references to clients waiting to receive notifications
+<span class="doccomment">/// A `Notifier` holds references to clients waiting to receive notifications
 /// from the validator.
 /// Clients will be evicted if their connections are terminated.
 </span><span class="attr">#[derive(Clone)]
@@ -203,9 +215,7 @@
     inner: DashMap&lt;ChainId, Vec&lt;UnboundedSender&lt;N&gt;&gt;&gt;,
 }
 
-<span class="comment">// This is here because #[derive(Default)] does not seem to work
-// Is this a compiler bug?
-</span><span class="kw">impl</span>&lt;N&gt; Default <span class="kw">for </span>Notifier&lt;N&gt; {
+<span class="kw">impl</span>&lt;N&gt; Default <span class="kw">for </span>Notifier&lt;N&gt; {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             inner: DashMap::default(),
@@ -213,7 +223,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;N: Clone&gt; Notifier&lt;N&gt; {
+<span class="kw">impl</span>&lt;N&gt; Notifier&lt;N&gt; {
     <span class="doccomment">/// Creates a subscription given a collection of ChainIds and a sender to the client.
     </span><span class="kw">pub fn </span>subscribe(<span class="kw-2">&amp;</span><span class="self">self</span>, chain_ids: Vec&lt;ChainId&gt;) -&gt; UnboundedReceiver&lt;N&gt; {
         <span class="kw">let </span>(tx, rx) = tokio::sync::mpsc::unbounded_channel();
@@ -223,9 +233,14 @@
         }
         rx
     }
+}
 
+<span class="kw">impl</span>&lt;N&gt; Notifier&lt;N&gt;
+<span class="kw">where
+    </span>N: Clone,
+{
     <span class="doccomment">/// Notifies all the clients waiting for a notification from a given chain.
-    </span><span class="kw">pub fn </span>notify(<span class="kw-2">&amp;</span><span class="self">self</span>, chain_id: <span class="kw-2">&amp;</span>ChainId, notification: N) {
+    </span><span class="kw">pub fn </span>notify(<span class="kw-2">&amp;</span><span class="self">self</span>, chain_id: <span class="kw-2">&amp;</span>ChainId, notification: <span class="kw-2">&amp;</span>N) {
         <span class="kw">let </span>senders_is_empty = {
             <span class="kw">let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>senders) = <span class="self">self</span>.inner.get_mut(chain_id) <span class="kw">else </span>{
                 <span class="macro">trace!</span>(<span class="string">&quot;Chain {chain_id:?} has no subscribers.&quot;</span>);
@@ -251,6 +266,15 @@
         <span class="kw">if </span>senders_is_empty {
             <span class="macro">trace!</span>(<span class="string">&quot;No more subscribers for chain {chain_id:?}. Removing entry.&quot;</span>);
             <span class="self">self</span>.inner.remove(chain_id);
+        }
+    }
+}
+
+<span class="kw">impl </span>Notifier&lt;<span class="kw">crate</span>::worker::Notification&gt; {
+    <span class="doccomment">/// Process multiple notifications of type [`crate::worker::Notification`].
+    </span><span class="kw">pub fn </span>handle_notifications(<span class="kw-2">&amp;</span><span class="self">self</span>, notifications: <span class="kw-2">&amp;</span>[<span class="kw">crate</span>::worker::Notification]) {
+        <span class="kw">for </span>notification <span class="kw">in </span>notifications {
+            <span class="self">self</span>.notify(<span class="kw-2">&amp;</span>notification.chain_id, notification);
         }
     }
 }
@@ -309,14 +333,14 @@
         <span class="kw">let </span>handle_a = std::thread::spawn(<span class="kw">move </span>|| {
             <span class="kw">let </span>chain_a = chain_a;
             <span class="kw">for _ in </span><span class="number">0</span>..NOTIFICATIONS_A {
-                a_notifier.notify(<span class="kw-2">&amp;</span>chain_a, ());
+                a_notifier.notify(<span class="kw-2">&amp;</span>chain_a, <span class="kw-2">&amp;</span>());
             }
         });
 
         <span class="kw">let </span>handle_b = std::thread::spawn(<span class="kw">move </span>|| {
             <span class="kw">let </span>chain_b = chain_b;
             <span class="kw">for _ in </span><span class="number">0</span>..NOTIFICATIONS_B {
-                notifier.notify(<span class="kw-2">&amp;</span>chain_b, ());
+                notifier.notify(<span class="kw-2">&amp;</span>chain_b, <span class="kw-2">&amp;</span>());
             }
         });
 
@@ -357,22 +381,22 @@
         <span class="macro">assert_eq!</span>(notifier.inner.len(), <span class="number">4</span>);
 
         rx_c.close();
-        notifier.notify(<span class="kw-2">&amp;</span>chain_c, ());
+        notifier.notify(<span class="kw-2">&amp;</span>chain_c, <span class="kw-2">&amp;</span>());
         <span class="macro">assert_eq!</span>(notifier.inner.len(), <span class="number">3</span>);
 
         rx_a.close();
-        notifier.notify(<span class="kw-2">&amp;</span>chain_a, ());
+        notifier.notify(<span class="kw-2">&amp;</span>chain_a, <span class="kw-2">&amp;</span>());
         <span class="macro">assert_eq!</span>(notifier.inner.len(), <span class="number">3</span>);
 
         rx_b.close();
-        notifier.notify(<span class="kw-2">&amp;</span>chain_b, ());
+        notifier.notify(<span class="kw-2">&amp;</span>chain_b, <span class="kw-2">&amp;</span>());
         <span class="macro">assert_eq!</span>(notifier.inner.len(), <span class="number">2</span>);
 
-        notifier.notify(<span class="kw-2">&amp;</span>chain_a, ());
+        notifier.notify(<span class="kw-2">&amp;</span>chain_a, <span class="kw-2">&amp;</span>());
         <span class="macro">assert_eq!</span>(notifier.inner.len(), <span class="number">1</span>);
 
         rx_d.close();
-        notifier.notify(<span class="kw-2">&amp;</span>chain_d, ());
+        notifier.notify(<span class="kw-2">&amp;</span>chain_d, <span class="kw-2">&amp;</span>());
         <span class="macro">assert_eq!</span>(notifier.inner.len(), <span class="number">0</span>);
     }
 }

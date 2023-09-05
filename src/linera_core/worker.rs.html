@@ -1310,6 +1310,9 @@
 <a href="#1310" id="1310">1310</a>
 <a href="#1311" id="1311">1311</a>
 <a href="#1312" id="1312">1312</a>
+<a href="#1313" id="1313">1313</a>
+<a href="#1314" id="1314">1314</a>
+<a href="#1315" id="1315">1315</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1630,6 +1633,9 @@
         <span class="kw-2">mut </span>notifications: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Vec&lt;Notification&gt;&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfoResponse, WorkerError&gt; {
         <span class="kw">let </span>(response, actions) = <span class="self">self</span>.handle_certificate(certificate, blobs, <span class="prelude-val">None</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(notifications) = notifications.as_mut() {
+            notifications.extend(actions.notifications);
+        }
         <span class="kw">let </span><span class="kw-2">mut </span>requests = VecDeque::from(actions.cross_chain_requests);
         <span class="kw">while let </span><span class="prelude-val">Some</span>(request) = requests.pop_front() {
             <span class="kw">let </span>actions = <span class="self">self</span>.handle_cross_chain_request(request).<span class="kw">await</span><span class="question-mark">?</span>;
