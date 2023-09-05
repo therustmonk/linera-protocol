@@ -369,7 +369,7 @@
 
 <span class="doccomment">/// A number identifying the configuration of the chain (aka the committee).
 </span><span class="attr">#[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Default, Debug)]
-</span><span class="kw">pub struct </span>Epoch(<span class="kw">pub </span>u64);
+</span><span class="kw">pub struct </span>Epoch(<span class="kw">pub </span>u32);
 
 <span class="kw">impl </span>Serialize <span class="kw">for </span>Epoch {
     <span class="kw">fn </span>serialize&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, serializer: S) -&gt; <span class="prelude-ty">Result</span>&lt;S::Ok, S::Error&gt;
@@ -391,11 +391,11 @@
     {
         <span class="kw">if </span>deserializer.is_human_readable() {
             <span class="kw">let </span>s = String::deserialize(deserializer)<span class="question-mark">?</span>;
-            <span class="prelude-val">Ok</span>(Epoch(u64::from_str(<span class="kw-2">&amp;</span>s).map_err(serde::de::Error::custom)<span class="question-mark">?</span>))
+            <span class="prelude-val">Ok</span>(Epoch(u32::from_str(<span class="kw-2">&amp;</span>s).map_err(serde::de::Error::custom)<span class="question-mark">?</span>))
         } <span class="kw">else </span>{
             <span class="attr">#[derive(Deserialize)]
             #[serde(rename = <span class="string">&quot;Epoch&quot;</span>)]
-            </span><span class="kw">struct </span>EpochDerived(u64);
+            </span><span class="kw">struct </span>EpochDerived(u32);
 
             <span class="kw">let </span>value = EpochDerived::deserialize(deserializer)<span class="question-mark">?</span>;
             <span class="prelude-val">Ok</span>(<span class="self">Self</span>(value.<span class="number">0</span>))
@@ -615,8 +615,8 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;u64&gt; <span class="kw">for </span>Epoch {
-    <span class="kw">fn </span>from(value: u64) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;u32&gt; <span class="kw">for </span>Epoch {
+    <span class="kw">fn </span>from(value: u32) -&gt; <span class="self">Self </span>{
         Epoch(value)
     }
 }
