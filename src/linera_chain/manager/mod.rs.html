@@ -205,6 +205,29 @@
 <a href="#205" id="205">205</a>
 <a href="#206" id="206">206</a>
 <a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -222,8 +245,9 @@
     crypto::{CryptoHash, KeyPair, PublicKey},
     data_types::{BlockHeight, RoundNumber},
     doc_scalar, ensure,
+    identifiers::ChainId,
 };
-<span class="kw">use </span>linera_execution::ChainOwnership;
+<span class="kw">use </span>linera_execution::{committee::Epoch, ChainOwnership};
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>tracing::error;
 
@@ -301,6 +325,21 @@
         }
     }
 
+    <span class="kw">pub fn </span>vote_leader_timeout(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        chain_id: ChainId,
+        height: BlockHeight,
+        epoch: Epoch,
+        key_pair: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>KeyPair&gt;,
+    ) -&gt; bool {
+        <span class="kw">match </span><span class="self">self </span>{
+            ChainManager::Multi(manager) =&gt; {
+                manager.vote_leader_timeout(chain_id, height, epoch, key_pair)
+            }
+            ChainManager::Single(<span class="kw">_</span>) | ChainManager::None =&gt; <span class="bool-val">false</span>,
+        }
+    }
+
     <span class="doccomment">/// Verifies the safety of the block w.r.t. voting rules.
     </span><span class="kw">pub fn </span>check_proposed_block(<span class="kw-2">&amp;</span><span class="self">self</span>, proposal: <span class="kw-2">&amp;</span>BlockProposal) -&gt; <span class="prelude-ty">Result</span>&lt;Outcome, ChainError&gt; {
         <span class="comment">// When a block is certified, incrementing its height must succeed.
@@ -347,9 +386,9 @@
         }
     }
 
-    <span class="kw">pub fn </span>handle_timeout_certificate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: Certificate) {
+    <span class="kw">pub fn </span>handle_timeout_certificate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, certificate: Certificate) {
         <span class="kw">match </span><span class="self">self </span>{
-            ChainManager::Multi(<span class="kw">_</span>) =&gt; {}
+            ChainManager::Multi(manager) =&gt; manager.handle_timeout_certificate(certificate),
             ChainManager::None | ChainManager::Single(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected chain manager&quot;</span>),
         }
     }
@@ -395,6 +434,13 @@
             ChainManagerInfo::Single(single) =&gt; single.pending.as_ref(),
             ChainManagerInfo::Multi(multi) =&gt; multi.pending.as_ref(),
             ChainManagerInfo::None =&gt; <span class="prelude-val">None</span>,
+        }
+    }
+
+    <span class="kw">pub fn </span>timeout_vote(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>LiteVote&gt; {
+        <span class="kw">match </span><span class="self">self </span>{
+            ChainManagerInfo::Multi(multi) =&gt; multi.timeout_vote.as_ref(),
+            ChainManagerInfo::Single(<span class="kw">_</span>) | ChainManagerInfo::None =&gt; <span class="prelude-val">None</span>,
         }
     }
 

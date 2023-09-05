@@ -1281,6 +1281,35 @@
 <a href="#1281" id="1281">1281</a>
 <a href="#1282" id="1282">1282</a>
 <a href="#1283" id="1283">1283</a>
+<a href="#1284" id="1284">1284</a>
+<a href="#1285" id="1285">1285</a>
+<a href="#1286" id="1286">1286</a>
+<a href="#1287" id="1287">1287</a>
+<a href="#1288" id="1288">1288</a>
+<a href="#1289" id="1289">1289</a>
+<a href="#1290" id="1290">1290</a>
+<a href="#1291" id="1291">1291</a>
+<a href="#1292" id="1292">1292</a>
+<a href="#1293" id="1293">1293</a>
+<a href="#1294" id="1294">1294</a>
+<a href="#1295" id="1295">1295</a>
+<a href="#1296" id="1296">1296</a>
+<a href="#1297" id="1297">1297</a>
+<a href="#1298" id="1298">1298</a>
+<a href="#1299" id="1299">1299</a>
+<a href="#1300" id="1300">1300</a>
+<a href="#1301" id="1301">1301</a>
+<a href="#1302" id="1302">1302</a>
+<a href="#1303" id="1303">1303</a>
+<a href="#1304" id="1304">1304</a>
+<a href="#1305" id="1305">1305</a>
+<a href="#1306" id="1306">1306</a>
+<a href="#1307" id="1307">1307</a>
+<a href="#1308" id="1308">1308</a>
+<a href="#1309" id="1309">1309</a>
+<a href="#1310" id="1310">1310</a>
+<a href="#1311" id="1311">1311</a>
+<a href="#1312" id="1312">1312</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1964,7 +1993,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         certificate: Certificate,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainInfoResponse, NetworkActions), WorkerError&gt; {
-        <span class="kw">let </span>(chain_id, _height, epoch) = <span class="kw">match </span>certificate.value() {
+        <span class="kw">let </span>(chain_id, height, epoch) = <span class="kw">match </span>certificate.value() {
             CertificateValue::LeaderTimeout {
                 chain_id,
                 height,
@@ -1975,7 +2004,7 @@
         };
         <span class="comment">// Check that the chain is active and ready for this confirmation.
         // Verify the certificate. Returns a catch-all error to make client code more robust.
-        </span><span class="kw">let </span>chain = <span class="self">self</span>.storage.load_active_chain(chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
+        </span><span class="kw">let </span><span class="kw-2">mut </span>chain = <span class="self">self</span>.storage.load_active_chain(chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>(current_epoch, committee) = chain
             .execution_state
             .system
@@ -1986,9 +2015,26 @@
             WorkerError::InvalidEpoch { chain_id, epoch }
         );
         certificate.check(committee)<span class="question-mark">?</span>;
-        <span class="comment">// TODO(#464): Handle timeout in chain manager.
-        </span><span class="kw">let </span>actions = NetworkActions::default();
+        <span class="kw">let </span><span class="kw-2">mut </span>actions = NetworkActions::default();
+        <span class="kw">if </span>chain.tip_state.get().already_validated_block(height)<span class="question-mark">? </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>((ChainInfoResponse::new(<span class="kw-2">&amp;</span>chain, <span class="self">self</span>.key_pair()), actions));
+        }
+        <span class="kw">let </span>next_round = chain.manager.get().next_round();
+        chain
+            .manager
+            .get_mut()
+            .handle_timeout_certificate(certificate.clone());
+        <span class="kw">if </span>chain.manager.get().next_round() &gt; next_round {
+            actions.notifications.push(Notification {
+                chain_id,
+                reason: Reason::NewRound {
+                    height,
+                    round: chain.manager.get().next_round(),
+                },
+            })
+        }
         <span class="kw">let </span>info = ChainInfoResponse::new(<span class="kw-2">&amp;</span>chain, <span class="self">self</span>.key_pair());
+        chain.save().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>((info, actions))
     }
 
@@ -2186,7 +2232,7 @@
             owner,
             signature,
             blobs,
-            validated: <span class="kw">_</span>,
+            validated,
         } = <span class="kw-2">&amp;</span>proposal;
         <span class="kw">let </span>chain_id = block.chain_id;
         <span class="kw">let </span><span class="kw-2">mut </span>chain = <span class="self">self</span>.storage.load_active_chain(chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -2200,7 +2246,7 @@
             block.epoch == epoch,
             WorkerError::InvalidEpoch { chain_id, epoch }
         );
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(validated) = <span class="kw-2">&amp;</span>proposal.validated {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(validated) = validated {
             validated.check(committee)<span class="question-mark">?</span>;
         }
         <span class="comment">// Check the authentication of the block.
@@ -2325,6 +2371,18 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(ChainInfoResponse, NetworkActions), WorkerError&gt; {
         <span class="macro">trace!</span>(<span class="string">&quot;{} &lt;-- {:?}&quot;</span>, <span class="self">self</span>.nickname, query);
         <span class="kw">let </span><span class="kw-2">mut </span>chain = <span class="self">self</span>.storage.load_chain(query.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">if </span>query.request_leader_timeout {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(epoch) = chain.execution_state.system.epoch.get() {
+                <span class="kw">if </span>chain.manager.get_mut().vote_leader_timeout(
+                    query.chain_id,
+                    chain.tip_state.get().next_block_height,
+                    <span class="kw-2">*</span>epoch,
+                    <span class="self">self</span>.key_pair(),
+                ) {
+                    chain.save().<span class="kw">await</span><span class="question-mark">?</span>;
+                }
+            }
+        }
         <span class="kw">let </span><span class="kw-2">mut </span>info = ChainInfo::from(<span class="kw-2">&amp;</span>chain);
         <span class="kw">if </span>query.request_committees {
             info.requested_committees = <span class="prelude-val">Some</span>(chain.execution_state.system.committees.get().clone());

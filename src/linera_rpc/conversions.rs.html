@@ -703,6 +703,9 @@
 <a href="#703" id="703">703</a>
 <a href="#704" id="704">704</a>
 <a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -994,6 +997,7 @@
                 .request_received_log_excluding_first_nth,
             test_next_block_height: chain_info_query.test_next_block_height.map(Into::into),
             request_manager_values: chain_info_query.request_manager_values,
+            request_leader_timeout: chain_info_query.request_leader_timeout,
             request_blob,
         })
     }
@@ -1021,6 +1025,7 @@
             request_received_log_excluding_first_nth: chain_info_query
                 .request_received_log_excluding_first_nth,
             request_manager_values: chain_info_query.request_manager_values,
+            request_leader_timeout: chain_info_query.request_leader_timeout,
             request_blob,
         })
     }
@@ -1284,6 +1289,7 @@
             }),
             request_received_log_excluding_first_nth: <span class="prelude-val">None</span>,
             request_manager_values: <span class="bool-val">false</span>,
+            request_leader_timeout: <span class="bool-val">false</span>,
             request_blob: <span class="prelude-val">None</span>,
         };
         round_trip_check::&lt;<span class="kw">_</span>, grpc::ChainInfoQuery&gt;(chain_info_query_some);

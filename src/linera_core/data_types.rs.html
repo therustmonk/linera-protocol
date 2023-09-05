@@ -253,6 +253,14 @@
 <a href="#253" id="253">253</a>
 <a href="#254" id="254">254</a>
 <a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -315,6 +323,8 @@
     </span><span class="kw">pub </span>request_received_log_excluding_first_nth: <span class="prelude-ty">Option</span>&lt;u64&gt;,
     <span class="doccomment">/// Query values from the chain manager, not just votes.
     </span><span class="kw">pub </span>request_manager_values: bool,
+    <span class="doccomment">/// Include a timeout vote for the current round, if appropriate.
+    </span><span class="kw">pub </span>request_leader_timeout: bool,
     <span class="doccomment">/// Query a value that contains a binary blob (e.g. bytecode) required by this chain.
     </span><span class="kw">pub </span>request_blob: <span class="prelude-ty">Option</span>&lt;CryptoHash&gt;,
 }
@@ -329,6 +339,7 @@
             request_sent_certificates_in_range: <span class="prelude-val">None</span>,
             request_received_log_excluding_first_nth: <span class="prelude-val">None</span>,
             request_manager_values: <span class="bool-val">false</span>,
+            request_leader_timeout: <span class="bool-val">false</span>,
             request_blob: <span class="prelude-val">None</span>,
         }
     }
@@ -360,6 +371,11 @@
 
     <span class="kw">pub fn </span>with_manager_values(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.request_manager_values = <span class="bool-val">true</span>;
+        <span class="self">self
+    </span>}
+
+    <span class="kw">pub fn </span>with_leader_timeout(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.request_leader_timeout = <span class="bool-val">true</span>;
         <span class="self">self
     </span>}
 
