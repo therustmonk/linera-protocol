@@ -1580,6 +1580,93 @@
 <a href="#1580" id="1580">1580</a>
 <a href="#1581" id="1581">1581</a>
 <a href="#1582" id="1582">1582</a>
+<a href="#1583" id="1583">1583</a>
+<a href="#1584" id="1584">1584</a>
+<a href="#1585" id="1585">1585</a>
+<a href="#1586" id="1586">1586</a>
+<a href="#1587" id="1587">1587</a>
+<a href="#1588" id="1588">1588</a>
+<a href="#1589" id="1589">1589</a>
+<a href="#1590" id="1590">1590</a>
+<a href="#1591" id="1591">1591</a>
+<a href="#1592" id="1592">1592</a>
+<a href="#1593" id="1593">1593</a>
+<a href="#1594" id="1594">1594</a>
+<a href="#1595" id="1595">1595</a>
+<a href="#1596" id="1596">1596</a>
+<a href="#1597" id="1597">1597</a>
+<a href="#1598" id="1598">1598</a>
+<a href="#1599" id="1599">1599</a>
+<a href="#1600" id="1600">1600</a>
+<a href="#1601" id="1601">1601</a>
+<a href="#1602" id="1602">1602</a>
+<a href="#1603" id="1603">1603</a>
+<a href="#1604" id="1604">1604</a>
+<a href="#1605" id="1605">1605</a>
+<a href="#1606" id="1606">1606</a>
+<a href="#1607" id="1607">1607</a>
+<a href="#1608" id="1608">1608</a>
+<a href="#1609" id="1609">1609</a>
+<a href="#1610" id="1610">1610</a>
+<a href="#1611" id="1611">1611</a>
+<a href="#1612" id="1612">1612</a>
+<a href="#1613" id="1613">1613</a>
+<a href="#1614" id="1614">1614</a>
+<a href="#1615" id="1615">1615</a>
+<a href="#1616" id="1616">1616</a>
+<a href="#1617" id="1617">1617</a>
+<a href="#1618" id="1618">1618</a>
+<a href="#1619" id="1619">1619</a>
+<a href="#1620" id="1620">1620</a>
+<a href="#1621" id="1621">1621</a>
+<a href="#1622" id="1622">1622</a>
+<a href="#1623" id="1623">1623</a>
+<a href="#1624" id="1624">1624</a>
+<a href="#1625" id="1625">1625</a>
+<a href="#1626" id="1626">1626</a>
+<a href="#1627" id="1627">1627</a>
+<a href="#1628" id="1628">1628</a>
+<a href="#1629" id="1629">1629</a>
+<a href="#1630" id="1630">1630</a>
+<a href="#1631" id="1631">1631</a>
+<a href="#1632" id="1632">1632</a>
+<a href="#1633" id="1633">1633</a>
+<a href="#1634" id="1634">1634</a>
+<a href="#1635" id="1635">1635</a>
+<a href="#1636" id="1636">1636</a>
+<a href="#1637" id="1637">1637</a>
+<a href="#1638" id="1638">1638</a>
+<a href="#1639" id="1639">1639</a>
+<a href="#1640" id="1640">1640</a>
+<a href="#1641" id="1641">1641</a>
+<a href="#1642" id="1642">1642</a>
+<a href="#1643" id="1643">1643</a>
+<a href="#1644" id="1644">1644</a>
+<a href="#1645" id="1645">1645</a>
+<a href="#1646" id="1646">1646</a>
+<a href="#1647" id="1647">1647</a>
+<a href="#1648" id="1648">1648</a>
+<a href="#1649" id="1649">1649</a>
+<a href="#1650" id="1650">1650</a>
+<a href="#1651" id="1651">1651</a>
+<a href="#1652" id="1652">1652</a>
+<a href="#1653" id="1653">1653</a>
+<a href="#1654" id="1654">1654</a>
+<a href="#1655" id="1655">1655</a>
+<a href="#1656" id="1656">1656</a>
+<a href="#1657" id="1657">1657</a>
+<a href="#1658" id="1658">1658</a>
+<a href="#1659" id="1659">1659</a>
+<a href="#1660" id="1660">1660</a>
+<a href="#1661" id="1661">1661</a>
+<a href="#1662" id="1662">1662</a>
+<a href="#1663" id="1663">1663</a>
+<a href="#1664" id="1664">1664</a>
+<a href="#1665" id="1665">1665</a>
+<a href="#1666" id="1666">1666</a>
+<a href="#1667" id="1667">1667</a>
+<a href="#1668" id="1668">1668</a>
+<a href="#1669" id="1669">1669</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1591,7 +1678,6 @@
     updater::{communicate_with_quorum, CommunicateAction, CommunicationError, ValidatorUpdater},
     worker::{Notification, Reason, WorkerError, WorkerState},
 };
-<span class="kw">use </span>anyhow::{anyhow, bail, ensure, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span>futures::{
     future,
     lock::Mutex,
@@ -1600,7 +1686,8 @@
 <span class="kw">use </span>linera_base::{
     abi::{Abi, ContractAbi},
     crypto::{CryptoHash, KeyPair, PublicKey},
-    data_types::{Amount, BlockHeight, RoundNumber, Timestamp},
+    data_types::{Amount, ArithmeticError, BlockHeight, RoundNumber, Timestamp},
+    ensure,
     identifiers::{BytecodeId, ChainId, MessageId, Owner},
 };
 <span class="kw">use </span>linera_chain::{
@@ -1624,6 +1711,7 @@
     sync::Arc,
     time::Duration,
 };
+<span class="kw">use </span>thiserror::Error;
 <span class="kw">use </span>tokio_stream::Stream;
 <span class="kw">use </span>tracing::{debug, error, info};
 
@@ -1672,6 +1760,61 @@
     <span class="doccomment">/// Local node to manage the execution state and the local storage of the chains that we are
     /// tracking.
     </span>node_client: LocalNodeClient&lt;StorageClient&gt;,
+}
+
+<span class="doccomment">/// Error type for [`ChainClient`].
+</span><span class="attr">#[derive(Debug, Error)]
+</span><span class="kw">pub enum </span>ChainClientError {
+    <span class="attr">#[error(<span class="string">&quot;Local node operation failed: {0}&quot;</span>)]
+    </span>LocalNodeError(<span class="attr">#[from] </span>LocalNodeError),
+
+    <span class="attr">#[error(<span class="string">&quot;Remote node operation failed: {0}&quot;</span>)]
+    </span>RemoteNodeError(<span class="attr">#[from] </span>NodeError),
+
+    <span class="attr">#[error(transparent)]
+    </span>ArithmeticError(<span class="attr">#[from] </span>ArithmeticError),
+
+    <span class="attr">#[error(<span class="string">&quot;JSON (de)serialization error: {0}&quot;</span>)]
+    </span>JsonError(<span class="attr">#[from] </span>serde_json::Error),
+
+    <span class="attr">#[error(<span class="string">&quot;Chain operation failed: {0}&quot;</span>)]
+    </span>ChainError(<span class="attr">#[from] </span>ChainError),
+
+    <span class="attr">#[error(transparent)]
+    </span>CommunicationError(<span class="attr">#[from] </span>CommunicationError&lt;NodeError&gt;),
+
+    <span class="attr">#[error(<span class="string">&quot;Internal error within chain client: {0}&quot;</span>)]
+    </span>InternalError(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str),
+
+    <span class="attr">#[error(
+        <span class="string">&quot;Cannot accept a certificate from an unknown committee in the future. \
+         Please synchronize the local view of the admin chain&quot;
+    </span>)]
+    </span>CommitteeSynchronizationError,
+
+    <span class="attr">#[error(<span class="string">&quot;The local node is behind the trusted state in wallet and needs synchronization with validators&quot;</span>)]
+    </span>WalletSynchronizationError,
+
+    <span class="attr">#[error(<span class="string">&quot;The state of the client is incompatible with the proposed block: {0}&quot;</span>)]
+    </span>BlockProposalError(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str),
+
+    <span class="attr">#[error(
+        <span class="string">&quot;Cannot accept a certificate from a committee that was retired. \
+         Try a newer certificate from the same origin&quot;
+    </span>)]
+    </span>CommitteeDeprecationError,
+
+    <span class="attr">#[error(<span class="string">&quot;Protocol error within chain client: {0}&quot;</span>)]
+    </span>ProtocolError(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str),
+
+    <span class="attr">#[error(<span class="string">&quot;No key available to interact with single-owner chain {0}&quot;</span>)]
+    </span>CannotFindKeyForSingleOwnerChain(ChainId),
+
+    <span class="attr">#[error(<span class="string">&quot;No key available to interact with multi-owner chain {0}&quot;</span>)]
+    </span>CannotFindKeyForMultiOwnerChain(ChainId),
+
+    <span class="attr">#[error(<span class="string">&quot;Found several possible identities to interact with multi-owner chain {0}&quot;</span>)]
+    </span>FoundMultipleKeysForMultiOwnerChain(ChainId),
 }
 
 <span class="kw">impl</span>&lt;P, S&gt; ChainClient&lt;P, S&gt; {
@@ -1861,7 +2004,7 @@
     }
 
     <span class="doccomment">/// Obtains the validators trusted by the local chain.
-    </span><span class="kw">async fn </span>validator_nodes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(ValidatorName, P::Node)&gt;&gt; {
+    </span><span class="kw">async fn </span>validator_nodes(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(ValidatorName, P::Node)&gt;, ChainClientError&gt; {
         <span class="kw">match </span><span class="self">self</span>.local_committee().<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(committee) =&gt; <span class="prelude-val">Ok</span>(<span class="self">self</span>.validator_node_provider.make_nodes(<span class="kw-2">&amp;</span>committee)<span class="question-mark">?</span>),
             <span class="prelude-val">Err</span>(LocalNodeError::InactiveChain(<span class="kw">_</span>)) =&gt; <span class="prelude-val">Ok</span>(Vec::new()),
@@ -1884,14 +2027,13 @@
 
     <span class="doccomment">/// Obtains the identity of the current owner of the chain. HACK: In the case of a
     /// multi-owner chain, we pick one identity for which we know the private key.
-    </span><span class="kw">pub async fn </span>identity(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Owner&gt; {
+    </span><span class="kw">pub async fn </span>identity(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Owner, ChainClientError&gt; {
         <span class="kw">match </span><span class="self">self</span>.chain_info().<span class="kw">await</span><span class="question-mark">?</span>.manager {
             ChainManagerInfo::Single(manager) =&gt; {
                 <span class="kw">if </span>!<span class="self">self</span>.known_key_pairs.contains_key(<span class="kw-2">&amp;</span>manager.owner) {
-                    <span class="macro">bail!</span>(
-                        <span class="string">&quot;No key available to interact with single-owner chain {}&quot;</span>,
-                        <span class="self">self</span>.chain_id
-                    );
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(ChainClientError::CannotFindKeyForSingleOwnerChain(
+                        <span class="self">self</span>.chain_id,
+                    ));
                 }
                 <span class="prelude-val">Ok</span>(manager.owner)
             }
@@ -1901,17 +2043,13 @@
                     .keys()
                     .filter(|owner| <span class="self">self</span>.known_key_pairs.contains_key(owner));
                 <span class="kw">let </span><span class="prelude-val">Some</span>(identity) = identities.next() <span class="kw">else </span>{
-                    <span class="macro">bail!</span>(
-                        <span class="string">&quot;Cannot find suitable identity to interact with multi-owner chain {}&quot;</span>,
-                        <span class="self">self</span>.chain_id
-                    );
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(ChainClientError::CannotFindKeyForMultiOwnerChain(
+                        <span class="self">self</span>.chain_id,
+                    ));
                 };
                 <span class="macro">ensure!</span>(
                     identities.next().is_none(),
-                    <span class="macro">anyhow!</span>(
-                        <span class="string">&quot;Found several possible identities to interact with multi-owner chain {}&quot;</span>,
-                        <span class="self">self</span>.chain_id
-                    )
+                    ChainClientError::FoundMultipleKeysForMultiOwnerChain(<span class="self">self</span>.chain_id)
                 );
                 <span class="prelude-val">Ok</span>(<span class="kw-2">*</span>identity)
             }
@@ -1920,7 +2058,7 @@
     }
 
     <span class="doccomment">/// Obtains the key pair associated to the current identity.
-    </span><span class="kw">pub async fn </span>key_pair(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>KeyPair&gt; {
+    </span><span class="kw">pub async fn </span>key_pair(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>KeyPair, ChainClientError&gt; {
         <span class="kw">let </span>id = <span class="self">self</span>.identity().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">self
             </span>.known_key_pairs
@@ -1929,7 +2067,7 @@
     }
 
     <span class="doccomment">/// Obtains the public key associated to the current identity.
-    </span><span class="kw">pub async fn </span>public_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PublicKey&gt; {
+    </span><span class="kw">pub async fn </span>public_key(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PublicKey, ChainClientError&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.key_pair().<span class="kw">await</span><span class="question-mark">?</span>.public())
     }
 
@@ -2067,7 +2205,7 @@
     </span>}
 
     <span class="doccomment">/// Listens to notifications about the current chain from all validators.
-    </span><span class="kw">pub async fn </span>listen(this: Arc&lt;Mutex&lt;<span class="self">Self</span>&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;NotificationStream&gt;
+    </span><span class="kw">pub async fn </span>listen(this: Arc&lt;Mutex&lt;<span class="self">Self</span>&gt;&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;NotificationStream, ChainClientError&gt;
     <span class="kw">where
         </span>P: Send + <span class="lifetime">&#39;static</span>,
     {
@@ -2094,7 +2232,7 @@
     <span class="kw">async fn </span>update_streams(
         this: <span class="kw-2">&amp;</span>Arc&lt;Mutex&lt;<span class="self">Self</span>&gt;&gt;,
         streams: <span class="kw-2">&amp;mut </span>HashMap&lt;ValidatorName, Pin&lt;Box&lt;<span class="kw">dyn </span>Stream&lt;Item = Notification&gt; + Send&gt;&gt;&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainClientError&gt;
     <span class="kw">where
         </span>P: Send + <span class="lifetime">&#39;static</span>,
     {
@@ -2135,7 +2273,7 @@
     }
 
     <span class="doccomment">/// Prepares the chain for the next operation.
-    </span><span class="kw">async fn </span>prepare_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    </span><span class="kw">async fn </span>prepare_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainClientError&gt; {
         <span class="comment">// Verify that our local storage contains enough history compared to the
         // expected block height. Otherwise, download the missing history from the
         // network.
@@ -2148,8 +2286,8 @@
             <span class="comment">// Check that our local node has the expected block hash.
             </span><span class="macro">ensure!</span>(
                 <span class="self">self</span>.block_hash == info.block_hash,
-                <span class="string">&quot;Invalid chain of blocks in local node&quot;
-            </span>);
+                ChainClientError::InternalError(<span class="string">&quot;Invalid chain of blocks in local node&quot;</span>)
+            );
         }
         <span class="kw">if </span>!<span class="macro">matches!</span>(
             <span class="kw-2">&amp;</span>info.manager,
@@ -2175,7 +2313,7 @@
         committee: <span class="kw-2">&amp;</span>Committee,
         chain_id: ChainId,
         action: CommunicateAction,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Certificate&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Certificate&gt;, ChainClientError&gt; {
         <span class="kw">let </span>storage_client = <span class="self">self</span>.node_client.storage_client().<span class="kw">await</span>;
         <span class="kw">let </span>cross_chain_delay = <span class="self">self</span>.cross_chain_delay;
         <span class="kw">let </span>cross_chain_retries = <span class="self">self</span>.cross_chain_retries;
@@ -2218,7 +2356,9 @@
             CommunicateAction::FinalizeBlock(validity_certificate) =&gt; {
                 <span class="kw">let </span>round = validity_certificate.round;
                 <span class="kw">let </span><span class="prelude-val">Some</span>(conf_value) = validity_certificate.value.into_confirmed() <span class="kw">else </span>{
-                    <span class="macro">bail!</span>(<span class="string">&quot;Unexpected certificate value for finalized block&quot;</span>);
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(ChainClientError::ProtocolError(
+                        <span class="string">&quot;Unexpected certificate value for finalized block&quot;</span>,
+                    ));
                 };
                 (conf_value, round)
             }
@@ -2230,7 +2370,7 @@
                     {
                         <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
                     }
-                    <span class="prelude-val">Err</span>(error) =&gt; <span class="prelude-val">Err</span>(error)<span class="question-mark">?</span>,
+                    <span class="prelude-val">Err</span>(error) =&gt; <span class="prelude-val">Err</span>(error.into()),
                 };
             }
         };
@@ -2240,16 +2380,24 @@
             {
                 votes
             }
-            <span class="kw">_ </span>=&gt; <span class="macro">bail!</span>(<span class="string">&quot;Unexpected response from validators&quot;</span>),
+            <span class="kw">_ </span>=&gt; {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(ChainClientError::ProtocolError(
+                    <span class="string">&quot;Unexpected response from validators&quot;</span>,
+                ))
+            }
         };
         <span class="comment">// Certificate is valid because
         // * `communicate_with_quorum` ensured a sufficient &quot;weight&quot; of
         // (non-error) answers were returned by validators.
         // * each answer is a vote signed by the expected validator.
         </span><span class="kw">let </span>certificate = LiteCertificate::try_from_votes(votes.into_iter().flatten())
-            .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;Vote values or rounds don&#39;t match; this is a bug&quot;</span>))<span class="question-mark">?
+            .ok_or_else(|| {
+                ChainClientError::InternalError(<span class="string">&quot;Vote values or rounds don&#39;t match; this is a bug&quot;</span>)
+            })<span class="question-mark">?
             </span>.with_value(value)
-            .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;A quorum voted for an unexpected value&quot;</span>))<span class="question-mark">?</span>;
+            .ok_or_else(|| {
+                ChainClientError::ProtocolError(<span class="string">&quot;A quorum voted for an unexpected value&quot;</span>)
+            })<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(certificate))
     }
 
@@ -2257,24 +2405,22 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         certificate: Certificate,
         mode: ReceiveCertificateMode,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainClientError&gt; {
         <span class="kw">let </span>CertificateValue::ConfirmedBlock { executed_block, .. } = certificate.value() <span class="kw">else </span>{
-            <span class="macro">bail!</span>(<span class="string">&quot;Was expecting a confirmed chain operation&quot;</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ChainClientError::InternalError(
+                <span class="string">&quot;Was expecting a confirmed chain operation&quot;</span>,
+            ));
         };
         <span class="kw">let </span>block = <span class="kw-2">&amp;</span>executed_block.block;
         <span class="comment">// Verify the certificate before doing any expensive networking.
         </span><span class="kw">let </span>(committees, max_epoch) = <span class="self">self</span>.known_committees().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="macro">ensure!</span>(
             block.epoch &lt;= max_epoch,
-            <span class="string">&quot;Cannot accept a certificate from an unknown committee in the future. \
-             Please synchronize the local view of the admin chain&quot;</span>,
+            ChainClientError::CommitteeSynchronizationError
         );
-        <span class="kw">let </span>remote_committee = committees.get(<span class="kw-2">&amp;</span>block.epoch).ok_or_else(|| {
-            <span class="macro">anyhow!</span>(
-                <span class="string">&quot;Cannot accept a certificate from a committee that was retired. \
-                 Try a newer certificate from the same origin&quot;
-            </span>)
-        })<span class="question-mark">?</span>;
+        <span class="kw">let </span>remote_committee = committees
+            .get(<span class="kw-2">&amp;</span>block.epoch)
+            .ok_or_else(|| ChainClientError::CommitteeDeprecationError)<span class="question-mark">?</span>;
         <span class="kw">if let </span>ReceiveCertificateMode::NeedsCheck = mode {
             certificate.check(remote_committee)<span class="question-mark">?</span>;
         }
@@ -2424,7 +2570,7 @@
     ///
     /// However, this should be the case whenever a sender&#39;s chain is still in use and
     /// is regularly upgraded to new committees.
-    </span><span class="kw">async fn </span>find_received_certificates(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    </span><span class="kw">async fn </span>find_received_certificates(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainClientError&gt; {
         <span class="comment">// Use network information from the local chain.
         </span><span class="kw">let </span>chain_id = <span class="self">self</span>.chain_id;
         <span class="kw">let </span>local_committee = <span class="self">self</span>.local_committee().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -2457,14 +2603,8 @@
                 // to synchronize received certificates.
                 </span><span class="kw">return </span><span class="prelude-val">Ok</span>(());
             }
-            <span class="prelude-val">Err</span>(CommunicationError::Trusted(err)) =&gt; {
-                <span class="macro">bail!</span>(<span class="string">&quot;Failed to communicate with a quorum of validators: {}&quot;</span>, err)
-            }
-            <span class="prelude-val">Err</span>(CommunicationError::Sample(errors)) =&gt; {
-                <span class="macro">bail!</span>(
-                    <span class="string">&quot;Failed to communicate with a quorum of validators:\n{:#?}&quot;</span>,
-                    errors
-                )
+            <span class="prelude-val">Err</span>(error) =&gt; {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(error.into());
             }
         };
         <span class="kw">for </span>(name, tracker, certificates) <span class="kw">in </span>responses {
@@ -2483,7 +2623,7 @@
         this: Arc&lt;Mutex&lt;<span class="self">Self</span>&gt;&gt;,
         name: ValidatorName,
         client: A,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainClientError&gt;
     <span class="kw">where
         </span>A: ValidatorNode + Send + Sync + <span class="lifetime">&#39;static </span>+ Clone,
     {
@@ -2521,7 +2661,7 @@
         amount: Amount,
         recipient: Recipient,
         user_data: UserData,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="comment">// TODO(#467): check the balance of `owner` before signing any block proposal.
         </span><span class="self">self</span>.execute_operation(Operation::System(SystemOperation::Transfer {
             owner,
@@ -2540,7 +2680,7 @@
         recipient: Recipient,
         amount: Amount,
         user_data: UserData,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::Claim {
             owner,
             target,
@@ -2580,21 +2720,21 @@
 
     <span class="doccomment">/// Executes (or retries) a regular block proposal. Updates local balance.
     /// If `with_confirmation` is false, we stop short of executing the finalized block.
-    </span><span class="kw">async fn </span>propose_block(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: Block) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    </span><span class="kw">async fn </span>propose_block(<span class="kw-2">&amp;mut </span><span class="self">self</span>, block: Block) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="kw">let </span>next_round = <span class="self">self</span>.next_round;
         <span class="macro">ensure!</span>(
             <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.pending_block, <span class="prelude-val">None</span>)
                 || <span class="macro">matches!</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.pending_block, <span class="prelude-val">Some</span>(r) <span class="kw">if </span><span class="kw-2">*</span>r == block),
-            <span class="string">&quot;Client state has a different pending block&quot;</span>,
+            ChainClientError::BlockProposalError(<span class="string">&quot;Client state has a different pending block&quot;</span>)
         );
         <span class="macro">ensure!</span>(
             block.height == <span class="self">self</span>.next_block_height,
-            <span class="string">&quot;Unexpected block height&quot;
-        </span>);
+            ChainClientError::BlockProposalError(<span class="string">&quot;Unexpected block height&quot;</span>)
+        );
         <span class="macro">ensure!</span>(
             block.previous_block_hash == <span class="self">self</span>.block_hash,
-            <span class="string">&quot;Unexpected previous block hash&quot;
-        </span>);
+            ChainClientError::BlockProposalError(<span class="string">&quot;Unexpected previous block hash&quot;</span>)
+        );
         <span class="comment">// Collect blobs required for execution.
         </span><span class="kw">let </span>committee = <span class="self">self</span>.local_committee().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>nodes = <span class="self">self</span>.validator_node_provider.make_nodes(<span class="kw-2">&amp;</span>committee)<span class="question-mark">?</span>;
@@ -2610,8 +2750,10 @@
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(validated) = <span class="kw-2">&amp;</span>validated {
             <span class="macro">ensure!</span>(
                 validated.value().block() == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>block),
-                <span class="string">&quot;A different block has already been validated at this height&quot;
-            </span>);
+                ChainClientError::BlockProposalError(
+                    <span class="string">&quot;A different block has already been validated at this height&quot;
+                </span>)
+            );
         }
         <span class="kw">let </span>proposal = BlockProposal::new(
             BlockAndRound {
@@ -2671,8 +2813,10 @@
                 final_certificate.value(), CertificateValue::ConfirmedBlock { executed_block, .. }
                     <span class="kw">if </span>executed_block.block == proposal.content.block
             ),
-            <span class="string">&quot;A different operation was executed in parallel (consider retrying the operation)&quot;
-        </span>);
+            ChainClientError::BlockProposalError(
+                <span class="string">&quot;A different operation was executed in parallel (consider retrying the operation)&quot;
+            </span>)
+        );
         <span class="comment">// Since `handle_block_proposal` succeeded, we have the needed bytecode.
         // Leaving blobs empty.
         </span><span class="self">self</span>.process_certificate(final_certificate.clone(), <span class="macro">vec!</span>[])
@@ -2701,14 +2845,20 @@
     }
 
     <span class="doccomment">/// Executes a list of operations.
-    </span><span class="kw">pub async fn </span>execute_operations(<span class="kw-2">&amp;mut </span><span class="self">self</span>, operations: Vec&lt;Operation&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    </span><span class="kw">pub async fn </span>execute_operations(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        operations: Vec&lt;Operation&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.execute_block(messages, operations).<span class="kw">await
     </span>}
 
     <span class="doccomment">/// Executes an operation.
-    </span><span class="kw">pub async fn </span>execute_operation(<span class="kw-2">&amp;mut </span><span class="self">self</span>, operation: Operation) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    </span><span class="kw">pub async fn </span>execute_operation(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        operation: Operation,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="self">self</span>.execute_operations(<span class="macro">vec!</span>[operation]).<span class="kw">await
     </span>}
 
@@ -2719,7 +2869,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         incoming_messages: Vec&lt;IncomingMessage&gt;,
         operations: Vec&lt;Operation&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="kw">let </span>timestamp = <span class="self">self</span>.next_timestamp(<span class="kw-2">&amp;</span>incoming_messages);
         <span class="kw">let </span>block = Block {
             epoch: <span class="self">self</span>.epoch().<span class="kw">await</span><span class="question-mark">?</span>,
@@ -2749,7 +2899,7 @@
     }
 
     <span class="doccomment">/// Queries an application.
-    </span><span class="kw">pub async fn </span>query_application(<span class="kw-2">&amp;</span><span class="self">self</span>, query: <span class="kw-2">&amp;</span>Query) -&gt; <span class="prelude-ty">Result</span>&lt;Response&gt; {
+    </span><span class="kw">pub async fn </span>query_application(<span class="kw-2">&amp;</span><span class="self">self</span>, query: <span class="kw-2">&amp;</span>Query) -&gt; <span class="prelude-ty">Result</span>&lt;Response, ChainClientError&gt; {
         <span class="kw">let </span>response = <span class="self">self
             </span>.node_client
             .query_application(<span class="self">self</span>.chain_id, query)
@@ -2758,14 +2908,19 @@
     }
 
     <span class="doccomment">/// Queries a system application.
-    </span><span class="kw">pub async fn </span>query_system_application(<span class="kw-2">&amp;mut </span><span class="self">self</span>, query: SystemQuery) -&gt; <span class="prelude-ty">Result</span>&lt;SystemResponse&gt; {
+    </span><span class="kw">pub async fn </span>query_system_application(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        query: SystemQuery,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;SystemResponse, ChainClientError&gt; {
         <span class="kw">let </span>response = <span class="self">self
             </span>.node_client
             .query_application(<span class="self">self</span>.chain_id, <span class="kw-2">&amp;</span>Query::System(query))
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">match </span>response {
             Response::System(response) =&gt; <span class="prelude-val">Ok</span>(response),
-            <span class="kw">_ </span>=&gt; <span class="macro">bail!</span>(<span class="string">&quot;Unexpected response for system query&quot;</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(ChainClientError::InternalError(
+                <span class="string">&quot;Unexpected response for system query&quot;</span>,
+            )),
         }
     }
 
@@ -2774,7 +2929,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         application_id: UserApplicationId&lt;A&gt;,
         query: <span class="kw-2">&amp;</span>A::Query,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;A::QueryResponse&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;A::QueryResponse, ChainClientError&gt; {
         <span class="kw">let </span>query = Query::user(application_id, query)<span class="question-mark">?</span>;
         <span class="kw">let </span>response = <span class="self">self
             </span>.node_client
@@ -2782,15 +2937,17 @@
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">match </span>response {
             Response::User(response) =&gt; <span class="prelude-val">Ok</span>(serde_json::from_slice(<span class="kw-2">&amp;</span>response)<span class="question-mark">?</span>),
-            <span class="kw">_ </span>=&gt; <span class="macro">bail!</span>(<span class="string">&quot;Unexpected response for user query&quot;</span>),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(ChainClientError::InternalError(
+                <span class="string">&quot;Unexpected response for user query&quot;</span>,
+            )),
         }
     }
 
-    <span class="kw">pub async fn </span>local_balance(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Amount&gt; {
+    <span class="kw">pub async fn </span>local_balance(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Amount, ChainClientError&gt; {
         <span class="macro">ensure!</span>(
             <span class="self">self</span>.chain_info().<span class="kw">await</span><span class="question-mark">?</span>.next_block_height == <span class="self">self</span>.next_block_height,
-            <span class="string">&quot;The local node is behind the trusted state in wallet and needs synchronization with validators&quot;
-        </span>);
+            ChainClientError::WalletSynchronizationError
+        );
         <span class="kw">let </span>incoming_messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>timestamp = <span class="self">self</span>.next_timestamp(<span class="kw-2">&amp;</span>incoming_messages);
         <span class="kw">let </span>block = Block {
@@ -2808,7 +2965,7 @@
     }
 
     <span class="doccomment">/// Attempts to update all validators about the local chain.
-    </span><span class="kw">pub async fn </span>update_validators(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    </span><span class="kw">pub async fn </span>update_validators(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainClientError&gt; {
         <span class="kw">let </span>committee = <span class="self">self</span>.local_committee().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.communicate_chain_updates(
             <span class="kw-2">&amp;</span>committee,
@@ -2825,7 +2982,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         application_id: UserApplicationId,
         chain_id: <span class="prelude-ty">Option</span>&lt;ChainId&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="kw">let </span>chain_id = chain_id.unwrap_or(application_id.creation.chain_id);
         <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::RequestApplication {
             application_id,
@@ -2841,7 +2998,7 @@
         amount: Amount,
         account: Account,
         user_data: UserData,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="self">self</span>.transfer(owner, amount, Recipient::Account(account), user_data)
             .<span class="kw">await
     </span>}
@@ -2852,20 +3009,20 @@
         owner: <span class="prelude-ty">Option</span>&lt;Owner&gt;,
         amount: Amount,
         user_data: UserData,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="self">self</span>.transfer(owner, amount, Recipient::Burn, user_data)
             .<span class="kw">await
     </span>}
 
     <span class="doccomment">/// Attempts to synchronize with validators and re-compute our balance.
-    </span><span class="kw">pub async fn </span>synchronize_from_validators(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Amount&gt; {
+    </span><span class="kw">pub async fn </span>synchronize_from_validators(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Amount, ChainClientError&gt; {
         <span class="self">self</span>.find_received_certificates().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.local_balance().<span class="kw">await
     </span>}
 
     <span class="doccomment">/// Retries the last pending block
-    </span><span class="kw">pub async fn </span>retry_pending_block(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Certificate&gt;&gt; {
+    </span><span class="kw">pub async fn </span>retry_pending_block(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Certificate&gt;, ChainClientError&gt; {
         <span class="self">self</span>.find_received_certificates().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.pending_block {
@@ -2885,20 +3042,29 @@
     }
 
     <span class="doccomment">/// Processes confirmed operation for which this chain is a recipient.
-    </span><span class="kw">pub async fn </span>receive_certificate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, certificate: Certificate) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    </span><span class="kw">pub async fn </span>receive_certificate(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        certificate: Certificate,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainClientError&gt; {
         <span class="self">self</span>.receive_certificate_internal(certificate, ReceiveCertificateMode::NeedsCheck)
             .<span class="kw">await
     </span>}
 
     <span class="doccomment">/// Rotates the key of the chain.
-    </span><span class="kw">pub async fn </span>rotate_key_pair(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key_pair: KeyPair) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    </span><span class="kw">pub async fn </span>rotate_key_pair(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        key_pair: KeyPair,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="kw">let </span>new_public_key = key_pair.public();
         <span class="self">self</span>.known_key_pairs.insert(new_public_key.into(), key_pair);
         <span class="self">self</span>.transfer_ownership(new_public_key).<span class="kw">await
     </span>}
 
     <span class="doccomment">/// Transfers ownership of the chain.
-    </span><span class="kw">pub async fn </span>transfer_ownership(<span class="kw-2">&amp;mut </span><span class="self">self</span>, new_public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    </span><span class="kw">pub async fn </span>transfer_ownership(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        new_public_key: PublicKey,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::ChangeOwner {
             new_public_key,
         }))
@@ -2906,7 +3072,10 @@
     </span>}
 
     <span class="doccomment">/// Adds another owner to the chain.
-    </span><span class="kw">pub async fn </span>share_ownership(<span class="kw-2">&amp;mut </span><span class="self">self</span>, new_public_key: PublicKey) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    </span><span class="kw">pub async fn </span>share_ownership(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        new_public_key: PublicKey,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>public_key = <span class="self">self</span>.public_key().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -2923,7 +3092,7 @@
     </span><span class="kw">pub async fn </span>open_chain(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         ownership: ChainOwnership,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(MessageId, Certificate)&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(MessageId, Certificate), ChainClientError&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>(epoch, committees) = <span class="self">self</span>.epoch_and_committees(<span class="self">self</span>.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>epoch = epoch.ok_or(LocalNodeError::InactiveChain(<span class="self">self</span>.chain_id))<span class="question-mark">?</span>;
@@ -2943,12 +3112,12 @@
         </span><span class="kw">let </span>message_id = certificate
             .value
             .nth_last_message_id(<span class="number">2</span>)
-            .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;Failed to open a new chain&quot;</span>))<span class="question-mark">?</span>;
+            .ok_or_else(|| ChainClientError::InternalError(<span class="string">&quot;Failed to open a new chain&quot;</span>))<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>((message_id, certificate))
     }
 
     <span class="doccomment">/// Closes the chain (and loses everything in it!!).
-    </span><span class="kw">pub async fn </span>close_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    </span><span class="kw">pub async fn </span>close_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::CloseChain))
             .<span class="kw">await
     </span>}
@@ -2958,7 +3127,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         contract: Bytecode,
         service: Bytecode,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(BytecodeId, Certificate)&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(BytecodeId, Certificate), ChainClientError&gt; {
         <span class="kw">let </span>certificate = <span class="self">self
             </span>.execute_operation(Operation::System(SystemOperation::PublishBytecode {
                 contract,
@@ -2969,7 +3138,7 @@
         </span><span class="kw">let </span>message_id = certificate
             .value
             .nth_last_message_id(<span class="number">1</span>)
-            .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;Failed to publish bytecode&quot;</span>))<span class="question-mark">?</span>;
+            .ok_or_else(|| ChainClientError::InternalError(<span class="string">&quot;Failed to publish bytecode&quot;</span>))<span class="question-mark">?</span>;
         <span class="kw">let </span>id = BytecodeId::new(message_id);
         <span class="prelude-val">Ok</span>((id, certificate))
     }
@@ -2981,7 +3150,7 @@
         parameters: <span class="kw-2">&amp;</span>&lt;A <span class="kw">as </span>ContractAbi&gt;::Parameters,
         initialization_argument: <span class="kw-2">&amp;</span>A::InitializationArgument,
         required_application_ids: Vec&lt;UserApplicationId&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(UserApplicationId&lt;A&gt;, Certificate)&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(UserApplicationId&lt;A&gt;, Certificate), ChainClientError&gt; {
         <span class="kw">let </span>initialization_argument = serde_json::to_vec(initialization_argument)<span class="question-mark">?</span>;
         <span class="kw">let </span>parameters = serde_json::to_vec(parameters)<span class="question-mark">?</span>;
         <span class="kw">let </span>(app_id, cert) = <span class="self">self
@@ -3002,7 +3171,7 @@
         parameters: Vec&lt;u8&gt;,
         initialization_argument: Vec&lt;u8&gt;,
         required_application_ids: Vec&lt;UserApplicationId&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(UserApplicationId, Certificate)&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(UserApplicationId, Certificate), ChainClientError&gt; {
         <span class="kw">let </span>certificate = <span class="self">self
             </span>.execute_operation(Operation::System(SystemOperation::CreateApplication {
                 bytecode_id,
@@ -3015,7 +3184,7 @@
         </span><span class="kw">let </span>creation = certificate
             .value
             .nth_last_message_id(<span class="number">1</span>)
-            .ok_or_else(|| <span class="macro">anyhow!</span>(<span class="string">&quot;Failed to create application&quot;</span>))<span class="question-mark">?</span>;
+            .ok_or_else(|| ChainClientError::InternalError(<span class="string">&quot;Failed to create application&quot;</span>))<span class="question-mark">?</span>;
         <span class="kw">let </span>id = UserApplicationId {
             bytecode_id,
             creation,
@@ -3024,7 +3193,10 @@
     }
 
     <span class="doccomment">/// Creates a new committee and starts using it (admin chains only).
-    </span><span class="kw">pub async fn </span>stage_new_committee(<span class="kw-2">&amp;mut </span><span class="self">self</span>, committee: Committee) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    </span><span class="kw">pub async fn </span>stage_new_committee(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        committee: Committee,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>epoch = <span class="self">self</span>.epoch().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -3041,7 +3213,7 @@
     </span>}
 
     <span class="doccomment">/// Creates an empty block to process all incoming messages. This may require several blocks.
-    </span><span class="kw">pub async fn </span>process_inbox(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Certificate&gt;&gt; {
+    </span><span class="kw">pub async fn </span>process_inbox(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Certificate&gt;, ChainClientError&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>certificates = Vec::new();
         <span class="kw">loop </span>{
@@ -3057,7 +3229,7 @@
 
     <span class="doccomment">/// Starts listening to the admin chain for new committees. (This is only useful for
     /// other genesis chains or for testing.)
-    </span><span class="kw">pub async fn </span>subscribe_to_new_committees(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    </span><span class="kw">pub async fn </span>subscribe_to_new_committees(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::Subscribe {
             chain_id: <span class="self">self</span>.admin_id,
             channel: SystemChannel::Admin,
@@ -3067,7 +3239,9 @@
 
     <span class="doccomment">/// Stops listening to the admin chain for new committees. (This is only useful for
     /// testing.)
-    </span><span class="kw">pub async fn </span>unsubscribe_from_new_committees(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    </span><span class="kw">pub async fn </span>unsubscribe_from_new_committees(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::Unsubscribe {
             chain_id: <span class="self">self</span>.admin_id,
             channel: SystemChannel::Admin,
@@ -3079,7 +3253,7 @@
     </span><span class="kw">pub async fn </span>subscribe_to_published_bytecodes(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         chain_id: ChainId,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::Subscribe {
             chain_id,
             channel: SystemChannel::PublishedBytecodes,
@@ -3091,7 +3265,7 @@
     </span><span class="kw">pub async fn </span>unsubscribe_from_published_bytecodes(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         chain_id: ChainId,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::Unsubscribe {
             chain_id,
             channel: SystemChannel::PublishedBytecodes,
@@ -3103,7 +3277,7 @@
     /// only). Currently, each individual chain is still entitled to wait before accepting
     /// this command. However, it is expected that deprecated validators stop functioning
     /// shortly after such command is issued.
-    </span><span class="kw">pub async fn </span>finalize_committee(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    </span><span class="kw">pub async fn </span>finalize_committee(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>(current_epoch, committees) = <span class="self">self</span>.epoch_and_committees(<span class="self">self</span>.chain_id).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>current_epoch = current_epoch.ok_or(LocalNodeError::InactiveChain(<span class="self">self</span>.chain_id))<span class="question-mark">?</span>;
@@ -3132,7 +3306,7 @@
         amount: Amount,
         account: Account,
         user_data: UserData,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
         <span class="self">self</span>.execute_operation(Operation::System(SystemOperation::Transfer {
             owner,
             recipient: Recipient::Account(account),

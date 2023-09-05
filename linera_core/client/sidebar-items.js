@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["client_test_utils"],"struct":["ChainClient"]};
+window.SIDEBAR_ITEMS = {"enum":["ChainClientError"],"mod":["client_test_utils"],"struct":["ChainClient"]};

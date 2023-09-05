@@ -828,6 +828,10 @@
 <a href="#828" id="828">828</a>
 <a href="#829" id="829">829</a>
 <a href="#830" id="830">830</a>
+<a href="#831" id="831">831</a>
+<a href="#832" id="832">832</a>
+<a href="#833" id="833">833</a>
+<a href="#834" id="834">834</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -855,7 +859,11 @@
     BcsHexParseError,
 };
 <span class="kw">use </span>linera_chain::{data_types::HashedValue, ChainStateView};
-<span class="kw">use </span>linera_core::{client::ChainClient, node::ValidatorNodeProvider, worker::Notification};
+<span class="kw">use </span>linera_core::{
+    client::{ChainClient, ChainClientError},
+    node::ValidatorNodeProvider,
+    worker::Notification,
+};
 <span class="kw">use </span>linera_execution::{
     committee::{Committee, Epoch},
     system::{AdminOperation, Recipient, SystemChannel, UserData},
@@ -938,6 +946,8 @@
 <span class="attr">#[derive(Debug, ThisError)]
 </span><span class="kw">enum </span>NodeServiceError {
     <span class="attr">#[error(transparent)]
+    </span>ChainClientError(<span class="attr">#[from] </span>ChainClientError),
+    <span class="attr">#[error(transparent)]
     </span>BcsHexError(<span class="attr">#[from] </span>BcsHexParseError),
     <span class="attr">#[error(<span class="string">&quot;could not decode query string&quot;</span>)]
     </span>QueryStringError(<span class="attr">#[from] </span>hex::FromHexError),
@@ -945,8 +955,6 @@
     </span>BcsError(<span class="attr">#[from] </span>bcs::Error),
     <span class="attr">#[error(transparent)]
     </span>JsonError(<span class="attr">#[from] </span>serde_json::Error),
-    <span class="attr">#[error(transparent)]
-    </span>Internal(<span class="attr">#[from] </span>anyhow::Error),
     <span class="attr">#[error(<span class="string">&quot;missing graphql operation&quot;</span>)]
     </span>MissingOperation,
     <span class="attr">#[error(<span class="string">&quot;unsupported query type: subscription&quot;</span>)]
@@ -978,13 +986,13 @@
         <span class="kw">let </span>tuple = <span class="kw">match </span><span class="self">self </span>{
             NodeServiceError::BcsHexError(e) =&gt; (StatusCode::BAD_REQUEST, <span class="macro">vec!</span>[e.to_string()]),
             NodeServiceError::QueryStringError(e) =&gt; (StatusCode::BAD_REQUEST, <span class="macro">vec!</span>[e.to_string()]),
+            NodeServiceError::ChainClientError(e) =&gt; {
+                (StatusCode::INTERNAL_SERVER_ERROR, <span class="macro">vec!</span>[e.to_string()])
+            }
             NodeServiceError::BcsError(e) =&gt; {
                 (StatusCode::INTERNAL_SERVER_ERROR, <span class="macro">vec!</span>[e.to_string()])
             }
             NodeServiceError::JsonError(e) =&gt; {
-                (StatusCode::INTERNAL_SERVER_ERROR, <span class="macro">vec!</span>[e.to_string()])
-            }
-            NodeServiceError::Internal(e) =&gt; {
                 (StatusCode::INTERNAL_SERVER_ERROR, <span class="macro">vec!</span>[e.to_string()])
             }
             NodeServiceError::MalformedApplicationResponse =&gt; {
