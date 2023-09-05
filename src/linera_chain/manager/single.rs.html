@@ -127,6 +127,13 @@
 <a href="#127" id="127">127</a>
 <a href="#128" id="128">128</a>
 <a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -175,6 +182,10 @@
     </span><span class="kw">pub fn </span>check_proposed_block(<span class="kw-2">&amp;</span><span class="self">self</span>, proposal: <span class="kw-2">&amp;</span>BlockProposal) -&gt; <span class="prelude-ty">Result</span>&lt;Outcome, ChainError&gt; {
         <span class="kw">let </span>new_block = <span class="kw-2">&amp;</span>proposal.content.block;
         <span class="kw">let </span>new_round = proposal.content.round;
+        <span class="macro">ensure!</span>(
+            proposal.validated.is_none(),
+            ChainError::InvalidBlockProposal
+        );
         <span class="macro">ensure!</span>(
             new_round == RoundNumber::default() &amp;&amp; proposal.validated.is_none(),
             ChainError::InvalidBlockProposal
@@ -235,6 +246,8 @@
 </span><span class="kw">pub struct </span>SingleOwnerManagerInfo {
     <span class="doccomment">/// The owner of the chain.
     </span><span class="kw">pub </span>owner: Owner,
+    <span class="doccomment">/// The owner&#39;s public key.
+    </span><span class="kw">pub </span>public_key: PublicKey,
     <span class="doccomment">/// Latest vote we cast.
     </span><span class="kw">pub </span>pending: <span class="prelude-ty">Option</span>&lt;LiteVote&gt;,
     <span class="doccomment">/// The value we voted for, if requested.
@@ -245,6 +258,7 @@
     <span class="kw">fn </span>from(manager: <span class="kw-2">&amp;</span>SingleOwnerManager) -&gt; <span class="self">Self </span>{
         SingleOwnerManagerInfo {
             owner: manager.owner,
+            public_key: manager.public_key,
             pending: manager.pending.as_ref().map(|vote| vote.lite()),
             requested_pending_value: <span class="prelude-val">None</span>,
         }

@@ -1667,6 +1667,20 @@
 <a href="#1667" id="1667">1667</a>
 <a href="#1668" id="1668">1668</a>
 <a href="#1669" id="1669">1669</a>
+<a href="#1670" id="1670">1670</a>
+<a href="#1671" id="1671">1671</a>
+<a href="#1672" id="1672">1672</a>
+<a href="#1673" id="1673">1673</a>
+<a href="#1674" id="1674">1674</a>
+<a href="#1675" id="1675">1675</a>
+<a href="#1676" id="1676">1676</a>
+<a href="#1677" id="1677">1677</a>
+<a href="#1678" id="1678">1678</a>
+<a href="#1679" id="1679">1679</a>
+<a href="#1680" id="1680">1680</a>
+<a href="#1681" id="1681">1681</a>
+<a href="#1682" id="1682">1682</a>
+<a href="#1683" id="1683">1683</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1707,6 +1721,7 @@
 <span class="kw">use </span>linera_views::views::ViewError;
 <span class="kw">use </span>std::{
     collections::{hash_map, BTreeMap, HashMap},
+    iter,
     pin::Pin,
     sync::Arc,
     time::Duration,
@@ -2039,7 +2054,7 @@
             }
             ChainManagerInfo::Multi(manager) =&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>identities = manager
-                    .owners
+                    .public_keys
                     .keys()
                     .filter(|owner| <span class="self">self</span>.known_key_pairs.contains_key(owner));
                 <span class="kw">let </span><span class="prelude-val">Some</span>(identity) = identities.next() <span class="kw">else </span>{
@@ -2273,7 +2288,7 @@
     }
 
     <span class="doccomment">/// Prepares the chain for the next operation.
-    </span><span class="kw">async fn </span>prepare_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ChainClientError&gt; {
+    </span><span class="kw">async fn </span>prepare_chain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;ChainInfo, ChainClientError&gt; {
         <span class="comment">// Verify that our local storage contains enough history compared to the
         // expected block height. Otherwise, download the missing history from the
         // network.
@@ -2303,7 +2318,7 @@
                 .<span class="kw">await</span><span class="question-mark">?</span>;
         }
         <span class="self">self</span>.update_from_info(<span class="kw-2">&amp;</span>info);
-        <span class="prelude-val">Ok</span>(())
+        <span class="prelude-val">Ok</span>(info)
     }
 
     <span class="doccomment">/// Broadcasts certified blocks and optionally one more block proposal.
@@ -3076,13 +3091,26 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         new_public_key: PublicKey,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Certificate, ChainClientError&gt; {
-        <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>public_key = <span class="self">self</span>.public_key().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>info = <span class="self">self</span>.prepare_chain().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>messages = <span class="self">self</span>.pending_messages().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>new_public_keys = <span class="kw">match </span>info.manager {
+            ChainManagerInfo::None =&gt; {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(ChainError::InactiveChain(<span class="self">self</span>.chain_id).into());
+            }
+            ChainManagerInfo::Single(manager) =&gt; {
+                <span class="macro">vec!</span>[manager.public_key, new_public_key]
+            }
+            ChainManagerInfo::Multi(manager) =&gt; manager
+                .public_keys
+                .values()
+                .cloned()
+                .chain(iter::once(new_public_key))
+                .collect(),
+        };
         <span class="self">self</span>.execute_block(
             messages,
             <span class="macro">vec!</span>[Operation::System(SystemOperation::ChangeMultipleOwners {
-                new_public_keys: <span class="macro">vec!</span>[public_key, new_public_key],
+                new_public_keys,
             })],
         )
         .<span class="kw">await

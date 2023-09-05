@@ -228,6 +228,8 @@
 <a href="#228" id="228">228</a>
 <a href="#229" id="229">229</a>
 <a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -285,7 +287,9 @@
                 <span class="kw-2">*</span><span class="self">self </span>=
                     ChainManager::Single(Box::new(SingleOwnerManager::new(<span class="kw-2">*</span>owner, <span class="kw-2">*</span>public_key)));
             }
-            ChainOwnership::Multi { owners } =&gt; {
+            ChainOwnership::Multi {
+                public_keys: owners,
+            } =&gt; {
                 <span class="kw">let </span>owners = owners
                     .iter()
                     .map(|(owner, public_key)| (<span class="kw-2">*</span>owner, <span class="kw-2">*</span>public_key))

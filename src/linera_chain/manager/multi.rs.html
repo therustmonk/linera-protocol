@@ -274,8 +274,8 @@
 <span class="doccomment">/// The specific state of a chain managed by multiple owners.
 </span><span class="attr">#[derive(Clone, Debug, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>MultiOwnerManager {
-    <span class="doccomment">/// The co-owners of the chain.
-    </span><span class="kw">pub </span>owners: HashMap&lt;Owner, PublicKey&gt;,
+    <span class="doccomment">/// The public keys of the chain&#39;s co-owners.
+    </span><span class="kw">pub </span>public_keys: HashMap&lt;Owner, PublicKey&gt;,
     <span class="doccomment">/// Latest authenticated block that we have received (and voted to validate).
     </span><span class="kw">pub </span>proposed: <span class="prelude-ty">Option</span>&lt;BlockProposal&gt;,
     <span class="doccomment">/// Latest validated proposal that we have seen (and voted to confirm).
@@ -285,9 +285,9 @@
 }
 
 <span class="kw">impl </span>MultiOwnerManager {
-    <span class="kw">pub fn </span>new(owners: HashMap&lt;Owner, PublicKey&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(public_keys: HashMap&lt;Owner, PublicKey&gt;) -&gt; <span class="self">Self </span>{
         MultiOwnerManager {
-            owners,
+            public_keys,
             proposed: <span class="prelude-val">None</span>,
             locked: <span class="prelude-val">None</span>,
             pending: <span class="prelude-val">None</span>,
@@ -438,7 +438,7 @@
     </span>}
 
     <span class="kw">pub fn </span>verify_owner(<span class="kw-2">&amp;</span><span class="self">self</span>, proposal: <span class="kw-2">&amp;</span>BlockProposal) -&gt; <span class="prelude-ty">Option</span>&lt;PublicKey&gt; {
-        <span class="self">self</span>.owners.get(<span class="kw-2">&amp;</span>proposal.owner).copied()
+        <span class="self">self</span>.public_keys.get(<span class="kw-2">&amp;</span>proposal.owner).copied()
     }
 }
 
@@ -447,9 +447,9 @@
 </span><span class="attr">#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(any(test, feature = <span class="string">&quot;test&quot;</span>), derive(Eq, PartialEq))]
 </span><span class="kw">pub struct </span>MultiOwnerManagerInfo {
-    <span class="doccomment">/// The co-owners of the chain.
+    <span class="doccomment">/// The public keys of the chain&#39;s co-owners.
     /// Using a map instead a hashset because Serde treats HashSet&#39;s as vectors.
-    </span><span class="kw">pub </span>owners: HashMap&lt;Owner, PublicKey&gt;,
+    </span><span class="kw">pub </span>public_keys: HashMap&lt;Owner, PublicKey&gt;,
     <span class="doccomment">/// Latest authenticated block that we have received, if requested.
     </span><span class="kw">pub </span>requested_proposed: <span class="prelude-ty">Option</span>&lt;BlockProposal&gt;,
     <span class="doccomment">/// Latest validated proposal that we have seen (and voted to confirm), if requested.
@@ -467,7 +467,7 @@
 <span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>MultiOwnerManager&gt; <span class="kw">for </span>MultiOwnerManagerInfo {
     <span class="kw">fn </span>from(manager: <span class="kw-2">&amp;</span>MultiOwnerManager) -&gt; <span class="self">Self </span>{
         MultiOwnerManagerInfo {
-            owners: manager.owners.clone(),
+            public_keys: manager.public_keys.clone(),
             requested_proposed: <span class="prelude-val">None</span>,
             requested_locked: <span class="prelude-val">None</span>,
             pending: manager.pending.as_ref().map(|vote| vote.lite()),

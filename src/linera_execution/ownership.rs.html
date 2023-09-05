@@ -55,6 +55,10 @@
 <a href="#55" id="55">55</a>
 <a href="#56" id="56">56</a>
 <a href="#57" id="57">57</a>
+<a href="#58" id="58">58</a>
+<a href="#59" id="59">59</a>
+<a href="#60" id="60">60</a>
+<a href="#61" id="61">61</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -71,7 +75,9 @@
     <span class="doccomment">/// The chain is managed by a single owner.
     </span>Single { owner: Owner, public_key: PublicKey },
     <span class="doccomment">/// The chain is managed by multiple owners.
-    </span>Multi { owners: BTreeMap&lt;Owner, PublicKey&gt; },
+    </span>Multi {
+        public_keys: BTreeMap&lt;Owner, PublicKey&gt;,
+    },
 }
 
 <span class="kw">impl </span>ChainOwnership {
@@ -84,7 +90,7 @@
 
     <span class="kw">pub fn </span>multiple(public_keys: <span class="kw">impl </span>IntoIterator&lt;Item = PublicKey&gt;) -&gt; <span class="self">Self </span>{
         ChainOwnership::Multi {
-            owners: public_keys
+            public_keys: public_keys
                 .into_iter()
                 .map(|key| (Owner::from(key), key))
                 .collect(),
@@ -107,7 +113,9 @@
                     <span class="prelude-val">None
                 </span>}
             }
-            ChainOwnership::Multi { owners } =&gt; owners.get(owner).copied(),
+            ChainOwnership::Multi {
+                public_keys: owners,
+            } =&gt; owners.get(owner).copied(),
             ChainOwnership::None =&gt; <span class="prelude-val">None</span>,
         }
     }
