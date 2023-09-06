@@ -716,6 +716,15 @@
 <a href="#716" id="716">716</a>
 <a href="#717" id="717">717</a>
 <a href="#718" id="718">718</a>
+<a href="#719" id="719">719</a>
+<a href="#720" id="720">720</a>
+<a href="#721" id="721">721</a>
+<a href="#722" id="722">722</a>
+<a href="#723" id="723">723</a>
+<a href="#724" id="724">724</a>
+<a href="#725" id="725">725</a>
+<a href="#726" id="726">726</a>
+<a href="#727" id="727">727</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -1337,7 +1346,7 @@
         <span class="self">self</span>.temp_dirs.push(dir);
         <span class="kw">let </span>common_config = create_rocks_db_common_config();
         <span class="kw">let </span>(store_client, <span class="kw">_</span>) =
-            RocksDbStoreClient::new(path, <span class="self">self</span>.wasm_runtime, common_config).<span class="kw">await</span><span class="question-mark">?</span>;
+            RocksDbStoreClient::new_for_testing(path, <span class="self">self</span>.wasm_runtime, common_config).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(store_client)
     }
 }
@@ -1378,8 +1387,13 @@
         <span class="kw">let </span>table_name = table.parse()<span class="question-mark">?</span>;
         <span class="kw">let </span>common_config = create_dynamo_db_common_config();
         <span class="self">self</span>.instance_counter += <span class="number">1</span>;
-        <span class="kw">let </span>(store_client, <span class="kw">_</span>) =
-            DynamoDbStoreClient::new(config, table_name, common_config, <span class="self">self</span>.wasm_runtime).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>(store_client, <span class="kw">_</span>) = DynamoDbStoreClient::new_for_testing(
+            config,
+            table_name,
+            common_config,
+            <span class="self">self</span>.wasm_runtime,
+        )
+        .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(store_client)
     }
 }
@@ -1428,9 +1442,13 @@
         <span class="kw">let </span>table_name = get_table_name().<span class="kw">await</span>;
         <span class="kw">let </span>table_name = <span class="macro">format!</span>(<span class="string">&quot;{}_{}&quot;</span>, table_name, <span class="self">self</span>.instance_counter);
         <span class="kw">let </span>common_config = create_scylla_db_common_config();
-        <span class="kw">let </span>(store_client, <span class="kw">_</span>) =
-            ScyllaDbStoreClient::new(<span class="kw-2">&amp;</span><span class="self">self</span>.uri, table_name, common_config, <span class="self">self</span>.wasm_runtime)
-                .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>(store_client, <span class="kw">_</span>) = ScyllaDbStoreClient::new_for_testing(
+            <span class="kw-2">&amp;</span><span class="self">self</span>.uri,
+            table_name,
+            common_config,
+            <span class="self">self</span>.wasm_runtime,
+        )
+        .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(store_client)
     }
 }
