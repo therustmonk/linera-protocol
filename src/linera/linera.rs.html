@@ -1787,6 +1787,14 @@
 <a href="#1787" id="1787">1787</a>
 <a href="#1788" id="1788">1788</a>
 <a href="#1789" id="1789">1789</a>
+<a href="#1790" id="1790">1790</a>
+<a href="#1791" id="1791">1791</a>
+<a href="#1792" id="1792">1792</a>
+<a href="#1793" id="1793">1793</a>
+<a href="#1794" id="1794">1794</a>
+<a href="#1795" id="1795">1795</a>
+<a href="#1796" id="1796">1796</a>
+<a href="#1797" id="1797">1797</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1821,7 +1829,7 @@
     storage::{Runnable, StorageConfig},
 };
 <span class="kw">use </span>linera_storage::Store;
-<span class="kw">use </span>linera_views::views::ViewError;
+<span class="kw">use </span>linera_views::{common::CommonStoreConfig, views::ViewError};
 <span class="kw">use </span>serde_json::Value;
 <span class="kw">use </span>std::{
     env, fs,
@@ -2398,6 +2406,10 @@
     <span class="doccomment">/// The maximal number of entries in the storage cache.
     </span><span class="attr">#[structopt(long, default_value = <span class="string">&quot;1000&quot;</span>)]
     </span>cache_size: usize,
+
+    <span class="doccomment">/// Do not create a table if one is missing
+    </span><span class="attr">#[structopt(long = <span class="string">&quot;do not create a database if missing&quot;</span>)]
+    </span>skip_table_creation_when_missing: bool,
 
     <span class="doccomment">/// Subcommand.
     </span><span class="attr">#[structopt(subcommand)]
@@ -3559,18 +3571,22 @@
     <span class="kw">let </span>context = ClientContext::from_options(<span class="kw-2">&amp;</span>options)<span class="question-mark">?</span>;
     <span class="kw">let </span>genesis_config = context.wallet_state.genesis_config().clone();
     <span class="kw">let </span>wasm_runtime = options.wasm_runtime.with_wasm_default();
-    <span class="kw">let </span>cache_size = options.cache_size;
     <span class="kw">let </span>max_concurrent_queries = options.max_concurrent_queries;
     <span class="kw">let </span>max_stream_queries = options.max_stream_queries;
+    <span class="kw">let </span>cache_size = options.cache_size;
+    <span class="kw">let </span>create_if_missing = !options.skip_table_creation_when_missing;
     <span class="kw">let </span>storage_config = ClientContext::storage_config(<span class="kw-2">&amp;</span>options)<span class="question-mark">?</span>;
-
+    <span class="kw">let </span>common_config = CommonStoreConfig {
+        max_concurrent_queries,
+        max_stream_queries,
+        cache_size,
+        create_if_missing,
+    };
     storage_config
         .run_with_storage(
             <span class="kw-2">&amp;</span>genesis_config,
             wasm_runtime,
-            max_concurrent_queries,
-            max_stream_queries,
-            cache_size,
+            common_config,
             Job(context, options.command),
         )
         .<span class="kw">await</span><span class="question-mark">?</span>;

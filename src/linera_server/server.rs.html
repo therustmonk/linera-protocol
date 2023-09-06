@@ -523,6 +523,11 @@
 <a href="#523" id="523">523</a>
 <a href="#524" id="524">524</a>
 <a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -550,7 +555,7 @@
     storage::{Runnable, StorageConfig},
 };
 <span class="kw">use </span>linera_storage::Store;
-<span class="kw">use </span>linera_views::views::ViewError;
+<span class="kw">use </span>linera_views::{common::CommonStoreConfig, views::ViewError};
 <span class="kw">use </span>serde::Deserialize;
 <span class="kw">use </span>std::{net::SocketAddr, path::PathBuf};
 <span class="kw">use </span>structopt::StructOpt;
@@ -863,6 +868,10 @@
         </span><span class="attr">#[structopt(long, default_value = <span class="string">&quot;1000&quot;</span>)]
         </span>cache_size: usize,
 
+        <span class="doccomment">/// Do not create a table if one is missing
+        </span><span class="attr">#[structopt(long = <span class="string">&quot;do not create a database if missing&quot;</span>)]
+        </span>skip_table_creation_when_missing: bool,
+
         <span class="doccomment">/// Use this when running from a Kubernetes cluster (including from within GCP)
         /// Won&#39;t use config files to determine host IPs, but will do it dynamically
         /// based on cluster info
@@ -918,6 +927,7 @@
             cache_size,
             <span class="attr">#[cfg(feature = <span class="string">&quot;kube&quot;</span>)]
             </span>kube,
+            skip_table_creation_when_missing,
         } =&gt; {
             <span class="kw">let </span>genesis_config = GenesisConfig::read(<span class="kw-2">&amp;</span>genesis_config_path)
                 .expect(<span class="string">&quot;Fail to read initial chain config&quot;</span>);
@@ -945,15 +955,15 @@
                 </span>kube,
             };
             <span class="kw">let </span>wasm_runtime = wasm_runtime.with_wasm_default();
+            <span class="kw">let </span>create_if_missing = !skip_table_creation_when_missing;
+            <span class="kw">let </span>common_config = CommonStoreConfig {
+                max_concurrent_queries,
+                max_stream_queries,
+                cache_size,
+                create_if_missing,
+            };
             storage_config
-                .run_with_storage(
-                    <span class="kw-2">&amp;</span>genesis_config,
-                    wasm_runtime,
-                    max_concurrent_queries,
-                    max_stream_queries,
-                    cache_size,
-                    job,
-                )
+                .run_with_storage(<span class="kw-2">&amp;</span>genesis_config, wasm_runtime, common_config, job)
                 .<span class="kw">await
                 </span>.unwrap();
         }

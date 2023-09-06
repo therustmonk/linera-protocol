@@ -292,13 +292,75 @@
 <a href="#292" id="292">292</a>
 <a href="#293" id="293">293</a>
 <a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use crate</span>::{
     batch::{Batch, WriteOperation},
-    common::{get_upper_bound, ContextFromDb, KeyValueStoreClient},
-    lru_caching::{LruCachingKeyValueClient, TEST_CACHE_SIZE},
+    common::{get_upper_bound, CommonStoreConfig, ContextFromDb, KeyValueStoreClient, TableStatus},
+    lru_caching::LruCachingKeyValueClient,
     value_splitting::{DatabaseConsistencyError, ValueSplittingKeyValueStoreClient},
 };
 <span class="kw">use </span>async_trait::async_trait;
@@ -307,8 +369,9 @@
     path::Path,
     sync::Arc,
 };
-<span class="kw">use </span>tempfile::TempDir;
 <span class="kw">use </span>thiserror::Error;
+<span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+</span><span class="kw">use </span>{<span class="kw">crate</span>::lru_caching::TEST_CACHE_SIZE, std::fs, tempfile::TempDir};
 
 <span class="doccomment">/// The number of streams for the test
 </span><span class="kw">pub const </span>TEST_ROCKS_DB_MAX_STREAM_QUERIES: usize = <span class="number">10</span>;
@@ -466,30 +529,82 @@
 }
 
 <span class="kw">impl </span>RocksDbClient {
-    <span class="doccomment">/// Creates a RocksDB database from a specified path.
-    </span><span class="kw">pub fn </span>new&lt;P: AsRef&lt;Path&gt;&gt;(
+    <span class="doccomment">/// Returns whether a table already exists.
+    </span><span class="kw">pub async fn </span>test_existence&lt;P: AsRef&lt;Path&gt;&gt;(path: <span class="kw-2">&amp;</span>P) -&gt; <span class="prelude-ty">Result</span>&lt;bool, RocksDbContextError&gt; {
+        <span class="kw">let </span>options = rocksdb::Options::default();
+        <span class="kw">let </span>result = DB::open(<span class="kw-2">&amp;</span>options, path);
+        <span class="kw">match </span>result {
+            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>),
+            <span class="prelude-val">Err</span>(error) =&gt; <span class="kw">match </span>error.kind() {
+                rocksdb::ErrorKind::InvalidArgument =&gt; <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>),
+                <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(RocksDbContextError::RocksDb(error)),
+            },
+        }
+    }
+
+    <span class="doccomment">/// Creates a RocksDB database for unit tests from a specified path.
+    </span><span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+    </span><span class="kw">pub async fn </span>new_for_testing&lt;P: AsRef&lt;Path&gt;&gt;(
         path: P,
-        max_stream_queries: usize,
-        cache_size: usize,
-    ) -&gt; RocksDbClient {
+        common_config: CommonStoreConfig,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(RocksDbClient, TableStatus), RocksDbContextError&gt; {
+        fs::remove_dir_all(<span class="kw-2">&amp;</span>path)<span class="question-mark">?</span>;
+        <span class="self">Self</span>::new(path, common_config).<span class="kw">await
+    </span>}
+
+    <span class="doccomment">/// Creates a RocksDB database from a specified path.
+    </span><span class="kw">pub async fn </span>new&lt;P: AsRef&lt;Path&gt;&gt;(
+        path: P,
+        common_config: CommonStoreConfig,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(RocksDbClient, TableStatus), RocksDbContextError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>options = rocksdb::Options::default();
-        options.create_if_missing(<span class="bool-val">true</span>);
-        <span class="kw">let </span>db = DB::open(<span class="kw-2">&amp;</span>options, path).unwrap();
+        <span class="kw">let </span>test = <span class="self">Self</span>::test_existence(<span class="kw-2">&amp;</span>path).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>table_status = <span class="kw">if </span>test {
+            TableStatus::Existing
+        } <span class="kw">else </span>{
+            TableStatus::New
+        };
+        <span class="kw">let </span>db = <span class="kw">if </span>common_config.create_if_missing {
+            options.create_if_missing(<span class="bool-val">true</span>);
+            DB::open(<span class="kw-2">&amp;</span>options, path)<span class="question-mark">?
+        </span>} <span class="kw">else </span>{
+            <span class="kw">if </span>!test {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(RocksDbContextError::MissingDatabase);
+            }
+            DB::open(<span class="kw-2">&amp;</span>options, path)<span class="question-mark">?
+        </span>};
         <span class="kw">let </span>client = RocksDbClientInternal {
             db: Arc::new(db),
-            max_stream_queries,
+            max_stream_queries: common_config.max_stream_queries,
         };
         <span class="kw">let </span>client = ValueSplittingKeyValueStoreClient::new(client);
-        <span class="self">Self </span>{
-            client: LruCachingKeyValueClient::new(client, cache_size),
-        }
+        <span class="kw">let </span>client = <span class="self">Self </span>{
+            client: LruCachingKeyValueClient::new(client, common_config.cache_size),
+        };
+        <span class="prelude-val">Ok</span>((client, table_status))
+    }
+}
+
+<span class="doccomment">/// Creates the common initialization for RocksDB
+</span><span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+</span><span class="kw">pub fn </span>create_rocks_db_common_config() -&gt; CommonStoreConfig {
+    CommonStoreConfig {
+        max_concurrent_queries: <span class="prelude-val">None</span>,
+        max_stream_queries: TEST_ROCKS_DB_MAX_STREAM_QUERIES,
+        cache_size: TEST_CACHE_SIZE,
+        create_if_missing: <span class="bool-val">true</span>,
     }
 }
 
 <span class="doccomment">/// Creates a RocksDB database client to be used for tests.
-</span><span class="kw">pub fn </span>create_rocks_db_test_client() -&gt; RocksDbClient {
+</span><span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+</span><span class="kw">pub async fn </span>create_rocks_db_test_client() -&gt; RocksDbClient {
     <span class="kw">let </span>dir = TempDir::new().unwrap();
-    RocksDbClient::new(dir, TEST_ROCKS_DB_MAX_STREAM_QUERIES, TEST_CACHE_SIZE)
+    <span class="kw">let </span>common_config = create_rocks_db_common_config();
+    <span class="kw">let </span>(client, <span class="kw">_</span>) = RocksDbClient::new_for_testing(dir, common_config)
+        .<span class="kw">await
+        </span>.expect(<span class="string">&quot;client&quot;</span>);
+    client
 }
 
 <span class="doccomment">/// An implementation of [`crate::common::Context`] based on RocksDB
@@ -552,8 +667,9 @@
 }
 
 <span class="doccomment">/// Create a [`crate::common::Context`] that can be used for tests.
-</span><span class="kw">pub fn </span>create_rocks_db_test_context() -&gt; RocksDbContext&lt;()&gt; {
-    <span class="kw">let </span>client = create_rocks_db_test_client();
+</span><span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+</span><span class="kw">pub async fn </span>create_rocks_db_test_context() -&gt; RocksDbContext&lt;()&gt; {
+    <span class="kw">let </span>client = create_rocks_db_test_client().<span class="kw">await</span>;
     <span class="kw">let </span>base_key = <span class="macro">vec!</span>[];
     RocksDbContext::new(client, base_key, ())
 }
@@ -568,6 +684,14 @@
     <span class="doccomment">/// RocksDb error.
     </span><span class="attr">#[error(<span class="string">&quot;RocksDb error: {0}&quot;</span>)]
     </span>RocksDb(<span class="attr">#[from] </span>rocksdb::Error),
+
+    <span class="doccomment">/// Missing database
+    </span><span class="attr">#[error(<span class="string">&quot;Missing database&quot;</span>)]
+    </span>MissingDatabase,
+
+    <span class="doccomment">/// Filesystem error
+    </span><span class="attr">#[error(<span class="string">&quot;Filesystem error&quot;</span>)]
+    </span>FsError(<span class="attr">#[from] </span>std::io::Error),
 
     <span class="doccomment">/// BCS serialization error.
     </span><span class="attr">#[error(<span class="string">&quot;BCS error: {0}&quot;</span>)]

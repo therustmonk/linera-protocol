@@ -64,18 +64,49 @@
 <a href="#64" id="64">64</a>
 <a href="#65" id="65">65</a>
 <a href="#66" id="66">66</a>
+<a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use crate</span>::{chain_guards::ChainGuards, DbStore, DbStoreClient};
 <span class="kw">use </span>linera_execution::WasmRuntime;
-<span class="kw">use </span>linera_views::rocks_db::RocksDbClient;
-<span class="kw">use </span>std::{path::PathBuf, sync::Arc};
-<span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
-</span><span class="kw">use </span>{
-    linera_views::{lru_caching::TEST_CACHE_SIZE, rocks_db::TEST_ROCKS_DB_MAX_STREAM_QUERIES},
-    tempfile::TempDir,
+<span class="kw">use </span>linera_views::{
+    common::{CommonStoreConfig, TableStatus},
+    rocks_db::{RocksDbClient, RocksDbContextError},
 };
+<span class="kw">use </span>std::{path::PathBuf, sync::Arc};
+
+<span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+</span><span class="kw">use </span>{linera_views::rocks_db::create_rocks_db_common_config, tempfile::TempDir};
 
 <span class="attr">#[cfg(test)]
 #[path = <span class="string">&quot;unit_tests/rocks_db.rs&quot;</span>]
@@ -84,19 +115,35 @@
 <span class="kw">type </span>RocksDbStore = DbStore&lt;RocksDbClient&gt;;
 
 <span class="kw">impl </span>RocksDbStore {
-    <span class="kw">pub fn </span>new(
+    <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+    </span><span class="kw">pub async fn </span>new_for_testing(
         dir: PathBuf,
         wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
-        max_stream_queries: usize,
-        cache_size: usize,
-    ) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>client = RocksDbClient::new(dir, max_stream_queries, cache_size);
-        <span class="self">Self </span>{
+        common_config: CommonStoreConfig,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, TableStatus), RocksDbContextError&gt; {
+        <span class="kw">let </span>(client, table_status) = RocksDbClient::new_for_testing(dir, common_config).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>store = <span class="self">Self </span>{
             client,
             guards: ChainGuards::default(),
             user_applications: Arc::default(),
             wasm_runtime,
-        }
+        };
+        <span class="prelude-val">Ok</span>((store, table_status))
+    }
+
+    <span class="kw">pub async fn </span>new(
+        dir: PathBuf,
+        wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
+        common_config: CommonStoreConfig,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, TableStatus), RocksDbContextError&gt; {
+        <span class="kw">let </span>(client, table_status) = RocksDbClient::new(dir, common_config).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>store = <span class="self">Self </span>{
+            client,
+            guards: ChainGuards::default(),
+            user_applications: Arc::default(),
+            wasm_runtime,
+        };
+        <span class="prelude-val">Ok</span>((store, table_status))
     }
 }
 
@@ -106,28 +153,41 @@
     <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
     </span><span class="kw">pub async fn </span>make_test_client(wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;) -&gt; RocksDbStoreClient {
         <span class="kw">let </span>dir = TempDir::new().unwrap();
-        RocksDbStoreClient::new(
+        <span class="kw">let </span>common_config = create_rocks_db_common_config();
+        <span class="kw">let </span>(store_client, <span class="kw">_</span>) = RocksDbStoreClient::new_for_testing(
             dir.path().to_path_buf(),
             wasm_runtime,
-            TEST_ROCKS_DB_MAX_STREAM_QUERIES,
-            TEST_CACHE_SIZE,
+            common_config,
         )
+        .<span class="kw">await
+        </span>.expect(<span class="string">&quot;store_client&quot;</span>);
+        store_client
     }
 
-    <span class="kw">pub fn </span>new(
+    <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+    </span><span class="kw">pub async fn </span>new_for_testing(
         path: PathBuf,
         wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
-        max_stream_queries: usize,
-        cache_size: usize,
-    ) -&gt; <span class="self">Self </span>{
-        RocksDbStoreClient {
-            client: Arc::new(RocksDbStore::new(
-                path,
-                wasm_runtime,
-                max_stream_queries,
-                cache_size,
-            )),
-        }
+        common_config: CommonStoreConfig,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, TableStatus), RocksDbContextError&gt; {
+        <span class="kw">let </span>(store, table_status) =
+            RocksDbStore::new_for_testing(path, wasm_runtime, common_config).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>store_client = RocksDbStoreClient {
+            client: Arc::new(store),
+        };
+        <span class="prelude-val">Ok</span>((store_client, table_status))
+    }
+
+    <span class="kw">pub async fn </span>new(
+        path: PathBuf,
+        wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
+        common_config: CommonStoreConfig,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, TableStatus), RocksDbContextError&gt; {
+        <span class="kw">let </span>(store, table_status) = RocksDbStore::new(path, wasm_runtime, common_config).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>store_client = RocksDbStoreClient {
+            client: Arc::new(store),
+        };
+        <span class="prelude-val">Ok</span>((store_client, table_status))
     }
 }
 </code></pre></div></section></main></body></html>

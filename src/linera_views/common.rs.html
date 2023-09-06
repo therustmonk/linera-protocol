@@ -580,6 +580,40 @@
 <a href="#580" id="580">580</a>
 <a href="#581" id="581">581</a>
 <a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a>
+<a href="#599" id="599">599</a>
+<a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
+<a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -605,6 +639,9 @@
     time::{Duration, Instant},
 };
 
+<span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+</span><span class="kw">use </span>{async_lock::RwLock, once_cell::sync::Lazy, std::sync::Arc};
+
 <span class="attr">#[cfg(test)]
 #[path = <span class="string">&quot;unit_tests/common_tests.rs&quot;</span>]
 </span><span class="kw">mod </span>common_tests;
@@ -618,6 +655,37 @@
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum </span>Update&lt;T&gt; {
     Removed,
     Set(T),
+}
+
+<span class="doccomment">/// Status of a table at the creation time of a [`KeyValueStoreClient`] instance.
+</span><span class="attr">#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+</span><span class="kw">pub enum </span>TableStatus {
+    <span class="doccomment">/// Table was created during the construction of the [`KeyValueStoreClient`] instance.
+    </span>New,
+    <span class="doccomment">/// Table already existed when the [`KeyValueStoreClient`] instance was created.
+    </span>Existing,
+}
+
+<span class="doccomment">/// Returns a unique table name for testing.
+</span><span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+</span><span class="kw">pub async fn </span>get_table_name() -&gt; String {
+    <span class="kw">static </span>TEST_COUNTER: Lazy&lt;Arc&lt;RwLock&lt;u32&gt;&gt;&gt; = Lazy::new(|| Arc::new(RwLock::new(<span class="number">0</span>)));
+    <span class="kw">let </span><span class="kw-2">mut </span>counter = TEST_COUNTER.write().<span class="kw">await</span>;
+    <span class="kw-2">*</span>counter += <span class="number">1</span>;
+    <span class="macro">format!</span>(<span class="string">&quot;test_table_{}&quot;</span>, <span class="kw-2">*</span>counter)
+}
+
+<span class="doccomment">/// The common initialization parameters for the `KeyValueStore`
+</span><span class="attr">#[derive(Debug, Clone)]
+</span><span class="kw">pub struct </span>CommonStoreConfig {
+    <span class="doccomment">/// The number of concurrent to a database
+    </span><span class="kw">pub </span>max_concurrent_queries: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+    <span class="doccomment">/// The number of streams used for the async streams.
+    </span><span class="kw">pub </span>max_stream_queries: usize,
+    <span class="doccomment">/// The cache size being used.
+    </span><span class="kw">pub </span>cache_size: usize,
+    <span class="doccomment">/// Creates the database if missing
+    </span><span class="kw">pub </span>create_if_missing: bool,
 }
 
 <span class="doccomment">/// The minimum value for the view tags. Values in 0..MIN_VIEW_TAG are used for other purposes.

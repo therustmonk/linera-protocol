@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":["MIN_VIEW_TAG"],"fn":["get_interval"],"struct":["ContextFromDb"],"trait":["Context","CustomSerialize","KeyIterable","KeyValueIterable","KeyValueStoreClient"]};
+window.SIDEBAR_ITEMS = {"constant":["MIN_VIEW_TAG"],"enum":["TableStatus"],"fn":["get_interval","get_table_name"],"struct":["CommonStoreConfig","ContextFromDb"],"trait":["Context","CustomSerialize","KeyIterable","KeyValueIterable","KeyValueStoreClient"]};

@@ -94,18 +94,26 @@
 <a href="#94" id="94">94</a>
 <a href="#95" id="95">95</a>
 <a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
 </span><span class="kw">use crate</span>::{chain_guards::ChainGuards, DbStore, DbStoreClient};
 <span class="kw">use </span>linera_execution::WasmRuntime;
-<span class="kw">use </span>linera_views::scylla_db::{get_table_name, ScyllaDbClient, ScyllaDbContextError};
+<span class="kw">use </span>linera_views::{
+    common::{CommonStoreConfig, TableStatus},
+    scylla_db::{ScyllaDbClient, ScyllaDbContextError},
+};
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
-</span><span class="kw">use </span>linera_views::{
-    lru_caching::TEST_CACHE_SIZE,
-    scylla_db::{TEST_SCYLLA_DB_MAX_CONCURRENT_QUERIES, TEST_SCYLLA_DB_MAX_STREAM_QUERIES},
+</span><span class="kw">use </span>{
+    linera_views::common::get_table_name, linera_views::scylla_db::create_scylla_db_common_config,
 };
 
 <span class="attr">#[cfg(test)]
@@ -115,30 +123,38 @@
 <span class="kw">type </span>ScyllaDbStore = DbStore&lt;ScyllaDbClient&gt;;
 
 <span class="kw">impl </span>ScyllaDbStore {
-    <span class="kw">pub async fn </span>new(
-        restart_database: bool,
+    <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+    </span><span class="kw">pub async fn </span>new_for_testing(
         uri: <span class="kw-2">&amp;</span>str,
         table_name: String,
-        max_concurrent_queries: <span class="prelude-ty">Option</span>&lt;usize&gt;,
-        max_stream_queries: usize,
-        cache_size: usize,
+        common_config: CommonStoreConfig,
         wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ScyllaDbContextError&gt; {
-        <span class="kw">let </span>client = ScyllaDbClient::new(
-            restart_database,
-            uri,
-            table_name,
-            max_concurrent_queries,
-            max_stream_queries,
-            cache_size,
-        )
-        .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, TableStatus), ScyllaDbContextError&gt; {
+        <span class="kw">let </span>(client, table_status) =
+            ScyllaDbClient::new_for_testing(uri, table_name, common_config).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>store = <span class="self">Self </span>{
             client,
             guards: ChainGuards::default(),
             user_applications: Arc::default(),
             wasm_runtime,
-        })
+        };
+        <span class="prelude-val">Ok</span>((store, table_status))
+    }
+
+    <span class="kw">pub async fn </span>new(
+        uri: <span class="kw-2">&amp;</span>str,
+        table_name: String,
+        common_config: CommonStoreConfig,
+        wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, TableStatus), ScyllaDbContextError&gt; {
+        <span class="kw">let </span>(client, table_status) = ScyllaDbClient::new(uri, table_name, common_config).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>store = <span class="self">Self </span>{
+            client,
+            guards: ChainGuards::default(),
+            user_applications: Arc::default(),
+            wasm_runtime,
+        };
+        <span class="prelude-val">Ok</span>((store, table_status))
     }
 }
 
@@ -147,47 +163,43 @@
 <span class="kw">impl </span>ScyllaDbStoreClient {
     <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
     </span><span class="kw">pub async fn </span>make_test_client(wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;) -&gt; ScyllaDbStoreClient {
-        <span class="kw">let </span>restart_database = <span class="bool-val">true</span>;
         <span class="kw">let </span>uri = <span class="string">&quot;localhost:9042&quot;</span>;
         <span class="kw">let </span>table_name = get_table_name().<span class="kw">await</span>;
-        <span class="kw">let </span>max_concurrent_queries = <span class="prelude-val">Some</span>(TEST_SCYLLA_DB_MAX_CONCURRENT_QUERIES);
-        <span class="kw">let </span>max_stream_queries = TEST_SCYLLA_DB_MAX_STREAM_QUERIES;
-        <span class="kw">let </span>cache_size = TEST_CACHE_SIZE;
-        ScyllaDbStoreClient::new(
-            restart_database,
-            uri,
-            table_name,
-            max_concurrent_queries,
-            max_stream_queries,
-            cache_size,
-            wasm_runtime,
-        )
-        .<span class="kw">await
-        </span>.expect(<span class="string">&quot;client&quot;</span>)
+        <span class="kw">let </span>common_config = create_scylla_db_common_config();
+        <span class="kw">let </span>(client, <span class="kw">_</span>) =
+            ScyllaDbStoreClient::new_for_testing(uri, table_name, common_config, wasm_runtime)
+                .<span class="kw">await
+                </span>.expect(<span class="string">&quot;client&quot;</span>);
+        client
+    }
+
+    <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+    </span><span class="kw">pub async fn </span>new_for_testing(
+        uri: <span class="kw-2">&amp;</span>str,
+        table_name: String,
+        common_config: CommonStoreConfig,
+        wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, TableStatus), ScyllaDbContextError&gt; {
+        <span class="kw">let </span>(store, table_status) =
+            ScyllaDbStore::new_for_testing(uri, table_name, common_config, wasm_runtime).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>store_client = ScyllaDbStoreClient {
+            client: Arc::new(store),
+        };
+        <span class="prelude-val">Ok</span>((store_client, table_status))
     }
 
     <span class="kw">pub async fn </span>new(
-        restart_database: bool,
         uri: <span class="kw-2">&amp;</span>str,
         table_name: String,
-        max_concurrent_queries: <span class="prelude-ty">Option</span>&lt;usize&gt;,
-        max_stream_queries: usize,
-        cache_size: usize,
+        common_config: CommonStoreConfig,
         wasm_runtime: <span class="prelude-ty">Option</span>&lt;WasmRuntime&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ScyllaDbContextError&gt; {
-        <span class="kw">let </span>store = ScyllaDbStore::new(
-            restart_database,
-            uri,
-            table_name,
-            max_concurrent_queries,
-            max_stream_queries,
-            cache_size,
-            wasm_runtime,
-        )
-        .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(ScyllaDbStoreClient {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, TableStatus), ScyllaDbContextError&gt; {
+        <span class="kw">let </span>(store, table_status) =
+            ScyllaDbStore::new(uri, table_name, common_config, wasm_runtime).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>store_client = ScyllaDbStoreClient {
             client: Arc::new(store),
-        })
+        };
+        <span class="prelude-val">Ok</span>((store_client, table_status))
     }
 }
 </code></pre></div></section></main></body></html>
