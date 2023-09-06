@@ -806,7 +806,7 @@
                             height,
                             index: <span class="kw">_</span>,
                         })) =&gt; {
-                            jobs.push((chain_id, BlockHeight::from(<span class="number">0</span>), target_block_height, <span class="bool-val">true</span>));
+                            jobs.push((chain_id, BlockHeight::ZERO, target_block_height, <span class="bool-val">true</span>));
                             chain_id = parent_id;
                             target_block_height = height.try_add_one()<span class="question-mark">?</span>;
                         }
@@ -901,7 +901,7 @@
             }
             CommunicateAction::FinalizeBlock(certificate) =&gt; {
                 <span class="comment">// The only cause for a retry here is the first certificate of a newly opened chain.
-                </span><span class="kw">let </span>retryable = target_block_height == BlockHeight::from(<span class="number">0</span>);
+                </span><span class="kw">let </span>retryable = target_block_height == BlockHeight::ZERO;
                 <span class="kw">let </span>info = <span class="self">self</span>.send_certificate(certificate, retryable).<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="kw">match </span>info.manager.pending() {
                     <span class="prelude-val">Some</span>(vote) <span class="kw">if </span>vote.validator == <span class="self">self</span>.name =&gt; {

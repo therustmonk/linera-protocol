@@ -2096,7 +2096,7 @@
                 <span class="prelude-val">None </span>=&gt; <span class="kw">continue</span>,
             };
             <span class="kw">let </span>block = Block {
-                epoch: Epoch::from(<span class="number">0</span>),
+                epoch: Epoch::ZERO,
                 chain_id: chain.chain_id,
                 incoming_messages: Vec::new(),
                 operations: <span class="macro">vec!</span>[Operation::System(SystemOperation::Transfer {
@@ -2236,7 +2236,7 @@
                 key_pair: key_pair.as_ref().map(|kp| kp.copy()),
                 block_hash: <span class="prelude-val">None</span>,
                 timestamp,
-                next_block_height: BlockHeight::from(<span class="number">0</span>),
+                next_block_height: BlockHeight::ZERO,
             });
         }
     }

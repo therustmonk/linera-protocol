@@ -406,7 +406,7 @@
     </span><span class="kw">fn </span>test_application_origin() {
         <span class="kw">let </span>reason_0 = Reason::NewIncomingMessage {
             origin: Origin::chain(ChainId::root(<span class="number">0</span>)),
-            height: BlockHeight::from(<span class="number">0</span>),
+            height: BlockHeight::ZERO,
         };
         <span class="kw">let </span>reason_1 = Reason::NewIncomingMessage {
             origin: Origin::chain(ChainId::root(<span class="number">0</span>)),

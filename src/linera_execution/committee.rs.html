@@ -354,6 +354,10 @@
 <a href="#354" id="354">354</a>
 <a href="#355" id="355">355</a>
 <a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -370,6 +374,10 @@
 <span class="doccomment">/// A number identifying the configuration of the chain (aka the committee).
 </span><span class="attr">#[derive(Eq, PartialEq, Ord, PartialOrd, Copy, Clone, Hash, Default, Debug)]
 </span><span class="kw">pub struct </span>Epoch(<span class="kw">pub </span>u32);
+
+<span class="kw">impl </span>Epoch {
+    <span class="kw">pub const </span>ZERO: Epoch = Epoch(<span class="number">0</span>);
+}
 
 <span class="kw">impl </span>Serialize <span class="kw">for </span>Epoch {
     <span class="kw">fn </span>serialize&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, serializer: S) -&gt; <span class="prelude-ty">Result</span>&lt;S::Ok, S::Error&gt;

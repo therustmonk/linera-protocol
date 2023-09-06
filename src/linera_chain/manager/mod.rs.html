@@ -348,7 +348,7 @@
     </span><span class="kw">pub fn </span>check_proposed_block(<span class="kw-2">&amp;</span><span class="self">self</span>, proposal: <span class="kw-2">&amp;</span>BlockProposal) -&gt; <span class="prelude-ty">Result</span>&lt;Outcome, ChainError&gt; {
         <span class="comment">// When a block is certified, incrementing its height must succeed.
         </span><span class="macro">ensure!</span>(
-            proposal.content.block.height &lt; BlockHeight::max(),
+            proposal.content.block.height &lt; BlockHeight::MAX,
             ChainError::InvalidBlockHeight
         );
         <span class="kw">match </span><span class="self">self </span>{

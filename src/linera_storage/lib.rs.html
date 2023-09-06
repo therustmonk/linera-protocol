@@ -609,12 +609,12 @@
         <span class="macro">assert!</span>(!chain.is_active(), <span class="string">&quot;Attempting to create a chain twice&quot;</span>);
         <span class="kw">let </span>system_state = <span class="kw-2">&amp;mut </span>chain.execution_state.system;
         system_state.description.set(<span class="prelude-val">Some</span>(description));
-        system_state.epoch.set(<span class="prelude-val">Some</span>(Epoch::from(<span class="number">0</span>)));
+        system_state.epoch.set(<span class="prelude-val">Some</span>(Epoch::ZERO));
         system_state.admin_id.set(<span class="prelude-val">Some</span>(admin_id));
         system_state
             .committees
             .get_mut()
-            .insert(Epoch::from(<span class="number">0</span>), committee);
+            .insert(Epoch::ZERO, committee);
         system_state
             .ownership
             .set(ChainOwnership::single(public_key));

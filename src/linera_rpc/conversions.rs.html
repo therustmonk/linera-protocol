@@ -1178,7 +1178,7 @@
             epoch: Epoch::default(),
             incoming_messages: <span class="macro">vec!</span>[],
             operations: <span class="macro">vec!</span>[],
-            height: BlockHeight::from(<span class="number">0</span>),
+            height: BlockHeight::ZERO,
             authenticated_signer: <span class="prelude-val">None</span>,
             timestamp: Timestamp::default(),
             previous_block_hash: <span class="prelude-val">None</span>,
@@ -1248,7 +1248,7 @@
             system_balance: Amount::ZERO,
             block_hash: <span class="prelude-val">None</span>,
             timestamp: Timestamp::default(),
-            next_block_height: BlockHeight::from(<span class="number">0</span>),
+            next_block_height: BlockHeight::ZERO,
             state_hash: <span class="prelude-val">None</span>,
             requested_committees: <span class="prelude-val">None</span>,
             requested_pending_messages: <span class="macro">vec!</span>[],
@@ -1376,7 +1376,7 @@
         <span class="kw">let </span>block_proposal = BlockProposal {
             content: BlockAndRound {
                 block: get_block(),
-                round: RoundNumber::zero(),
+                round: RoundNumber::ZERO,
             },
             owner: Owner::from(KeyPair::generate().public()),
             signature: Signature::new(<span class="kw-2">&amp;</span>Foo(<span class="string">&quot;test&quot;</span>.into()), <span class="kw-2">&amp;</span>KeyPair::generate()),
