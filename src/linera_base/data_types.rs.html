@@ -428,6 +428,18 @@
 <a href="#428" id="428">428</a>
 <a href="#429" id="429">429</a>
 <a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -521,6 +533,18 @@
     /// earlier than `self`.
     </span><span class="kw">pub fn </span>saturating_diff_micros(<span class="kw-2">&amp;</span><span class="self">self</span>, other: Timestamp) -&gt; u64 {
         <span class="self">self</span>.<span class="number">0</span>.saturating_sub(other.<span class="number">0</span>)
+    }
+
+    <span class="doccomment">/// Returns a timestamp `micros` microseconds later than `self`, or the highest possible value
+    /// if it would overflow.
+    </span><span class="kw">pub fn </span>saturating_add_micros(<span class="kw-2">&amp;</span><span class="self">self</span>, micros: u64) -&gt; Timestamp {
+        Timestamp(<span class="self">self</span>.<span class="number">0</span>.saturating_add(micros))
+    }
+
+    <span class="doccomment">/// Returns a timestamp `micros` microseconds earlier than `self`, or the lowest possible value
+    /// if it would underflow.
+    </span><span class="kw">pub fn </span>saturating_sub_micros(<span class="kw-2">&amp;</span><span class="self">self</span>, micros: u64) -&gt; Timestamp {
+        Timestamp(<span class="self">self</span>.<span class="number">0</span>.saturating_sub(micros))
     }
 }
 

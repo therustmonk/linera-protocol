@@ -936,6 +936,19 @@
 <a href="#936" id="936">936</a>
 <a href="#937" id="937">937</a>
 <a href="#938" id="938">938</a>
+<a href="#939" id="939">939</a>
+<a href="#940" id="940">940</a>
+<a href="#941" id="941">941</a>
+<a href="#942" id="942">942</a>
+<a href="#943" id="943">943</a>
+<a href="#944" id="944">944</a>
+<a href="#945" id="945">945</a>
+<a href="#946" id="946">946</a>
+<a href="#947" id="947">947</a>
+<a href="#948" id="948">948</a>
+<a href="#949" id="949">949</a>
+<a href="#950" id="950">950</a>
+<a href="#951" id="951">951</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Facebook, Inc. and its affiliates.
 // Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
@@ -1237,6 +1250,19 @@
     <span class="doccomment">/// Transfers to the system balance of the given owner (or any owner) at the given
     /// chain.
     </span>Account(Account),
+}
+
+<span class="kw">impl </span>Recipient {
+    <span class="doccomment">/// Returns the default recipient for the given chain (no owner).
+    </span><span class="kw">pub fn </span>chain(chain_id: ChainId) -&gt; Recipient {
+        Recipient::Account(Account::chain(chain_id))
+    }
+
+    <span class="doccomment">/// Returns the default recipient for the root chain with the given index.
+    </span><span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+    </span><span class="kw">pub fn </span>root(index: u32) -&gt; Recipient {
+        Recipient::chain(ChainId::root(index))
+    }
 }
 
 <span class="doccomment">/// A system account.

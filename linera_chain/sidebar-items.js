@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["ChainError","ChainManager","ChainManagerInfo","ChainManagerOutcome"],"mod":["data_types"],"struct":["ChainStateView"]};
+window.SIDEBAR_ITEMS = {"enum":["ChainError","ChainManager","ChainManagerInfo","ChainManagerOutcome"],"mod":["data_types","test"],"struct":["ChainStateView"]};

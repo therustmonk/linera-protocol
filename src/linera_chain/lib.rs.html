@@ -112,6 +112,8 @@
 <a href="#112" id="112">112</a>
 <a href="#113" id="113">113</a>
 <a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright (c) Zefchain Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -122,6 +124,8 @@
 <span class="kw">mod </span>inbox;
 <span class="kw">mod </span>manager;
 <span class="kw">mod </span>outbox;
+<span class="attr">#[cfg(any(test, feature = <span class="string">&quot;test&quot;</span>))]
+</span><span class="kw">pub mod </span>test;
 
 <span class="kw">pub use </span>chain::ChainStateView;
 <span class="kw">use </span>data_types::{Event, Origin};
