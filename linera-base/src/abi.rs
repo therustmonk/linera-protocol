@@ -16,47 +16,51 @@ pub trait Abi: ContractAbi + ServiceAbi {}
 // T::Parameters is duplicated for simplicity but it must match.
 impl<T> Abi for T where T: ContractAbi + ServiceAbi<Parameters = <T as ContractAbi>::Parameters> {}
 
+pub trait AbiData: Serialize + DeserializeOwned + Send + Sync + Debug + 'static {}
+
+impl<T> AbiData for T where T: Serialize + DeserializeOwned + Send + Sync + Debug + 'static {}
+
 // ANCHOR: contract_abi
 /// A trait that includes all the types exported by a Linera application contract.
 pub trait ContractAbi {
     /// Immutable parameters specific to this application (e.g. the name of a token).
-    type Parameters: Serialize + DeserializeOwned + Send + Sync + Debug + 'static;
+    type Parameters: AbiData;
 
     /// Initialization argument passed to a new application on the chain that created it
     /// (e.g. an initial amount of tokens minted).
     ///
     /// To share configuration data on every chain, use [`ContractAbi::Parameters`]
     /// instead.
-    type InitializationArgument: Serialize + DeserializeOwned + Send + Sync + Debug + 'static;
+    type InitializationArgument: AbiData;
 
     /// The type of operation executed by the application.
     ///
     /// Operations are transactions directly added to a block by the creator (and signer)
     /// of the block. Users typically use operations to start interacting with an
     /// application on their own chain.
-    type Operation: Serialize + DeserializeOwned + Send + Sync + Debug + 'static;
+    type Operation: AbiData;
 
     /// The type of message executed by the application.
     ///
     /// Messages are executed when a message created by the same application is received
     /// from another chain and accepted in a block.
-    type Message: Serialize + DeserializeOwned + Send + Sync + Debug + 'static;
+    type Message: AbiData;
 
     /// The argument type when this application is called from another application on the same chain.
-    type ApplicationCall: Serialize + DeserializeOwned + Send + Sync + Debug + 'static;
+    type ApplicationCall: AbiData;
 
     /// The argument type when a session of this application is called from another
     /// application on the same chain.
     ///
     /// Sessions are temporary objects that may be spawned by an application call. Once
     /// created, they must be consumed before the current transaction ends.
-    type SessionCall: Serialize + DeserializeOwned + Send + Sync + Debug + 'static;
+    type SessionCall: AbiData;
 
     /// The type for the state of a session.
-    type SessionState: Serialize + DeserializeOwned + Send + Sync + Debug + 'static;
+    type SessionState: AbiData;
 
     /// The response type of an application call.
-    type Response: Serialize + DeserializeOwned + Send + Sync + Debug + 'static;
+    type Response: AbiData;
 }
 // ANCHOR_END: contract_abi
 
@@ -64,13 +68,13 @@ pub trait ContractAbi {
 /// A trait that includes all the types exported by a Linera application service.
 pub trait ServiceAbi {
     /// Immutable parameters specific to this application (e.g. the name of a token).
-    type Parameters: Serialize + DeserializeOwned + Send + Sync + Debug + 'static;
+    type Parameters: AbiData;
 
     /// The type of a query receivable by the application's service.
-    type Query: Serialize + DeserializeOwned + Send + Sync + Debug + 'static;
+    type Query: AbiData;
 
     /// The response type of the application's service.
-    type QueryResponse: Serialize + DeserializeOwned + Send + Sync + Debug + 'static;
+    type QueryResponse: AbiData;
 }
 // ANCHOR_END: service_abi
 
